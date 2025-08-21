@@ -170,6 +170,14 @@ status:
 		echo "  ❌ Migrations directory not found"; \
 	fi
 
+lint:
+	@echo "🔄 Linting code..."
+	cd app && npm run lint
+
+format:
+	@echo "🔄 Formatting code..."
+	cd app && npm run format
+
 # Quick commands for common tasks
 up: start-supabase
 down: stop-supabase

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,19 +8,35 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
-import SupabaseConnectionTest from "../../components/SupabaseConnectionTest";
+} from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import SupabaseConnectionTest from '../../components/SupabaseConnectionTest';
 
-export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  'Login'
+>;
+
+interface LoginScreenProps {
+  navigation: LoginScreenNavigationProp;
+}
+
+export default function LoginScreen({ navigation }: LoginScreenProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
@@ -29,38 +45,38 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(false);
 
     if (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <KeyboardAvoidingView
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
     >
       <View style={styles.content}>
-      <SupabaseConnectionTest />
+        <SupabaseConnectionTest />
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to your account</Text>
 
         <View style={styles.form}>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder='Email'
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            keyboardType='email-address'
+            autoCapitalize='none'
             autoCorrect={false}
           />
 
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder='Password'
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            autoCapitalize="none"
+            autoCapitalize='none'
           />
 
           <TouchableOpacity
@@ -69,13 +85,13 @@ export default function LoginScreen({ navigation }: any) {
             disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {loading ? "Signing In..." : "Sign In"}
+              {loading ? 'Signing In...' : 'Sign In'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.linkButton}
-            onPress={() => navigation.navigate("Register")}
+            onPress={() => navigation.navigate('Register')}
           >
             <Text style={styles.linkText}>Don't have an account? Sign up</Text>
           </TouchableOpacity>
@@ -88,31 +104,31 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   content: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 8,
-    color: "#333",
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 32,
-    color: "#666",
+    color: '#666',
   },
   form: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 20,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -123,33 +139,33 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
-    backgroundColor: "#fafafa",
+    backgroundColor: '#fafafa',
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 16,
   },
   buttonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
   },
   buttonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   linkButton: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   linkText: {
-    color: "#007AFF",
+    color: '#007AFF',
     fontSize: 14,
   },
 });

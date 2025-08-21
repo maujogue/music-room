@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,29 +8,45 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+} from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
 
-export default function RegisterScreen({ navigation }: any) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
+type RegisterScreenNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  'Register'
+>;
+
+interface RegisterScreenProps {
+  navigation: RegisterScreenNavigationProp;
+}
+
+export default function RegisterScreen({ navigation }: RegisterScreenProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
 
@@ -39,15 +55,15 @@ export default function RegisterScreen({ navigation }: any) {
     setLoading(false);
 
     if (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Error', error.message);
     } else {
       Alert.alert(
-        "Success",
-        "Registration successful! Please check your email to verify your account.",
+        'Success',
+        'Registration successful! Please check your email to verify your account.',
         [
           {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
+            text: 'OK',
+            onPress: () => navigation.navigate('Login'),
           },
         ]
       );
@@ -56,7 +72,7 @@ export default function RegisterScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <View style={styles.content}>
@@ -66,30 +82,30 @@ export default function RegisterScreen({ navigation }: any) {
         <View style={styles.form}>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder='Email'
             value={email}
             onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            keyboardType='email-address'
+            autoCapitalize='none'
             autoCorrect={false}
           />
 
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder='Password'
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            autoCapitalize="none"
+            autoCapitalize='none'
           />
 
           <TextInput
             style={styles.input}
-            placeholder="Confirm Password"
+            placeholder='Confirm Password'
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            autoCapitalize="none"
+            autoCapitalize='none'
           />
 
           <TouchableOpacity
@@ -98,13 +114,13 @@ export default function RegisterScreen({ navigation }: any) {
             disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.linkButton}
-            onPress={() => navigation.navigate("Login")}
+            onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.linkText}>
               Already have an account? Sign in
@@ -119,31 +135,31 @@ export default function RegisterScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   content: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 8,
-    color: "#333",
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 32,
-    color: "#666",
+    color: '#666',
   },
   form: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 20,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -154,33 +170,33 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
-    backgroundColor: "#fafafa",
+    backgroundColor: '#fafafa',
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 16,
   },
   buttonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
   },
   buttonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   linkButton: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   linkText: {
-    color: "#007AFF",
+    color: '#007AFF',
     fontSize: 14,
   },
 });

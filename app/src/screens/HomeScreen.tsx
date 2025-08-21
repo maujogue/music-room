@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,28 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-} from "react-native";
-import { useAuth } from "../contexts/AuthContext";
-import SupabaseConnectionTest from "../components/SupabaseConnectionTest";
+} from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import SupabaseConnectionTest from '../components/SupabaseConnectionTest';
 
-export default function HomeScreen({ navigation }: any) {
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Home: undefined;
+  Profile: undefined;
+  About: undefined;
+};
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Home'
+>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { user, signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -43,14 +60,14 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate("Profile")}
+            onPress={() => navigation.navigate('Profile')}
           >
             <Text style={styles.actionButtonText}>Edit Profile</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => navigation.navigate("About")}
+            onPress={() => navigation.navigate('About')}
           >
             <Text style={styles.actionButtonText}>About App</Text>
           </TouchableOpacity>
@@ -72,33 +89,33 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
   },
   userInfo: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -109,47 +126,47 @@ const styles = StyleSheet.create({
   },
   userInfoTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: '600',
+    color: '#333',
     marginBottom: 16,
   },
   infoCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: '#f0f0f0',
   },
   infoLabel: {
     fontSize: 14,
-    color: "#666",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
-    color: "#333",
-    fontFamily: "monospace",
+    color: '#333',
+    fontFamily: 'monospace',
   },
   actions: {
     gap: 16,
   },
   actionButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
   actionButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   signOutButton: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: '#FF3B30',
     marginTop: 16,
   },
   signOutButtonText: {
-    color: "white",
+    color: 'white',
   },
 });

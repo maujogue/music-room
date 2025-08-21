@@ -1,0 +1,10 @@
+# Ignore artifacts:
+build
+coverage
+ios/build
+ios/Pods
+android/build
+android/app/.cxx
+android/app/build
+android/.kotlin
+android/.gradle

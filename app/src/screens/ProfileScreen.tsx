@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,31 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
-} from "react-native";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../lib/supabase";
+} from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
-export default function ProfileScreen({ navigation }: any) {
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Home: undefined;
+  Profile: undefined;
+  About: undefined;
+};
+
+type ProfileScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Profile'
+>;
+
+interface ProfileScreenProps {
+  navigation: ProfileScreenNavigationProp;
+}
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user } = useAuth();
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -27,22 +43,21 @@ export default function ProfileScreen({ navigation }: any) {
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user?.id)
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
         .single();
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching profile:", error);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', error);
         return;
       }
 
       if (data) {
-        setProfile(data);
-        setFullName(data.full_name || "");
+        setFullName(data.full_name || '');
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error('Error fetching profile:', error);
     }
   };
 
@@ -51,7 +66,7 @@ export default function ProfileScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("profiles").upsert({
+      const { error } = await supabase.from('profiles').upsert({
         id: user.id,
         email: user.email,
         full_name: fullName,
@@ -59,13 +74,14 @@ export default function ProfileScreen({ navigation }: any) {
       });
 
       if (error) {
-        Alert.alert("Error", error.message);
+        Alert.alert('Error', error.message);
       } else {
-        Alert.alert("Success", "Profile updated successfully!");
+        Alert.alert('Success', 'Profile updated successfully!');
         fetchProfile();
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to update profile");
+      console.error('Failed to update profile:', error);
+      Alert.alert('Error', 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -96,8 +112,8 @@ export default function ProfileScreen({ navigation }: any) {
               style={styles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder="Enter your full name"
-              autoCapitalize="words"
+              placeholder='Enter your full name'
+              autoCapitalize='words'
             />
           </View>
         </View>
@@ -108,7 +124,7 @@ export default function ProfileScreen({ navigation }: any) {
           disabled={loading}
         >
           <Text style={styles.updateButtonText}>
-            {loading ? "Updating..." : "Update Profile"}
+            {loading ? 'Updating...' : 'Update Profile'}
           </Text>
         </TouchableOpacity>
 
@@ -126,33 +142,33 @@ export default function ProfileScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
   },
   profileSection: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -166,56 +182,56 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: "#666",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 16,
-    color: "#333",
-    fontFamily: "monospace",
+    color: '#333',
+    fontFamily: 'monospace',
   },
   inputGroup: {
     marginTop: 16,
   },
   inputLabel: {
     fontSize: 14,
-    color: "#666",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 16,
     fontSize: 16,
-    backgroundColor: "#fafafa",
+    backgroundColor: '#fafafa',
   },
   updateButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 16,
   },
   updateButtonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
   },
   updateButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   backButton: {
-    backgroundColor: "#6c757d",
+    backgroundColor: '#6c757d',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
   backButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

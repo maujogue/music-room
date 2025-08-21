@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,25 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-} from "react-native";
+} from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export default function AboutScreen({ navigation }: any) {
+type RootStackParamList = {
+  Home: undefined;
+  Profile: undefined;
+  About: undefined;
+};
+
+type AboutScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'About'
+>;
+
+interface AboutScreenProps {
+  navigation: AboutScreenNavigationProp;
+}
+
+export default function AboutScreen({ navigation }: AboutScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -76,33 +92,33 @@ export default function AboutScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
   version: {
     fontSize: 16,
-    color: "#666",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
   },
   section: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -113,13 +129,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: '600',
+    color: '#333',
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     lineHeight: 24,
   },
   featureList: {
@@ -127,20 +143,20 @@ const styles = StyleSheet.create({
   },
   featureItem: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginBottom: 8,
     lineHeight: 22,
   },
   backButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 16,
   },
   backButtonText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
