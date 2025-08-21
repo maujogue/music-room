@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
+    console.error('useAuth context is undefined - this should not happen');
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -30,17 +31,26 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  console.log('AuthProvider: Initializing...');
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider: useEffect triggered');
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        console.log('AuthProvider: Initial session:', session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('AuthProvider: Error getting session:', error);
+        setLoading(false);
+      });
 
     // Listen for auth changes
     const {
@@ -82,6 +92,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     signIn,
     signOut,
   };
+
+  console.log('AuthProvider: Providing value:', value);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

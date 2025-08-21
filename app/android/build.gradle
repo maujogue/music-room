@@ -5,10 +5,13 @@ buildscript {
     google()
     mavenCentral()
   }
+  ext {
+    kotlinVersion = '2.0.21'
+  }
   dependencies {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
   }
 }
 
@@ -30,6 +33,15 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+  }
+  
+  // Force all Kotlin dependencies to use version 2.0.21
+  configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'org.jetbrains.kotlin') {
+        details.useVersion '2.0.21'
+      }
+    }
   }
 }
 

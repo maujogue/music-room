@@ -16,7 +16,6 @@ export default function AuthStack() {
       initialRouteName='Login'
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#f5f5f5' },
       }}
     >
       <Stack.Screen name='Login' component={LoginScreen} />
