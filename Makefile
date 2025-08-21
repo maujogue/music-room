@@ -3,6 +3,15 @@
 
 .PHONY: help install setup-supabase start-supabase stop-supabase setup-env start-app clean reset migrate reset-db
 
+# Shortcuts
+COMPOSE_FILE := docker-compose.yml
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+    IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
+else
+    IP := $(shell hostname -I | awk '{print $$1}')
+endif
+
 # Default target
 help:
 	@echo "🎵 Music Room Project - Available Commands:"
@@ -91,8 +100,8 @@ setup-env:
 	@if [ ! -f "app/.env" ]; then \
 		echo "Creating .env file..."; \
 		cd app; \
-		echo "EXPO_PUBLIC_SUPABASE_URL=http://$(shell ipconfig getifaddr en0):54321" > .env; \
-		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$(shell supabase start | grep "anon key" | awk -F": " '{print $$2}')" >> .env; \
+		echo "EXPO_PUBLIC_SUPABASE_URL=http://$(IP):54321" > .env; \
+		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$(shell npx supabase start | grep "anon key" | awk -F": " '{print $$2}')" >> .env; \
 		echo "⚠️  Check that the following env keys are correct"; \
 		cat .env; \
 	else \
