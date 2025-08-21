@@ -79,7 +79,7 @@ start-supabase:
 # Stop local Supabase services
 stop-supabase:
 	@echo "🛑 Stopping Supabase services..."
-	supabase stop
+	supabase stop --project-id music-room
 	@echo "✅ Supabase services stopped!"
 
 # Apply database migrations
