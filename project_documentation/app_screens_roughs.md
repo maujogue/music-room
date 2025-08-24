@@ -3,9 +3,11 @@
 [< Back to readme](../README.md)
 
 - [Authentification](#1-authentification-screens)
-- [Profile](#2-profile-screens)
+- [Home](#1-home-screen)
+- [Profile service](#2-profile-screens)
+- [Playlist service](#3-playlist-service)
 
-## 1. Authentification screens
+## 0. Authentification
 
 [<](#screens-roughs)
 
@@ -13,10 +15,18 @@
 ![login screen](./img/login.jpg)
 
 **REGISTER**  
-![register screen](./img/register.jpg)
+![regiter screen](./img/register.jpg)
 
 
-## 2. profile screens
+## 1. Home screen
+
+[<](#screens-roughs)
+
+**HOME *services hub***  
+![home screen](./img/home.jpg)
+
+
+## 2. profile service
 
 [<](#screens-roughs)
 
@@ -30,4 +40,12 @@
 ![register screen](./img/profile_not-owner.jpg)
 
 
+## 3. Playlist Service
 
+[<](#screens-roughs)
+
+**PLAYLIST_HOME**  
+![register screen](./img/playlist_home.jpg)
+
+**PLAYLIST_ITEM**  
+![register screen](./img/playlist_item.jpg)
