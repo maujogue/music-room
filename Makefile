@@ -27,6 +27,9 @@ help:
 	@echo "  start-supabase   Start local Supabase services and apply migrations"
 	@echo "  stop-supabase    Stop local Supabase services"
 	@echo "  migrate          Apply database migrations"
+	@echo "  dev              Start development server"
+	@echo "  dev-tunnel       Start development server with tunnel"
+
 	@echo ""
 	@echo "🧹 Maintenance Commands:"
 	@echo "  clean            Clean up node_modules and build files"
@@ -132,6 +135,10 @@ setup: install setup-supabase setup-env
 dev:
 	@echo "📱 Starting Expo development server..."
 	cd app && npm start
+
+dev-tunnel:
+	@echo "📱 Starting Expo development server..."
+	cd app && npx expo start --tunnel
 
 # Clean up build files and node_modules
 clean:
