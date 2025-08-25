@@ -88,6 +88,9 @@ music-room/
 │   │   ├── navigation/   # App navigation
 │   │   └── screens/      # App screens
 │   └── package.json
+│   
+├── project_documentation/ # More things to read
+│   
 ├── supabase/              # Supabase configuration
 │   ├── migrations/        # Database migrations
 │   ├── seed.sql          # Initial data
@@ -95,6 +98,10 @@ music-room/
 ├── Makefile              # Automation scripts
 └── README.md             # This file
 ```
+
+## App screen roughs
+
+See music room application's first shapes [here](./project_documentation/app_screens_roughs.md).
 
 ## 🛠️ Available Commands
 
