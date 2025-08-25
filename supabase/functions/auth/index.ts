@@ -254,6 +254,21 @@ async function fetchSpotifyUserProfile(access_token: string): Promise<any> {
   return await response.json();
 }
 
+function handleSpotifyCallback(req: Request, res: Response): Response {
+  console.log("Handling Spotify callback");
+  // const url = new URL(req.url);
+  // const code = url.searchParams.get("code");
+  // const state = url.searchParams.get("state");
+
+  // // Exchange the authorization code for an access token
+  // // ...
+
+  // return new Response(
+  //   JSON.stringify({ message: "Spotify callback handled" }),
+  //   { headers: { "Content-Type": "application/json" } },
+  // );
+}
+
 /* To invoke locally:
 
   1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
