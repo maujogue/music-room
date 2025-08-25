@@ -5,6 +5,8 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
+const base_url = "https://f40fd90b90d9.ngrok-free.app"
+
 function generateRandomString(length: number): string {
   const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -17,6 +19,11 @@ function generateRandomString(length: number): string {
 Deno.serve(async (req, res) => {
   const url = req.url
 
+  console.log("Request URL:", url);
+
+  if (url.includes("/spotify/callback")) {
+    return handleSpotifyCallback(req, res)
+  }
   if (url.includes("/spotify")) {
     return handleSpotifyAuth(req, res)
   }
@@ -35,7 +42,7 @@ function handleSpotifyAuth(req: Request, res: Response): Response {
     response_type: 'code',
     client_id: "f34c3840efdf4098b299c94c63708f04",
     scope: scope,
-    redirect_uri: "https://847bb8848dc1.ngrok-free.app/functions/v1/auth/spotify/callback",
+    redirect_uri: `${base_url}/functions/v1/auth/spotify/callback`,
     state: state
   });
 
@@ -45,6 +52,21 @@ function handleSpotifyAuth(req: Request, res: Response): Response {
       Location: 'https://accounts.spotify.com/authorize?' + params.toString(),
     },
   });
+}
+
+function handleSpotifyCallback(req: Request, res: Response): Response {
+  console.log("Handling Spotify callback");
+  // const url = new URL(req.url);
+  // const code = url.searchParams.get("code");
+  // const state = url.searchParams.get("state");
+
+  // // Exchange the authorization code for an access token
+  // // ...
+
+  // return new Response(
+  //   JSON.stringify({ message: "Spotify callback handled" }),
+  //   { headers: { "Content-Type": "application/json" } },
+  // );
 }
 
 /* To invoke locally:
