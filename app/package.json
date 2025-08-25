@@ -11,7 +11,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -21,6 +22,8 @@
     "@supabase/supabase-js": "^2.55.0",
     "expo": "~53.0.22",
     "expo-status-bar": "~2.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
@@ -41,6 +44,15 @@
     "prettier": "3.6.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.40.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "private": true
 }

@@ -40,7 +40,7 @@ help:
 # Install all dependencies
 install:
 	@echo "📦 Installing dependencies..."
-	cd app && npm install
+	cd app && npx expo install
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
