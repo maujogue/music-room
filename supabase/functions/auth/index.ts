@@ -5,7 +5,20 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
-const base_url = "https://f40fd90b90d9.ngrok-free.app"
+const base_url = "https://404a13eda7fd.ngrok-free.app"
+
+function getCookieValue(cookieHeader: string | null, cookieName: string): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';');
+  for (const cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === cookieName) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+}
+
 
 function generateRandomString(length: number): string {
   const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -50,18 +63,39 @@ function handleSpotifyAuth(req: Request, res: Response): Response {
     status: 302,
     headers: {
       Location: 'https://accounts.spotify.com/authorize?' + params.toString(),
+      "Set-Cookie": `spotify_state=${state}; HttpOnly; Path=/; Secure;`
     },
   });
 }
 
 function handleSpotifyCallback(req: Request, res: Response): Response {
   console.log("Handling Spotify callback");
-  // const url = new URL(req.url);
-  // const code = url.searchParams.get("code");
-  // const state = url.searchParams.get("state");
+  const url = new URL(req.url);
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  const cookieHeader = req.headers.get("cookie");
+  const spotifyState = getCookieValue(cookieHeader, "spotify_state");
 
-  // // Exchange the authorization code for an access token
-  // // ...
+
+  console.log("Authorization code:", code);
+  console.log("State:", state);
+
+  const bodyParams = new URLSearchParams();
+  bodyParams.append("code", code ?? "");
+  bodyParams.append("redirect_uri", redirect_uri);
+  bodyParams.append("grant_type", "authorization_code");
+
+  const authHeader = "Basic " + btoa(client_id + ":" + client_secret);
+
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Authorization": authHeader,
+    },
+    body: bodyParams.toString(),
+  });
+  }
 
   // return new Response(
   //   JSON.stringify({ message: "Spotify callback handled" }),
