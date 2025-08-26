@@ -5,6 +5,7 @@
 
 # Shortcuts
 COMPOSE_FILE := docker-compose.yml
+REACT_APP_DIR := react
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
     IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
@@ -43,7 +44,7 @@ help:
 # Install all dependencies
 install:
 	@echo "📦 Installing dependencies..."
-	cd app && npx expo install
+	cd ${REACT_APP_DIR} && npx expo install
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
@@ -100,9 +101,9 @@ reset-db:
 # Create .env file with local Supabase configuration
 setup-env:
 	@echo "⚙️  Setting up environment variables..."
-	@if [ ! -f "app/.env" ]; then \
+	@if [ ! -f "${REACT_APP_DIR}/.env" ]; then \
 		echo "Creating .env file..."; \
-		cd app; \
+		cd ${REACT_APP_DIR}; \
 		echo "EXPO_PUBLIC_SUPABASE_URL=http://$(IP):54321" > .env; \
 		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$(shell npx supabase start | grep "anon key" | awk -F": " '{print $$2}')" >> .env; \
 		echo "⚠️  Check that the following env keys are correct"; \
@@ -115,7 +116,7 @@ setup-env:
 # Reset environment file
 reset-env:
 	@echo "🔄 Resetting environment file..."
-	cd app && rm -f .env
+	cd ${REACT_APP_DIR} && rm -f .env
 	@echo "✅ .env file removed. Run 'make setup-env' to recreate it."
 
 # Complete project setup
@@ -134,16 +135,16 @@ setup: install setup-supabase setup-env
 # Start the Expo development server
 dev:
 	@echo "📱 Starting Expo development server..."
-	cd app && npm start
+	cd ${REACT_APP_DIR} && npm start
 
 dev-tunnel:
 	@echo "📱 Starting Expo development server..."
-	cd app && npx expo start --tunnel
+	cd ${REACT_APP_DIR} && npx expo start --tunnel
 
 # Clean up build files and node_modules
 clean:
 	@echo "🧹 Cleaning up build files..."
-	cd app && rm -rf node_modules package-lock.json .expo
+	cd ${REACT_APP_DIR} && rm -rf node_modules package-lock.json .expo
 	cd supabase && rm -rf .branches .temp 
 	@echo "✅ Cleanup complete! Run 'make install' to reinstall dependencies."
 
@@ -162,8 +163,8 @@ status:
 	@echo ""
 	@echo "📁 Project Structure:"
 	@if [ -d "supabase" ]; then echo "  ✅ Supabase initialized"; else echo "  ❌ Supabase not initialized"; fi
-	@if [ -f "app/.env" ]; then echo "  ✅ Environment configured"; else echo "  ❌ Environment not configured"; fi
-	@if [ -d "app/node_modules" ]; then echo "  ✅ Dependencies installed"; else echo "  ❌ Dependencies not installed"; fi
+	@if [ -f "${REACT_APP_DIR}/.env" ]; then echo "  ✅ Environment configured"; else echo "  ❌ Environment not configured"; fi
+	@if [ -d "${REACT_APP_DIR}/node_modules" ]; then echo "  ✅ Dependencies installed"; else echo "  ❌ Dependencies not installed"; fi
 	@echo ""
 	@echo "🔧 Supabase Status:"
 	@supabase status 2>/dev/null || echo "  ❌ Supabase services not running"
@@ -179,11 +180,11 @@ status:
 
 lint:
 	@echo "🔄 Linting code..."
-	cd app && npm run lint
+	cd ${REACT_APP_DIR} && npm run lint
 
 format:
 	@echo "🔄 Formatting code..."
-	cd app && npm run format
+	cd ${REACT_APP_DIR} && npm run format
 
 # Quick commands for common tasks
 up: start-supabase
@@ -191,7 +192,7 @@ down: stop-supabase
 restart: stop-supabase start-supabase
 
 android:
-	cd app && npx expo run:android
+	cd ${REACT_APP_DIR} && npx expo run:android
 
 ios:
-	cd app && npx expo run:ios
+	cd ${REACT_APP_DIR} && npx expo run:ios
