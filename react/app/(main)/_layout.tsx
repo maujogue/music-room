@@ -12,9 +12,9 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name='all_playlists'
+        name='playlists_home'
         options={{
-          title: 'Playlists',
+          title: 'My Playlists',
           tabBarIcon: () => <Text>📋</Text>,
         }}
       />
