@@ -1,0 +1,64 @@
+---
+description: running, debugging the project
+alwaysApply: false
+---
+# Development Workflow
+
+This project uses a Makefile for automation and development tasks.
+
+## Prerequisites
+
+```bash
+# Install required CLI tools
+npm install -g @expo/cli
+npm install -g supabase
+```
+
+## Available Commands
+
+### Setup & Installation
+
+- `make setup` - Complete project setup (install + supabase + env)
+- `make install` - Install dependencies
+- `make setup-supabase` - Initialize Supabase locally
+- `make setup-env` - Create environment file
+
+### Development
+
+- `make start-supabase` - Start Supabase + apply migrations
+- `make dev` - Start Expo development server
+- `make migrate` - Apply database migrations manually
+
+### Maintenance
+
+- `make status` - Check project status
+- `make reset` - Reset database and restart
+- `make clean` - Clean up build files
+- `make help` - Show all available commands
+
+## Development Flow
+
+1. **First Time Setup**: `make setup`
+2. **Start Development**: `make dev`
+3. **Database Changes**: `make migrate`
+4. **Reset if Needed**: `make reset`
+
+## Environment Configuration
+
+- `.env` file is created automatically with `make setup-env`
+- Contains Supabase URL and anonymous key
+- Uses local IP address for mobile compatibility
+- Located in `react/.env`
+
+## Troubleshooting
+
+- **Supabase Issues**: `make status` to check services
+- **Database Problems**: `make reset` to reset and restart
+- **Build Issues**: `make clean` to remove build artifacts
+- **Dependencies**: `make install` to reinstall packages
+  description:
+  globs:
+  alwaysApply: true
+
+---
+

@@ -1,0 +1,49 @@
+# UI Components and Styling
+
+This project uses Gluestack UI components with NativeWind (Tailwind CSS) for styling.
+
+## Component Imports
+
+```tsx
+// Gluestack UI components
+import { Button, ButtonText } from "@/components/ui/button";
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+
+// React Native components
+import { View, Text } from "react-native";
+```
+
+## Styling with NativeWind
+
+```tsx
+// Use className for Tailwind styles
+<View className="flex-1 justify-center items-center">
+  <Text className="text-lg font-bold text-gray-900">
+    Hello World
+  </Text>
+</View>
+
+// Or use style prop for React Native styles
+<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <Text>Hello World</Text>
+</View>
+```
+
+## Component Structure
+
+- **`components/ui/`** - Gluestack UI components (buttons, providers, etc.)
+- **`components/`** - Custom app-specific components
+- Use Gluestack components for consistent design system
+- Extend with custom components as needed
+
+## Styling Guidelines
+
+- Prefer NativeWind classes for layout and spacing
+- Use React Native style prop for complex animations or platform-specific styles
+- Follow the existing design patterns in the project
+- Use semantic class names (e.g., `text-primary`, `bg-background`)
+  description:
+  globs:
+  alwaysApply: true
+
+---

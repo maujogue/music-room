@@ -1,0 +1,52 @@
+---
+description: implementing authentification logic
+alwaysApply: false
+---
+# Authentication System
+
+This project uses Supabase for authentication with React Context for state management.
+
+## Authentication Context
+
+```tsx
+import { useSession } from "@/contexts/authCtx";
+
+export default function MyComponent() {
+  const { signIn, signOut, isLoading, user } = useSession();
+
+  // Authentication methods
+  const handleLogin = () => signIn();
+  const handleLogout = () => signOut();
+}
+```
+
+## Available Auth Methods
+
+- **`signIn()`** - Sign in user (currently placeholder implementation)
+- **`signOut()`** - Sign out user
+- **`isLoading`** - Loading state for auth operations
+- **`user`** - Current authenticated user
+
+## Authentication Flow
+
+1. **Login** → `signIn()` → Navigate to `/(main)/home`
+2. **Logout** → `signOut()` → Navigate to `/(auth)/login`
+3. **Protected Routes** → Check `user` state before rendering
+
+## Route Protection
+
+- **`(auth)/`** routes are for unauthenticated users
+- **`(main)/`** routes are for authenticated users
+- Use `useSession()` to check authentication state
+- Redirect unauthenticated users to login
+
+## Supabase Integration
+
+- Supabase client is configured in `config/supabase.ts`
+- Environment variables required: `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- Authentication state is managed through React Context
+  description:
+  globs:
+  alwaysApply: true
+
+---
