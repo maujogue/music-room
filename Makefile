@@ -53,7 +53,7 @@ setup-supabase:
 	@if [ ! -d "supabase" ]; then \
 		echo "Initializing Supabase..."; \
 		npx supabase init; \
-		supabase start; \
+		npx supabase start; \
 	else \
 		echo "Supabase already initialized, skipping..."; \
 	fi
@@ -66,7 +66,7 @@ start-supabase:
 	@echo "✅ Supabase services started!"
 	@echo ""
 	@echo "🔄 Applying database migrations..."
-	@if supabase db push > /dev/null 2>&1; then \
+	@if npx supabase db push > /dev/null 2>&1; then \
 		echo "✅ Migrations applied successfully!"; \
 	else \
 		echo "⚠️  No new migrations to apply or migration failed"; \
@@ -83,19 +83,19 @@ start-supabase:
 # Stop local Supabase services
 stop-supabase:
 	@echo "🛑 Stopping Supabase services..."
-	supabase stop --project-id music-room
+	npx supabase stop --project-id music-room
 	@echo "✅ Supabase services stopped!"
 
 # Apply database migrations
 migrate:
 	@echo "🔄 Applying database migrations..."
-	supabase db push
+	npx supabase db push
 	@echo "✅ Migrations applied!"
 
 # Reset database (keep services running)
 reset-db:
 	@echo "🔄 Resetting database..."
-	supabase db reset
+	npx supabase db reset
 	@echo "✅ Database reset complete!"
 
 # Create .env file with local Supabase configuration
@@ -151,10 +151,10 @@ clean:
 # Reset Supabase database and restart
 reset:
 	@echo "🔄 Resetting Supabase database and restarting services..."
-	supabase stop
-	supabase start
+	npx supabase stop
+	npx supabase start
 	@echo "🔄 Applying migrations after reset..."
-	supabase db push
+	npx supabase db push
 	@echo "✅ Database reset and migrations applied!"
 
 # Check project status
@@ -167,7 +167,7 @@ status:
 	@if [ -d "${REACT_APP_DIR}/node_modules" ]; then echo "  ✅ Dependencies installed"; else echo "  ❌ Dependencies not installed"; fi
 	@echo ""
 	@echo "🔧 Supabase Status:"
-	@supabase status 2>/dev/null || echo "  ❌ Supabase services not running"
+	@npx supabase status 2>/dev/null || echo "  ❌ Supabase services not running"
 	@echo ""
 	@echo "🗄️  Database Migrations:"
 	@if [ -d "supabase/migrations" ]; then \
