@@ -6,6 +6,7 @@
 - [Home](#1-home-screen)
 - [Profile service](#2-profile-screens)
 - [Playlist service](#3-playlist-service)
+- [Event service](#4-event-service)
 
 ## 0. Authentification
 
@@ -45,7 +46,19 @@
 [<](#screens-roughs)
 
 **PLAYLIST_HOME**  
-![register screen](./img/playlist_home.jpg)
+![playlist screen](./img/playlist_home.jpg)
 
 **PLAYLIST_ITEM**  
-![register screen](./img/playlist_item.jpg)
+![playlist screen](./img/playlist_item.jpg)
+
+
+## 4. Event Service
+
+[<](#screens-roughs)
+
+**EVENT_HOME**  
+![event home screen](./img/event_home.jpg)
+
+**EVENT_ITEM**  
+![event item screen](./img/event_item.jpg)
+
