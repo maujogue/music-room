@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "music-room",
+    "slug": "music-room",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/vibing.jpg",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "music-room",
+    "splash": {
+      "image": "./assets/vibing.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.maujogue.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/vibing.jpg",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.maujogue.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}
