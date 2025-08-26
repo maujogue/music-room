@@ -2,6 +2,18 @@
 
 A React Native mobile application built with Expo and Supabase, featuring user authentication, profile management, and a modern UI design.
 
+## 📋 Prerequisites
+
+Before you begin, install the required CLI tools:
+
+```bash
+# Install Expo CLI globally
+npm install -g @expo/cli
+
+# Install Supabase CLI globally
+npm install -g supabase
+```
+
 ## 🚀 Quick Start
 
 The easiest way to get started is using the included Makefile:
@@ -10,7 +22,6 @@ The easiest way to get started is using the included Makefile:
 # Complete project setup (recommended for first time)
 make setup
 
-
 # Start the development server
 make dev
 
@@ -18,82 +29,28 @@ make dev
 make help
 ```
 
-## 📋 What Gets Created Automatically
-
-When you run `make start-supabase`, the following happens automatically:
-
-1. **🚀 Supabase Services Start** - Database, Auth, and API services
-2. **🔄 Migrations Applied** - Database tables and structure created
-3. **🌱 Seed Data Applied** - Initial data populated (if configured)
-4. **✅ Tables Ready** - Your app can immediately start using the database
-
-## 🗄️ Database Tables Created
-
-The migrations automatically create:
-
-### **Profiles Table**
-
-```sql
-profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id),
-  email TEXT NOT NULL,
-  full_name TEXT,
-  avatar_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-)
-```
-
-### **Features**
-
-- ✅ **Row Level Security (RLS)** enabled
-- ✅ **Automatic profile creation** when users sign up
-- ✅ **Secure policies** - users can only access their own data
-- ✅ **Storage bucket** for avatar images
-
-## 🔧 How It Works
-
-### **1. Migration Files**
-
-Located in `supabase/migrations/`:
-
-- `20250821065711_user_management_starter.sql` - Initial setup
-- `20250821065712_profiles_table_update.sql` - App-specific structure
-
-### **2. Automatic Execution**
-
-- Migrations run automatically on `supabase start`
-- Tables are created/updated without manual intervention
-- Seed data is applied if present
-
-### **3. Database Reset**
-
-```bash
-# Reset database and reapply migrations
-make reset
-
-# Reset database only (keep services running)
-make reset-db
-```
 
 ## 📁 Project Structure
 
 ```
 music-room/
-├── app/                    # React Native/Expo app
-│   ├── src/
-│   │   ├── components/    # UI components
-│   │   ├── contexts/      # React Context providers
-│   │   ├── lib/          # Supabase configuration
-│   │   ├── navigation/   # App navigation
-│   │   └── screens/      # App screens
-│   └── package.json
-│   
-├── project_documentation/ # More things to read
-│   
+├── react/                  # React Native/Expo app
+│   ├── app/               # Expo Router pages
+│   │   ├── _layout.tsx    # Root layout
+│   │   ├── (auth)/        # Authentication routes
+│   │   └── (main)/        # Main app routes
+│   ├── components/        # UI components
+│   │   └── ui/            # Gluestack UI components
+│   ├── contexts/          # React Context providers
+│   ├── config/            # Configuration files
+│   ├── hooks/             # Custom React hooks
+│   ├── assets/            # Images and static files
+
+│
+├── project_documentation/ # Design documentation
+│
 ├── supabase/              # Supabase configuration
 │   ├── migrations/        # Database migrations
-│   ├── seed.sql          # Initial data
 │   └── config.toml       # Supabase settings
 ├── Makefile              # Automation scripts
 └── README.md             # This file
@@ -115,8 +72,7 @@ See music room application's first shapes [here](./project_documentation/app_scr
 ### **Development**
 
 - `make start-supabase` - Start Supabase + apply migrations
-- `make start-app` - Start Expo development server
-- `make dev` - Start both services
+- `make dev` - Start Expo development server
 - `make migrate` - Apply migrations manually
 
 ### **Maintenance**
@@ -125,13 +81,6 @@ See music room application's first shapes [here](./project_documentation/app_scr
 - `make reset` - Reset database and restart
 - `make clean` - Clean up build files
 - `make help` - Show all commands
-
-## 🔐 Authentication Flow
-
-1. **User Registration** → Creates auth.users record
-2. **Trigger Fires** → Automatically creates profiles record
-3. **Profile Ready** → User can immediately access their profile
-4. **Secure Access** → RLS policies ensure data privacy
 
 ## 🌐 Environment Configuration
 
@@ -160,24 +109,15 @@ make reset
 
 - Ensure you're using local IP, not `127.0.0.1`
 - Verify Supabase services are running: `make status`
-- Check `.env` file configuration
+- Check `.env` file configuration, input anon and url key manually if needed
 
 ### **Database Reset**
 
 ```bash
 # Complete reset
 make reset
-
-# Database only
-make reset-db
 ```
 
-## 📱 Testing the App
-
-1. **Start Services**: `make start-supabase`
-2. **Start App**: `make start-app`
-3. **Test on Device**: Scan QR code with Expo Go
-4. **Verify Tables**: Check connection status in the app
 
 ## 🔄 Adding New Tables
 
@@ -202,18 +142,3 @@ To add new tables:
 - [React Native Documentation](https://reactnative.dev)
 - [Expo Documentation](https://docs.expo.dev)
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-**🎵 Your Music Room app is now ready with automatic table creation!**
