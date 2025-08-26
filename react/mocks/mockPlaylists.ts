@@ -26,7 +26,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     uri: 'spotify:playlist:1',
   },
   {
-    collaborative: false,
+    collaborative: true,
     description: 'Playlist pour se motiver à la salle',
     external_urls: { spotify: 'https://open.spotify.com/playlist/2' },
     href: 'https://api.spotify.com/v1/playlists/2',
@@ -76,7 +76,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     uri: 'spotify:playlist:3',
   },
   {
-    collaborative: false,
+    collaborative: true,
     description: 'Pour travailler en toute concentration',
     external_urls: { spotify: 'https://open.spotify.com/playlist/4' },
     href: 'https://api.spotify.com/v1/playlists/4',
@@ -176,7 +176,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     uri: 'spotify:playlist:7',
   },
   {
-    collaborative: false,
+    collaborative: true,
     description: 'De l’énergie toute la nuit',
     external_urls: { spotify: 'https://open.spotify.com/playlist/8' },
     href: 'https://api.spotify.com/v1/playlists/8',
@@ -201,7 +201,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     uri: 'spotify:playlist:8',
   },
   {
-    collaborative: false,
+    collaborative: true,
     description: 'Les plus belles chansons d’ici',
     external_urls: { spotify: 'https://open.spotify.com/playlist/9' },
     href: 'https://api.spotify.com/v1/playlists/9',

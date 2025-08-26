@@ -1,41 +1,11 @@
-import { useUserPlaylists } from '@/hooks/useUserPlaylists'
 import { View, Text, ActivityIndicator, FlatList } from 'react-native';
+import AllPlaylists from '@/components/ui/playlist/AllPlaylists';
 
 export default function PlaylistsHome() {
-  const { playlists, loading, error } = useUserPlaylists();
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-        <Text>Loading playlists…</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red' }}>{error}</Text>
-      </View>
-    );
-  }
-
-  const titles = playlists.map((p) => p.name)
-
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'start' }}>
-      <Text>My Playlists</Text>
-      <FlatList
-        data={playlists}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={{ padding: 12, borderBottomWidth: 1, borderColor: '#eee' }}>
-            <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
-            <Text>{item.description}</Text>
-          </View>
-        )}
-      />
+    <View style={{ flex: 1, padding: 16 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 32 }}>My Playlists</Text>
+      <AllPlaylists />
     </View>
   );
 }
