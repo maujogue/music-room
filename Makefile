@@ -117,7 +117,6 @@ setup-env:
 reset-env:
 	@echo "🔄 Resetting environment file..."
 	cd ${REACT_APP_DIR} && rm -f .env
-	make setup-env
 	@echo "✅ .env file removed. Run 'make setup-env' to recreate it."
 
 # Complete project setup
@@ -146,7 +145,7 @@ dev-tunnel:
 clean:
 	@echo "🧹 Cleaning up build files..."
 	cd ${REACT_APP_DIR} && rm -rf node_modules package-lock.json .expo
-	cd supabase && rm -rf .branches .temp 
+	cd supabase && rm -rf .branches .temp
 	@echo "✅ Cleanup complete! Run 'make install' to reinstall dependencies."
 
 # Reset Supabase database and restart

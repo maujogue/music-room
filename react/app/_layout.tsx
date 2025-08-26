@@ -1,21 +1,21 @@
 import { Stack, Tabs } from 'expo-router';
 import '@/global.css';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { AuthProvider, useAuth } from '../contexts/authCtx';
+import { SessionProvider, useSession } from '../contexts/authCtx';
 
 export default function Root() {
   // Set up the auth context and render our layout inside of it.
   return (
     <GluestackUIProvider mode='light'>
-      <AuthProvider>
+      <SessionProvider>
         <RootNavigator />
-      </AuthProvider>
+      </SessionProvider>
     </GluestackUIProvider>
   );
 }
 
 function RootNavigator() {
-  const { session } = useAuth();
+  const { session } = useSession();
 
   return (
     <GluestackUIProvider mode='light'>
