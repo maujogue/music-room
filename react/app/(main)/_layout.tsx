@@ -1,3 +1,4 @@
+import { Avatar, AvatarFallbackText, AvatarImage } from '@/components/ui/avatar';
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 
@@ -22,7 +23,10 @@ export default function AppLayout() {
         name='profile'
         options={{
           title: 'Profile',
-          tabBarIcon: () => <Text>👤</Text>,
+          tabBarIcon: () => <Avatar size='sm'>
+            <AvatarFallbackText>👤</AvatarFallbackText>
+            <AvatarImage source={require('../../assets/vibing.jpg')} />
+          </Avatar>,
         }}
       />
     </Tabs>
