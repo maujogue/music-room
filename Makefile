@@ -62,7 +62,7 @@ setup-supabase:
 # Start local Supabase services and apply migrations
 start-supabase:
 	@echo "🚀 Starting Supabase services..."
-	supabase start
+	npx supabase start
 	@echo "✅ Supabase services started!"
 	@echo ""
 	@echo "🔄 Applying database migrations..."
