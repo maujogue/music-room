@@ -4,14 +4,14 @@ import { VStack } from '@/components/ui/vstack';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import { useState } from 'react';
 import { Center } from '@/components/ui/center';
-import EditAvatar from '@/components/profile/edit_avatar';
-
-import vibingImg from '../../assets/vibing.jpg';
+import Avatar from '@/components/profile/edit_avatar';
+import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
 
 export default function Profile() {
-  const { profile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
+  console.log(profile?.avatar_url);
   return (
     <View className='flex-1 pt-safe'>
       <VStack className='justify-center items-center p-6 gap-4'>
@@ -25,12 +25,15 @@ export default function Profile() {
           </ButtonText>
         </Button>
         <Center>
-          <EditAvatar
-            source={
+          <Avatar
+            url={
               profile?.avatar_url
                 ? { uri: profile.avatar_url }
                 : (vibingImg as ImageSourcePropType)
             }
+            onUpload={async filePath => {
+              await updateProfile({ avatar_url: filePath });
+            }}
             isEdit={editProfile}
           />
         </Center>

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@expo/html-elements": "^0.4.2",
+    "@gluestack-ui/alert": "^0.1.16",
     "@gluestack-ui/avatar": "^0.1.18",
     "@gluestack-ui/button": "^1.0.14",
     "@gluestack-ui/form-control": "^0.1.19",

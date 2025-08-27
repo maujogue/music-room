@@ -12,6 +12,7 @@ import { useAuth } from './authCtx';
 interface ProfileContextType {
   profile: UserInfo | null;
   isLoading: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProfile: (updates: Partial<UserInfo>) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
   clearProfile: () => void;
@@ -52,7 +53,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
             table: 'profiles',
             filter: `id=eq.${user.id}`,
           },
-          (payload) => {
+          () => {
             // On any change, refresh the profile
             refreshProfile();
           }
@@ -71,7 +72,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         supabase.removeChannel(subscription);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const refreshProfile = async () => {
@@ -101,6 +101,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const updateProfile = async (
     updates: Partial<UserInfo>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<{ error: any }> => {
     if (!user || !profile) {
       return {

@@ -5,7 +5,10 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { FormControl } from '@/components/ui/form-control';
+import {
+  FormControl,
+  FormControlHelperText,
+} from '@/components/ui/form-control';
 
 import { useAuth } from '../../contexts/authCtx';
 
@@ -57,9 +60,12 @@ export default function Register() {
               placeholder='Username'
               value={username}
               onChangeText={setUsername}
-              secureTextEntry
+              maxLength={20}
             />
           </Input>
+          <FormControlHelperText>
+            Username must be between 3 and 20 characters
+          </FormControlHelperText>
         </FormControl>
         <FormControl>
           <Input>
