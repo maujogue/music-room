@@ -1,30 +1,41 @@
 import React from 'react';
-import { FlatList, Text, View } from 'react-native';
-import { SpotifyPlaylist } from './types';
+import { Text, SectionList, StyleSheet } from 'react-native';
+import PlaylistListItem from '@/components/ui/playlist/PlaylistListItem';
+import { PlaylistSection } from '@/types/playlist';
+
 
 type Props = {
-  playlists: SpotifyPlaylist[];
-  title: string;
+  sections: PlaylistSection[];
 };
 
-export default function PlaylistList({ playlists, title }: Props) {
-  if (playlists.length === 0) {
-    return <Text>no playlist found</Text>;
-  }
+
+export default function PlaylistList({ sections }: Props) {
 
   return (
-    // <View style={{flex: 1, backgroundColor: '#123123'}}>
-    <View style={{flex: 1 }}>
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>{title}</Text>
-      <FlatList
-        data={playlists}
+      <SectionList
+        sections={sections}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={{ padding: 10, borderBottomWidth: 1, borderColor: '#ddd' }}>
-            <Text>{item.name}</Text>
-          </View>
+        renderItem={({ item }) => <PlaylistListItem playlist={item} />}
+        renderSectionHeader={({ section }) => (
+          <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
+        stickySectionHeadersEnabled={false}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+    color: '#333',
+  },
+});

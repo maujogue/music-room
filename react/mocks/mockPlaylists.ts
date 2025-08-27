@@ -6,7 +6,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/1' },
     href: 'https://api.spotify.com/v1/playlists/1',
     id: '1',
-    images: [{ url: 'https://placehold.co/640x640?text=Chill+Vibes', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/201', height: 640, width: 640 }],
     name: 'Chill Vibes',
     owner: {
       display_name: 'Alice',
@@ -31,7 +31,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/2' },
     href: 'https://api.spotify.com/v1/playlists/2',
     id: '2',
-    images: [{ url: 'https://placehold.co/640x640?text=Workout+Energy', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/200', height: 640, width: 640 }],
     name: 'Workout Energy',
     owner: {
       display_name: 'Bob',
@@ -56,7 +56,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/3' },
     href: 'https://api.spotify.com/v1/playlists/3',
     id: '3',
-    images: [{ url: 'https://placehold.co/640x640?text=Classic+Rock', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/202', height: 640, width: 640 }],
     name: 'Classic Rock',
     owner: {
       display_name: 'Carla',
@@ -81,7 +81,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/4' },
     href: 'https://api.spotify.com/v1/playlists/4',
     id: '4',
-    images: [{ url: 'https://placehold.co/640x640?text=Deep+Focus', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/203', height: 640, width: 640 }],
     name: 'Deep Focus',
     owner: {
       display_name: 'Jean',
@@ -106,7 +106,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/5' },
     href: 'https://api.spotify.com/v1/playlists/5',
     id: '5',
-    images: [{ url: 'https://placehold.co/640x640?text=Rap+US', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/204', height: 640, width: 640 }],
     name: 'Rap US',
     owner: {
       display_name: 'Kevin',
@@ -131,7 +131,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/6' },
     href: 'https://api.spotify.com/v1/playlists/6',
     id: '6',
-    images: [{ url: 'https://placehold.co/640x640?text=Pop+Hits', height: 640, width: 640 }],
+    images: [],
     name: 'Pop Hits',
     owner: {
       display_name: 'Emma',
@@ -156,7 +156,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/7' },
     href: 'https://api.spotify.com/v1/playlists/7',
     id: '7',
-    images: [{ url: 'https://placehold.co/640x640?text=Jazz+Lounge', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/206', height: 640, width: 640 }],
     name: 'Jazz Lounge',
     owner: {
       display_name: 'Louis',
@@ -181,7 +181,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/8' },
     href: 'https://api.spotify.com/v1/playlists/8',
     id: '8',
-    images: [{ url: 'https://placehold.co/640x640?text=Electro+Party', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/208', height: 640, width: 640 }],
     name: 'Electro Party',
     owner: {
       display_name: 'Sophie',
@@ -206,7 +206,7 @@ export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
     external_urls: { spotify: 'https://open.spotify.com/playlist/9' },
     href: 'https://api.spotify.com/v1/playlists/9',
     id: '9',
-    images: [{ url: 'https://placehold.co/640x640?text=Chansons+Françaises', height: 640, width: 640 }],
+    images: [{ url: 'https://picsum.photos/210', height: 640, width: 640 }],
     name: 'Chansons Françaises',
     owner: {
       display_name: 'Pierre',

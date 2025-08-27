@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
+import { SpotifyPlaylist } from '@/types/playlist';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : fetch backend when ready)
