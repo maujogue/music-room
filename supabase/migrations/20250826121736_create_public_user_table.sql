@@ -1,6 +1,6 @@
 create table if not exists public.users (
-    id 							uuid primary key default gen_random_uuid(),
-	email 						text unique not null,
+    id 							uuid primary key references auth.users,
+	  email 						text unique not null,
     spotify_access_token 		text,
     spotify_refresh_token 		text,
     spotify_token_expires_at 	timestamp with time zone
