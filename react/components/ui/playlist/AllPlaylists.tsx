@@ -25,9 +25,6 @@ export default function AllPlaylists() {
       data: playlists.filter(pl => !pl.collaborative),
     },
   ];
-  
-
-
 
   return (
     <View style={{ flex: 1 }}>

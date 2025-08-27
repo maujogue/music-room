@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
 import { SpotifyPlaylist } from '@/types/spotify';
 
-
 // -------------------------------------------------------------------
-// Hook with mock-datas (TODO : fetch backend when ready)
+// Hook with mock-datas (TODO : connect fetch backend when ready)
 // -------------------------------------------------------------------
-export function useUserPlaylists() {
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[] | null>(null);
+export function usePlaylist(id: string) {
+  const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +15,15 @@ export function useUserPlaylists() {
     setLoading(true);
     setError(null);
 
-    const fetchPlaylists = async () => {
+    const fetchPlaylist = async () => {
       try {
         // MOCK_PLAYLISTS (use fetch when ready)
         await new Promise(resolve => setTimeout(resolve, 800));
         if (isActive) {
-          setPlaylists(MOCK_PLAYLISTS);
+          const filtered = MOCK_PLAYLISTS.find((p) => p.id === id);
+          const defaultPlaylist = MOCK_PLAYLISTS[0] || null;
+
+          setPlaylist(filtered || defaultPlaylist);
         }
       } catch (e) {
         if (isActive) {
@@ -34,11 +36,11 @@ export function useUserPlaylists() {
       }
     };
 
-    fetchPlaylists();
+    fetchPlaylist();
     return () => {
       isActive = false;
     };
   }, []);
 
-  return { playlists, loading, error };
+  return { playlist, loading, error };
 };

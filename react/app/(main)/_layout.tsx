@@ -1,30 +1,9 @@
-import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Stack } from 'expo-router';
 
-export default function AppLayout() {
+export default function Layout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen
-        name='index'
-        options={{
-          title: 'Home',
-          tabBarIcon: () => <Text>🏠</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name='playlists_home'
-        options={{
-          title: 'My Playlists',
-          tabBarIcon: () => <Text>📋</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name='profile'
-        options={{
-          title: 'Profile',
-          tabBarIcon: () => <Text>👤</Text>,
-        }}
-      />
-    </Tabs>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }
