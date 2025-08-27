@@ -1,0 +1,41 @@
+# Music Room Project Structure
+
+This is a React Native project built with Expo and Supabase. The main app code is located in the `react/` directory.
+
+## Key Directories
+
+- **`react/app/`** - Expo Router pages with route groups
+
+  - `(auth)/` - Authentication routes (login, register, etc.)
+  - `(main)/` - Main app routes (home, profile, etc.)
+  - `_layout.tsx` - Root layout configuration
+
+- **`react/components/`** - UI components
+
+  - `ui/` - Gluestack UI components (buttons, providers, etc.)
+
+- **`react/contexts/`** - React Context providers
+
+  - `authCtx.tsx` - Authentication context
+
+- **`react/config/`** - Configuration files
+
+  - `supabase.ts` - Supabase client configuration
+
+- **`react/hooks/`** - Custom React hooks
+
+  - `useStorageState.tsx` - Storage state management
+
+- \*\*`react/assets/` - Images and static files
+
+## File Naming Conventions
+
+- Use descriptive names for route files (e.g., `home.tsx` instead of `index.tsx`)
+- Group related routes in parentheses like `(auth)/` and `(main)/`
+- Keep components in the `components/` directory
+- Store utilities and configs in `config/` and `hooks/` directories
+  description:
+  globs:
+  alwaysApply: true
+
+---

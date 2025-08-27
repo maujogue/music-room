@@ -1,0 +1,47 @@
+---
+description: working with navigation, routing, linking between views
+alwaysApply: false
+---
+# Expo Router Navigation
+
+This project uses Expo Router for navigation. Always use the `useRouter` hook for programmatic navigation.
+
+## Import and Usage
+
+```tsx
+import { useRouter } from "expo-router";
+
+export default function MyComponent() {
+  const router = useRouter();
+
+  // Navigation methods
+  router.push("/route"); // Navigate to route
+  router.replace("/route"); // Replace current route
+  router.back(); // Go back
+}
+```
+
+## Route Structure
+
+- **`/(auth)/login`** - Login page
+- **`/(auth)/register`** - Registration page
+- **`/(main)/home`** - Home page
+- **`/(main)/profile`** - Profile page
+
+## Navigation Patterns
+
+- Use `router.replace()` for authentication flows (login → main app)
+- Use `router.push()` for navigation within the same group
+- Use `router.back()` to return to previous screen
+- Always navigate to the full path including group prefix
+
+## Important Notes
+
+- Never import `router` directly - always use `useRouter()` hook
+- The hook must be called inside a React component
+- Route groups `(auth)` and `(main)` are used for layout organization
+  description:
+  globs:
+  alwaysApply: true
+
+---
