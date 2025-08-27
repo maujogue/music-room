@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { SpotifyPlaylist } from '@/types/spotify';
+import { Link } from 'expo-router';
 
 
 type Props = {
@@ -7,7 +8,6 @@ type Props = {
 };
 
 export default function PlaylistListItem({ playlist }: Props) {
-
 
   const getImage = () => {
     const hasValidImage =
@@ -20,17 +20,17 @@ export default function PlaylistListItem({ playlist }: Props) {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={getImage()}
-        style={styles.image}
-        resizeMode="cover"
-      />
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{playlist.name}</Text>
-        {playlist.owner?.display_name && (
-          <Text style={styles.owner}>By {playlist.owner.display_name}</Text>
-        )}
-      </View>
+        <Image
+          source={getImage()}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{playlist.name}</Text>
+          {playlist.owner?.display_name && (
+            <Text style={styles.owner}>By {playlist.owner.display_name}</Text>
+          )}
+        </View>
     </View>
   );
 }

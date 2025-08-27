@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import { useSession } from '../../contexts/authCtx';
+import { useSession } from '@/contexts/authCtx';
 
 export default function Index() {
   const { signOut } = useSession();
