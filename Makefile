@@ -117,6 +117,7 @@ setup-env:
 reset-env:
 	@echo "🔄 Resetting environment file..."
 	cd ${REACT_APP_DIR} && rm -f .env
+	make setup-env
 	@echo "✅ .env file removed. Run 'make setup-env' to recreate it."
 
 # Complete project setup
