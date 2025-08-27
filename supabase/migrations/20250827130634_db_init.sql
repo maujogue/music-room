@@ -1,13 +1,23 @@
 -- Create a table for public profiles
-create table profiles (
+create table if not exists public.profiles (
   id uuid references auth.users not null primary key,
   username text unique,
   email text,
   avatar_url text,
   bio text,
   music_genre text[],
-  constraint username_length check (char_length(username) >= 3)
+  constraint username_length check (char_length(username) >= 3),
+  spotify_access_token text,
+  spotify_refresh_token text,
+  spotify_token_expires_at timestamp with time zone
 );
+
+create table if not exists public.oauth_state (
+    id uuid primary key default gen_random_uuid(),
+    state text not null unique,
+    created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
 -- Set up Row Level Security (RLS)
 -- See https://supabase.com/docs/guides/database/postgres/row-level-security for more details.
 alter table profiles
