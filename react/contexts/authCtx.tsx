@@ -12,13 +12,16 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (
     username: string,
     email: string,
     password: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
