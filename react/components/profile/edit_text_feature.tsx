@@ -53,7 +53,6 @@ export default function EditProfileTextFeature({
         : validateText(text);
 
   const handleConfirm = async () => {
-
     const data: Partial<UserInfo> = {
       [type]: text,
     };
