@@ -1,12 +1,11 @@
 -- Create a table for public profiles
 create table profiles (
   id uuid references auth.users not null primary key,
-  updated_at timestamp with time zone,
   username text unique,
-  full_name text,
+  email text,
   avatar_url text,
-  website text,
-
+  bio text,
+  music_genre text[],
   constraint username_length check (char_length(username) >= 3)
 );
 -- Set up Row Level Security (RLS)
@@ -30,8 +29,8 @@ returns trigger
 set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (id, username, email)
+  values (new.id, new.raw_user_meta_data->>'username', new.email);
   return new;
 end;
 $$ language plpgsql security definer;
