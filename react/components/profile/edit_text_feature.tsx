@@ -1,5 +1,4 @@
 import { Button, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
 import { Heading } from '@/components/ui/heading';
 import {
   Modal,
@@ -17,20 +16,18 @@ import {
   EditIcon,
 } from '@/components/ui/icon';
 import { useState } from 'react';
-import { Input, InputField, InputSlot } from '../ui/input';
+import { Input, InputField } from '../ui/input';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import {
   FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-  FormControlHelper,
-  FormControlHelperText,
   FormControlError,
   FormControlErrorIcon,
   FormControlErrorText,
 } from '@/components/ui/form-control';
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
+import { useProfile } from '@/contexts/profileCtx';
+import { UserInfo } from '@/types/user';
 
 export default function EditProfileTextFeature({
   type,
@@ -45,12 +42,29 @@ export default function EditProfileTextFeature({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [text, setText] = useState(currentText);
+  const [error, setError] = useState<string | null>(null);
+  const { updateProfile } = useProfile();
+
   const isValid =
     type === 'email'
       ? validateEmail(text)
       : type === 'bio'
         ? validateBio(text)
         : validateText(text);
+
+  const handleConfirm = async () => {
+
+    const data: Partial<UserInfo> = {
+      [type]: text,
+    };
+    const { error } = await updateProfile(data);
+    if (error) {
+      console.error('Error updating profile:', error);
+      setError(error.message);
+    } else {
+      setShowModal(false);
+    }
+  };
 
   return (
     <VStack className='px-3'>
@@ -121,7 +135,7 @@ export default function EditProfileTextFeature({
                 <FormControlError>
                   <FormControlErrorIcon as={AlertCircleIcon} />
                   <FormControlErrorText>
-                    A valid {type} is required.
+                    {error || `A valid ${type} is required.`}
                   </FormControlErrorText>
                 </FormControlError>
               </FormControl>
@@ -136,12 +150,7 @@ export default function EditProfileTextFeature({
               >
                 <ButtonText>Cancel</ButtonText>
               </Button>
-              <Button
-                isDisabled={!isValid}
-                onPress={() => {
-                  setShowModal(false);
-                }}
-              >
+              <Button isDisabled={!isValid} onPress={handleConfirm}>
                 <ButtonText>Confirm</ButtonText>
               </Button>
             </ModalFooter>
