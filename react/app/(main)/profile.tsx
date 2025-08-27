@@ -1,23 +1,16 @@
-import { View } from 'react-native';
-import {
-  Button,
-  ButtonText,
-  ButtonSpinner,
-  ButtonIcon,
-  ButtonGroup,
-} from '@/components/ui/button';
-import { Image } from '@/components/ui/image';
-import { Heading } from '@/components/ui/heading';
-import { HStack } from '@/components/ui/hstack';
+import { ImageSourcePropType, View } from 'react-native';
+import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
-import { Input, InputField, InputSlot, InputIcon } from '@/components/ui/input';
-import { Icon } from '@/components/ui/icon';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import { useState } from 'react';
 import { Center } from '@/components/ui/center';
 import EditAvatar from '@/components/profile/edit_avatar';
 
+import vibingImg from '../../assets/vibing.jpg';
+import { useProfile } from '@/contexts/profileCtx';
+
 export default function Profile() {
+  const { profile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
   return (
     <View className='flex-1 pt-safe'>
@@ -33,7 +26,11 @@ export default function Profile() {
         </Button>
         <Center>
           <EditAvatar
-            source={require('../../assets/vibing.jpg')}
+            source={
+              profile?.avatar_url
+                ? { uri: profile.avatar_url }
+                : (vibingImg as ImageSourcePropType)
+            }
             isEdit={editProfile}
           />
         </Center>
@@ -41,19 +38,19 @@ export default function Profile() {
       <VStack className='gap-4'>
         <EditProfileTextFeature
           type='username'
-          currentText={'Herrmann'}
+          currentText={profile?.username || ''}
           size='xl'
           isEdit={editProfile}
         />
         <EditProfileTextFeature
           type='bio'
-          currentText={'La Feve lover'}
+          currentText={profile?.bio || ''}
           size='md'
           isEdit={editProfile}
         />
         <EditProfileTextFeature
           type='email'
-          currentText={'gclement@groscon.fr'}
+          currentText={profile?.email || ''}
           size='md'
           isEdit={editProfile}
         />

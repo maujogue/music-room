@@ -20,6 +20,7 @@ import {
   FormControlErrorText,
 } from '../ui/form-control';
 import * as ImagePicker from 'expo-image-picker';
+import { useProfile } from '@/contexts/profileCtx';
 
 export default function EditAvatar({
   source,
@@ -31,16 +32,17 @@ export default function EditAvatar({
   const [showModal, setShowModal] = useState(false);
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const { updateProfile } = useProfile();
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result : ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-      mediaTypes: ['images'],
-    });
-    
+    const result: ImagePicker.ImagePickerResult =
+      await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+        mediaTypes: ['images'],
+      });
+
     if (!result.canceled) {
       const img: ImagePicker.ImagePickerAsset = result.assets?.[0];
       if (img?.type !== 'image') {
@@ -55,7 +57,15 @@ export default function EditAvatar({
     }
     console.log(result);
   };
-
+  const handleConfirm = async () => {
+    const { error } = await updateProfile({ avatar_url: image?.uri });
+    if (error) {
+      console.error('Error updating profile:', error);
+      setError(error.message);
+    } else {
+      setShowModal(false);
+    }
+  };
   return (
     <HStack className='relative'>
       <Image
@@ -145,16 +155,7 @@ export default function EditAvatar({
             >
               <ButtonText>Cancel</ButtonText>
             </Button>
-            <Button
-              isDisabled={!image}
-              onPress={() => {
-                // Here you would handle the avatar upload/save logic
-                setShowModal(false);
-                // Optionally reset file and error
-                setImage(null);
-                setError(null);
-              }}
-            >
+            <Button isDisabled={!image} onPress={handleConfirm}>
               <ButtonText>Confirm</ButtonText>
             </Button>
           </ModalFooter>
