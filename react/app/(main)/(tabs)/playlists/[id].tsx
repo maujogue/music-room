@@ -1,18 +1,8 @@
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { useLocalSearchParams, Stack } from 'expo-router';
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
-import { useEffect, useState } from 'react';
-import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
-import { SpotifyPlaylist } from '@/types/spotify';
 import { usePlaylist } from '@/hooks/usePlaylist'
+import TrackList from '@/components/ui/track/TrackList';
 
-
-// export default function PlaylistDetailScreen() {
-//   const { id } = useLocalSearchParams<{ id: string }>();
-
-//   return (
-//     <Text>Detail playlist id : |{id}| </Text>
-//   )
-// }
 
 export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,8 +39,6 @@ export default function PlaylistDetailScreen() {
       <Stack.Screen
         options={{
           title: playlist.name,
-          // Vous pouvez ajouter un bouton de retour custom si besoin
-          // headerLeft: () => (<Button title="Back" onPress={() => router.back()} />)
         }}
       />
 
@@ -60,6 +48,7 @@ export default function PlaylistDetailScreen() {
         <Text style={styles.description}>{playlist.description}</Text>
       ) : null}
       <Text style={styles.owner}>By {playlist.owner?.display_name}</Text>
+      <TrackList />
     </View>
   );
 }
