@@ -167,7 +167,7 @@ async function fetchSpotifyUserToken(code: string): Promise<Response> {
       user = await createAuthUser(user_profile_data).then((res) => res.user);
     } else {
       user = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('email', user_profile_data.email)
         .single()
@@ -190,7 +190,7 @@ async function upsertUser(
   user_email: string,
   spotify_token_data: any
 ): Promise<void> {
-  await supabase.from('users').upsert({
+  await supabase.from('profiles').upsert({
     id: user_id,
     email: user_email,
     spotify_access_token: spotify_token_data.access_token,
@@ -228,7 +228,7 @@ async function checkIfAuthUserAlreadyExist(
   userEmail: string
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*')
     .eq('email', userEmail);
 
