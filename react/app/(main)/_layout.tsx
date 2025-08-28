@@ -7,6 +7,7 @@ import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
+import {  PlayIcon, Icon } from '@/components/ui/icon';
 
 export default function AppLayout() {
   return (
@@ -23,7 +24,7 @@ export default function AppLayout() {
           name='playlists'
           options={{
             title: 'Playlists',
-            tabBarIcon: () => <Text>📋</Text>,
+            tabBarIcon: () => <Icon as={PlayIcon} size="md" />,
           }}
         />
         <Tabs.Screen
