@@ -5,10 +5,10 @@ import {
 } from '@/components/ui/avatar';
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
-import vibingImg from '../../assets/vibing.jpg';
+import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
 
-export default function Layout() {
+export default function AppLayout() {
   return (
     <ProfileProvider>
       <Tabs screenOptions={{ headerShown: false }}>
@@ -20,7 +20,7 @@ export default function Layout() {
           }}
         />
         <Tabs.Screen
-          name='all_playlists'
+          name='playlists'
           options={{
             title: 'Playlists',
             tabBarIcon: () => <Text>📋</Text>,

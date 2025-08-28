@@ -18,7 +18,7 @@ export default function PlaylistList({ sections }: Props) {
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <Link href={{
-            pathname: "/(main)/(tabs)/playlists/[id]",
+            pathname: "/(main)/playlists/[id]",
             params: {id: item.id},
           }} asChild>
             <Pressable>

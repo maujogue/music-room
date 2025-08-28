@@ -1,8 +1,7 @@
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
-import { usePlaylist } from '@/hooks/usePlaylist'
+import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/ui/track/TrackList';
-
 
 export default function PlaylistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -11,7 +10,7 @@ export default function PlaylistDetailScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size='large' />
       </View>
     );
   }
@@ -36,19 +35,13 @@ export default function PlaylistDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: playlist.name,
-        }}
-      />
-
       <Image source={{ uri: imageUri }} style={styles.cover} />
       <Text style={styles.title}>{playlist.name}</Text>
       {playlist.description ? (
         <Text style={styles.description}>{playlist.description}</Text>
       ) : null}
       <Text style={styles.owner}>By {playlist.owner?.display_name}</Text>
-      <TrackList />
+      <TrackList playlistId={id} />
     </View>
   );
 }
