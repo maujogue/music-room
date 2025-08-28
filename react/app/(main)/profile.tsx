@@ -1,4 +1,4 @@
-import { ImageSourcePropType, View } from 'react-native';
+import { ImageSourcePropType, View, Linking } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
@@ -7,29 +7,24 @@ import { Center } from '@/components/ui/center';
 import Avatar from '@/components/profile/edit_avatar';
 import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
   console.log(profile?.avatar_url);
 
-  const connectToSpotify = () => {
-    fetch('http://127.0.0.1:54321/functions/v1/auth/spotify', {
+const connectToSpotify = async () => {
+  try {
+    const response = await fetch('http://10.0.2.2:54321/functions/v1/auth/spotify', {
       method: 'POST',
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.url) {
-          // Redirect the user to the Spotify authentication URL
-          window.location.href = data.url;
-        } else {
-          console.error('No URL found in response:', data);
-        }
-      })
-      .catch(error => {
-        console.error('Error during Spotify authentication:', error);
-      });
+    });
+    const data = await response.json();
+    await Linking.openURL(data.url);
+  } catch (error) {
+    console.error('Error during Spotify authentication:', error);
   }
+};
 
   return (
     <View className='flex-1 pt-safe'>

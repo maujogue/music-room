@@ -21,9 +21,11 @@ Deno.serve(async (req, res) => {
 
   try {
     if (url.includes('/spotify/callback')) {
+      console.log('Handling Spotify callback');
       return handleSpotifyCallback(req, res);
     }
     if (url.includes('/spotify')) {
+      console.log('Handling Spotify auth initiation');
       return handleSpotifyAuth(req, res);
     }
 
@@ -50,16 +52,16 @@ async function handleSpotifyAuth(
   req: Request,
   res: Response
 ): Promise<Response> {
-  var state = generateRandomString(16);
-  var scope =
-    ' \
-		user-read-private \
-		user-read-email \
-		user-read-playback-state \
-		user-modify-playback-state \
-		user-read-currently-playing \
-		playlist-read-private \
-		playlist-modify-private';
+  const state = generateRandomString(16);
+  const scope = [
+    'user-read-private',
+    'user-read-email',
+    'user-read-playback-state',
+    'user-modify-playback-state',
+    'user-read-currently-playing',
+    'playlist-read-private',
+    'playlist-modify-private',
+  ].join(' ');
 
   const { error } = await supabase.from('oauth_state').insert([{ state }]);
   if (error) {
@@ -74,16 +76,18 @@ async function handleSpotifyAuth(
     state: state,
   });
 
-  const headers = new Headers();
-  headers.set(
-    'Location',
-    'https://accounts.spotify.com/authorize?' + params.toString()
-  );
-  return new Response(null, {
-    status: 302,
-    headers: headers,
+  const spotifyAuthUrl = 'https://accounts.spotify.com/authorize?' + params.toString();
+
+  console.log('Generated Spotify authorization URL:', spotifyAuthUrl);
+
+  // Retournez l'URL Spotify dans une réponse JSON
+  const jsonResponse = { url: spotifyAuthUrl };
+  return new Response(JSON.stringify(jsonResponse), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
   });
 }
+
 
 async function handleSpotifyCallback(
   req: Request,

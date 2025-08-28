@@ -26,24 +26,29 @@ Deno.serve(async (req) => {
 
 async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
   if (req.method !== 'GET') {
-	return new Response('Method Not Allowed', { status: 405 });
+    console.log('Invalid method:', req.method);
+	  return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const user = await getCurrentUser(req);
-  if (!user) {
+  const user_data = await getCurrentUser(req);
+  if (!user_data) {
+    console.log('Unauthorized request: no user');
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const { data, error } = await supabase.from('users')
+  console.log('Authenticated user:', user_data.user.id);
+  const { data, error } = await supabase.from('profiles')
         .select('*')
-        .eq('id', user.id);
+        .eq('id', user_data.user.id);
 
   if (error || !data) {
+    console.error('Error fetching user from database:', error);
     return new Response('Failed to fetch Spotify token', { status: 500 });
   }
 
   const playlists = await fetchSpotifyUserPlaylists(data[0].spotify_access_token);
   if (!playlists) {
+    console.error('Error fetching playlists from Spotify');
     return new Response('Failed to fetch Spotify playlists', { status: 500 });
   }
 

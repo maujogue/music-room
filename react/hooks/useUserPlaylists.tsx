@@ -16,30 +16,46 @@ export function useUserPlaylists() {
     let isActive = true;
     setLoading(true);
     setError(null);
+    console.log('useUserPlaylists called');
 
     const fetchPlaylists = async (session: any) => {
-      try {
-        console.log('Fetching playlists with session:', session?.access_token);
-      } catch (e) {
-        if (isActive) {
-          setError('fetch playlists error');
+    try {
+      return fetch('http://10.0.2.2:54321/functions/v1/me/playlists', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
+        return response.json();
+      });
+    } catch (e) {
+      if (isActive) {
+        setError('fetch playlists error');
       }
-    };
+    } finally {
+      if (isActive) {
+        setLoading(false);
+      }
+    }
+  };
 
-    getSession().then((res) => {
-      fetchPlaylists(res);
-    }).catch((err) => {
-      console.error('Erreur dans useUserPlaylists:', err)
+  getSession().then((res) => {
+    fetchPlaylists(res).then((data) => {
+      if (isActive) {
+        setPlaylists(data.items || []);
+      }
     });
+  }).catch((err) => {
+    console.error('Erreur dans useUserPlaylists:', err)
+  });
 
-    return () => {
-      isActive = false;
-    };
+  return () => {
+    isActive = false;
+  };
   }, []);
 
   return { playlists, loading, error };
