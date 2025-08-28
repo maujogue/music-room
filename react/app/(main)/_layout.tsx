@@ -40,9 +40,6 @@ export default function Layout() {
           }}
         />
       </Tabs>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
     </ProfileProvider>
   );
 }
