@@ -190,7 +190,7 @@ async function upsertUser(
   user_email: string,
   spotify_token_data: any
 ): Promise<void> {
-  await supabase.from('users').upsert({
+  await supabase.from('profiles').upsert({
     id: user_id,
     email: user_email,
     spotify_access_token: spotify_token_data.access_token,

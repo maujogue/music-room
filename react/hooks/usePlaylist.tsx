@@ -27,7 +27,7 @@ export function usePlaylist(id: string) {
         }
       } catch (e) {
         if (isActive) {
-          setError('fetch playlists error');
+          setError(`fetch playlists error: ${e}`);
         }
       } finally {
         if (isActive) {

@@ -12,8 +12,6 @@ export function useUserPlaylists() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('useUserPlaylists: getSession');
-
   useEffect(() => {
     let isActive = true;
     setLoading(true);
@@ -52,12 +50,12 @@ async function getSession() {
     data: { session },
     error,
   } = await supabase.auth.getSession();
-  
+
   if (error) {
     console.error('Erreur récupération session:', error);
     return null;
   }
-  
+
   console.log('Session utilisateur:', session?.access_token);
   return session;
 }
