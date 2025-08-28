@@ -1,4 +1,4 @@
-import { ImageSourcePropType, View } from 'react-native';
+import { ImageSourcePropType, View, Linking } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
@@ -7,36 +7,62 @@ import { Center } from '@/components/ui/center';
 import Avatar from '@/components/profile/edit_avatar';
 import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
   console.log(profile?.avatar_url);
+
+const connectToSpotify = async () => {
+  try {
+    const response = await fetch('http://10.0.2.2:54321/functions/v1/auth/spotify', {
+      method: 'POST',
+    });
+    const data = await response.json();
+    await Linking.openURL(data.url);
+  } catch (error) {
+    console.error('Error during Spotify authentication:', error);
+  }
+};
+
   return (
     <View className='flex-1 pt-safe'>
-      <VStack className='justify-center items-center p-6 gap-4'>
-        <Button
-          className={`w-28 h-8 mt-2 self-end ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-          size='sm'
-          onPress={() => setEditProfile(!editProfile)}
-        >
-          <ButtonText className='text-white'>
-            {editProfile ? 'Save' : 'Edit Profile'}
-          </ButtonText>
-        </Button>
-        <Center>
-          <Avatar
-            url={
-              profile?.avatar_url
-                ? { uri: profile.avatar_url }
-                : (vibingImg as ImageSourcePropType)
-            }
-            onUpload={async filePath => {
-              await updateProfile({ avatar_url: filePath });
-            }}
-            isEdit={editProfile}
-          />
-        </Center>
+    <VStack className='justify-center items-center p-6 gap-4'>
+            <View className="flex-row justify-between mt-2 w-full">
+              <Button
+                className={`w-35 h-8 ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
+                size="sm"
+                onPress={connectToSpotify}
+              >
+                <ButtonText className="text-white">
+                  Connect with Spotify
+                </ButtonText>
+              </Button>
+              <Button
+                className={`w-28 h-8 ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
+                size="sm"
+                onPress={() => setEditProfile(!editProfile)}
+              >
+                <ButtonText className="text-white">
+                  {editProfile ? 'Save' : 'Edit Profile'}
+                </ButtonText>
+              </Button>
+            </View>
+
+            <Center>
+              <Avatar
+                url={
+                  profile?.avatar_url
+                    ? { uri: profile.avatar_url }
+                    : (vibingImg as ImageSourcePropType)
+                }
+                onUpload={async filePath => {
+                  await updateProfile({ avatar_url: filePath });
+                }}
+                isEdit={editProfile}
+              />
+            </Center>
       </VStack>
       <VStack className='gap-4'>
         <EditProfileTextFeature
