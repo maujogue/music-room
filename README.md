@@ -157,17 +157,15 @@ To add new tables:
 Add the following key-value pairs to your `.env` file:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=http://10.11.6.4:54321
+EXPO_PUBLIC_SUPABASE_URL=https://04af8d63ed79.ngrok-free.app
 LOCAL_SUPABASE_URL=http://kong:8000
-API_BASE_URL=https://04af8d63ed79.ngrok-free.app
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SECRET_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 SPOTIFY_CLIENT_ID=your_spotify_client_id_here
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
 ```
 
-- `EXPO_PUBLIC_SUPABASE_URL` and `LOCAL_SUPABASE_URL`: URLs for your Supabase instances.
-- `API_BASE_URL`: Your external API base URL (e.g., ngrok URL).
+- `EXPO_PUBLIC_SUPABASE_URL`:URLs for your Supabase instances, or your external API base URL (e.g., ngrok URL).
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon (public) key.
 - `SECRET_SERVICE_ROLE_KEY`: Supabase service role key for privileged operations.
 - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`: Credentials from your Spotify developer app.
