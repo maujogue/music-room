@@ -7,8 +7,9 @@ import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import vibingImg from '../../assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
+import { Stack } from 'expo-router';
 
-export default function AppLayout() {
+export default function Layout() {
   return (
     <ProfileProvider>
       <Tabs screenOptions={{ headerShown: false }}>
@@ -39,6 +40,9 @@ export default function AppLayout() {
           }}
         />
       </Tabs>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </ProfileProvider>
   );
 }
