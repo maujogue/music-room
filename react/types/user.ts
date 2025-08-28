@@ -5,5 +5,5 @@ export type UserInfo = {
   email: string;
   bio?: string;
   avatar_url?: string;
-  musicGenre?: string[];
+  music_genre?: string[];
 };

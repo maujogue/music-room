@@ -48,7 +48,10 @@ export default function Profile() {
           isEdit={editProfile}
           noHeader={true}
         />
-        <EditMusicTastes isEdit={editProfile} />
+        <EditMusicTastes
+          currentText={profile?.music_genre || []}
+          isEdit={editProfile}
+        />
         <Divider />
         <EditProfileTextFeature
           type='bio'

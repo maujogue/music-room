@@ -15,6 +15,7 @@ import {
 } from '../ui/select';
 import { ChevronDownIcon } from '../ui/icon';
 import { HStack } from '../ui/hstack';
+import { useProfile } from '../../contexts/profileCtx';
 
 // Example list of music genres, each with a color
 const MUSIC_GENRES = [
@@ -30,22 +31,43 @@ const MUSIC_GENRES = [
   { label: 'Metal', value: 'metal', color: '#b0bec5' }, // grey
 ];
 
-export default function EditMusicTastes({ isEdit }: { isEdit: boolean }) {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const handleSelect = (value: string) => {
+export default function EditMusicTastes({
+  currentText,
+  isEdit,
+}: {
+  currentText: string[];
+  isEdit: boolean;
+}) {
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(currentText);
+  const { updateProfile } = useProfile();
+
+  // Always pass the new genres array directly to handleUpdateGenres to avoid async state lag
+  const handleSelect = async (value: string) => {
     if (!selectedGenres.includes(value)) {
+      let newGenres;
       if (selectedGenres.length >= 3) {
         // If already 3, replace the first with the new one
-        setSelectedGenres([...selectedGenres.slice(1), value]);
+        newGenres = [...selectedGenres.slice(1), value];
       } else {
-        setSelectedGenres([...selectedGenres, value]);
+        newGenres = [...selectedGenres, value];
       }
+      setSelectedGenres(newGenres);
+      await handleUpdateGenres(newGenres);
     }
   };
 
   // Remove genre from selection
-  const handleRemove = (value: string) => {
-    setSelectedGenres(selectedGenres.filter(v => v !== value));
+  const handleRemove = async (value: string) => {
+    const newGenres = selectedGenres.filter(v => v !== value);
+    setSelectedGenres(newGenres);
+    await handleUpdateGenres(newGenres);
+  };
+
+  const handleUpdateGenres = async (genres: string[]) => {
+    const { error } = await updateProfile({ music_genre: genres });
+    if (error) {
+      console.error('Error updating genres:', error);
+    }
   };
 
   return (
@@ -90,8 +112,9 @@ export default function EditMusicTastes({ isEdit }: { isEdit: boolean }) {
           className='ml-auto'
           // The value is not controlled here, since we want multi-select behavior
           // We use onSelectItem to handle selection
-          onValueChange={(value: string) => {
-            handleSelect(value);
+          onValueChange={async (value: string) => {
+            console.log('onValueChange', value);
+            await handleSelect(value);
           }}
         >
           <SelectTrigger variant='underlined' size='md'>
