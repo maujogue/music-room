@@ -14,7 +14,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@expo/html-elements": "^0.4.2",
+    "@expo/html-elements": "^0.12.5",
+    "@gluestack-ui/actionsheet": "^0.2.53",
     "@gluestack-ui/alert": "^0.1.16",
     "@gluestack-ui/avatar": "^0.1.18",
     "@gluestack-ui/button": "^1.0.14",
@@ -25,6 +26,7 @@
     "@gluestack-ui/modal": "^0.1.41",
     "@gluestack-ui/nativewind-utils": "^1.0.27",
     "@gluestack-ui/overlay": "^0.1.22",
+    "@gluestack-ui/select": "^0.1.31",
     "@gluestack-ui/textarea": "^0.1.25",
     "@gluestack-ui/toast": "^1.0.9",
     "@legendapp/motion": "^2.4.0",

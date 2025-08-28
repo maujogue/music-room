@@ -11,7 +11,7 @@ type Props = {
 
 export default function TrackList({ playlistId }: Props) {
   const mocks = MOCK_TRACKS;
-  
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <FlatList

@@ -7,6 +7,8 @@ import { Center } from '@/components/ui/center';
 import Avatar from '@/components/profile/edit_avatar';
 import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
+import EditMusicTastes from '@/components/profile/edit_music_tastes';
+import { Divider } from '@/components/ui/divider';
 
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
@@ -42,21 +44,28 @@ export default function Profile() {
         <EditProfileTextFeature
           type='username'
           currentText={profile?.username || ''}
-          size='xl'
+          size='4xl'
           isEdit={editProfile}
+          noHeader={true}
         />
+        <EditMusicTastes isEdit={editProfile} />
+        <Divider />
         <EditProfileTextFeature
           type='bio'
           currentText={profile?.bio || ''}
           size='md'
           isEdit={editProfile}
+          noHeader={false}
         />
+        <Divider />
         <EditProfileTextFeature
           type='email'
           currentText={profile?.email || ''}
           size='md'
           isEdit={editProfile}
+          noHeader={false}
         />
+        <Divider />
       </VStack>
     </View>
   );
