@@ -11,7 +11,7 @@ export default function PlaylistDetailLayout() {
         }}
       />
       <Stack.Screen
-        name='tracks/[id]'
+        name='tracks/[trackId]'
         options={{
           title: 'Track',
           presentation: 'modal',

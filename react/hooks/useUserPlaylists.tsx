@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
 import { SpotifyPlaylist } from '@/types/spotify';
 
-
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : fetch backend when ready)
 // -------------------------------------------------------------------
@@ -25,7 +24,7 @@ export function useUserPlaylists() {
         }
       } catch (e) {
         if (isActive) {
-          setError('fetch playlists error');
+          setError(`fetch playlists error: ${e}`);
         }
       } finally {
         if (isActive) {
@@ -41,4 +40,4 @@ export function useUserPlaylists() {
   }, []);
 
   return { playlists, loading, error };
-};
+}

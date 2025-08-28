@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { useUserPlaylists } from '@/hooks/useUserPlaylists'
-import PlaylistList from '@/components/ui/playlist/PlaylistList';
+import { useUserPlaylists } from '@/hooks/useUserPlaylists';
+import PlaylistList from '@/components/playlist/PlaylistList';
 import { PlaylistSection } from '@/types/playlist';
 
 export default function AllPlaylists() {
@@ -15,7 +15,7 @@ export default function AllPlaylists() {
     return <Text>no playlist found</Text>;
   }
 
-    const sections: PlaylistSection[] = [
+  const sections: PlaylistSection[] = [
     {
       title: 'My collaborative playlists',
       data: playlists.filter(pl => pl.collaborative),

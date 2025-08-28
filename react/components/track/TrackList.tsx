@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Pressable, Text, SafeAreaView, View } from 'react-native';
+import { Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { MOCK_TRACKS } from '@/mocks/mockTracks';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
-import TrackListItem from '@/components/ui/track/TrackListItem';
+import TrackListItem from '@/components/track/TrackListItem';
 
 type Props = {
   playlistId: string;
@@ -11,7 +11,7 @@ type Props = {
 
 export default function TrackList({ playlistId }: Props) {
   const mocks = MOCK_TRACKS;
-
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <FlatList
@@ -20,8 +20,8 @@ export default function TrackList({ playlistId }: Props) {
           <>
             <Link
               href={{
-                pathname: '/(main)/playlists/[id]/tracks/[id]',
-                params: { id: playlistId, trackId: item.id },
+                pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
+                params: { playlistId, trackId: item.id },
               }}
               asChild
             >
@@ -36,18 +36,3 @@ export default function TrackList({ playlistId }: Props) {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-  },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
-    color: '#333',
-  },
-});

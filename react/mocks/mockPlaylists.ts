@@ -1,5 +1,4 @@
-import { SpotifyPlaylist } from "@/types/spotify";
-
+import { SpotifyPlaylist } from '@/types/spotify';
 
 export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
   {

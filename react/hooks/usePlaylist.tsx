@@ -20,14 +20,14 @@ export function usePlaylist(id: string) {
         // MOCK_PLAYLISTS (use fetch when ready)
         await new Promise(resolve => setTimeout(resolve, 800));
         if (isActive) {
-          const filtered = MOCK_PLAYLISTS.find((p) => p.id === id);
+          const filtered = MOCK_PLAYLISTS.find(p => p.id === id);
           const defaultPlaylist = MOCK_PLAYLISTS[0] || null;
 
           setPlaylist(filtered || defaultPlaylist);
         }
       } catch (e) {
         if (isActive) {
-          setError('fetch playlists error');
+          setError(`fetch playlists error: ${e}`);
         }
       } finally {
         if (isActive) {
@@ -43,4 +43,4 @@ export function usePlaylist(id: string) {
   }, []);
 
   return { playlist, loading, error };
-};
+}

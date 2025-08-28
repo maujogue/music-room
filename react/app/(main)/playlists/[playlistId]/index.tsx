@@ -1,11 +1,11 @@
 import { useLocalSearchParams } from 'expo-router';
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { usePlaylist } from '@/hooks/usePlaylist';
-import TrackList from '@/components/ui/track/TrackList';
+import TrackList from '@/components/track/TrackList';
 
 export default function PlaylistDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { playlist, loading, error } = usePlaylist(id);
+  const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
+  const { playlist, loading, error } = usePlaylist(playlistId);
 
   if (loading) {
     return (
@@ -26,7 +26,7 @@ export default function PlaylistDetailScreen() {
   if (!playlist) {
     return (
       <View style={styles.center}>
-        <Text>No playlist with id '{id}'</Text>
+        <Text>No playlist with id '{playlistId}'</Text>
       </View>
     );
   }
@@ -41,7 +41,7 @@ export default function PlaylistDetailScreen() {
         <Text style={styles.description}>{playlist.description}</Text>
       ) : null}
       <Text style={styles.owner}>By {playlist.owner?.display_name}</Text>
-      <TrackList playlistId={id} />
+      <TrackList playlistId={playlistId} />
     </View>
   );
 }
