@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Text, View, StyleSheet } from 'react-native';
 
 export default function TrackDetailScreen() {
-  const { id, trackId } = useLocalSearchParams<{ id: string; trackId: string }>();
+  const { playlistId, trackId } = useLocalSearchParams<{ playlistId: string; trackId: string }>();
 
   return (
     <View style={styles.container}>
@@ -11,7 +11,7 @@ export default function TrackDetailScreen() {
           title: 'mock track',
         }}
       />
-      <Text>Playlist id : |{id}| </Text>
+      <Text>Playlist id : |{playlistId}| </Text>
       <Text>Track id : |{trackId}| </Text>
     </View>
   );
