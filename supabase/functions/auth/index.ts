@@ -11,7 +11,8 @@ import { SupabaseError } from './supabase_error.ts';
 const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-const base_url = Deno.env.get('API_BASE_URL') || 'http://localhost:54321';
+const base_url =
+  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
 const redirect_uri = `${base_url}/functions/v1/auth/spotify/callback`;
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const client_secret = Deno.env.get('SPOTIFY_CLIENT_SECRET')!;
@@ -76,7 +77,8 @@ async function handleSpotifyAuth(
     state: state,
   });
 
-  const spotifyAuthUrl = 'https://accounts.spotify.com/authorize?' + params.toString();
+  const spotifyAuthUrl =
+    'https://accounts.spotify.com/authorize?' + params.toString();
 
   console.log('Generated Spotify authorization URL:', spotifyAuthUrl);
 
@@ -87,7 +89,6 @@ async function handleSpotifyAuth(
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
 
 async function handleSpotifyCallback(
   req: Request,

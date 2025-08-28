@@ -113,7 +113,6 @@ setup-env:
 		SECRET_SERVICE_ROLE_KEY=$$(npx supabase status | grep "service_role key" | awk -F": " '{print $$2}'); \
 		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$${ANON_KEY}" >> .env; \
 		echo "SECRET_SERVICE_ROLE_KEY=$${SECRET_SERVICE_ROLE_KEY}" >> .env; \
-		read -p "API_BASE_URL: " api_base_url; echo "API_BASE_URL=$$api_base_url" >> .env; \
 		read -p "SPOTIFY_CLIENT_ID: " spotify_id; echo "SPOTIFY_CLIENT_ID=$$spotify_id" >> .env; \
 		read -p "SPOTIFY_CLIENT_SECRET: " spotify_secret; echo "SPOTIFY_CLIENT_SECRET=$$spotify_secret" >> .env; \
 		echo "⚠️  Check that the following env keys are correct"; \
@@ -122,19 +121,6 @@ setup-env:
 		echo "⚠️  .env file already exists. Skipping..."; \
 		echo "   If you need to update it, run 'make reset-env'"; \
 	fi
-
-
-create-env-local:
-	@echo "Creating supabase/.env.local with interactive prompts..."
-	@mkdir -p supabase
-	@echo "EXPO_PUBLIC_SUPABASE_URL=http://10.11.6.4:54321" > supabase/.env.local
-	@echo "LOCAL_SUPABASE_URL=http://kong:8000" >> supabase/.env.local
-	@read -p "API_BASE_URL: " api_base_url; echo "API_BASE_URL=$$api_base_url" >> supabase/.env.local; \
-		read -p "EXPO_PUBLIC_SUPABASE_ANON_KEY: " anon_key; echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$$anon_key" >> supabase/.env.local; \
-		read -p "SECRET_SERVICE_ROLE_KEY: " service_role; echo "SECRET_SERVICE_ROLE_KEY=$$service_role" >> supabase/.env.local; \
-		read -p "SPOTIFY_CLIENT_ID: " spotify_id; echo "SPOTIFY_CLIENT_ID=$$spotify_id" >> supabase/.env.local; \
-		read -p "SPOTIFY_CLIENT_SECRET: " spotify_secret; echo "SPOTIFY_CLIENT_SECRET=$$spotify_secret" >> supabase/.env.local;
-	@echo "⚙️ supabase/.env.local created successfully."
 
 
 # Reset environment file

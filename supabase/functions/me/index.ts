@@ -3,31 +3,31 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCurrentUser } from '../auth.ts';
 
 const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-const base_url = Deno.env.get('API_BASE_URL') || 'http://localhost:54321';
+const base_url =
+  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
 
 Deno.serve(async (req) => {
-	const url = req.url;
+  const url = req.url;
   if (url.includes('/playlists')) {
-      return fetchCurrentUserPlaylists(req);
-    }
+    return fetchCurrentUserPlaylists(req);
+  }
 
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
+  return new Response(JSON.stringify(data), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+});
 
 async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
   if (req.method !== 'GET') {
     console.log('Invalid method:', req.method);
-	  return new Response('Method Not Allowed', { status: 405 });
+    return new Response('Method Not Allowed', { status: 405 });
   }
 
   const user_data = await getCurrentUser(req);
@@ -37,36 +37,37 @@ async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
   }
 
   console.log('Authenticated user:', user_data.user.id);
-  const { data, error } = await supabase.from('profiles')
-        .select('*')
-        .eq('id', user_data.user.id);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user_data.user.id);
 
   if (error || !data) {
     console.error('Error fetching user from database:', error);
     return new Response('Failed to fetch Spotify token', { status: 500 });
   }
 
-  const playlists = await fetchSpotifyUserPlaylists(data[0].spotify_access_token);
+  const playlists = await fetchSpotifyUserPlaylists(
+    data[0].spotify_access_token
+  );
   if (!playlists) {
     console.error('Error fetching playlists from Spotify');
     return new Response('Failed to fetch Spotify playlists', { status: 500 });
   }
 
-  return new Response(
-    JSON.stringify(playlists),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify(playlists), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 async function fetchSpotifyUserPlaylists(spotify_token: string): Promise<any> {
-	const response = await fetch('https://api.spotify.com/v1/me/playlists', {
-		headers: {
-			'Authorization': `Bearer ${spotify_token}`
-		}
-	});
-	return response.json();
+  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+    headers: {
+      Authorization: `Bearer ${spotify_token}`,
+    },
+  });
+  return response.json();
 }
-
 
 /* To invoke locally:
 

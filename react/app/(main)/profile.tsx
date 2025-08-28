@@ -16,7 +16,7 @@ export default function Profile() {
 
 const connectToSpotify = async () => {
   try {
-    const response = await fetch('http://10.0.2.2:54321/functions/v1/auth/spotify', {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`, {
       method: 'POST',
     });
     const data = await response.json();

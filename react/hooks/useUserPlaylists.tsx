@@ -4,9 +4,6 @@ import { SpotifyPlaylist } from '@/types/spotify';
 import { supabase } from '../services/supabase';
 
 
-// -------------------------------------------------------------------
-// Hook with mock-datas (TODO : fetch backend when ready)
-// -------------------------------------------------------------------
 export function useUserPlaylists() {
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +17,7 @@ export function useUserPlaylists() {
 
     const fetchPlaylists = async (session: any) => {
     try {
-      return fetch('http://10.0.2.2:54321/functions/v1/me/playlists', {
+      return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
