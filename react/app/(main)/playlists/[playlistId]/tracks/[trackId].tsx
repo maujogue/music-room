@@ -2,7 +2,10 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Text, View, StyleSheet } from 'react-native';
 
 export default function TrackDetailScreen() {
-  const { playlistId, trackId } = useLocalSearchParams<{ playlistId: string; trackId: string }>();
+  const { playlistId, trackId } = useLocalSearchParams<{
+    playlistId: string;
+    trackId: string;
+  }>();
 
   return (
     <View style={styles.container}>

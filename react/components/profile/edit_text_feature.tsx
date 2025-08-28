@@ -34,11 +34,13 @@ export default function EditProfileTextFeature({
   currentText,
   size,
   isEdit,
+  noHeader,
 }: {
   type: 'bio' | 'email' | 'username';
   currentText: string;
   size: 'sm' | 'md' | 'lg' | 'xl' | undefined;
   isEdit: boolean;
+  noHeader: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
   const [text, setText] = useState(currentText);
@@ -67,7 +69,7 @@ export default function EditProfileTextFeature({
 
   return (
     <VStack className='px-3'>
-      <Heading size='sm'>{type}</Heading>
+      {!noHeader && <Heading size='sm'>{type}</Heading>}
       <HStack className='w-full gap-2'>
         <Heading size={size} className='my-1 mx-3 flex-1'>
           {currentText}
@@ -114,7 +116,7 @@ export default function EditProfileTextFeature({
                 isRequired={true}
               >
                 {type === 'bio' ? (
-                  <Textarea size={size}>
+                  <Textarea size='md'>
                     <TextareaInput
                       value={text}
                       onChangeText={setText}
@@ -122,7 +124,7 @@ export default function EditProfileTextFeature({
                     />
                   </Textarea>
                 ) : (
-                  <Input size={size}>
+                  <Input size='md'>
                     <InputField
                       type='text'
                       value={text}
