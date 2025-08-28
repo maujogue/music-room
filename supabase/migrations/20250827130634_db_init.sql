@@ -1,14 +1,23 @@
 -- Create a table for public profiles
-create table profiles (
+create table if not exists public.profiles (
   id uuid references auth.users not null primary key,
-  updated_at timestamp with time zone,
   username text unique,
-  full_name text,
+  email text,
   avatar_url text,
-  website text,
-
-  constraint username_length check (char_length(username) >= 3)
+  bio text,
+  music_genre text[],
+  constraint username_length check (char_length(username) >= 3),
+  spotify_access_token text,
+  spotify_refresh_token text,
+  spotify_token_expires_at timestamp with time zone
 );
+
+create table if not exists public.oauth_state (
+    id uuid primary key default gen_random_uuid(),
+    state text not null unique,
+    created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
 -- Set up Row Level Security (RLS)
 -- See https://supabase.com/docs/guides/database/postgres/row-level-security for more details.
 alter table profiles
@@ -30,8 +39,8 @@ returns trigger
 set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (id, username, email)
+  values (new.id, new.raw_user_meta_data->>'username', new.email);
   return new;
 end;
 $$ language plpgsql security definer;
