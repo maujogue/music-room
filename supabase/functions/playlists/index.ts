@@ -14,30 +14,33 @@ const base_url =
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
 
 Deno.serve(async (req) => {
-  const url = req.url;
-  if (url.includes('/playlists')) {
-    return fetchCurrentUserPlaylists(req);
+  const url = new URL(req.url)
+  const method = req.method
+  const parts = url.pathname.split('/')
+  const lastSegment = parts.pop()
+  const playlist_id = parts.pop()
+  try {
+    switch (method) {
+      case 'GET':
+        if (playlist_id && lastSegment == 'tracks') {
+          return getPlaylistTracks(req, playlist_id)
+        }
+      default:
+        return new Response('Method Not Allowed', { status: 405 })
+    }
+  } catch (error) {
+    return new Response(`Internal Server Error: ${error}`, { status: 500 })
   }
-
-  return new Response(`${req.url} not found`, {
-    status: 404,
-    headers: { 'Content-Type': 'application/json' },
-  });
 });
 
-async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
-  if (req.method !== 'GET') {
-    console.log('Invalid method:', req.method);
-    return new Response('Method Not Allowed', { status: 405 });
-  }
-
+async function getPlaylistTracks(req: Request, id: string): Promise<Response> {
   const user_data = await getCurrentUser(req);
-  if (!user_data) {
+  if (!user_data.ok) {
     console.log('Unauthorized request: no user');
     return new Response('Unauthorized', { status: 401 });
   }
 
-  console.log('Authenticated user:', user_data.user.id);
+  console.log('Authenticated user:', user_data);
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -48,21 +51,23 @@ async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
     return new Response('Failed to fetch Spotify token', { status: 500 });
   }
 
-  const playlists = await fetchSpotifyUserPlaylists(
-    data[0].spotify_access_token
+  const playlist_items = await fetchSpotifyPlaylistsItems(
+    data[0].spotify_access_token,
+    id
   );
-  if (!playlists) {
-    console.error('Error fetching playlists from Spotify');
+
+  if (!playlist_items) {
+    console.error('Error fetching playlist items from Spotify');
     return new Response('Failed to fetch Spotify playlists', { status: 500 });
   }
 
-  return new Response(JSON.stringify(playlists), {
+  return new Response(JSON.stringify(playlists_items), {
     headers: { 'Content-Type': 'application/json' },
   });
 }
 
-async function fetchSpotifyUserPlaylists(spotify_token: string): Promise<any> {
-  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+async function fetchSpotifyPlaylistsItems(spotify_token: string, id: string): Promise<any> {
+  const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
     headers: {
       Authorization: `Bearer ${spotify_token}`,
     },
@@ -81,3 +86,4 @@ async function fetchSpotifyUserPlaylists(spotify_token: string): Promise<any> {
     --data '{"name":"Functions"}'
 
 */
+
