@@ -32,6 +32,39 @@ export interface SpotifyPlaylist {
   uri: string;
 }
 
+// export interface SpotifyTrack {
+//   album: {
+//     album_type: string;
+//     artists: { name: string; id: string; uri: string }[];
+//     external_urls: { spotify: string };
+//     href: string;
+//     id: string;
+//     images: SpotifyImage[];
+//     name: string;
+//     release_date: string;
+//     total_tracks: number;
+//     type: string;
+//     uri: string;
+//   };
+//   artists: { name: string; id: string; uri: string }[];
+//   available_markets?: string[];
+//   disc_number: number;
+//   duration_ms: number;
+//   explicit: boolean;
+//   external_ids?: Record<string, string>;
+//   external_urls: { spotify: string };
+//   href: string;
+//   id: string;
+//   is_local?: boolean;
+//   is_playable?: boolean;
+//   name: string;
+//   popularity: number;
+//   preview_url?: string;
+//   track_number: number;
+//   type: string;
+//   uri: string;
+// }
+
 export interface SpotifyTrack {
   album: {
     album_type: string;
@@ -54,13 +87,38 @@ export interface SpotifyTrack {
   external_ids?: Record<string, string>;
   external_urls: { spotify: string };
   href: string;
-  id: string;
+  id: string | null; // null if local track
   is_local?: boolean;
   is_playable?: boolean;
   name: string;
   popularity: number;
-  preview_url?: string;
+  preview_url: string | null;
   track_number: number;
-  type: string;
+  type: 'track' | string;
   uri: string;
 }
+
+export type SpotifyTrackWithKey = SpotifyTrack & {
+  __key: string;
+  __added_at: string | null;
+};
+
+type SpotifyEpisode = { type: 'episode'; id: string; uri: string; name: string };
+
+type PlaylistItem = {
+  added_at: string | null;
+  is_local: boolean;
+  track: SpotifyTrack | SpotifyEpisode | null;
+};
+
+type PlaylistItemsResponse = {
+  href: string;
+  items: PlaylistItem[];
+  limit: number;
+  next: string | null;
+  offset: number;
+  previous: string | null;
+  total: number;
+};
+
+

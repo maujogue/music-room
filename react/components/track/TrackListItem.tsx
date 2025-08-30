@@ -13,6 +13,8 @@ type Props = {
 export default function TrackListItem({ track }: Props) {
   const getImage = () => {
     const hasValidImage =
+      track &&
+      track.album &&
       Array.isArray(track.album.images) &&
       track.album.images.length > 0 &&
       track.album.images[0]?.url;
@@ -20,7 +22,7 @@ export default function TrackListItem({ track }: Props) {
     return {
       uri: hasValidImage
         ? track.album.images[0]!.url
-        : 'https://picsum.photos/205',
+        : 'https://picsum.photos/144',
     };
   };
 
