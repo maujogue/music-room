@@ -9,11 +9,10 @@ import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import { Divider } from '@/components/ui/divider';
-        
+
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
-  console.log(profile?.avatar_url);
 
 const connectToSpotify = async () => {
   try {
