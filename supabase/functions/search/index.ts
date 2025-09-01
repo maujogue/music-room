@@ -57,7 +57,6 @@ async function getUserToken(user_id: string): Promise<string | null> {
     throw new HTTPException(500, 'Failed to fetch user data')
   }
 
-  console.log('User Spotify token:', data[0].spotify_access_token);
   return data[0].spotify_access_token
 }
 

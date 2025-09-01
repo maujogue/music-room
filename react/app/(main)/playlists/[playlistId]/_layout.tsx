@@ -17,6 +17,13 @@ export default function PlaylistDetailLayout() {
           presentation: 'modal',
         }}
       />
+      <Stack.Screen
+        name='tracks/add'
+        options={{
+          title: 'Add Track',
+          presentation: 'modal',
+        }}
+      />
     </Stack>
   );
 }

@@ -11,15 +11,12 @@ export async function searchApi(query: string, type: string, options?: { limit?:
 
     const session = await getSession();
     const token = session?.access_token;
-    console.log('Base URL:', baseUrl);
-    console.log('Search parameters:', params.toString());
 
     const data = await fetch(`${baseUrl}?${params.toString()}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     }).then(res => {
-        console.log('Raw response:', res.ok);
         if (!res.ok) {
             throw new Error('Response not ok');
         }
