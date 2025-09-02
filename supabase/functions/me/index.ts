@@ -14,6 +14,7 @@ const base_url =
 
 Deno.serve(async (req) => {
   const url = req.url;
+
   if (url.includes('/playlists')) {
     return fetchCurrentUserPlaylists(req);
   }
@@ -80,7 +81,8 @@ async function getCurrentUser(req: Request): Promise<any> {
   const { data: user, error } = await supabase.auth.getUser(token);
 
   if (error || !user) {
-    throw new Error('Invalid token or user not found');
+    const errorResponse = new Response('Invalid token or user not found', { status: 401 });
+    throw new HTTPException(401, { res: errorResponse });
   }
 
   return user;

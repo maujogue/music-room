@@ -21,7 +21,8 @@ export async function getCurrentUser(req: Request): Promise<any> {
   const { data, error } = await supabase.auth.getUser(token);
 
   if (error || !data) {
-    throw new HTTPException(401, 'Unauthorized: Invalid token');
+    const errorResponse = new Response('Failed to fetch user data', { status: 401 });
+    throw new HTTPException(401, { res: errorResponse });
   }
 
   return data.user;
@@ -34,7 +35,8 @@ export async function getUserToken(user_id: string): Promise<string | null> {
     .eq('id', user_id)
 
   if (error || !data) {
-    throw new HTTPException(500, 'Failed to fetch user data')
+    const errorResponse = new Response('Failed to fetch user data', { status: 500 });
+    throw new HTTPException(500, { res: errorResponse });
   }
 
   return data[0].spotify_access_token

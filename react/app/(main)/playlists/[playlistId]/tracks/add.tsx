@@ -5,12 +5,10 @@ import { SearchBar } from '@/components/ui/searchbar'
 import { searchApi } from '@/services/search';
 import { addItemToPlaylist } from '@/services/playlist';
 import { SpotifyTrack } from '@/types/spotify';
-import { Button, ButtonIcon } from '@/components/ui/button';
-import { Icon, AddIcon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon';
 import {
   SafeAreaView,
   FlatList,
-  Alert,
   View,
   Text,
   StyleSheet,
@@ -18,22 +16,20 @@ import {
   Image
 } from "react-native";
 import {
-  Swipeable,
   GestureHandlerRootView,
-  TouchableOpacity,
 } from 'react-native-gesture-handler';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, {
   SharedValue,
-  useAnimatedStyle,
 } from 'react-native-reanimated';
+import { TrackListItem } from '@/components/track/TrackListItem';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function AddTrack() {
-    const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
+    const { playlistId, onTrackAdded } = useLocalSearchParams<{ playlistId: string }>();
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState<SpotifyTrack[]>([]);
 
@@ -89,7 +85,7 @@ export default function AddTrack() {
                 ref={swipeableRef}
                 renderLeftActions={(prog, drag) => LeftAction(prog, drag, item)}
                 leftThreshold={75}
-                onSwipeableOpen={direction => {
+                onSwipeableOpen={() => {
                     handlePress(item.id);
                     setTimeout(() => {
                         swipeableRef.current?.close();

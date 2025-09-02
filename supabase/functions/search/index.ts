@@ -41,7 +41,8 @@ app.get('/', async (c) => {
   const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
 
   if (!res) {
-    throw new HTTPException(500, 'Failed to fetch Spotify playlists')
+    const errorResponse = new Response('Failed to fetch Spotify playlists', { status: 500 });
+    throw new HTTPException(500, { res: errorResponse });
   }
 
   c.status(200)

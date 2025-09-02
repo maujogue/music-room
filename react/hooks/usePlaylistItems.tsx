@@ -3,39 +3,23 @@ import { PlaylistItemsResponse, SpotifyTrack, SpotifyTrackWithKey } from '@/type
 import { getSession } from '../services/session';
 
 
-export function usePlaylistItems(id: string) {
+export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
   const [tracks, setTracks] = useState<SpotifyTrackWithKey[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
     let cancelled = false;
-
+    
     const run = async () => {
       setLoading(true);
       setError(null);
+      if (!data || !data.items) {
+        return;
+      }
+
       try {
-        const session = await getSession();
-
-        const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${encodeURIComponent(
-          id
-        )}/tracks`;
-
-        const res = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${session?.access_token ?? ''}`,
-            Accept: 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error(`HTTP ${res.status} ${res.statusText} – ${text}`);
-        }
-
-        const data: PlaylistItemsResponse = await res.json();
-
         const fetchStamp = new Date().toISOString();
         const seen = new Map<string, number>();
 
@@ -68,7 +52,7 @@ export function usePlaylistItems(id: string) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, data]);
 
   return { tracks, loading, error };
 }
