@@ -42,6 +42,8 @@ export function useUserPlaylists() {
   };
 
   getSession().then((res) => {
+    if (res == null)
+      throw new Error("Session retrieve error")
     fetchPlaylists(res).then((data) => {
       if (isActive) {
         setPlaylists(data.items || []);
