@@ -1,11 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { } from 'react-native';
 import { SearchBar } from '@/components/ui/searchbar'
 import { searchApi } from '@/services/search';
+import { addItemToPlaylist } from '@/services/playlist';
 import { SpotifyTrack } from '@/types/spotify';
-import { Image } from 'react-native';
+import { Button, ButtonIcon } from '@/components/ui/button';
+import { Icon, AddIcon } from '@/components/ui/icon';
+import {
+  SafeAreaView,
+  FlatList,
+  Alert,
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Image
+} from "react-native";
+import {
+  Swipeable,
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
+import ReanimatedSwipeable, {
+  SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, {
+  SharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function AddTrack() {
+    const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
     const [searchQuery, setSearchQuery] = useState('');
     const [results, setResults] = useState<SpotifyTrack[]>([]);
 
@@ -36,27 +64,151 @@ export default function AddTrack() {
         }
     };
 
-    return (
-        <View style={{ flex: 1, alignItems: 'center', padding: 24 }}>
-            <SearchBar
-                value={searchQuery}
-                onChange={setSearchQuery}
-            />
-            <ScrollView style={{ width: '100%' }}>
-                {results.map((track, idx) => (
-                    <View key={track.id || idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, padding: 8, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
-                        <Image source={{ uri: track.album.images[0]?.url }} style={{ width: 50, height: 50, borderRadius: 6, marginRight: 12 }} />
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontWeight: 'bold' }}>{track.name}</Text>
-                            <Text>{track.artists?.map(a => a.name).join(', ')}</Text>
-                            <Text>{track.album?.name}</Text>
-                        </View>
+    const handlePress = async (trackId: string) => {
+        try {
+            const res = await addItemToPlaylist(playlistId, [`spotify:track:${trackId}`]);
+        } catch (error) {
+            console.error('Error adding track to playlist:', error);
+        }
+    }
+
+
+    function LeftAction(prog: SharedValue<number>, drag: SharedValue<number>, track: SpotifyTrack) {
+        return (
+            <Reanimated.View style={[styles.addAction]}>
+                <Icon name="add" size={24} color="#fff" />
+            </Reanimated.View>
+        );
+    }
+
+    const ListItem = ({ item }: { item: SpotifyTrack }) => {
+        const swipeableRef = useRef<SwipeableMethods>(null);
+
+        return (
+            <ReanimatedSwipeable
+                ref={swipeableRef}
+                renderLeftActions={(prog, drag) => LeftAction(prog, drag, item)}
+                leftThreshold={75}
+                onSwipeableOpen={direction => {
+                    handlePress(item.id);
+                    setTimeout(() => {
+                        swipeableRef.current?.close();
+                    }, 500);
+                }}
+            >
+                <View style={styles.itemContainer}>
+                    <Image
+                        source={{ uri: item.album.images[0]?.url }}
+                        style={styles.albumImage}
+                    />
+                    <View style={styles.trackInfo}>
+                        <Text style={styles.trackName} numberOfLines={1}>
+                            {item.name}
+                        </Text>
+                        <Text style={styles.artistName} numberOfLines={1}>
+                            {item.artists?.map(a => a.name).join(', ')}
+                        </Text>
+                        <Text style={styles.albumName} numberOfLines={1}>
+                            {item.album?.name}
+                        </Text>
                     </View>
-                ))}
-                {results.length === 0 && (
-                    <Text style={{ marginTop: 16, color: '#888' }}>Aucun résultat</Text>
-                )}
-            </ScrollView>
-        </View>
+                </View>
+            </ReanimatedSwipeable>
+        );
+    };
+
+    return (
+        <GestureHandlerRootView style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.searchContainer}>
+                    <SearchBar
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                    />
+                </View>
+                <FlatList
+                    data={results}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => <ListItem item={item} />}
+                    style={styles.list}
+                    showsVerticalScrollIndicator={false}
+                />
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    safeArea: {
+        flex: 1,
+    },
+    searchContainer: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+    },
+    list: {
+        flex: 1,
+    },
+    itemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        width: screenWidth,
+    },
+    albumImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 6,
+        marginRight: 12,
+    },
+    trackInfo: {
+        flex: 1,
+        marginRight: 12,
+    },
+    trackName: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: '#000',
+        marginBottom: 2,
+    },
+    artistName: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 2,
+    },
+    albumName: {
+        fontSize: 12,
+        color: '#999',
+    },
+    addButton: {
+        padding: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    addAction: {
+        flex: 1,
+        backgroundColor: '#2db300',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 80,
+    },
+    deleteButton: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+    },
+    deleteText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 16,
+    },
+});

@@ -11,7 +11,6 @@ export function usePlaylist(id: string) {
   const [error, setError] = useState<string | null>(null);
 
   if (!id) {
-    console.log('usePlaylist called WITHOUT id:');
     setError("NO ID PLAYLIST")
   }
 

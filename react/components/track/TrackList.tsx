@@ -7,6 +7,7 @@ import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
 import { AddIcon } from '@/components/ui/icon';
 import { ActivityIndicator, Text, Pressable, View, StyleSheet } from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
+import Reanimated from 'react-native-reanimated';
 
 type Props = {
   playlistId: string;
@@ -14,6 +15,13 @@ type Props = {
 
 export default function TrackList({ playlistId }: Props) {
   const mocks = MOCK_TRACKS;
+
+  const LeftAction = (prog: SharedValue<number>, drag: SharedValue<number>, track: SpotifyTrack) => {
+    return (
+        <Reanimated.View style={[styles.addAction]}>
+        </Reanimated.View>
+    );
+  }
 
   const handlePress = () => {
     router.push({
@@ -69,7 +77,16 @@ export default function TrackList({ playlistId }: Props) {
               asChild
             >
               <Pressable>
-                <TrackListItem track={item} />
+                <TrackListItem
+                  track={item}
+                  renderRightAction={(prog, drag, track) => {
+                    return (
+                    <Reanimated.View style={[styles.deleteAction]}>
+                      <Text>Delete</Text>
+                    </Reanimated.View>
+                    );
+                  }}
+                />
               </Pressable>
             </Link>
           </>
@@ -87,4 +104,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
   description: { fontSize: 16, marginBottom: 12 },
   owner: { fontSize: 14, color: '#555' },
+  deleteAction: {
+    flex: 1,
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+},
 });

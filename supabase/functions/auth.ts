@@ -11,17 +11,31 @@ const supabase = createClient(
 );
 
 export async function getCurrentUser(req: Request): Promise<any> {
-  const authHeader =
-    req.headers.get('Authorization') || req.headers.get('authorization');
+  const authHeader = req.header('Authorization') || req.header('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return new Response('Unauthorized', { status: 401 });
+    console.log('No Authorization header or invalid format');
+    throw new HTTPException(401, { message: 'Unauthorized: No token provided'});
   }
+
   const token = authHeader.substring(7);
-  const { data: user, error } = await supabaseClient.auth.getUser(token);
+  const { data, error } = await supabase.auth.getUser(token);
 
-  if (error || !user) {
-    throw new Error('Invalid token or user not found');
+  if (error || !data) {
+    throw new HTTPException(401, 'Unauthorized: Invalid token');
   }
 
-  return user;
+  return data.user;
+}
+
+export async function getUserToken(user_id: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user_id)
+
+  if (error || !data) {
+    throw new HTTPException(500, 'Failed to fetch user data')
+  }
+
+  return data[0].spotify_access_token
 }
