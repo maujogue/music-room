@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/track/TrackList';
+import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
 
 export default function PlaylistDetailScreen() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -23,24 +24,28 @@ export default function PlaylistDetailScreen() {
     );
   }
 
-  if (!playlist) {
-    return (
-      <View style={styles.center}>
-        <Text>No playlist with id '{playlistId}'</Text>
-      </View>
-    );
-  }
+  // TODO : Playist is null : usePlaylist Hook not ready yet
+  // if (!playlist) {
+  //   return (
+  //     <View style={styles.center}>
+  //       <Text>No playlist with id '{playlistId}'</Text>
+  //     </View>
+  //   );
+  // }
 
-  const imageUri = playlist.images?.[0]?.url ?? 'https://picsum.photos/300';
+  const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
+  const playlistTitle = playlist?.name ?? 'Playlist';
+  const playlistDescription = playlist?.description ?? 'No description available';
+  const playlistOwner = playlist?.owner?.display_name ?? 'Unknown';
 
   return (
     <View style={styles.container}>
       <Image source={{ uri: imageUri }} style={styles.cover} />
-      <Text style={styles.title}>{playlist.name}</Text>
-      {playlist.description ? (
-        <Text style={styles.description}>{playlist.description}</Text>
+      <Text style={styles.title}>{playlistTitle}</Text>
+      {playlist?.description ? (
+        <Text style={styles.description}>{playlistDescription}</Text>
       ) : null}
-      <Text style={styles.owner}>By {playlist.owner?.display_name}</Text>
+      <Text style={styles.owner}>By {playlistOwner}</Text>
       <TrackList playlistId={playlistId} />
     </View>
   );

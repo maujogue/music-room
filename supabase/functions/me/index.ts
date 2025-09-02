@@ -19,7 +19,8 @@ Deno.serve(async (req) => {
     return fetchCurrentUserPlaylists(req);
   }
 
-  return new Response(JSON.stringify(data), {
+  return new Response(`${req.url} not found`, {
+    status: 404,
     headers: { 'Content-Type': 'application/json' },
   });
 });

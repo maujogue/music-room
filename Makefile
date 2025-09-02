@@ -146,12 +146,13 @@ setup: install setup-supabase setup-env
 # Start the Expo development server
 dev:
 	@echo "📱 Starting Expo development server..."
-	npx supabase functions serve auth --no-verify-jwt --env-file react/.env & \
+	npx supabase functions serve --no-verify-jwt --env-file react/.env & \
 	cd ${REACT_APP_DIR} && npm start
 
 dev-tunnel:
 	@echo "📱 Starting Expo development server..."
-	cd ${REACT_APP_DIR} && npx expo start --tunnel
+	npx supabase functions serve --no-verify-jwt --env-file react/.env & \
+	cd ${REACT_APP_DIR} && npm start --tunnel
 
 # Clean up build files and node_modules
 clean:

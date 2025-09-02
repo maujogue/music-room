@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
 import { SpotifyPlaylist } from '@/types/spotify';
+import { getSession } from '../services/session';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : connect fetch backend when ready)
@@ -10,21 +11,33 @@ export function usePlaylist(id: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('usePlaylist called with id:', id);
+
+  if (!id) {
+    console.log('usePlaylist called WITHOUT id:');
+    setError("NO ID PLAYLIST")
+  }
+
   useEffect(() => {
     let isActive = true;
     setLoading(true);
     setError(null);
 
-    const fetchPlaylist = async () => {
+    const fetchPlaylistItems = async (session: any) => {
       try {
-        // MOCK_PLAYLISTS (use fetch when ready)
-        await new Promise(resolve => setTimeout(resolve, 800));
-        if (isActive) {
-          const filtered = MOCK_PLAYLISTS.find((p) => p.id === id);
-          const defaultPlaylist = MOCK_PLAYLISTS[0] || null;
-
-          setPlaylist(filtered || defaultPlaylist);
-        }
+        // TODO : NOT READY TO USE ON BACKEND ATM : DELETE OR CHANGE THIS HOOK
+        return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        });
       } catch (e) {
         if (isActive) {
           setError(`fetch playlists error: ${e}`);
@@ -36,10 +49,20 @@ export function usePlaylist(id: string) {
       }
     };
 
-    fetchPlaylist();
-    return () => {
-      isActive = false;
-    };
+
+  getSession().then((res) => {
+    fetchPlaylistItems(res).then((data) => {
+      if (isActive) {
+        setPlaylist(data || null);
+      }
+    });
+  }).catch((err) => {
+    console.error('Error in useUserPlaylists:', err)
+  });
+
+  return () => {
+    isActive = false;
+  };
   }, []);
 
   return { playlist, loading, error };
