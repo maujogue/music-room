@@ -1,15 +1,23 @@
-import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
-import { Link, router } from 'expo-router';
+import EditPlayListForm from "@/components/playlist/EditPlaylistForm";
+import { PlaylistPayload } from "@/types/playlist";
+import { router, useRouter } from 'expo-router';
+
 
 export default function AddNewPlayList() {
 
-  const isPresented = router.canGoBack();
+  const router = useRouter()
+
+
+  const onSubmit = (payload: PlaylistPayload) => {
+    console.log("HERE IMPLEMENT POST NEW PLAYLIST TO BACK")
+    console.log("payload : ", payload)
+
+    if (router.canGoBack()) {
+      router.push('../')
+    }
+  }
 
   return (
-    <Box>
-      <Text>YOP</Text>
-      {isPresented && <Link href="../">Cancel</Link>}
-    </Box>
+    <EditPlayListForm onSubmit={onSubmit} />
   );
 }

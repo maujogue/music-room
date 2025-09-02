@@ -14,11 +14,14 @@ export default function PlaylistLayout() {
             headerRight: () => <NewItemButton routePath='(main)/playlists/add/' />
           }} />
       <Stack.Screen name='[playlistId]' options={{ headerShown: false }} />
-      <Stack.Screen name='add' options={{
-        presentation: 'modal', title: 'New Playlist',
-        headerBackVisible: false,
-        headerRight: () => <CancelButton />,
-      }} />
+      <Stack.Screen name='add'
+        options={{
+          presentation: 'modal',
+          title: 'New Playlist',
+          headerBackVisible: false,
+          headerRight: () => <CancelButton />,
+        }}
+      />
     </Stack>
   );
 }
