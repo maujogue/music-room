@@ -14,10 +14,11 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
+  ApiError: string,
   initialValues?: Partial<PlaylistPayload>;
 };
 
-export default function EditPlayListForm({initialValues = {}, onSubmit}: Props) {
+export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmit}: Props) {
   const [name, setName] = useState(initialValues.name ?? '');
   const [description, setDescription] = useState(
     initialValues.description ?? ''
@@ -126,6 +127,15 @@ export default function EditPlayListForm({initialValues = {}, onSubmit}: Props) 
             <HStack space="xs" className="items-center">
               <Icon as={AlertCircleIcon} size="sm" />
               <Text>{error}</Text>
+            </HStack>
+          </Center>
+        ) : <Center className='p-3' />}
+
+        {ApiError !== '' ? (
+          <Center>
+            <HStack space="xs" className="items-center color-red-500">
+              <Icon as={AlertCircleIcon} size="sm" />
+              <Text>{ApiError}</Text>
             </HStack>
           </Center>
         ) : <Center className='p-3' />}
