@@ -1,12 +1,36 @@
-import { useLocalSearchParams } from 'expo-router';
-import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { View, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/track/TrackList';
 import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
+import { useEffect } from 'react';
+import { Box } from '@/components/ui/box';
+import { Button } from '@/components/ui/button';
+import { ThreeDotsIcon, Icon } from '@/components/ui/icon';
 
 export default function PlaylistDetailScreen() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
   const { playlist, loading, error } = usePlaylist(playlistId);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // CONTINUE HERE CREATE MENU DROPDOWN THERE
+    navigation.setOptions({
+      headerRight: () => (
+        <Box>
+          <Button
+            size="sm"
+            action="secondary"
+            variant='solid'
+            className='rounded-2xl'
+          >
+            <Icon as={ThreeDotsIcon} size="md" />
+          </Button>
+        </Box>
+      ),
+    });
+  }, [navigation]);
 
   if (loading) {
     return (

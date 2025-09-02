@@ -13,7 +13,12 @@ export default function PlaylistLayout() {
             title: 'My Playlists',
             headerRight: () => <NewItemButton routePath='(main)/playlists/add/' />
           }} />
-      <Stack.Screen name='[playlistId]' options={{ headerShown: false }} />
+
+      <Stack.Screen name='[playlistId]'
+        options={{
+          headerShown: false,
+        }} />
+
       <Stack.Screen name='add'
         options={{
           presentation: 'modal',
