@@ -1,71 +1,6 @@
 import { useEffect, useState } from 'react';
-import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
-import { PlaylistItemsResponse, SpotifyPlaylist, SpotifyTrack, SpotifyTrackWithKey } from '@/types/spotify';
+import { PlaylistItemsResponse, SpotifyTrack, SpotifyTrackWithKey } from '@/types/spotify';
 import { getSession } from '../services/session';
-
-// -------------------------------------------------------------------
-// Hook with mock-datas (TODO : connect fetch backend when ready)
-// -------------------------------------------------------------------
-// export function usePlaylistItems(id: string) {
-//   const [tracks, setTracks] = useState<SpotifyTrack[] | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-
-
-//   useEffect(() => {
-//     let cancelled = false;
-//     setLoading(true);
-//     setError(null);
-
-//     const fetchPlaylistItems = async (session: any) => {
-//       try {
-//         return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}/tracks`, {
-//         method: 'GET',
-//         headers: {
-//           Authorization: `Bearer ${session?.access_token}`,
-//           },
-//         })
-//         .then(response => {
-//           if (!response.ok) {
-//             throw new Error('Network response was not ok');
-//           }
-//           return response.json();
-//         });
-//       } catch (e) {
-//         if (isActive) {
-//           setError(`fetch playlists error: ${e}`);
-//         }
-//       } finally {
-//         if (isActive) {
-//           setLoading(false);
-//         }
-//       }
-//     };
-
-
-//   getSession().then((res) => {
-//     fetchPlaylistItems(res).then((data) => {
-//       if (isActive) {
-//         console.log("usePlaylistItems DATA =")
-//         console.log(data)
-//         console.log("usePlaylistItems DATA.items[0] =")
-//         console.log(data.items[0])
-//         console.log("usePlaylistItems DATA.items[0].album.images[0] =")
-//         console.log(data.items[0].album.images[0])
-//         setTracks(data.items || []);
-//       }
-//     });
-//   }).catch((err) => {
-//     console.error('Error in usePlaylistItems:', err)
-//   });
-
-//   return () => {
-//     isActive = false;
-//   };
-//   }, []);
-
-//   return { tracks, loading, error };
-// };
 
 
 export function usePlaylistItems(id: string) {
@@ -101,16 +36,21 @@ export function usePlaylistItems(id: string) {
 
         const data: PlaylistItemsResponse = await res.json();
 
+        const fetchStamp = new Date().toISOString();
+        const seen = new Map<string, number>();
+
         const mapped: SpotifyTrackWithKey[] = (data.items ?? [])
-          .map((it, idx) => {
-            const t = it?.track;
+          .map((item, idx) => {
+            const t = item?.track;
             if (!t || (t as any).type !== 'track') return null;
             const track = t as SpotifyTrack;
-            const addedAt = it.added_at ?? null;
+            const addedAt = item.added_at ?? fetchStamp;
 
-            // Key : id/uri + added_at (+index fallback)
-            const base = track.id ?? track.uri ?? 'local';
-            const key = `${base}::${addedAt ?? `idx-${idx}`}`;
+            // Key : need unique value (id not enough if same track twice in playlist)
+            const base = `${track.uri ?? track.id ?? 'local'}::${addedAt}`
+            const count = seen.get(base) ?? 0;
+            seen.set(base, count + 1);
+            const key = count === 0 ? base : `${base}::dup${count}`;
 
             return { ...track, __key: key, __added_at: addedAt };
           })

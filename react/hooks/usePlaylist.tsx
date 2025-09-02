@@ -53,8 +53,6 @@ export function usePlaylist(id: string) {
   getSession().then((res) => {
     fetchPlaylistItems(res).then((data) => {
       if (isActive) {
-        console.log("******** ========== usePlaylist DATA ========= ***************")
-        console.log(data)
         setPlaylist(data || null);
       }
     });
