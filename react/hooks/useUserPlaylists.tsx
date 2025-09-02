@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
 import { SpotifyPlaylist } from '@/types/spotify';
-import { supabase } from '../services/supabase';
+import { getSession } from '@/services/session';
+import { Session } from '@/types/session';
 
 
 export function useUserPlaylists() {
@@ -15,7 +15,7 @@ export function useUserPlaylists() {
     setError(null);
     console.log('useUserPlaylists called');
 
-    const fetchPlaylists = async (session: any) => {
+    const fetchPlaylists = async (session: Session) => {
     try {
       return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`, {
         method: 'GET',
@@ -30,6 +30,7 @@ export function useUserPlaylists() {
         return response.json();
       });
     } catch (e) {
+      console.error('Error fetching playlists:', e);
       if (isActive) {
         setError('fetch playlists error');
       }
@@ -58,17 +59,4 @@ export function useUserPlaylists() {
   return { playlists, loading, error };
 };
 
-async function getSession() {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
 
-  if (error) {
-    console.error('Erreur récupération session:', error);
-    return null;
-  }
-
-  console.log('Session utilisateur:', session?.access_token);
-  return session;
-}
