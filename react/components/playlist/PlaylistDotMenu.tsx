@@ -1,15 +1,16 @@
 import { Button } from '@/components/ui/button';
-import { ThreeDotsIcon, Icon, GlobeIcon, PaperclipIcon, SettingsIcon, TrashIcon } from '@/components/ui/icon';
+import { ThreeDotsIcon, Icon, GlobeIcon, PaperclipIcon, SettingsIcon, TrashIcon, EditIcon } from '@/components/ui/icon';
 import { Menu, MenuItem, MenuItemLabel, MenuSeparator } from '@/components/ui/menu';
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { HStack } from '@/components/ui/hstack';
 
+
 interface Props {
   callDelete: () => void
+  callEdit: () => void
 }
 
-
-export default function Playlist3DotMenu({ callDelete }: Props) {
+export default function Playlist3DotMenu({ callDelete, callEdit }: Props) {
 
   return (
     <Menu
@@ -33,6 +34,10 @@ export default function Playlist3DotMenu({ callDelete }: Props) {
       <MenuItem key="delete" textValue="delete" onPress={callDelete} >
         <Icon as={TrashIcon} size="sm" className="mr-2 color-red-500" />
         <MenuItemLabel className="mr-2 color-red-500" size="sm">delete</MenuItemLabel>
+      </MenuItem>
+      <MenuItem key="edit" textValue="edit" onPress={callEdit} >
+        <Icon as={EditIcon} size="sm" className="mr-2" />
+        <MenuItemLabel className="mr-2" size="sm">edit</MenuItemLabel>
       </MenuItem>
 
       {/* MOCK MENU */}

@@ -11,9 +11,12 @@ import { Box } from '@/components/ui/box';
 import { Center } from '@/components/ui/center';
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { PlaylistItemsResponse } from '@/types/spotify';
 import { ScrollView } from 'react-native';
+import { CircleIcon } from '@/components/ui/icon';
 
 
 export default function PlaylistDetail() {
@@ -38,7 +41,7 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (<Playlist3DotMenu callDelete={() => setShowAlertDialog(true)} />),
+      headerRight: () => (<Playlist3DotMenu callDelete={() => setShowAlertDialog(true)} callEdit={onCallEdit} />),
     });
   }, [navigation]);
 
@@ -53,6 +56,11 @@ export default function PlaylistDetail() {
       router.push('(main)/playlists/')
     }
   }
+
+  const onCallEdit = () => {
+    router.push(`(main)/playlists/${playlistId}/edit`)
+  }
+
 
   if (loading) {
     return (
@@ -84,11 +92,12 @@ export default function PlaylistDetail() {
   const playlistTitle = playlist?.name ?? 'Playlist';
   const playlistDescription = playlist?.description ?? 'No description available';
   const playlistOwner = playlist?.owner?.display_name ?? 'Unknown';
+  const ispublic = playlist?.public ?? false
+  const isCollaborative = playlist?.collaborative ?? false
 
   return (
     <>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Box className='flex-1'>
+        {/* <Box className='flex-1'>
           <Card>
             <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
             <VStack className='px-4 pt-2'>
@@ -104,7 +113,43 @@ export default function PlaylistDetail() {
             playlistTracks={playlistTracks}
             onTrackDeleted={refetch}
           />
-        </Box>
+        </Box> */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+      {/* <Box className='flex-1'> */}
+        <Card>
+          <Image source={{ uri: imageUri }} size="2xl" className="w-full rounded-lg" alt="Playlist image" />
+          <VStack className='px-4 pt-2'>
+            <HStack className='justify-between'>
+              <Heading size='xl'>{playlistTitle}</Heading>
+              <HStack className='gap-2'>
+                {isCollaborative && (
+                  <Badge action="info" className="rounded-full">
+                    <BadgeIcon as={CircleIcon} className="" />
+                  </Badge>
+                )}
+                {ispublic ? (
+                  <Badge action="success" className="rounded-full">
+                    <BadgeText>Public</BadgeText>
+                  </Badge>
+                ) : (
+                  <Badge action="warning" className="rounded-full">
+                    <BadgeText>Private</BadgeText>
+                  </Badge>
+                )}
+              </HStack>
+            </HStack>
+            {playlist?.description ? (
+              <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
+            ) : null}
+            <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
+          </VStack>
+        </Card>
+        <TrackList
+            playlistId={playlistId}
+            playlistTracks={playlistTracks}
+            onTrackDeleted={refetch}
+          />
+      {/* </Box> */}
       </ScrollView>
 
       <DeleteAlert showAlertDialog={showAlertDialog}
