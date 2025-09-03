@@ -1,3 +1,5 @@
+import { getSession } from "@/services/session";
+
 export type RequestOptions = {
     method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     headers?: Record<string, string>;
@@ -17,12 +19,17 @@ export async function apiFetch<T>(
     } = options;
 
     try {
+      const session = await getSession();
       const isFormData = body instanceof FormData;
+      const sessionHeaders = {
+          Authorization: `Bearer ${session?.access_token}`,
+          ...headers
+        }
       const finalHeaders = isFormData
-        ? headers
+        ? sessionHeaders
         : {
             "Content-Type": "application/json",
-            ...headers,
+            ...sessionHeaders,
           };
 
       const bodyToSend = isFormData

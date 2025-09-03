@@ -26,6 +26,8 @@ export default function AddNewPlayList() {
 
     // [Note] : Clement, ici l'API Spotify renvoie la playlist créee, on peut s'en servir pour update notre liste sans refetch
     // OU alors retourne un <string> au lieu de <SpotifyPlaylist> et on forcera le refetch de la liste
+    // Tu es plus partant pour un refetch global : ok pour moi :D => j'ai créé une issue pour cela : #52
+    // De plus : j'ai intégré le Bearer token au apiFetch, mais faudra le tester
     const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/users/${profile.id}/playlists`,
       {
         method: "POST",
