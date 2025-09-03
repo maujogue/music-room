@@ -3,15 +3,16 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
+import { Hono } from 'jsr:@hono/hono'
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { Hono } from 'jsr:@hono/hono';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { getCurrentUser, getUserToken } from '../auth.ts';
+import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import meRoutes from './routes.ts';
 
-const app = new Hono();
+const functionName = "me"
+const app = new Hono().basePath(`/${functionName}`)
 
 serve(app.fetch);
 
@@ -39,10 +40,36 @@ app.onError((err, c) => {
   return c.json(
     {
       message: 'Internal Server Error',
-    },
+          },
     500
   );
 });
+
+
+app.put('/profile', async (c) => {
+
+  const user = c.get('user')
+  if (!user) {
+    return c.json({ error: 'Authentication required' }, 401)
+  }
+
+  const { userId, updates } = await c.req.json()
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating profile:', error)
+    throw new HTTPException(500, { message: `Error updating profile:', ${error}`})
+  }
+  c.status(200)
+  return c.json({ data, error: null })
+})
+
 
 app.route('/me', meRoutes);
 

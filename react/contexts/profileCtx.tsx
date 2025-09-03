@@ -8,6 +8,7 @@ import {
 import { UserInfo } from '@/types/user';
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
+import { getSession } from '@/services/session';
 
 interface ProfileContextType {
   profile: UserInfo | null;
@@ -74,6 +75,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     };
   }, [user]);
 
+
   const refreshProfile = async () => {
     if (!user) return;
 
@@ -103,26 +105,37 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     updates: Partial<UserInfo>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<{ error: any }> => {
+
     if (!user || !profile) {
       return {
         error: { message: 'User not authenticated or profile not loaded' },
       };
     }
+
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      const session  = await getSession()
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          updates: updates
+        })
+      });
 
-      if (error) {
-        console.error('Error updating profile:', error);
-        return { error };
-      } else {
-        // Update local state with new data
-        setProfile(prev => (prev ? { ...prev, ...updates } : null));
-        return { error: null };
+      const result = await response.json();
+      if (!response.ok || result.error) {
+        console.error('Error updating profile:', result.error);
+        return { error: result.error };
       }
+
+      setProfile(prev => (prev ? { ...prev, ...result.data } : result.data));
+      return { error: null };
+
     } catch (error) {
       console.error('Unexpected error updating profile:', error);
       return { error: { message: 'An unexpected error occurred' } };
