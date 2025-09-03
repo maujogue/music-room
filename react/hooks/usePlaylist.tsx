@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { MOCK_PLAYLISTS } from '@/mocks/mockPlaylists';
+import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
 import { getSession } from '../services/session';
 
@@ -11,13 +10,14 @@ export function usePlaylist(id: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('usePlaylist called with id:', id);
-
   if (!id) {
     console.log('usePlaylist called WITHOUT id:');
     setError("NO ID PLAYLIST")
   }
 
+  // ---------------------------------------------------------------
+  // Fetch playlist (GET)
+  // ---------------------------------------------------------------
   useEffect(() => {
     let isActive = true;
     setLoading(true);
@@ -63,7 +63,45 @@ export function usePlaylist(id: string) {
   return () => {
     isActive = false;
   };
-  }, []);
+  }, [id]);
 
-  return { playlist, loading, error };
+
+  // ---------------------------------------------------------------
+  // Remove Playlist (DELETE)
+  // ---------------------------------------------------------------
+  const deletePlaylist = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const session = await getSession();
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(
+          `Delete failed (status ${response.status}): ${errorBody}`,
+        );
+      }
+      setPlaylist(null);
+    } catch (e: any) {
+      setError(`delete playlist error: ${e.message ?? e}`);
+      console.error('Delete playlist error:', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+
+  return { playlist, loading, error, deletePlaylist };
 };
