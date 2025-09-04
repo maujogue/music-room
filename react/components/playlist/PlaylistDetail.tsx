@@ -7,13 +7,15 @@ import Playlist3DotMenu from '@/components/playlist/PlaylistDotMenu';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
-import { Box } from '@/components/ui/box';
 import { Center } from '@/components/ui/center';
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { PlaylistItemsResponse } from '@/types/spotify';
 import { ScrollView } from 'react-native';
+import { CircleIcon } from '@/components/ui/icon';
 
 
 export default function PlaylistDetail() {
@@ -38,7 +40,7 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (<Playlist3DotMenu callDelete={() => setShowAlertDialog(true)} />),
+      headerRight: () => (<Playlist3DotMenu callDelete={() => setShowAlertDialog(true)} callEdit={onCallEdit} />),
     });
   }, [navigation]);
 
@@ -54,7 +56,15 @@ export default function PlaylistDetail() {
     }
   }
 
-  if (loading) {
+  const onCallEdit = () => {
+    console.log(`Edit call for playlist ${playlistId} | Not implemented yet`)
+    // [!] Implement this later (issue #54)
+    // Can't retrieve playlist from usePlaylist() in edit.tsx
+    // router.push(`(main)/playlists/${playlistId}/edit`)
+  }
+
+
+  if (loading || !playlist) {
     return (
       <Center>
         <ActivityIndicator size='large' />
@@ -70,41 +80,51 @@ export default function PlaylistDetail() {
     );
   }
 
-  // TODO : Playist is null : usePlaylist Hook not ready yet
-  // if (!playlist) {
-  //   return (
-  //     <View style={styles.center}>
-  //       <Text>No playlist with id '{playlistId}'</Text>
-  //     </View>
-  //   );
-  // }
-
-  const playlistTracks: PlaylistItemsResponse = playlist?.tracks;
+  const playlistTracks: PlaylistItemsResponse = playlist.tracks;
   const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
   const playlistTitle = playlist?.name ?? 'Playlist';
   const playlistDescription = playlist?.description ?? 'No description available';
   const playlistOwner = playlist?.owner?.display_name ?? 'Unknown';
+  const ispublic = playlist?.public ?? false
+  const isCollaborative = playlist?.collaborative ?? false
 
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Box className='flex-1'>
-          <Card>
-            <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
-            <VStack className='px-4 pt-2'>
+        <Card>
+          <Image source={{ uri: imageUri }} className="w-full h-80" alt="Playlist image" />
+          <VStack className='px-4 pt-2'>
+            <HStack className='justify-between'>
               <Heading size='xl'>{playlistTitle}</Heading>
-              {playlist?.description ? (
-                <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
-              ) : null}
-              <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
-            </VStack>
-          </Card>
-          <TrackList
-            playlistId={playlistId}
-            playlistTracks={playlistTracks}
-            onTrackDeleted={refetch}
-          />
-        </Box>
+              <HStack className='gap-2'>
+                {isCollaborative && (
+                  <Badge action="info" className="rounded-full">
+                    <BadgeIcon as={CircleIcon} className="" />
+                  </Badge>
+                )}
+                {ispublic ? (
+                  <Badge action="success" className="rounded-full">
+                    <BadgeText>Public</BadgeText>
+                  </Badge>
+                ) : (
+                  <Badge action="warning" className="rounded-full">
+                    <BadgeText>Private</BadgeText>
+                  </Badge>
+                )}
+              </HStack>
+            </HStack>
+            {playlist?.description ? (
+              <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
+            ) : null}
+            <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
+          </VStack>
+        </Card>
+        <TrackList
+          playlistId={playlistId}
+          playlistTracks={playlistTracks}
+          onTrackDeleted={refetch}
+        />
+        {/* </Box> */}
       </ScrollView>
 
       <DeleteAlert showAlertDialog={showAlertDialog}

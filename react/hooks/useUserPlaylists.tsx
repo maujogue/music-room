@@ -16,46 +16,53 @@ export function useUserPlaylists() {
     console.log('useUserPlaylists called');
 
     const fetchPlaylists = async (session: Session) => {
-    try {
-      return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+      try {
+        return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          });
+      } catch (e) {
+        console.error('Error fetching playlists:', e);
+        if (isActive) {
+          setError('fetch playlists error');
         }
-        return response.json();
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getSession().then((res) => {
+      if (res == null)
+        throw new Error("Session retrieve error")
+      fetchPlaylists(res).then((data) => {
+        if (isActive) {
+          setPlaylists(data.items || []);
+
+          // [!] DEBUG ONLY -----------------
+          for (const playlist of data.items) {
+            console.log(`PLAYLIST ID [${playlist.id}]`)
+            console.log(`PLAYLIST NAME [${playlist.name}] | PUBLIC [${playlist.public}] | COLLABORATIVE [${playlist.collaborative}]`)
+          }
+          // --------------------------------
+        }
       });
-    } catch (e) {
-      console.error('Error fetching playlists:', e);
-      if (isActive) {
-        setError('fetch playlists error');
-      }
-    } finally {
-      if (isActive) {
-        setLoading(false);
-      }
-    }
-  };
-
-  getSession().then((res) => {
-    if (res == null)
-      throw new Error("Session retrieve error")
-    fetchPlaylists(res).then((data) => {
-      if (isActive) {
-        setPlaylists(data.items || []);
-      }
+    }).catch((err) => {
+      console.error('Erreur dans useUserPlaylists:', err)
     });
-  }).catch((err) => {
-    console.error('Erreur dans useUserPlaylists:', err)
-  });
 
-  return () => {
-    isActive = false;
-  };
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   return { playlists, loading, error };
