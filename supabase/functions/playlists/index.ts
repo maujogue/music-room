@@ -2,6 +2,7 @@ import { Hono } from 'jsr:@hono/hono'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { getCurrentUser, getUserToken } from '../auth.ts'
 
 const functionName = 'playlists'
 const app = new Hono().basePath(`/${functionName}`)
@@ -14,9 +15,15 @@ const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:5
 serve(app.fetch)
 
 app.use('*', async (c, next) => {
-  const user = await getCurrentUser(c.req)
-  c.set('user', user)
-  await next()
+  try {
+    const user = await getCurrentUser(c.req)
+    const token = await getUserToken(user.id)
+    c.set('user', user)
+    c.set('spotify_token', token)
+    await next()
+  } catch (err) {
+    return c.json({ error: err.message }, 401)
+  }
 })
 
 app.onError((err, c) => {
@@ -24,27 +31,68 @@ app.onError((err, c) => {
   if (err instanceof HTTPException) {
     return err.getResponse()
   }
+  return c.json({
+    message: 'Internal Server Error'
+  }, 500);
 })
 
-app.get('/:id/tracks', async (c) => {
+app.get('/:id', async (c) => {
   return fetchPlaylistItems(c)
 })
 
-async function fetchPlaylistItems(c: Context): Promise<any> {
+app.post('/:id/tracks', async (c) => {
+  return addItemsToPlaylist(c)
+})
+
+app.delete('/:id/tracks', async (c) => {
+  return deleteItemsFromPlaylist(c)
+})
+
+async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const user_data = c.get('user')
+  const spotify_access_token = c.get('spotify_token')
+  const body = await c.req.json()
+  const tracks = body.tracks
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user_data.user.id)
 
-  if (error || !data) {
-    c.status(500)
-    return c.text('Failed to fetch Spotify token')
+  const res = await deleteItemsFromSpotifyPlaylist(
+    spotify_access_token,
+    id,
+    { tracks }
+  )
+  if (!res) {
+    const errorResponse = new Response('Failed to remove items from Spotify playlist', { status: 500 });
+    throw new HTTPException(500, { res: errorResponse });
   }
 
-  const playlist_items = await fetchSpotifyPlaylistItems(data[0].spotify_access_token, id)
+  c.status(200)
+  return c.json(res)
+}
+
+
+async function addItemsToPlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const spotify_access_token = c.get('spotify_token')
+  const body = await c.req.json()
+  const uris = body.uris
+  const position = body.position || 0
+
+  const res = await postItemsToSpotifyPlaylist(spotify_access_token, id, { uris, position })
+  if (!res) {
+    console.error('Failed to add items to Spotify playlist')
+    const errorResponse = new Response('Failed to add items to Spotify playlist', { status: 500 });
+    throw new HTTPException(500, { res: errorResponse });
+  }
+
+  c.status(201)
+  return c.json(res)
+}
+
+async function fetchPlaylistItems(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const spotify_access_token = c.get('spotify_token')
+
+  const playlist_items = await fetchSpotifyPlaylist(spotify_access_token, id)
 
   if (!playlist_items) {
     c.status(500)
@@ -55,28 +103,40 @@ async function fetchPlaylistItems(c: Context): Promise<any> {
   return c.json(playlist_items)
 }
 
-async function fetchSpotifyPlaylistItems(spotify_token: string, id: string): Promise<any> {
-  const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
-    headers: {
-      Authorization: `Bearer ${spotify_token}`,
-    },
-  });
-  return response.json();
-}
+async function postItemsToSpotifyPlaylist(
+  spotify_token: string,
+  id: string,
+  body: { uris: string[], position?: number }): Promise<any> {
 
-export async function getCurrentUser(req: Request): Promise<any> {
-  const authHeader = req.header('Authorization') || req.header('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('No Authorization header or invalid format');
-    throw new HTTPException(401, { message: 'Unauthorized: No token provided'});
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${spotify_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    return response.json();
   }
 
-  const token = authHeader.substring(7);
-  const { data: user, error } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    throw new HTTPException(401, 'Unauthorized: Invalid token');
+  async function deleteItemsFromSpotifyPlaylist(spotify_token: string, id: string, body: { uris: string[] }): Promise<any> {
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${spotify_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    return response.json();
   }
 
-  return user;
+  async function fetchSpotifyPlaylist(spotify_token: string, id: string): Promise<any> {
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
+      headers: {
+        Authorization: `Bearer ${spotify_token}`,
+      },
+    });
+    return response.json();
 }
+

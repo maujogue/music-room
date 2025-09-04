@@ -5,7 +5,6 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getCurrentUser } from '../auth.ts';
 
 const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
@@ -15,6 +14,7 @@ const base_url =
 
 Deno.serve(async (req) => {
   const url = req.url;
+
   if (url.includes('/playlists')) {
     return fetchCurrentUserPlaylists(req);
   }
@@ -69,6 +69,25 @@ async function fetchSpotifyUserPlaylists(spotify_token: string): Promise<any> {
   });
   return response.json();
 }
+
+//TODO: Old version version without Hono, to be removed later
+async function getCurrentUser(req: Request): Promise<any> {
+  const authHeader =
+    req.headers.get('Authorization') || req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+  const token = authHeader.substring(7);
+  const { data: user, error } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    const errorResponse = new Response('Invalid token or user not found', { status: 401 });
+    throw new HTTPException(401, { res: errorResponse });
+  }
+
+  return user;
+}
+
 
 /* To invoke locally:
 

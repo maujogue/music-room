@@ -2,6 +2,7 @@ import { Hono } from 'jsr:@hono/hono'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { getCurrentUser, getUserToken } from '../auth.ts'
 
 const functionName = 'search'
 const app = new Hono().basePath(`/${functionName}`)
@@ -23,7 +24,7 @@ app.use('*', async (c, next) => {
   } catch (err) {
     console.log('Authentication error:', err)
     return c.json({ error: err.message }, 401)
-  }w
+  }
 })
 
 app.onError((err, c) => {
@@ -40,25 +41,13 @@ app.get('/', async (c) => {
   const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
 
   if (!res) {
-    throw new HTTPException(500, 'Failed to fetch Spotify playlists')
+    const errorResponse = new Response('Failed to fetch Spotify playlists', { status: 500 });
+    throw new HTTPException(500, { res: errorResponse });
   }
 
   c.status(200)
   return c.json(res)
 })
-
-async function getUserToken(user_id: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user_id)
-
-  if (error || !data) {
-    throw new HTTPException(500, 'Failed to fetch user data')
-  }
-
-  return data[0].spotify_access_token
-}
 
 async function fetchSpotifySearch(
   spotify_token: string,
@@ -79,19 +68,4 @@ async function fetchSpotifySearch(
   return response.json();
 }
 
-export async function getCurrentUser(req: Request): Promise<any> {
-  const authHeader = req.header('Authorization') || req.header('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('No Authorization header or invalid format');
-    throw new HTTPException(401, { message: 'Unauthorized: No token provided'});
-  }
 
-  const token = authHeader.substring(7);
-  const { data, error } = await supabase.auth.getUser(token);
-
-  if (error || !data) {
-    throw new HTTPException(401, 'Unauthorized: Invalid token');
-  }
-
-  return data.user;
-}

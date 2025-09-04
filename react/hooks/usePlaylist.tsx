@@ -1,69 +1,57 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
-import { getSession } from '../services/session';
+import { getSession } from '@/services/session';
+import { getPlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : connect fetch backend when ready)
 // -------------------------------------------------------------------
-export function usePlaylist(id: string) {
-  const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  if (!id) {
-    console.log('usePlaylist called WITHOUT id:');
-    setError("NO ID PLAYLIST")
-  }
+export function usePlaylist(id: string) {
+  const [playlist, setPlaylist] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPlaylist = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getPlaylistById(id);
+      setPlaylist(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
   // ---------------------------------------------------------------
   useEffect(() => {
-    let isActive = true;
-    setLoading(true);
-    setError(null);
+    fetchPlaylist();
+  }, [fetchPlaylist]);
 
-    const fetchPlaylistItems = async (session: any) => {
-      try {
-        // TODO : NOT READY TO USE ON BACKEND ATM : DELETE OR CHANGE THIS HOOK
-        return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-          },
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        });
-      } catch (e) {
-        if (isActive) {
-          setError(`fetch playlists error: ${e}`);
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
-      }
-    };
+  const refetch = useCallback(() => {
+    fetchPlaylist();
+  }, [fetchPlaylist]);
 
 
-  getSession().then((res) => {
-    fetchPlaylistItems(res).then((data) => {
-      if (isActive) {
-        setPlaylist(data || null);
-      }
-    });
-  }).catch((err) => {
-    console.error('Error in useUserPlaylists:', err)
-  });
+  // getSession().then((res) => {
+  //   fetchPlaylistItems(res).then((data) => {
+  //     if (isActive) {
+  //       setPlaylist(data || null);
+  //     }
+  //   });
+  // }).catch((err) => {
+  //   console.error('Error in useUserPlaylists:', err)
+  // });
 
-  return () => {
-    isActive = false;
-  };
-  }, [id]);
+  // return () => {
+  //   isActive = false;
+  // };
 
 
   // ---------------------------------------------------------------
@@ -103,5 +91,5 @@ export function usePlaylist(id: string) {
   }, [id]);
 
 
-  return { playlist, loading, error, deletePlaylist };
+  return { playlist, loading, error, refetch, deletePlaylist };
 };

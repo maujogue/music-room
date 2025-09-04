@@ -60,6 +60,7 @@ async function handleSpotifyAuth(
     'user-read-playback-state',
     'user-modify-playback-state',
     'user-read-currently-playing',
+    'playlist-modify-public',
     'playlist-read-private',
     'playlist-modify-private',
   ].join(' ');

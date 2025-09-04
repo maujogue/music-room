@@ -1,35 +1,54 @@
-import React from 'react';
+import React,  { useEffect } from 'react';
 import { Link, router } from 'expo-router';
-import { MOCK_TRACKS } from '@/mocks/mockTracks';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
+import { Icon, TrashIcon } from '@/components/ui/icon';
 import { AddIcon } from '@/components/ui/icon';
 import { ActivityIndicator, Text, Pressable, View, StyleSheet } from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
+import { deleteItemFromPlaylist } from '@/services/playlist';
+import { PlaylistItemsResponse } from '@/types/spotify';
+import Reanimated from 'react-native-reanimated';
 
-type Props = {
+interface Props {
   playlistId: string;
-};
+  playlistTitle?: string;
+  playlistTracks: PlaylistItemsResponse;
+  onTrackDeleted?: () => void;
+}
 
-export default function TrackList({ playlistId }: Props) {
-  const mocks = MOCK_TRACKS;
-
+export default function TrackList({ playlistId, playlistTitle, playlistTracks, onTrackDeleted }: Props) {
   const handlePress = () => {
     router.push({
       pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId },
+      params: { playlistId, playlistTitle },
     });
   };
-  const { tracks, loading, error } = usePlaylistItems(playlistId)
 
-  if (loading) {
-      return (
-        <View style={styles.center}>
-          <ActivityIndicator size='large' />
-        </View>
-      );
+  if (!playlistTracks) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 10 }}>Loading playlist...</Text>
+      </View>
+    );
+  }
+
+  const { tracks, loading, error } = usePlaylistItems(playlistId, playlistTracks);
+
+  const handleSwipeableOpen = async (trackId: string) => {
+    try {
+      await deleteItemFromPlaylist(playlistId, [`spotify:track:${trackId}`]);
+
+      if (onTrackDeleted) {
+        onTrackDeleted();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      // Optionnel: afficher une erreur à l'utilisateur
     }
+  };
 
   if (error) {
     return (
@@ -39,47 +58,61 @@ export default function TrackList({ playlistId }: Props) {
     );
   }
 
-  if (!tracks) {
+  if (loading || !tracks) {
     return (
       <View style={styles.center}>
-        <Text>No Tracks in playlist with id '{playlistId}'</Text>
+        <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 10 }}>Loading tracks...</Text>
+      </View>
+    );
+  }
+
+  if (tracks.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text>No tracks in this playlist</Text>
+        <Button variant="solid" className="mt-4" onPress={handlePress}>
+          <ButtonText>Add First Track</ButtonText>
+          <ButtonIcon as={AddIcon} className="ml-2" />
+        </Button>
       </View>
     );
   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Button
-        variant="solid"
-        className="mt-2"
-        onPress={handlePress}
-      >
+      <Button variant="solid" className="mt-2" onPress={handlePress}>
         <ButtonText>Add Track</ButtonText>
         <ButtonIcon as={AddIcon} className="ml-2" />
       </Button>
-      <FlatList
-        data={tracks}
-        renderItem={({ item }) => (
-          <>
-            <Link
-              href={{
-                pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
-                params: { playlistId, trackId: item.id },
-              }}
-              asChild
-            >
-              <Pressable>
-                <TrackListItem track={item} />
-              </Pressable>
-            </Link>
-          </>
-        )}
-        keyExtractor={(item) => item.__key}
-      />
+
+      {tracks.map((item) => (
+        <Link
+          key={item.__key}
+          href={{
+            pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
+            params: { playlistId, trackId: item.id },
+          }}
+          asChild
+        >
+          <Pressable>
+            <TrackListItem
+              track={item}
+              renderRightAction={() => (
+                <Reanimated.View style={[styles.deleteAction]}>
+                  <View className="flex-1 justify-center items-end w-full p-4">
+                    <Icon as={TrashIcon} color="white" size={6} />
+                  </View>
+                </Reanimated.View>
+              )}
+              onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+            />
+          </Pressable>
+        </Link>
+      ))}
     </GestureHandlerRootView>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -87,4 +120,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
   description: { fontSize: 16, marginBottom: 12 },
   owner: { fontSize: 14, color: '#555' },
+  deleteAction: {
+    flex: 1,
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+  },
 });
