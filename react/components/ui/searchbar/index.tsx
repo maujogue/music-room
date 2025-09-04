@@ -4,20 +4,23 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { SearchIcon } from '@/components/ui/icon';
 
 type Props = {
+  value: string;
   onChange?: (text: string) => void;
-  onSubmit?: (text: string) => void; // Passe la valeur actuelle
+  onSubmit?: (text: string) => void;
+  onChangeText?: (text: string) => void;
 };
 
-export function SearchBar({ onChange, onSubmit }: Props) {
+export function SearchBar({ value, onChange, onSubmit, onChangeText }: Props) {
   const [searchText, setSearchText] = useState('')
 
   const handleSearchChange = (text: string) => {
     setSearchText(text);
+    onChange?.(text);
+    onChangeText?.(text);
   };
 
   const handleSearchSubmit = () => {
     onSubmit?.(searchText);
-    console.log('Recherche soumise:', searchText);
   };
 
   return (

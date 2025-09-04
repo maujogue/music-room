@@ -13,8 +13,10 @@ export async function searchApi(query: string, type: string, options?: { limit?:
     const token = session?.access_token;
 
     const data = await fetch(`${baseUrl}?${params.toString()}`, {
+        method: 'GET',
         headers: {
-            Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
         },
     }).then(res => {
         if (!res.ok) {

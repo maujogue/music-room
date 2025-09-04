@@ -39,8 +39,15 @@ app.get('/', async (c) => {
   const spotify_token = c.get('spotify_token')
   const { q, type, limit, offset } = c.req.query()
 
-  const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
+  if (type === "user") {
+    const users_array = await getUsernamesList(q)
+    console.log("Users array = ", users_array)
 
+    c.status(200)
+    return c.json({status: 200})
+  }
+
+  const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
   if (!res) {
     const errorResponse = new Response('Failed to fetch Spotify playlists', { status: 500 });
     throw new HTTPException(500, { res: errorResponse });
@@ -53,6 +60,37 @@ app.get('/', async (c) => {
   c.status(200)
   return c.json(res)
 })
+
+
+async function getUsernamesList(input: string): Promise<string[] | null> {
+  if (!input) {
+    return c.json({ error: "username parameter is required" }, 400);
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .ilike('username', `${input}%`);
+
+  if (data && data.length > 0) {
+    return data
+  }
+  return null
+}
+
+
+async function getUserToken(user_id: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user_id)
+
+  if (error || !data) {
+    throw new HTTPException(500, 'Failed to fetch user data')
+  }
+
+  return data[0].spotify_access_token
+}
 
 async function fetchSpotifySearch(
   spotify_token: string,
