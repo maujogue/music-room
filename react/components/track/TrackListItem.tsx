@@ -13,7 +13,7 @@ import {
 import { useRef } from 'react';
 
 type TrackListItemProps = {
-  track: SpotifyTrack;
+  track?: SpotifyTrack;
   onSwipeableOpen?: () => void;
   renderLeftAction?: (
     prog: SharedValue<number>,

@@ -28,10 +28,11 @@ app.use('*', async (c, next) => {
 })
 
 app.onError((err, c) => {
-  //console.error('Error occurred:', err)
+  console.error('Error occurred:', err)
   if (err instanceof HTTPException) {
     return err.getResponse()
   }
+  return c.json({ error: 'Internal Server Error' }, 500)
 })
 
 app.get('/', async (c) => {
@@ -43,6 +44,10 @@ app.get('/', async (c) => {
   if (!res) {
     const errorResponse = new Response('Failed to fetch Spotify playlists', { status: 500 });
     throw new HTTPException(500, { res: errorResponse });
+  }
+  if (res.error) {
+    c.status(res.error.status || 500)
+    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
   }
 
   c.status(200)
