@@ -73,7 +73,12 @@ async function getUsernamesList(input: string): Promise<string[] | null> {
     .ilike('username', `${input}%`);
 
   if (data && data.length > 0) {
-    return data
+    const filtered_data = data.map(user => ({
+      username: user.username,
+      avatar_url: user.avatar_url,
+      bio: user.bio
+    }));
+    return filtered_data
   }
   return null
 }
