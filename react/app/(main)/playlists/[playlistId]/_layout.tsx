@@ -14,15 +14,6 @@ export default function PlaylistDetailLayout() {
           headerTintColor: 'white',
         }}
       />
-      <Stack.Screen name='edit'
-        options={{
-          presentation: 'modal',
-          title: 'Edit Playlist',
-          headerBackVisible: false,
-          headerRight: () => <CancelButton />,
-        }}
-      />
-
       <Stack.Screen
         name='tracks/[trackId]'
         options={{

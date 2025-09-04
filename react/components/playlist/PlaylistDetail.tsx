@@ -58,7 +58,10 @@ export default function PlaylistDetail() {
   }
 
   const onCallEdit = () => {
-    router.push(`(main)/playlists/${playlistId}/edit`)
+    console.log(`Edit call for playlist ${playlistId} | Not implemented yet`)
+    // [!] Implement this later (issue #54)
+    // Can't retrieve playlist from usePlaylist() in edit.tsx
+    // router.push(`(main)/playlists/${playlistId}/edit`)
   }
 
 

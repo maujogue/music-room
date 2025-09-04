@@ -35,9 +35,14 @@ export default function Playlist3DotMenu({ callDelete, callEdit }: Props) {
         <Icon as={TrashIcon} size="sm" className="mr-2 color-red-500" />
         <MenuItemLabel className="mr-2 color-red-500" size="sm">delete</MenuItemLabel>
       </MenuItem>
-      <MenuItem key="edit" textValue="edit" onPress={callEdit} >
-        <Icon as={EditIcon} size="sm" className="mr-2" />
-        <MenuItemLabel className="mr-2" size="sm">edit</MenuItemLabel>
+      <MenuItem key="edit" textValue="edit" onPress={callEdit} className='p-2 justify-between'>
+        <HStack>
+          <Icon as={EditIcon} size="sm" className="mr-2" />
+          <MenuItemLabel className="mr-2" size="sm">edit</MenuItemLabel>
+        </HStack>
+        <Badge action="warning" className="rounded-full">
+          <BadgeText className="text-2xs capitalize">Not impl.</BadgeText>
+        </Badge>
       </MenuItem>
 
       {/* MOCK MENU */}
