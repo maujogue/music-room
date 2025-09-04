@@ -7,11 +7,9 @@ export default function PlaylistDetailLayout() {
       <Stack.Screen
         name='index'
         options={{
-          title: '',
+          title: 'Playlist',
           headerShown: true,
           headerRight: () => <CancelButton />,
-          headerTransparent: true,
-          headerTintColor: 'white',
         }}
       />
       <Stack.Screen

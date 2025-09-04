@@ -2,15 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
 import { getSession } from '@/services/session';
 import { getPlaylistById } from '@/services/playlist';
+import { getErrorMsg } from '@/utils/getErrorMsg';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : connect fetch backend when ready)
 // -------------------------------------------------------------------
 
 export function usePlaylist(id: string) {
-  const [playlist, setPlaylist] = useState(null);
+  const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPlaylist = useCallback(async () => {
     if (!id) return;
@@ -21,7 +22,7 @@ export function usePlaylist(id: string) {
       const data = await getPlaylistById(id);
       setPlaylist(data);
     } catch (err) {
-      setError(err.message);
+      setError(getErrorMsg(err));
     } finally {
       setLoading(false);
     }
@@ -37,22 +38,6 @@ export function usePlaylist(id: string) {
   const refetch = useCallback(() => {
     fetchPlaylist();
   }, [fetchPlaylist]);
-
-
-  // getSession().then((res) => {
-  //   fetchPlaylistItems(res).then((data) => {
-  //     if (isActive) {
-  //       setPlaylist(data || null);
-  //     }
-  //   });
-  // }).catch((err) => {
-  //   console.error('Error in useUserPlaylists:', err)
-  // });
-
-  // return () => {
-  //   isActive = false;
-  // };
-
 
   // ---------------------------------------------------------------
   // Remove Playlist (DELETE)

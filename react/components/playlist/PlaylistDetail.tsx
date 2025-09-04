@@ -7,7 +7,6 @@ import Playlist3DotMenu from '@/components/playlist/PlaylistDotMenu';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
-import { Box } from '@/components/ui/box';
 import { Center } from '@/components/ui/center';
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
@@ -65,7 +64,7 @@ export default function PlaylistDetail() {
   }
 
 
-  if (loading) {
+  if (loading || !playlist) {
     return (
       <Center>
         <ActivityIndicator size='large' />
@@ -81,16 +80,7 @@ export default function PlaylistDetail() {
     );
   }
 
-  // TODO : Playist is null : usePlaylist Hook not ready yet
-  // if (!playlist) {
-  //   return (
-  //     <View style={styles.center}>
-  //       <Text>No playlist with id '{playlistId}'</Text>
-  //     </View>
-  //   );
-  // }
-
-  const playlistTracks: PlaylistItemsResponse = playlist?.tracks;
+  const playlistTracks: PlaylistItemsResponse = playlist.tracks;
   const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
   const playlistTitle = playlist?.name ?? 'Playlist';
   const playlistDescription = playlist?.description ?? 'No description available';
@@ -100,27 +90,9 @@ export default function PlaylistDetail() {
 
   return (
     <>
-        {/* <Box className='flex-1'>
-          <Card>
-            <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
-            <VStack className='px-4 pt-2'>
-              <Heading size='xl'>{playlistTitle}</Heading>
-              {playlist?.description ? (
-                <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
-              ) : null}
-              <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
-            </VStack>
-          </Card>
-          <TrackList
-            playlistId={playlistId}
-            playlistTracks={playlistTracks}
-            onTrackDeleted={refetch}
-          />
-        </Box> */}
       <ScrollView showsVerticalScrollIndicator={false}>
-      {/* <Box className='flex-1'> */}
         <Card>
-          <Image source={{ uri: imageUri }} size="2xl" className="w-full rounded-lg" alt="Playlist image" />
+          <Image source={{ uri: imageUri }} className="w-full h-80" alt="Playlist image" />
           <VStack className='px-4 pt-2'>
             <HStack className='justify-between'>
               <Heading size='xl'>{playlistTitle}</Heading>
@@ -148,11 +120,11 @@ export default function PlaylistDetail() {
           </VStack>
         </Card>
         <TrackList
-            playlistId={playlistId}
-            playlistTracks={playlistTracks}
-            onTrackDeleted={refetch}
-          />
-      {/* </Box> */}
+          playlistId={playlistId}
+          playlistTracks={playlistTracks}
+          onTrackDeleted={refetch}
+        />
+        {/* </Box> */}
       </ScrollView>
 
       <DeleteAlert showAlertDialog={showAlertDialog}

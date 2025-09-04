@@ -33,7 +33,7 @@ export default function Playlist3DotMenu({ callDelete, callEdit }: Props) {
     >
       <MenuItem key="delete" textValue="delete" onPress={callDelete} >
         <Icon as={TrashIcon} size="sm" className="mr-2 color-red-500" />
-        <MenuItemLabel className="mr-2 color-red-500" size="sm">delete</MenuItemLabel>
+        <MenuItemLabel className=" color-red-500" size="sm">delete</MenuItemLabel>
       </MenuItem>
       <MenuItem key="edit" textValue="edit" onPress={callEdit} className='p-2 justify-between'>
         <HStack>
