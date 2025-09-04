@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { PlaylistItemsResponse } from '@/types/spotify';
+import { ScrollView } from 'react-native';
 
 
 export default function PlaylistDetail() {
@@ -86,23 +87,25 @@ export default function PlaylistDetail() {
 
   return (
     <>
-      <Box className='flex-1'>
-        <Card>
-          <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
-          <VStack className='px-4 pt-2'>
-            <Heading size='xl'>{playlistTitle}</Heading>
-            {playlist?.description ? (
-              <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
-            ) : null}
-            <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
-          </VStack>
-        </Card>
-        <TrackList
-          playlistId={playlistId}
-          playlistTracks={playlistTracks}
-          onTrackDeleted={refetch}
-        />
-      </Box>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Box className='flex-1'>
+          <Card>
+            <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
+            <VStack className='px-4 pt-2'>
+              <Heading size='xl'>{playlistTitle}</Heading>
+              {playlist?.description ? (
+                <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
+              ) : null}
+              <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
+            </VStack>
+          </Card>
+          <TrackList
+            playlistId={playlistId}
+            playlistTracks={playlistTracks}
+            onTrackDeleted={refetch}
+          />
+        </Box>
+      </ScrollView>
 
       <DeleteAlert showAlertDialog={showAlertDialog}
         setShowAlertDialog={setShowAlertDialog}
