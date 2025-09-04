@@ -7,9 +7,11 @@ export default function PlaylistDetailLayout() {
       <Stack.Screen
         name='index'
         options={{
-          title: 'Playlist',
+          title: '',
           headerShown: true,
           headerRight: () => <CancelButton />,
+          headerTransparent: true,
+          headerTintColor: 'white',
         }}
       />
       <Stack.Screen
@@ -20,11 +22,12 @@ export default function PlaylistDetailLayout() {
         }}
       />
       <Stack.Screen
-        name='tracks/add'
-        options={{
-          title: 'Add Track',
+        name="tracks/add"
+        options={({ route }) => ({
+          title: route.params.playlistTitle || '',
           presentation: 'modal',
-        }}
+          headerShadowVisible: false,
+        })}
       />
     </Stack>
   );

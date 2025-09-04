@@ -5,7 +5,9 @@ import { SearchBar } from '@/components/ui/searchbar'
 import { searchApi } from '@/services/search';
 import { addItemToPlaylist } from '@/services/playlist';
 import { SpotifyTrack } from '@/types/spotify';
-import { Icon } from '@/components/ui/icon';
+import { Icon, AddIcon } from '@/components/ui/icon';
+import { HStack } from '@/components/ui/hstack';
+import { Box } from '@/components/ui/box';
 import {
   SafeAreaView,
   FlatList,
@@ -72,7 +74,17 @@ export default function AddTrack() {
     function LeftAction(prog: SharedValue<number>, drag: SharedValue<number>, track: SpotifyTrack) {
         return (
             <Reanimated.View style={[styles.addAction]}>
-                <Icon name="add" size={24} color="#fff" />
+                <Box
+                    style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    width: '100%',
+                    paddingLeft: 16
+                    }}
+                >
+                    <Icon as={AddIcon} color="white" size={6} />
+                </Box>
             </Reanimated.View>
         );
     }
@@ -122,13 +134,21 @@ export default function AddTrack() {
                         onChange={setSearchQuery}
                     />
                 </View>
-                <FlatList
-                    data={results}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => <ListItem item={item} />}
-                    style={styles.list}
-                    showsVerticalScrollIndicator={false}
-                />
+                {results.length === 0 ? (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#666', fontSize: 16 }}>
+                            Add new tracks in this playlist
+                        </Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={results}
+                        keyExtractor={item => item.id}
+                        renderItem={({ item }) => <ListItem item={item} />}
+                        style={styles.list}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
             </SafeAreaView>
         </GestureHandlerRootView>
     );
@@ -190,21 +210,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addAction: {
-        flex: 1,
         backgroundColor: '#2db300',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: 80,
-    },
-    deleteButton: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-    },
-    deleteText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 16,
-    },
+    }
 });

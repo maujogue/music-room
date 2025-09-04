@@ -7,25 +7,25 @@ import { getPlaylistById } from '@/services/playlist';
 // Hook with mock-datas (TODO : connect fetch backend when ready)
 // -------------------------------------------------------------------
 
-export function usePlaylist(playlistId: string) {
+export function usePlaylist(id: string) {
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchPlaylist = useCallback(async () => {
-    if (!playlistId) return;
+    if (!id) return;
 
     try {
       setLoading(true);
       setError(null);
-      const data = await getPlaylistById(playlistId);
+      const data = await getPlaylistById(id);
       setPlaylist(data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [playlistId]);
+  }, [id]);
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
@@ -39,19 +39,19 @@ export function usePlaylist(playlistId: string) {
   }, [fetchPlaylist]);
 
 
-  getSession().then((res) => {
-    fetchPlaylistItems(res).then((data) => {
-      if (isActive) {
-        setPlaylist(data || null);
-      }
-    });
-  }).catch((err) => {
-    console.error('Error in useUserPlaylists:', err)
-  });
+  // getSession().then((res) => {
+  //   fetchPlaylistItems(res).then((data) => {
+  //     if (isActive) {
+  //       setPlaylist(data || null);
+  //     }
+  //   });
+  // }).catch((err) => {
+  //   console.error('Error in useUserPlaylists:', err)
+  // });
 
-  return () => {
-    isActive = false;
-  };
+  // return () => {
+  //   isActive = false;
+  // };
 
 
   // ---------------------------------------------------------------

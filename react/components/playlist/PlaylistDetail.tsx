@@ -17,7 +17,13 @@ import { PlaylistItemsResponse } from '@/types/spotify';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const { playlist, loading, error, refetch, deletePlaylist } = usePlaylist(playlistId);
+  const {
+    playlist,
+    loading,
+    error,
+    refetch,
+    deletePlaylist
+  } = usePlaylist(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false)
   const navigation = useNavigation();
@@ -82,7 +88,7 @@ export default function PlaylistDetail() {
     <>
       <Box className='flex-1'>
         <Card>
-          <Image source={{ uri: imageUri }} size="2xl" className="w-full rounded-lg" alt="Playlist image" />
+          <Image source={{ uri: imageUri }} size="2xl" className="w-full h-80 object-cover" alt="Playlist image" />
           <VStack className='px-4 pt-2'>
             <Heading size='xl'>{playlistTitle}</Heading>
             {playlist?.description ? (

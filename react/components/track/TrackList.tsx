@@ -3,6 +3,7 @@ import { Link, router } from 'expo-router';
 import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
+import { Icon, TrashIcon } from '@/components/ui/icon';
 import { AddIcon } from '@/components/ui/icon';
 import { ActivityIndicator, Text, Pressable, View, StyleSheet } from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
@@ -12,15 +13,16 @@ import Reanimated from 'react-native-reanimated';
 
 interface Props {
   playlistId: string;
+  playlistTitle?: string;
   playlistTracks: PlaylistItemsResponse;
   onTrackDeleted?: () => void;
 }
 
-export default function TrackList({ playlistId, playlistTracks, onTrackDeleted }: Props) {
+export default function TrackList({ playlistId, playlistTitle, playlistTracks, onTrackDeleted }: Props) {
   const handlePress = () => {
     router.push({
       pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId },
+      params: { playlistId, playlistTitle },
     });
   };
 
@@ -84,33 +86,30 @@ export default function TrackList({ playlistId, playlistTracks, onTrackDeleted }
         <ButtonIcon as={AddIcon} className="ml-2" />
       </Button>
 
-      <FlatList
-        data={tracks}
-        renderItem={({ item }) => (
-          <Link
-            href={{
-              pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
-              params: { playlistId, trackId: item.id },
-            }}
-            asChild
-          >
-            <Pressable>
-              <TrackListItem
-                track={item}
-                renderRightAction={() => (
-                  <Reanimated.View style={[styles.deleteAction]}>
-                    <View className="flex-1 justify-center items-end w-full p-4">
-                      <Text>Delete</Text>
-                    </View>
-                  </Reanimated.View>
-                )}
-                onSwipeableOpen={() => handleSwipeableOpen(item.id)}
-              />
-            </Pressable>
-          </Link>
-        )}
-        keyExtractor={(item) => item.__key}
-      />
+      {tracks.map((item) => (
+        <Link
+          key={item.__key}
+          href={{
+            pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
+            params: { playlistId, trackId: item.id },
+          }}
+          asChild
+        >
+          <Pressable>
+            <TrackListItem
+              track={item}
+              renderRightAction={() => (
+                <Reanimated.View style={[styles.deleteAction]}>
+                  <View className="flex-1 justify-center items-end w-full p-4">
+                    <Icon as={TrashIcon} color="white" size={6} />
+                  </View>
+                </Reanimated.View>
+              )}
+              onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+            />
+          </Pressable>
+        </Link>
+      ))}
     </GestureHandlerRootView>
   );
 }
