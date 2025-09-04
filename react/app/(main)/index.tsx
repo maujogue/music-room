@@ -2,6 +2,7 @@ import { Text, View } from 'react-native';
 import { SearchBar } from '@/components/ui/searchbar';
 import { searchApi } from '@/services/search.ts'
 import { useAuth } from '@/contexts/authCtx';
+import { Button } from '@/components/ui/button'
 
 export default function Index() {
   const { signOut } = useAuth();
@@ -30,14 +31,17 @@ export default function Index() {
         onChangeText={handleSearchChange}>
       </SearchBar>
 
-      <Text
+      <Button
         onPress={() => {
           signOut();
         }}
         style={{margin: 48, fontSize: 18, fontWeight: 'bold'}}
       >
-        Sign Out
-      </Text>
+        <Text
+          style={{color: '#fff'}}
+    >
+          Sign Out</Text>
+      </Button>
     </View>
   );
 }
