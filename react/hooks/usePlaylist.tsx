@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
 import { getSession } from '@/services/session';
-import { getPlaylistById } from '@/services/playlist';
 import { getErrorMsg } from '@/utils/getErrorMsg';
 import { deletePlaylistService, getPlaylistById } from '@/services/playlist';
 
