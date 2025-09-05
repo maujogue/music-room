@@ -51,6 +51,7 @@ export default function SearchTrack({ playlistId }: Props) {
 
     const handlePress = async (trackId: string) => {
         try {
+            console.log('Adding track to playlist:', trackId);
             await addItemToPlaylist(playlistId, [`spotify:track:${trackId}`]);
         } catch (error) {
             console.error('Error adding track to playlist:', error);
@@ -87,7 +88,7 @@ export default function SearchTrack({ playlistId }: Props) {
                 <TrackListItem
                     key={item.id}
                     track={item}
-                    onPress={() => handlePress(item.id)}
+                    onSwipeableOpen={() => handlePress(item.id)}
                     renderLeftAction={() => LeftAction()}
                 />
             ))}
