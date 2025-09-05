@@ -14,18 +14,23 @@ export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
   const spotify_access_token = c.get('spotify_token')
   const body = await c.req.json()
-  const tracks = body.tracks
-
 
   const res = await deleteItemsFromSpotifyPlaylist(
     spotify_access_token,
     id,
-    { tracks }
+    body
   )
   if (!res) {
     const errorResponse = new Response('Failed to remove items from Spotify playlist', { status: 500 });
     throw new HTTPException(500, { res: errorResponse });
   }
+  if (res.error) {
+    console.error('Error deleting items from playlist:', res.error)
+    c.status(res.error.status || 500)
+    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+  }
+
+  console.log('Deleted items from playlist:', res)
 
   c.status(200)
   return c.json(res)
@@ -44,7 +49,13 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
     const errorResponse = new Response('Failed to add items to Spotify playlist', { status: 500 });
     throw new HTTPException(500, { res: errorResponse });
   }
+  if (res.error) {
+    console.error('Error adding items to playlist:', res.error)
+    c.status(res.error.status || 500)
+    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+  }
 
+  console.log('Added items to playlist:', res)
   c.status(201)
   return c.json(res)
 }

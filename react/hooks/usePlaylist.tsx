@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
-import { getSession } from '@/services/session';
 import { getErrorMsg } from '@/utils/getErrorMsg';
 import { deletePlaylistService, getPlaylistById } from '@/services/playlist';
 
@@ -22,6 +21,7 @@ export function usePlaylist(id: string) {
       const data = await getPlaylistById(id);
       setPlaylist(data);
     } catch (err) {
+      console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
     } finally {
       setLoading(false);

@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
 import { PlaylistSection } from '@/types/playlist';
+import { useFocusEffect } from 'expo-router';
 
 export default function AllPlaylists() {
-  const { playlists, loading, error } = useUserPlaylists();
+  const { playlists, refetch, loading, error } = useUserPlaylists();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   if (loading) return <Text>Playlists loading...</Text>;
   if (error) return <Text style={{ color: 'red' }}>{error}</Text>;
