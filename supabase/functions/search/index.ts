@@ -44,7 +44,7 @@ app.get('/', async (c) => {
     console.log("Users array = ", users_array)
 
     c.status(200)
-    return c.json({status: 200})
+    return c.json({status: 200, data: users_array})
   }
 
   const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
