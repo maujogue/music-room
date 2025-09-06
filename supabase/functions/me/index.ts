@@ -11,12 +11,6 @@ import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts
 import { getCurrentUser, getUserToken } from '../auth.ts';
 import meRoutes from './routes.ts';
 
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-const base_url =
-  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
-
 const app = new Hono();
 
 serve(app.fetch);
