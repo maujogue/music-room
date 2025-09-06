@@ -1,26 +1,31 @@
 // import { useUserEvents } from '@/hooks/useUserEvents';
 import { Text } from '@/components/ui/text';
-import { Center } from '@/components/ui/center';
-import { Heading } from '../ui/heading';
-import { Button, ButtonText } from '../ui/button';
-import { useRouter } from 'expo-router';
+import { useUserEvents } from '@/hooks/useUserEvents';
+import { useProfile } from '@/contexts/profileCtx';
+import EventList from '@/components/events/EventList';
+
 
 export default function AllEvents() {
-  // const { events, loading, error } = useUserEvents();
+  const { events, loading, error } = useUserEvents();
+  const { profile } = useProfile()
 
-  const router = useRouter();
+  if (loading) return <Text>Events loading...</Text>;
+  if (!profile) return <Text>Events loading but profileError...</Text>;
+  if (error) return <Text style={{ color: 'red' }}>{error}</Text>;
+  if (!events) return <Text>No event found</Text>;
 
-  const goToEventDetail = (eventId: string) => {
-    router.push(`(main)/events/${eventId}`);
-  };
+  const sections: MusicEventSection[] = [
+    {
+      title: 'Subscribed events',
+      data: events.filter(e => e.owner.id !== profile.id),
+    },
+    {
+      title: 'My events',
+      data: events.filter(e => e.owner.id == profile.id),
+    },
+  ];
 
   return (
-    <Center className='flex-1'>
-      <Heading>All Events Screen</Heading>
-      <Text>Lists My Events + Events Following</Text>
-      <Button onPress={() => goToEventDetail('ijiF5A8K9Ei')} className='mt-16'>
-        <ButtonText>Go to event detail</ButtonText>
-      </Button>
-    </Center>
+    <EventList sections={sections} />
   );
 }

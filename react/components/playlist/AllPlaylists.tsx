@@ -1,7 +1,6 @@
 import { View, Text } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
-import { PlaylistSection } from '@/types/playlist';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 

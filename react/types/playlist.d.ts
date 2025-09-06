@@ -1,4 +1,4 @@
-export interface PlaylistSection {
+type PlaylistSection = {
   title: string;
   data: SpotifyPlaylist[];
 }

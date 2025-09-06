@@ -1,5 +1,3 @@
-import { SpotifyPlaylist } from '@/types/spotify';
-
 export const MOCK_PLAYLISTS: SpotifyPlaylist[] = [
   {
     collaborative: false,

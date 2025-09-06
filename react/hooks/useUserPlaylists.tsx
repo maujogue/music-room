@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
+=======
+import { useEffect, useState } from 'react';
+>>>>>>> 989e37a ([ADD] Event nav + mainScreens + mockHooks (next: work in detail screen))
 import { getSession } from '@/services/session';
 import { getCurrentUserPlaylists } from '@/services/playlist';
 

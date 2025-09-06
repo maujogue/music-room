@@ -1,7 +1,5 @@
 import EditPlayListForm from "@/components/playlist/EditPlaylistForm";
 import { useProfile } from "@/contexts/profileCtx";
-import { PlaylistPayload } from "@/types/playlist";
-import { SpotifyPlaylist } from "@/types/spotify";
 import { apiFetch } from "@/utils/apiFetch";
 import { useRouter } from 'expo-router';
 import { useState } from "react";

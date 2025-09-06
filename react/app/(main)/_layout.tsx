@@ -38,6 +38,7 @@ export default function AppLayout() {
             ),
           }}
         />
+        <Tabs.Screen name="index" options={{href: null}}/>
       </Tabs>
     </ProfileProvider>
   );
