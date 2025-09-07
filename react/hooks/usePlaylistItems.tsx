@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { PlaylistItemsResponse, SpotifyTrack, SpotifyTrackWithKey } from '@/types/spotify';
-import { getSession } from '../services/session';
 
 
 export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
@@ -11,7 +10,7 @@ export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
 
   useEffect(() => {
     let cancelled = false;
-    
+
     const run = async () => {
       setLoading(true);
       setError(null);
@@ -24,7 +23,7 @@ export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
         const seen = new Map<string, number>();
 
         const mapped: SpotifyTrackWithKey[] = (data.items ?? [])
-          .map((item, idx) => {
+          .map((item) => {
             const t = item?.track;
             if (!t || (t as any).type !== 'track') return null;
             const track = t as SpotifyTrack;

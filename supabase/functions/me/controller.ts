@@ -1,6 +1,12 @@
 import { Context } from 'jsr:@hono/hono'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getCurrentUserPlaylists } from './service.ts'
+import {
+  getCurrentUserPlaylists,
+  getCurrentUserPlayingTrack,
+  startPlayback,
+  pausePlayback,
+  skipToNextTrack
+} from './service.ts'
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const spotify_token = c.get('spotify_token')
