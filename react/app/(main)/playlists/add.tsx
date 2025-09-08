@@ -28,7 +28,7 @@ export default function AddNewPlayList() {
     // OU alors retourne un <string> au lieu de <SpotifyPlaylist> et on forcera le refetch de la liste
     // Tu es plus partant pour un refetch global : ok pour moi :D => j'ai créé une issue pour cela : #52
     // De plus : j'ai intégré le Bearer token au apiFetch, mais faudra le tester
-    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/users/${profile.id}/playlists`,
+    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists`,
       {
         method: "POST",
         body: payload,
@@ -39,9 +39,10 @@ export default function AddNewPlayList() {
       return;
     }
 
-    if (router.canGoBack()) {
-      router.push('../')
-    }
+    router.replace({
+      pathname: '/(main)/playlists/[playlistId]',
+      params: { playlistId: resp.data.id },
+    })
   }
 
   return (

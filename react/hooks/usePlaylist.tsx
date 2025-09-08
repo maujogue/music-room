@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SpotifyPlaylist } from '@/types/spotify';
 import { getSession } from '@/services/session';
-import { getPlaylistById } from '@/services/playlist';
 import { getErrorMsg } from '@/utils/getErrorMsg';
+import { deletePlaylistService, getPlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : connect fetch backend when ready)
@@ -47,25 +47,7 @@ export function usePlaylist(id: string) {
     setError(null);
 
     try {
-      const session = await getSession();
-
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(
-          `Delete failed (status ${response.status}): ${errorBody}`,
-        );
-      }
+      await deletePlaylistService(id);
       setPlaylist(null);
     } catch (e: any) {
       setError(`delete playlist error: ${e.message ?? e}`);

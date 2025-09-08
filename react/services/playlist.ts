@@ -72,3 +72,25 @@ export async function deleteItemFromPlaylist(playlistId: string, uris: string[])
 	});
 	return true
 }
+
+export async function deletePlaylistService(id: string) {
+	const session = await getSession();
+
+	const response = await fetch(
+	`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
+	{
+		method: 'DELETE',
+		headers: {
+		Authorization: `Bearer ${session?.access_token}`,
+		'Content-Type': 'application/json',
+		},
+	},
+	);
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Delete failed (status ${response.status}): ${errorBody}`,
+		);
+	}
+}

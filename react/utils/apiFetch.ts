@@ -49,7 +49,8 @@ export async function apiFetch<T>(
       const contentType = res.headers.get("content-type");
       const isJson = contentType?.includes("application/json");
 
-      if (!res.ok) {
+      console.log("Response status:", res.status, "for", method, url);
+      if (!res.status.toString().startsWith("2")) {
         const json = await res.json();
         const errorMessage = isJson ? json.message : null;
         const message = isJson ? json.error : null;
