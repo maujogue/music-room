@@ -21,7 +21,6 @@ export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
       return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
     }
 
-    console.log('Fetched user playlists:', res)
     c.status(200)
     return c.json(res)
 }
@@ -39,7 +38,11 @@ export async function fetchCurrentUserPlayingTrack(c: Context): Promise<Response
       return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
     }
 
-    console.log('Fetched user currently playing track:', res)
+    if (res.status === 204) {
+      c.status(204)
+      return c.body(null)
+    }
+
     c.status(200)
     return c.json(res)
 }
@@ -53,14 +56,19 @@ export async function startUserPlayback(c: Context): Promise<Response> {
       throw new HTTPException(500, { message: 'Failed to start Spotify playback' })
     }
 
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+    console.log('Response from startPlayback:', res);
+    if (res.error || !res.ok) {
+      console.error('Error from Spotify API:', res.error);
+      if (res.error) {
+        c.status(res.status || 500)
+        return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+      }
+      c.status(res.status || 500)
+      return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
     }
 
-    console.log('Started user playback:', res)
-    c.status(200)
-    return c.json(res)
+    c.status(204)
+    return c.body(null)
 }
 
 export async function pauseUserPlayback(c: Context): Promise<Response> {
@@ -75,7 +83,6 @@ export async function pauseUserPlayback(c: Context): Promise<Response> {
       return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
     }
 
-    console.log('Paused user playback:', res)
     c.status(200)
     return c.json(res)
 }
@@ -87,13 +94,17 @@ export async function skipToNextUserTrack(c: Context): Promise<Response> {
     if (!res) {
       throw new HTTPException(500, { message: 'Failed to skip to next Spotify track' })
     }
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+    if (res.error || !res.ok) {
+      console.error('Error from Spotify API:', res.error);
+      if (res.error) {
+        c.status(res.status || 500)
+        return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+      }
+      c.status(res.status || 500)
+      return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
     }
 
-    console.log('Skipped to next user track:', res)
-    c.status(200)
-    return c.json(res)
+    c.status(204);
+    return c.body(null);
 }
 

@@ -1,6 +1,8 @@
 // Player.js
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { HStack } from "@/components/ui/hstack";
 import TrackListItem from "@/components/track/TrackListItem";
 import PlayerControls from "@/components/player/PlayerControl";
 
@@ -9,29 +11,27 @@ type PlayerProps = {
   isPlaying: boolean;
   onPlayPause: () => void;
   onNext: () => void;
+  showControls?: boolean;
 };
 
-const Player = ({ track, isPlaying, onPlayPause, onNext }: PlayerProps) => {
+const Player = ({ track, isPlaying, onPlayPause, onNext, showControls }: PlayerProps) => {
   if (!track) {
     return <View><Text>No track playing</Text></View>;
   }
   return (
-    <View style={styles.container}>
-      <TrackListItem track={track} />
-      <PlayerControls
-        isPlaying={isPlaying}
-        onPlayPause={onPlayPause}
-        onNext={onNext}
-      />
-    </View>
+    <GestureHandlerRootView>
+      <HStack>
+        <TrackListItem track={track}/>
+        {showControls && (
+          <PlayerControls
+            isPlaying={isPlaying}
+            onPlayPause={onPlayPause}
+            onNext={onNext}
+          />
+        )}
+      </HStack>
+    </GestureHandlerRootView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    padding: 20,
-  },
-});
 
 export default Player;

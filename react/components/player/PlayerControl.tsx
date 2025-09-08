@@ -2,18 +2,23 @@
 import React from "react";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon} from "@/components/ui/button";
-import { ChevronsRightIcon } from "@/components/ui/icon";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const PlayerControls = ({ isPlaying, onPlayPause, onNext }) => (
   <Box>
-    <Button onPress={onPlayPause} variant="ghost" size="lg" shape="circle">
-      <ButtonIcon icon={isPlaying ? "PauseIcon" : "PlayIcon"} size={24} />
+    <Button onPress={onPlayPause} className="rounded-full p-3.5">
+      {isPlaying ?
+      <FontAwesome6 name="play" size={10} color="white" /> :
+      <FontAwesome5 name="pause" size={10} color="white" />
+      }
     </Button>
-    <Button onPress={onNext} variant="ghost" size="lg" shape="circle">
-      <ButtonIcon icon={ChevronsRightIcon} size={24} />
+    <Button onPress={onNext} className="rounded-full p-3.5">
+      <AntDesign name="stepforward" size={10} color="white" />
     </Button>
   </Box>
 );
-
 
 export default PlayerControls;
