@@ -37,7 +37,7 @@ export default function SearchUser() {
 
   const renderUserItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => {console.log(item.username)}}
+      onPress={() => {console.log(`Redirection to ${item.username}'s profile`)}}
     >
       <View style={styles.userItem}>
         <Image
