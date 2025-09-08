@@ -36,11 +36,15 @@ app.onError((err, c) => {
 })
 
 app.get('/', async (c) => {
+  const tmp = c.get('user')
+  const currentUsername = tmp.user_metadata.username
+
+
   const spotify_token = c.get('spotify_token')
   const { q, type, limit, offset } = c.req.query()
 
   if (type === "user") {
-    const users_array = await getUsernamesList(q)
+    const users_array = await getUsernamesList(q, currentUsername)
     console.log("Users array = ", users_array)
 
     c.status(200)
@@ -62,7 +66,7 @@ app.get('/', async (c) => {
 })
 
 
-async function getUsernamesList(input: string): Promise<string[] | null> {
+async function getUsernamesList(input: string, currentUsername: string): Promise<string[] | null> {
   if (!input) {
     return c.json({ error: "username parameter is required" }, 400);
   }
@@ -73,7 +77,9 @@ async function getUsernamesList(input: string): Promise<string[] | null> {
     .ilike('username', `${input}%`);
 
   if (data && data.length > 0) {
-    const filtered_data = data.map(user => ({
+    const filtered_data = data
+      .filter(user => !user.username.includes(currentUsername))
+      .map(user => ({
       username: user.username,
       avatar_url: user.avatar_url,
       bio: user.bio
