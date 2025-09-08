@@ -1,28 +1,31 @@
 import React from 'react';
+import { useState } from 'react';
 import { TouchableOpacity, View, Image, Text, StyleSheet } from 'react-native';
 import { Button } from '@/components/ui/button'
+import { UserInfo } from '@/types/user'
 
-export function UserItem({ item }) {
+type UserItemProps = {
+  user: UserInfo;
+  handlePress?: () => void;
+};
+
+export function UserItem({ user, handlePress }: UserItemProps) {
+  const [isFollowed, setIsFollowed] = useState(false);
+
   return (
     <TouchableOpacity
-      onPress={() => console.log(`Redirection to ${item.username}'s profile`)}>
+      onPress={() => handlePress?.()}>
       <View style={styles.userItem}>
         <Image
           source={
-            item?.avatar_url
-              ? { uri: item.avatar_url }
+            user?.avatar_url
+              ? { uri: user.avatar_url }
               : require('../../assets/vibing.jpg')
           }
           style={styles.avatar}
           defaultSource={require('../../assets/vibing.jpg')}
         />
-        <Text style={styles.userName}>{item.username}</Text>
-        <Button
-          style={styles.addButton}
-          onPress={() => console.log("Follow button")}>
-
-            <Text style={{color: '#fff'}}>follow</Text>
-        </Button>
+        <Text style={styles.userName}>{user.username}</Text>
       </View>
     </TouchableOpacity>
   );

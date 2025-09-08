@@ -64,7 +64,7 @@ export default function SearchUser() {
                 <FlatList
                   data={users}
                   keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-                  renderItem={({ item }) => <UserItem item={item} />}
+                  renderItem={({ item }) => <UserItem user={item} />}
                   style={styles.userList}
                   showsVerticalScrollIndicator={false}
                 />
