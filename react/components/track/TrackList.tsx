@@ -1,6 +1,6 @@
-import React,  { useEffect } from 'react';
+import React from 'react';
 import { Link, router } from 'expo-router';
-import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
 import { Icon, TrashIcon } from '@/components/ui/icon';

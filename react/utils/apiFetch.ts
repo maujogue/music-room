@@ -18,6 +18,7 @@ export async function apiFetch<T>(
       cache = "default",
     } = options;
 
+    console.log("apiFetch called with:", { url, method, headers, body, cache });
     try {
       const session = await getSession();
       const isFormData = body instanceof FormData;
@@ -38,6 +39,7 @@ export async function apiFetch<T>(
             ? JSON.stringify(body)
             : undefined;
 
+      console.log("Fetching:", method, url);
       const res = await fetch(url, {
         method,
         headers: finalHeaders,
@@ -69,6 +71,7 @@ export async function apiFetch<T>(
     } catch (err) {
       let message = "Network error";
 
+      console.error("apiFetch error:", err);
       if (err instanceof Error) {
         message = err.message;
       }

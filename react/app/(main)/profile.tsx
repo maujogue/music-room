@@ -1,4 +1,4 @@
-import { ImageSourcePropType, View, Linking } from 'react-native';
+import { ImageSourcePropType, View} from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
@@ -9,22 +9,19 @@ import vibingImg from '@/assets/vibing.jpg';
 import { useProfile } from '@/contexts/profileCtx';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import { Divider } from '@/components/ui/divider';
+import { connectToSpotify } from '@/services/auth';
 
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
 
-const connectToSpotify = async () => {
-  try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`, {
-      method: 'POST',
-    });
-    const data = await response.json();
-    await Linking.openURL(data.url);
-  } catch (error) {
-    console.error('Error during Spotify authentication:', error);
-  }
-};
+  const handlePressOauthSpotify = async () => {
+    try {
+      await connectToSpotify();
+    } catch (error) {
+      console.error('Error during Spotify OAuth:', error);
+    }
+  };
 
   return (
     <View className='flex-1 pt-safe'>
@@ -33,7 +30,7 @@ const connectToSpotify = async () => {
               <Button
                 className={`w-35 h-8 ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
                 size="sm"
-                onPress={connectToSpotify}
+                onPress={handlePressOauthSpotify}
               >
                 <ButtonText className="text-white">
                   Connect with Spotify
