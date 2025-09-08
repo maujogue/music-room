@@ -4,12 +4,16 @@ import { SearchBar } from '@/components/ui/searchbar';
 import { searchApi } from '@/services/search.ts'
 import { useAuth } from '@/contexts/authCtx';
 import { Button } from '@/components/ui/button'
+import { useProfile } from '@/contexts/profileCtx';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function SearchUser() {
   const { signOut } = useAuth();
+  const { profile, updateProfile } = useProfile();
+  const [currentUsername, setCurrentUsername] = useState('')
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
 
   async function handleSearchSubmit(query) {
     console.log("handleSearchSubmit", query);
@@ -17,13 +21,16 @@ export default function SearchUser() {
 
   async function handleSearchChange(query) {
     const type = "user";
+    setCurrentUsername(profile.username)
 
     if (query.trim()) {
       setIsLoading(true);
       try {
         const results = await searchApi(query, type);
-        const userArray = results?.data || [];
-        setUsers(userArray);
+        const usersArray = results?.data || [];
+        const filteredUsers = usersArray.filter(user => user.username !== currentUsername);
+
+        setUsers(filteredUsers);
       } catch (error) {
         console.error("Error during the research:", error);
         setUsers([]);
