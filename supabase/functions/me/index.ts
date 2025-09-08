@@ -4,90 +4,47 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Hono } from 'jsr:@hono/hono';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { getCurrentUser, getUserToken } from '../auth.ts';
+import meRoutes from './routes.ts';
 
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-const base_url =
-  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
+const app = new Hono();
 
-Deno.serve(async (req) => {
-  const url = req.url;
+serve(app.fetch);
 
-  if (url.includes('/playlists')) {
-    return fetchCurrentUserPlaylists(req);
+app.use('*', async (c, next) => {
+  try {
+    console.log('Authenticating request...');
+    // console.log('url:', c.req.url);
+    // console.log('method:', c.req.method);
+    // console.log('headers:', JSON.stringify(c.req.headers, null, 2));
+    const user = await getCurrentUser(c.req);
+    const token = await getUserToken(user.id);
+    c.set('user', user);
+    c.set('spotify_token', token);
+    await next();
+  } catch (err) {
+    return c.json({ error: err.message }, 401);
   }
-
-  return new Response(`${req.url} not found`, {
-    status: 404,
-    headers: { 'Content-Type': 'application/json' },
-  });
 });
 
-async function fetchCurrentUserPlaylists(req: Request): Promise<Response> {
-  if (req.method !== 'GET') {
-    console.log('Invalid method:', req.method);
-    return new Response('Method Not Allowed', { status: 405 });
+app.onError((err, c) => {
+  console.error('Error occurred:', err);
+  if (err instanceof HTTPException) {
+    return err.getResponse();
   }
-
-  const user_data = await getCurrentUser(req);
-  if (!user_data) {
-    console.log('Unauthorized request: no user');
-    return new Response('Unauthorized', { status: 401 });
-  }
-
-  console.log('Authenticated user:', user_data.user.id);
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user_data.user.id);
-
-  if (error || !data) {
-    console.error('Error fetching user from database:', error);
-    return new Response('Failed to fetch Spotify token', { status: 500 });
-  }
-
-  const playlists = await fetchSpotifyUserPlaylists(
-    data[0].spotify_access_token
-  );
-  if (!playlists) {
-    console.error('Error fetching playlists from Spotify');
-    return new Response('Failed to fetch Spotify playlists', { status: 500 });
-  }
-
-  return new Response(JSON.stringify(playlists), {
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
-async function fetchSpotifyUserPlaylists(spotify_token: string): Promise<any> {
-  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
-    headers: {
-      Authorization: `Bearer ${spotify_token}`,
+  return c.json(
+    {
+      message: 'Internal Server Error',
     },
-  });
-  return response.json();
-}
+    500
+  );
+});
 
-//TODO: Old version version without Hono, to be removed later
-async function getCurrentUser(req: Request): Promise<any> {
-  const authHeader =
-    req.headers.get('Authorization') || req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-  const token = authHeader.substring(7);
-  const { data: user, error } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    const errorResponse = new Response('Invalid token or user not found', { status: 401 });
-    throw new HTTPException(401, { res: errorResponse });
-  }
-
-  return user;
-}
-
+app.route('/me', meRoutes);
 
 /* To invoke locally:
 
