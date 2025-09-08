@@ -48,6 +48,7 @@
     "expo-status-bar": "~2.2.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
+    "lucide-react-native": "^0.542.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",

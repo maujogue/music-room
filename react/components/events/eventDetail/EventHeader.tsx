@@ -10,6 +10,7 @@ import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { CircleIcon } from '@/components/ui/icon';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 
 interface Props {
   event: MusicEvent;
@@ -88,12 +89,9 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
         </HStack>
 
         {/* Expanded CONTENT */}
-        <Animated.View style={extraStyle} className="bg-lime-200 h-20">
-          <HStack className="gap-2 ">
-            
-
-
-
+        <Animated.View style={extraStyle} className="">
+          <HStack className='justify-between' >
+            <EventLocationInfo location={event.location} />
           </HStack>
         </Animated.View>
 

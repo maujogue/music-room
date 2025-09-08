@@ -17,11 +17,11 @@ export const MOCK_EVENTS: MusicEvent[] = [
         lat: 48.8566,
         long: 2.3522
       },
-      venueName: undefined,
-      address: "Place de la Bastille",
+      venueName: "Accor Arena",
+      address: "8 Boulevard de Bercy",
       city: "Paris",
       country: "France"
-    }
+    },
   },
   {
     id: "1",
@@ -37,10 +37,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
     isPublic: true,
     location: {
       coordinates: {
-        lat: 40.7128,
-        long: -74.0060
+        lat: 40.7505,
+        long: -73.9934
       },
-      venueName: undefined,
+      venueName: "Madison Square Garden",
       address: "Broadway & W 47th St",
       city: "New York",
       country: "United States"
@@ -60,11 +60,11 @@ export const MOCK_EVENTS: MusicEvent[] = [
     isPublic: true,
     location: {
       coordinates: {
-        lat: 34.0522,
-        long: -118.2437
+        lat: 34.0430,
+        long: -118.2673
       },
-      venueName: undefined,
-      address: "200 N Spring St",
+      venueName: "Crypto.com Arena",
+      address: "1111 S Figueroa St",
       city: "Los Angeles",
       country: "United States"
     }
@@ -83,11 +83,11 @@ export const MOCK_EVENTS: MusicEvent[] = [
     isPublic: false,
     location: {
       coordinates: {
-        lat: 35.6895,
-        long: 139.6917
+        lat: 35.6749,
+        long: 139.7634
       },
-      venueName: undefined,
-      address: "Shinjuku Station",
+      venueName: "Nippon Budokan",
+      address: "2 Chome-3 Kitanomarukoen",
       city: "Tokyo",
       country: "Japan"
     }
@@ -106,13 +106,13 @@ export const MOCK_EVENTS: MusicEvent[] = [
     isPublic: true,
     location: {
       coordinates: {
-        lat: 51.5074,
-        long: -0.1278
+        lat: -33.8685,
+        long: 151.2094
       },
-      venueName: undefined,
-      address: "Trafalgar Square",
-      city: "London",
-      country: "United Kingdom"
+      venueName: "Sydney Opera House",
+      address: "Bennelong Point",
+      city: "Sydney",
+      country: "Australia"
     }
   },
   {
@@ -129,14 +129,14 @@ export const MOCK_EVENTS: MusicEvent[] = [
     isPublic: false,
     location: {
       coordinates: {
-        lat: -33.8688,
-        long: 151.2093
+        lat: -23.5432,
+        long: -46.6292
       },
-      venueName: undefined,
-      address: "George St & Park St",
-      city: "Sydney",
-      country: "Australia"
-    },
+      venueName: "Allianz Parque",
+      address: "Av. Francisco Matarazzo, 1705",
+      city: "São Paulo",
+      country: "Brazil"
+    }
   },
   {
     id: "6",
@@ -150,15 +150,15 @@ export const MOCK_EVENTS: MusicEvent[] = [
       uri: 'spotify:user:alice123',
     },
     isPublic: true,
-        location: {
+    location: {
       coordinates: {
-        lat: -23.5505,
-        long: -46.6333
+        lat: 52.5016,
+        long: 13.3777
       },
-      venueName: undefined,
-      address: "Praça da Sé",
-      city: "São Paulo",
-      country: "Brazil"
+      venueName: "Mercedes-Benz Arena",
+      address: "Mercedes-Platz 1",
+      city: "Berlin",
+      country: "Germany"
     }
   },
 
