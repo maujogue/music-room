@@ -1,9 +1,11 @@
 import React from 'react';
 import { TouchableOpacity, View, Image, Text, StyleSheet } from 'react-native';
+import { Button } from '@/components/ui/button'
 
 export function UserItem({ item }) {
   return (
-    <TouchableOpacity onPress={() => console.log(`Redirection to ${item.username}'s profile`)}>
+    <TouchableOpacity
+      onPress={() => console.log(`Redirection to ${item.username}'s profile`)}>
       <View style={styles.userItem}>
         <Image
           source={
@@ -15,6 +17,12 @@ export function UserItem({ item }) {
           defaultSource={require('../../assets/vibing.jpg')}
         />
         <Text style={styles.userName}>{item.username}</Text>
+        <Button
+          style={styles.addButton}
+          onPress={() => console.log("Follow button")}>
+
+            <Text style={{color: '#fff'}}>follow</Text>
+        </Button>
       </View>
     </TouchableOpacity>
   );
@@ -54,4 +62,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#333'
     },
+    addButton: {
+      borderRadius: 50,
+      marginLeft: 'auto',
+      color: '#f0f0f0'
+    }
 })
