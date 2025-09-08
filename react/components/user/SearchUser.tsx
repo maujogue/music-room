@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/authCtx';
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/contexts/profileCtx';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { UserItem } from '@/components/user/UserItem.tsx';
+
 
 export default function SearchUser() {
   const { signOut } = useAuth();
@@ -42,25 +44,6 @@ export default function SearchUser() {
     }
   }
 
-  const renderUserItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => {console.log(`Redirection to ${item.username}'s profile`)}}
-    >
-      <View style={styles.userItem}>
-        <Image
-          source={
-            item?.avatar_url
-              ? { uri: item.avatar_url }
-              : require('../../assets/vibing.jpg')
-          }
-          style={styles.avatar}
-          defaultSource={require('../../assets/vibing.jpg')}
-        />
-        <Text style={styles.userName}>{item.username}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -81,7 +64,7 @@ export default function SearchUser() {
                 <FlatList
                   data={users}
                   keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-                  renderItem={renderUserItem}
+                  renderItem={({ item }) => <UserItem item={item} />}
                   style={styles.userList}
                   showsVerticalScrollIndicator={false}
                 />
@@ -145,51 +128,6 @@ const styles = StyleSheet.create({
   },
   userList: {
     flex: 1
-  },
-  userItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#fff',
-    marginVertical: 5,
-    borderRadius: 50,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: '#f0f0f0'
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  userDetails: {
-    flex: 1
-  },
-  userName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333'
-  },
-  userBio: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-    fontStyle: 'italic'
-  },
-  addButton: {
-    marginLeft: 'auto',
-    borderRadius: 20,
   },
   signOutButton: {
     margin: 48,
