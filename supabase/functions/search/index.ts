@@ -36,16 +36,12 @@ app.onError((err, c) => {
 })
 
 app.get('/', async (c) => {
-  const tmp = c.get('user')
-  const currentUsername = tmp.user_metadata.username
-
-
+  const currentUsername = c.get('user').user_metadata.username;
   const spotify_token = c.get('spotify_token')
   const { q, type, limit, offset } = c.req.query()
 
   if (type === "user") {
     const users_array = await getUsernamesList(q, currentUsername)
-    console.log("Users array = ", users_array)
 
     c.status(200)
     return c.json({status: 200, data: users_array})
