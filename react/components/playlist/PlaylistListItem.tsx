@@ -1,4 +1,3 @@
-import { SpotifyPlaylist } from '@/types/spotify';
 import { Card } from '@/components/ui/card';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';

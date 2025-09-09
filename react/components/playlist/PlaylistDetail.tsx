@@ -18,7 +18,6 @@ import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import DeleteAlert from '@/components/generics/DeleteAlert';
-import { PlaylistItemsResponse } from '@/types/spotify';
 import { ScrollView } from 'react-native';
 import { CircleIcon } from '@/components/ui/icon';
 

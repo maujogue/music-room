@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { SpotifyPlaylist } from '@/types/spotify';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deletePlaylistService, getPlaylistById } from '@/services/playlist';
+import { getPlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
 // Hook with mock-datas (TODO : connect fetch backend when ready)
@@ -12,6 +11,9 @@ export function usePlaylist(id: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ---------------------------------------------------------------
+  // Fetch playlist (GET)
+  // ---------------------------------------------------------------
   const fetchPlaylist = useCallback(async () => {
     if (!id) return;
 
@@ -28,9 +30,6 @@ export function usePlaylist(id: string) {
     }
   }, [id]);
 
-  // ---------------------------------------------------------------
-  // Fetch playlist (GET)
-  // ---------------------------------------------------------------
   useEffect(() => {
     fetchPlaylist();
   }, [fetchPlaylist]);
@@ -47,8 +46,9 @@ export function usePlaylist(id: string) {
     setError(null);
 
     try {
-      await deletePlaylistService(id);
-      setPlaylist(null);
+      // await deletePlaylistService(id);
+      // setPlaylist(null);
+      console.log("Delete playlist service not implemented. Remove this button ?")
     } catch (e: any) {
       setError(`delete playlist error: ${e.message ?? e}`);
       console.error('Delete playlist error:', e);

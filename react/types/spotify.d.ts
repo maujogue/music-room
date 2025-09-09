@@ -1,10 +1,10 @@
-export interface SpotifyImage {
+type SpotifyImage = {
   url: string;
   height?: number;
   width?: number;
 }
 
-export interface SpotifyOwner {
+type SpotifyOwner = {
   display_name: string;
   id: string;
   href: string;
@@ -12,7 +12,7 @@ export interface SpotifyOwner {
   uri: string;
 }
 
-export interface SpotifyPlaylist {
+type SpotifyPlaylist = {
   collaborative: boolean;
   description: string | null;
   external_urls: { spotify: string };
@@ -32,7 +32,7 @@ export interface SpotifyPlaylist {
   uri: string;
 }
 
-export interface SpotifyTrack {
+type SpotifyTrack = {
   album: {
     album_type: string;
     artists: { name: string; id: string; uri: string }[];
@@ -65,7 +65,7 @@ export interface SpotifyTrack {
   uri: string;
 }
 
-export type SpotifyTrackWithKey = SpotifyTrack & {
+type SpotifyTrackWithKey = SpotifyTrack & {
   __key: string;
   __added_at: string | null;
 };

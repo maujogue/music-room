@@ -1,9 +1,8 @@
-import React, { useCallback } from 'react';
 import { View, Text } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
-import { PlaylistSection } from '@/types/playlist';
 import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 export default function AllPlaylists() {
   const { playlists, refetch, loading, error } = useUserPlaylists();
@@ -35,7 +34,6 @@ export default function AllPlaylists() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* todo add icon */}
       <PlaylistList sections={sections} />
     </View>
   );

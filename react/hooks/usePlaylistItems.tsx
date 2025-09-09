@@ -1,9 +1,4 @@
 import { useEffect, useState } from 'react';
-import {
-  PlaylistItemsResponse,
-  SpotifyTrack,
-  SpotifyTrackWithKey,
-} from '@/types/spotify';
 
 export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
   const [tracks, setTracks] = useState<SpotifyTrackWithKey[] | null>(null);
