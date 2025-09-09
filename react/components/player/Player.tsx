@@ -1,9 +1,8 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { HStack } from '@/components/ui/hstack';
-import TrackListItem from '@/components/track/TrackListItem';
-import PlayerControls from '@/components/player/PlayerControl';
+import { View, Text } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { HStack } from "@/components/ui/hstack";
+import TrackListItem from "@/components/track/TrackListItem";
+import PlayerControls from "@/components/player/PlayerControl";
 
 type PlayerProps = {
   track: SpotifyTrack | null;

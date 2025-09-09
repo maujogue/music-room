@@ -10,13 +10,23 @@ type Props = {
 };
 
 export default function EventLocationInfo({ location }: Props) {
-  if (!location) {
-    return null;
-  }
+  if (!location) { return null; }
 
-  const { coordinates, venueName, address, city, country } = location;
+  const {
+    coordinates,
+    venuename,
+    address,
+    city,
+    country,
+  } = location;
 
-  if (!coordinates && !venueName && !address && !city && !country) {
+  if (
+    !coordinates &&
+    !venuename &&
+    !address &&
+    !city &&
+    !country
+  ) {
     return null;
   }
 
@@ -25,11 +35,12 @@ export default function EventLocationInfo({ location }: Props) {
     : null;
 
   return (
-    <VStack className='gap-2'>
-      {venueName && (
-        <Badge size='md' action='info' className='rounded-xl h-6'>
-          <BadgeIcon as={ShellIcon} size='lg' />
-          <BadgeText className='pl-1 font-bold'>{venueName}</BadgeText>
+    <VStack className="gap-2">
+
+      {venuename && (
+        <Badge size="md" action="info" className="rounded-xl h-6">
+          <BadgeIcon as={ShellIcon} size="lg" />
+          <BadgeText className="pl-1 font-bold">{venuename}</BadgeText>
         </Badge>
       )}
 

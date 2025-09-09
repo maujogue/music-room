@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
 import { deleteEventById, getEventById } from '@/services/events';
-import { MOCK_EVENTS } from '@/mocks/mockEvents';
 
 export function useEvent(id: string) {
-  const [event, setEvent] = useState<MusicEvent | null>(null);
+  const [data, setData] = useState<MusicEventFetchResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,9 +16,8 @@ export function useEvent(id: string) {
     try {
       setLoading(true);
       setError(null);
-
       const data = await getEventById(id);
-      setEvent(data);
+      setData(data);
     } catch (err) {
       setError(getErrorMsg(err));
     } finally {
@@ -44,7 +42,7 @@ export function useEvent(id: string) {
 
     try {
       await deleteEventById(id);
-      setEvent(null);
+      setData(null);
     } catch (e: any) {
       setError(`delete Event error: ${e.message ?? e}`);
       console.error('Delete Event error:', e);
@@ -53,5 +51,6 @@ export function useEvent(id: string) {
     }
   }, [id]);
 
-  return { event, loading, error, refetch, deleteEvent };
+  return { data, loading, error, refetch, deleteEvent };
+
 }

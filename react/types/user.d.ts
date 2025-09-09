@@ -1,8 +1,8 @@
 // Privacy settings for profile visibility
-export type PrivacySetting = 'public' | 'friends' | 'private';
+type PrivacySetting = 'public' | 'friends' | 'private';
 
 // UserInfo is a dictionary containing user info
-export type UserInfo = {
+type UserInfo = {
   id: string;
   username: string;
   email: string;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, router } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
@@ -14,13 +13,14 @@ import {
 } from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import { deleteItemFromPlaylist } from '@/services/playlist';
-import { PlaylistItemsResponse } from '@/types/spotify';
 import Reanimated from 'react-native-reanimated';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 
 interface Props {
   playlistId: string;
   playlistTitle?: string;
-  playlistTracks: PlaylistItemsResponse;
+  playlistTracks: SpotifyTracksArray;
   onTrackDeleted?: () => void;
 }
 
@@ -37,14 +37,7 @@ export default function TrackList({
     });
   };
 
-  if (!playlistTracks) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size='large' />
-        <Text style={{ marginTop: 10 }}>Loading playlist...</Text>
-      </View>
-    );
-  }
+  if (!playlistTracks) { return (<LoadingSpinner text='Loading playlist...' />); }
 
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
@@ -64,22 +57,9 @@ export default function TrackList({
     }
   };
 
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={{ color: 'red' }}>{error}</Text>
-      </View>
-    );
-  }
-
-  if (loading || !tracks) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size='large' />
-        <Text style={{ marginTop: 10 }}>Loading tracks...</Text>
-      </View>
-    );
-  }
+  if (loading) { return (<LoadingSpinner text='Loading tracks...' />); }
+  if (error) { return (<ErrorScreen error={error} />); }
+  if (!tracks) { return (<ErrorScreen error={"no tracks to load"} />); }
 
   if (tracks.length === 0) {
     return (
@@ -114,12 +94,12 @@ export default function TrackList({
               track={item}
               renderRightAction={() => (
                 <Reanimated.View style={[styles.deleteAction]}>
-                  <View className='flex-1 justify-center items-end w-full p-4'>
-                    <Icon as={TrashIcon} color='white' size={6} />
+                  <View className="flex-1 justify-center items-end w-full p-4">
+                    <Icon as={TrashIcon} color="white" size={"sm"} />
                   </View>
                 </Reanimated.View>
               )}
-              onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+              onSwipeableOpen={() => handleSwipeableOpen(item?.id ?? "0")}
             />
           </Pressable>
         </Link>

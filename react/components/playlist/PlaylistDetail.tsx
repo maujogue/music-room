@@ -82,7 +82,7 @@ export default function PlaylistDetail() {
     );
   }
 
-  const playlistTracks: PlaylistItemsResponse = playlist.tracks;
+  const playlistTracks: SpotifyTracksArray = playlist.tracks;
   const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
   const playlistTitle = playlist?.name ?? 'Playlist';
   const playlistDescription =

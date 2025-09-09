@@ -15,9 +15,8 @@ import DeleteAlert from '@/components/generics/DeleteAlert';
 import Event3DotMenu from '@/components/events/eventDetail/EventDotMenu';
 import { useEvent } from '@/hooks/useEvent';
 import EventHeader from './eventDetail/EventHeader';
-import colors from 'tailwindcss/colors';
-import { Spinner } from '@/components/ui/spinner';
-import { Text } from '@/components/ui/text';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -27,7 +26,13 @@ export default function EventDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
 
-  const { event, loading, error, refetch, deleteEvent } = useEvent(eventId);
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    deleteEvent
+  } = useEvent(eventId);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,23 +72,21 @@ export default function EventDetail() {
     setIsExpanded(v => !v);
   };
 
-  if (!event || loading) {
+  if (!data || loading) {
     return (
-      <HStack space='sm'>
-        <Spinner color={colors.indigo[500]} />
-        <Text size='md'>Loading event</Text>
-      </HStack>
-    );
+      <LoadingSpinner text='Loading Events' />
+    )
+  }
+
+  if (error) {
+      return ( <ErrorScreen error={error}/> )
   }
 
   return (
     <>
       <VStack className='flex-1'>
-        <EventHeader
-          event={event}
-          expanded={expanded}
-          onToggle={onToggleHeader}
-        />
+
+        <EventHeader eventData={data} expanded={expanded} onToggle={onToggleHeader} />
 
         {/* Votes / Guests tabs */}
         <Center className='flex-1'>
@@ -114,9 +117,8 @@ export default function EventDetail() {
         showAlertDialog={showAlertDialog}
         setShowAlertDialog={setShowAlertDialog}
         onDelete={onDeleteEvent}
-        itemName={event?.name ?? 'event'}
-        itemType='event'
-      />
+        itemName={data.event.name ?? 'event'}
+        itemType='event' />
     </>
   );
 }

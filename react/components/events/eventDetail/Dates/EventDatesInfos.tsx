@@ -6,18 +6,17 @@ import { Calendar1Icon, TimerIcon } from 'lucide-react-native';
 import { useEventDate } from '@/hooks/useEventDate';
 
 interface Props {
-  event: Pick<MusicEvent, 'startDate' | 'endDate'>;
+  event: Pick<MusicEvent, 'beginning_at' | 'ending_at'>;
 }
 
 export default function EventDatesInfos({ event }: Props) {
-  if (!event.startDate || !event.endDate) {
+  if (!event.beginning_at || !event.ending_at) {
     return null;
   }
 
-  const { start, end, rangeLabel, duration } = useEventDate(
-    event.startDate,
-    event.endDate
-  );
+  if (!event.beginning_at || !event.ending_at) { return null; }
+
+  const { start, end, rangeLabel, duration } = useEventDate(event.beginning_at, event.ending_at);
 
   return (
     <VStack space='xs'>

@@ -5,7 +5,6 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { UserInfo } from '@/types/user';
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
 import {
