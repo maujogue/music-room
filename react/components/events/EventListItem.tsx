@@ -5,24 +5,24 @@ import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { CircleIcon } from '../ui/icon';
+import { CircleIcon } from '@/components/ui/icon';
 
 
 type Props = {
-  playlist: SpotifyPlaylist;
+  event: MusicEvent;
 };
 
-export default function PlaylistListItem({ playlist }: Props) {
+export default function EventListItem({ event }: Props) {
   const getImage = () => {
     const hasValidImage =
-      Array.isArray(playlist.images) &&
-      playlist.images.length > 0 &&
-      playlist.images[0]?.url;
+      Array.isArray(event.images) &&
+      event.images.length > 0 &&
+      event.images[0]?.url;
 
     return {
       uri: hasValidImage
-        ? playlist.images[0]!.url
-        : 'https://picsum.photos/205',
+        ? event.images[0]!.url
+        : 'https://picsum.photos/111',
     };
   };
 
@@ -31,26 +31,31 @@ export default function PlaylistListItem({ playlist }: Props) {
       <Image source={getImage()} className="rounded-md h-[60px] w-[60px]" alt="Playlist avatar" />
       <VStack  className="pt-1 flex-1">
         <HStack className='justify-between'>
-          <Heading size='md' className='text-typography-800'>{playlist.name}</Heading>
+          <Heading size='md' className='text-typography-800'>{event.name}</Heading>
+
+          {/* BADGES MOCK UP HERE (0% MEANING YET) */}
           <HStack className='gap-2'>
-            {playlist.collaborative && (
+
+            {event.id.includes('2') && (
               <Badge action="info" className="rounded-full">
                 <BadgeIcon as={CircleIcon} className="" />
               </Badge>
             )}
-            {playlist.public ? (
+            {Number(event.id) % 2 == 0 ? (
               <Badge action="success" className="rounded-full">
-                <BadgeText>Public</BadgeText>
+                <BadgeText>Cool</BadgeText>
               </Badge>
             ) : (
               <Badge action="warning" className="rounded-full">
-                <BadgeText>Private</BadgeText>
+                <BadgeText>Not cool</BadgeText>
               </Badge>
             )}
           </HStack>
+          {/* BADGES MOCK UP HERE (0% MEANING YET) */}
+
         </HStack>
-        {playlist.owner?.display_name && (
-          <Text size='sm' className="text-typography-400">By {playlist.owner.display_name}</Text>
+        {event.owner?.display_name && (
+          <Text size='sm' className="text-typography-400">By {event.owner.display_name}</Text>
         )}
       </VStack>
     </Card>

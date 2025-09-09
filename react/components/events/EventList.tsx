@@ -1,13 +1,13 @@
 import { SectionList, Pressable } from 'react-native';
 import { Heading } from '@/components/ui/heading';
-import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import { Link } from 'expo-router';
+import EventListItem from '@/components/events/EventListItem';
 
 type Props = {
-  sections: PlaylistSection[];
+  sections: MusicEventSection[];
 };
 
-export default function PlaylistList({ sections }: Props) {
+export default function EventList({ sections }: Props) {
   return (
     <SectionList
       sections={sections}
@@ -15,13 +15,13 @@ export default function PlaylistList({ sections }: Props) {
       renderItem={({ item }) => (
         <Link
           href={{
-            pathname: '/(main)/playlists/[playlistId]',
-            params: { playlistId: item.id },
+            pathname: '/(main)/events/[eventId]',
+            params: { eventId: item.id },
           }}
           asChild
         >
           <Pressable>
-            <PlaylistListItem playlist={item} />
+            <EventListItem event={item} />
           </Pressable>
         </Link>
       )}

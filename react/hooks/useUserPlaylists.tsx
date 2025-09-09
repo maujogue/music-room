@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { SpotifyPlaylist } from '@/types/spotify';
 import { getSession } from '@/services/session';
 import { getCurrentUserPlaylists } from '@/services/playlist';
 
@@ -16,11 +15,6 @@ export function useUserPlaylists() {
       if (!session) throw new Error('Session retrieve error');
       const data = await getCurrentUserPlaylists();
       setPlaylists(data.items || []);
-      for (const playlist of data.items) {
-        console.log(`PLAYLIST ID [${playlist.id}]`)
-        console.log(`PLAYLIST NAME [${playlist.name}] | PUBLIC [${playlist.public}] | COLLABORATIVE [${playlist.collaborative}]`)
-      }
-      // --------------------------------
     } catch (e) {
       console.error('Error fetching playlists:', e);
       setError('fetch playlists error');

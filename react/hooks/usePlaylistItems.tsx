@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { PlaylistItemsResponse, SpotifyTrack, SpotifyTrackWithKey } from '@/types/spotify';
-
 
 export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
   const [tracks, setTracks] = useState<SpotifyTrackWithKey[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     let cancelled = false;

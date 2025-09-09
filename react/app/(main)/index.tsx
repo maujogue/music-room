@@ -1,18 +1,5 @@
-import { Text, View } from 'react-native';
-import { useAuth } from '@/contexts/authCtx';
+import { Redirect } from "expo-router";
 
-export default function Index() {
-  const { signOut } = useAuth();
-
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text
-        onPress={() => {
-          signOut();
-        }}
-      >
-        Sign Out
-      </Text>
-    </View>
-  );
+export default function redirectToEventTab() {
+  return <Redirect href={'(main)/events/'} />
 }
