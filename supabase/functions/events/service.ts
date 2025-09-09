@@ -19,3 +19,30 @@ export async function createSupabaseEvent(eventData: any): Promise<any> {
 
   return data;
 }
+
+export async function getSupabaseEventById(eventId: string): Promise<any> {
+  const { data, error } = await supabaseClient.from('events')
+    .select('*')
+    .eq('id', eventId)
+    .single();
+
+  if (error) {
+    console.error('Supabase error:', error);
+    throw new HTTPException(500, { message: `Error fetching event: ${error.message}` });
+  }
+
+  return data;
+}
+
+export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
+  const { data, error } = await supabaseClient.from('events')
+    .select('*')
+    .eq('owner_id', ownerId);
+
+  if (error) {
+    console.error('Supabase error:', error);
+    throw new HTTPException(500, { message: `Error fetching events: ${error.message}` });
+  }
+
+  return data;
+}

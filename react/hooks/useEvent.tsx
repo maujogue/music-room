@@ -19,7 +19,7 @@ export function useEvent(id: string) {
       setLoading(true);
       setError(null);
 
-      const data = MOCK_EVENTS[Number(id)];
+      const data = await getEventById(id);
       // Uncomment when ready
       // const data = await getEventById(id);
       setPlaylist(data);

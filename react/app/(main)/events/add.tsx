@@ -19,17 +19,21 @@ export default function AddNewEvent() {
       return;
     }
 
-    const resp: ApiResponse<Event> = await createEvent({
-      ...payload,
-    });
-
-    if (!resp.success) {
-      setError(resp.error ?? "Unknow API error");
+    try {
+      const resp = await createEvent({
+        ...payload,
+      });
+      console.log("Event created successfully:", resp);
+      if (router.canGoBack()) {
+          router.replace({
+          pathname: '/(main)/events/[eventId]',
+          params: { eventId: resp.id },
+      })
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      setError(`Error creating event: ${error}`);
       return;
-    }
-
-    if (router.canGoBack()) {
-      router.push('../')
     }
   }
 

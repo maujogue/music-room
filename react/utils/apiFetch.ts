@@ -46,33 +46,36 @@ export async function apiFetch<T>(
     const contentType = res.headers.get('content-type');
     const isJson = contentType?.includes('application/json');
 
-    console.log('Response status:', res.status, 'for', method, url);
-    if (!res.status.toString().startsWith('2')) {
-      const json = await res.json();
-      const errorMessage = isJson ? json.message : null;
-      const message = isJson ? json.error : null;
+      console.log("Response status:", res.status, "for", method, url);
+      if (!res.status.toString().startsWith("2")) {
+        const json = await res.json();
+        const errorMessage = isJson ? json.message : null;
+        const message = isJson ? json.error : null;
+
+        return {
+          success: false,
+          error: `${errorMessage || message || "unknown error"}`,
+          status: res.status
+        }
+
+      }
+
+      const data = isJson ? await res.json() : await res.text();
+      console.log("Response data:", data);
+
+      return { success: true, data };
+    } catch (err) {
+      let message = "Network error";
+
+      console.error("apiFetch error:", err);
+      if (err instanceof Error) {
+        message = err.message;
+      }
 
       return {
         success: false,
-        error: `${errorMessage || message || 'unknown error'}`,
-        status: res.status,
+        error: `${message}`,
+        status: undefined,
       };
     }
-
-    const data = isJson ? await res.json() : await res.text();
-
-    return { success: true, data };
-  } catch (err) {
-    let message = 'Network error';
-
-    console.error('apiFetch error:', err);
-    if (err instanceof Error) {
-      message = err.message;
-    }
-
-    return {
-      success: false,
-      error: `${message}`,
-    };
-  }
 }

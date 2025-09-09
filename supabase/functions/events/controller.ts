@@ -1,7 +1,11 @@
 import { Hono } from 'jsr:@hono/hono'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getCurrentUser, getUserToken } from '../auth.ts'
-import { createSupabaseEvent } from './service.ts'
+import {
+  createSupabaseEvent,
+  getSupabaseEventById,
+  getSupabaseEventByOwner
+} from './service.ts'
 
 export async function createEvent(c: Context): Promise<any> {
   const body = await c.req.json()
@@ -21,4 +25,26 @@ export async function createEvent(c: Context): Promise<any> {
   c.status(201)
   return c.json(event)
 }
+
+export async function fetchEvent(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const event = await getSupabaseEventById(id)
+  if (!event) {
+    throw new HTTPException(404, { message: 'Event not found' })
+  }
+
+  return c.json(event)
+}
+
+export async function fetchAllUserEvents(c: Context): Promise<any> {
+  const user = c.get('user')
+
+  const events = await getSupabaseEventByOwner(user.id)
+  if (!events) {
+    throw new HTTPException(500, { message: 'Failed to fetch events' })
+  }
+
+  return c.json(events)
+}
+
 
