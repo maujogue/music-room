@@ -1,0 +1,6 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+always go step by step, asking for confirmation and explaining for each step. when asked to create something, don't create multiple files at once without explaining its content and what will be used for.
