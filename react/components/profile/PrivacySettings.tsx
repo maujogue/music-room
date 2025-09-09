@@ -90,7 +90,6 @@ export default function PrivacySettings({
 
   return (
     <VStack className='px-3'>
-      <Heading size='sm'>{title}</Heading>
       <HStack className='w-full gap-2'>
         <HStack className='items-center gap-2 flex-1 my-1 mx-3'>
           <Text className='text-2xl'>{currentOption.icon}</Text>
