@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -24,6 +25,7 @@ import { Icon, CloseIcon, SearchIcon } from '@/components/ui/icon';
 import { useUserSearch, useFollow } from '@/hooks/useFollow';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
+import { useProfileVariant } from '@/hooks/useProfileVariant';
 
 // User type with follow status
 interface UserWithFollowStatus {
@@ -60,6 +62,7 @@ export default function UserList({
   const { user } = useAuth();
   const { follow, unfollow } = useFollow();
   const { refreshFollowingData } = useProfile();
+  const router = useRouter();
 
   // For 'all' type, use the search hook
   const { searchResults, isSearching, searchError, search } = useUserSearch();
@@ -132,6 +135,15 @@ export default function UserList({
     }
   };
 
+  const handleUserPress = (userItem: UserWithFollowStatus) => {
+    // Don't navigate to own profile
+    if (userItem.id === user?.id) return;
+
+    // Close modal and navigate to user profile
+    onClose();
+    router.push(`/profile/${userItem.id}`);
+  };
+
   const renderUser = (userItem: UserWithFollowStatus) => {
     const isCurrentUser = userItem.id === user?.id;
     const canFollow = showFollowButtons && !isCurrentUser;
@@ -139,38 +151,52 @@ export default function UserList({
     const isFriend = userItem.is_friend;
 
     return (
-      <HStack className='items-center gap-3 p-3 border-b border-typography-200'>
-        <Avatar size='md'>
-          <AvatarFallbackText>
-            {userItem.username.charAt(0).toUpperCase()}
-          </AvatarFallbackText>
-          {userItem.avatar_url && (
-            <AvatarImage source={{ uri: userItem.avatar_url }} />
-          )}
-        </Avatar>
-        <VStack className='flex-1'>
-          <Text className='text-base font-medium text-typography-900'>
-            {userItem.username}
-          </Text>
-          {isFriend && (
-            <Text className='text-sm text-primary-600 font-medium'>Friend</Text>
-          )}
-        </VStack>
-        {canFollow && (
-          <Button
-            size='sm'
-            variant={isFollowing ? 'outline' : 'solid'}
-            onPress={() => handleFollowAction(userItem)}
-            className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
-          >
-            <ButtonText
-              className={isFollowing ? 'text-primary-500' : 'text-white'}
+      <Pressable
+        onPress={() => handleUserPress(userItem)}
+        disabled={isCurrentUser}
+        className={`${isCurrentUser ? 'opacity-50' : 'active:bg-typography-50'}`}
+      >
+        <HStack className='items-center gap-3 p-3 border-b border-typography-200'>
+          <Avatar size='md'>
+            <AvatarFallbackText>
+              {userItem.username.charAt(0).toUpperCase()}
+            </AvatarFallbackText>
+            {userItem.avatar_url && (
+              <AvatarImage source={{ uri: userItem.avatar_url }} />
+            )}
+          </Avatar>
+          <VStack className='flex-1'>
+            <Text className='text-base font-medium text-typography-900'>
+              {userItem.username}
+            </Text>
+            {isFriend && (
+              <Text className='text-sm text-primary-600 font-medium'>
+                Friend
+              </Text>
+            )}
+            {isCurrentUser && (
+              <Text className='text-sm text-typography-500'>You</Text>
+            )}
+          </VStack>
+          {canFollow && (
+            <Button
+              size='sm'
+              variant={isFollowing ? 'outline' : 'solid'}
+              onPress={e => {
+                e.stopPropagation(); // Prevent row press when clicking button
+                handleFollowAction(userItem);
+              }}
+              className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
             >
-              {isFollowing ? 'Unfollow' : 'Follow'}
-            </ButtonText>
-          </Button>
-        )}
-      </HStack>
+              <ButtonText
+                className={isFollowing ? 'text-primary-500' : 'text-white'}
+              >
+                {isFollowing ? 'Unfollow' : 'Follow'}
+              </ButtonText>
+            </Button>
+          )}
+        </HStack>
+      </Pressable>
     );
   };
 
