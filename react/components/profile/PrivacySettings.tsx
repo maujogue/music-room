@@ -122,20 +122,14 @@ export default function PrivacySettings({
           <ModalBackdrop />
           <ModalContent>
             <ModalHeader>
-              <Heading size='md'>
-                Edit {title}
-              </Heading>
+              <Heading size='md'>Edit {title}</Heading>
               <ModalCloseButton>
-                <Icon
-                  as={CloseIcon}
-                  size='md'
-                />
+                <Icon as={CloseIcon} size='md' />
               </ModalCloseButton>
             </ModalHeader>
             <ModalBody>
               <VStack className='gap-3'>
                 {getAvailableOptions().map(option => (
-
                   <Button
                     key={option.value}
                     variant={

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Text, Pressable } from 'react-native';
 import { Badge } from '../ui/badge';
-import { Heading } from '../ui/heading';
 import { VStack } from '../ui/vstack';
 import {
   Select,
@@ -73,7 +72,6 @@ export default function EditMusicTastes({
   };
   return (
     <VStack className='px-3'>
-
       <HStack className='gap-2 mx-2 items-center min-h-10'>
         <HStack>
           {selectedGenres.length === 0 ? (

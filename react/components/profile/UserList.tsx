@@ -8,7 +8,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { Input, InputField } from '@/components/ui/input';
 import {
   Avatar,
-  AvatarGroup,
   AvatarImage,
   AvatarFallbackText,
 } from '@/components/ui/avatar';
@@ -43,7 +42,6 @@ export default function UserList({
   initialUsers = [],
   title,
   showFollowButtons = false,
-  targetUserId,
 }: UserListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredUsers, setFilteredUsers] =

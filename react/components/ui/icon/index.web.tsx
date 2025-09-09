@@ -66,7 +66,6 @@ export const Icon = React.forwardRef<
 
 type ParameterTypes = Omit<Parameters<typeof createIcon>[0], 'Root'>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const accessClassName = (style: any) => {
   const styleObject = Array.isArray(style) ? style[0] : style;
   const keys = Object.keys(styleObject);

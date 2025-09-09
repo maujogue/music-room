@@ -20,7 +20,7 @@ export default function PlaylistDetailLayout() {
         }}
       />
       <Stack.Screen
-        name="tracks/add"
+        name='tracks/add'
         options={({ route }) => ({
           title: route.params.playlistTitle || '',
           presentation: 'modal',

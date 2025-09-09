@@ -17,8 +17,10 @@ export function useUserPlaylists() {
       const data = await getCurrentUserPlaylists();
       setPlaylists(data.items || []);
       for (const playlist of data.items) {
-        console.log(`PLAYLIST ID [${playlist.id}]`)
-        console.log(`PLAYLIST NAME [${playlist.name}] | PUBLIC [${playlist.public}] | COLLABORATIVE [${playlist.collaborative}]`)
+        console.log(`PLAYLIST ID [${playlist.id}]`);
+        console.log(
+          `PLAYLIST NAME [${playlist.name}] | PUBLIC [${playlist.public}] | COLLABORATIVE [${playlist.collaborative}]`
+        );
       }
       // --------------------------------
     } catch (e) {
@@ -38,6 +40,4 @@ export function useUserPlaylists() {
   }, []);
 
   return { playlists, refetch, loading, error };
-};
-
-
+}

@@ -5,7 +5,6 @@ import {
   getUserFollowers,
   getUserFollowing,
   searchUsers,
-  areUsersFriends,
 } from '@/services/follow';
 
 export function useFollow(userId?: string) {
@@ -38,7 +37,7 @@ export function useFollow(userId?: string) {
         setFollowing(followingResult.data || []);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('An unexpected error occurred', err);
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +105,7 @@ export function useUserSearch() {
         setSearchResults(data || []);
       }
     } catch (err) {
-      setSearchError('An unexpected error occurred');
+      setSearchError('An unexpected error occurred', err);
       setSearchResults([]);
     } finally {
       setIsSearching(false);

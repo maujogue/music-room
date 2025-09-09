@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
+import React from 'react';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
@@ -52,31 +51,31 @@ export default function FollowingSection({
       >
         <HStack className='items-center gap-3 w-full'>
           <VStack className='flex-1 items-start'>
-              <HStack className='gap-2'>
-                {users.length > 0 ? (
-                  displayUsers.map(user => (
-                    <Avatar key={user.id} size='md'>
-                      <AvatarFallbackText>
-                        {user.username.charAt(0).toUpperCase()}
-                      </AvatarFallbackText>
-                      {user.avatar_url && (
-                        <AvatarImage source={{ uri: user.avatar_url }} />
-                      )}
-                    </Avatar>
-                  ))
-                ) : (
-                  <Text className='text-sm text-typography-500'>
-                    No {title.toLowerCase()}
-                  </Text>
-                )}
-                {remainingCount > 0 && (
-                  <Avatar size='md' className='bg-typography-300'>
-                    <AvatarFallbackText className='text-typography-600'>
-                      +{remainingCount}
+            <HStack className='gap-2'>
+              {users.length > 0 ? (
+                displayUsers.map(user => (
+                  <Avatar key={user.id} size='md'>
+                    <AvatarFallbackText>
+                      {user.username.charAt(0).toUpperCase()}
                     </AvatarFallbackText>
+                    {user.avatar_url && (
+                      <AvatarImage source={{ uri: user.avatar_url }} />
+                    )}
                   </Avatar>
-                )}
-              </HStack>
+                ))
+              ) : (
+                <Text className='text-sm text-typography-500'>
+                  No {title.toLowerCase()}
+                </Text>
+              )}
+              {remainingCount > 0 && (
+                <Avatar size='md' className='bg-typography-300'>
+                  <AvatarFallbackText className='text-typography-600'>
+                    +{remainingCount}
+                  </AvatarFallbackText>
+                </Avatar>
+              )}
+            </HStack>
           </VStack>
         </HStack>
       </Button>

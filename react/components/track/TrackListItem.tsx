@@ -7,9 +7,7 @@ import { Heading } from '@/components/ui/heading';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import {
-  SharedValue,
-} from 'react-native-reanimated';
+import { SharedValue } from 'react-native-reanimated';
 import { useRef } from 'react';
 
 type TrackListItemProps = {
@@ -31,7 +29,7 @@ export default function TrackListItem({
   track,
   onSwipeableOpen,
   renderLeftAction,
-  renderRightAction
+  renderRightAction,
 }: TrackListItemProps) {
   const swipeableRef = useRef<SwipeableMethods>(null);
 
@@ -52,32 +50,40 @@ export default function TrackListItem({
 
   return (
     <ReanimatedSwipeable
-        ref={swipeableRef}
-        renderLeftActions={
-            (prog, drag) => renderLeftAction ? renderLeftAction(prog, drag, track) : <></>
-          }
-        renderRightActions={
-            (prog, drag) => renderRightAction ? renderRightAction(prog, drag, track) : <></>
-          }
-        leftThreshold={75}
-        onSwipeableOpen={() => {
-            if (onSwipeableOpen) {
-                onSwipeableOpen();
-            }
-            setTimeout(() => {
-                swipeableRef.current?.close();
-            }, 500);
-        }}
+      ref={swipeableRef}
+      renderLeftActions={(prog, drag) =>
+        renderLeftAction ? renderLeftAction(prog, drag, track) : <></>
+      }
+      renderRightActions={(prog, drag) =>
+        renderRightAction ? renderRightAction(prog, drag, track) : <></>
+      }
+      leftThreshold={75}
+      onSwipeableOpen={() => {
+        if (onSwipeableOpen) {
+          onSwipeableOpen();
+        }
+        setTimeout(() => {
+          swipeableRef.current?.close();
+        }, 500);
+      }}
     >
-    <Card className="flex-row gap-2 p-2">
-      <Image source={getImage()} className="rounded-md h-[60px] w-[60px]" alt="Playlist avatar" />
-      <VStack  className="pt-1">
-        <Heading size='md' className='text-typography-800'>{track.name}</Heading>
-        {track.artists && (
-          <Text size='sm' className="text-typography-400">{track.artists[0].name}</Text>
-        )}
-      </VStack>
-    </Card>
+      <Card className='flex-row gap-2 p-2'>
+        <Image
+          source={getImage()}
+          className='rounded-md h-[60px] w-[60px]'
+          alt='Playlist avatar'
+        />
+        <VStack className='pt-1'>
+          <Heading size='md' className='text-typography-800'>
+            {track.name}
+          </Heading>
+          {track.artists && (
+            <Text size='sm' className='text-typography-400'>
+              {track.artists[0].name}
+            </Text>
+          )}
+        </VStack>
+      </Card>
     </ReanimatedSwipeable>
   );
 }

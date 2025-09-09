@@ -17,7 +17,6 @@ interface ProfileContextType {
   following: any[];
   followersCount: number;
   followingCount: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProfile: (updates: Partial<UserInfo>) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
   refreshFollowingData: () => Promise<void>;
@@ -183,7 +182,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const updateProfile = async (
     updates: Partial<UserInfo>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<{ error: any }> => {
     if (!user || !profile) {
       return {

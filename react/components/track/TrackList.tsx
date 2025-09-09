@@ -2,10 +2,16 @@ import React from 'react';
 import { Link, router } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button'
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { Icon, TrashIcon } from '@/components/ui/icon';
 import { AddIcon } from '@/components/ui/icon';
-import { ActivityIndicator, Text, Pressable, View, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  Text,
+  Pressable,
+  View,
+  StyleSheet,
+} from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import { deleteItemFromPlaylist } from '@/services/playlist';
 import { PlaylistItemsResponse } from '@/types/spotify';
@@ -18,7 +24,12 @@ interface Props {
   onTrackDeleted?: () => void;
 }
 
-export default function TrackList({ playlistId, playlistTitle, playlistTracks, onTrackDeleted }: Props) {
+export default function TrackList({
+  playlistId,
+  playlistTitle,
+  playlistTracks,
+  onTrackDeleted,
+}: Props) {
   const handlePress = () => {
     router.push({
       pathname: '/(main)/playlists/[playlistId]/tracks/add',
@@ -29,13 +40,16 @@ export default function TrackList({ playlistId, playlistTitle, playlistTracks, o
   if (!playlistTracks) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size='large' />
         <Text style={{ marginTop: 10 }}>Loading playlist...</Text>
       </View>
     );
   }
 
-  const { tracks, loading, error } = usePlaylistItems(playlistId, playlistTracks);
+  const { tracks, loading, error } = usePlaylistItems(
+    playlistId,
+    playlistTracks
+  );
 
   const handleSwipeableOpen = async (trackId: string) => {
     try {
@@ -61,7 +75,7 @@ export default function TrackList({ playlistId, playlistTitle, playlistTracks, o
   if (loading || !tracks) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size='large' />
         <Text style={{ marginTop: 10 }}>Loading tracks...</Text>
       </View>
     );
@@ -71,9 +85,9 @@ export default function TrackList({ playlistId, playlistTitle, playlistTracks, o
     return (
       <View style={styles.center}>
         <Text>No tracks in this playlist</Text>
-        <Button variant="solid" className="mt-4" onPress={handlePress}>
+        <Button variant='solid' className='mt-4' onPress={handlePress}>
           <ButtonText>Add First Track</ButtonText>
-          <ButtonIcon as={AddIcon} className="ml-2" />
+          <ButtonIcon as={AddIcon} className='ml-2' />
         </Button>
       </View>
     );
@@ -81,12 +95,12 @@ export default function TrackList({ playlistId, playlistTitle, playlistTracks, o
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Button variant="solid" className="mt-2" onPress={handlePress}>
+      <Button variant='solid' className='mt-2' onPress={handlePress}>
         <ButtonText>Add Track</ButtonText>
-        <ButtonIcon as={AddIcon} className="ml-2" />
+        <ButtonIcon as={AddIcon} className='ml-2' />
       </Button>
 
-      {tracks.map((item) => (
+      {tracks.map(item => (
         <Link
           key={item.__key}
           href={{
@@ -100,8 +114,8 @@ export default function TrackList({ playlistId, playlistTitle, playlistTracks, o
               track={item}
               renderRightAction={() => (
                 <Reanimated.View style={[styles.deleteAction]}>
-                  <View className="flex-1 justify-center items-end w-full p-4">
-                    <Icon as={TrashIcon} color="white" size={6} />
+                  <View className='flex-1 justify-center items-end w-full p-4'>
+                    <Icon as={TrashIcon} color='white' size={6} />
                   </View>
                 </Reanimated.View>
               )}

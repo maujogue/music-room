@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { boxStyle } from './styles';
 
@@ -18,5 +17,3 @@ const Box = React.forwardRef<HTMLDivElement, IBoxProps>(function Box(
 
 Box.displayName = 'Box';
 export { Box };
-
- 

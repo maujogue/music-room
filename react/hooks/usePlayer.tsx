@@ -3,7 +3,7 @@ import {
   pauseTrack,
   playTrack,
   skipToNextTrack,
-  getCurrentUserCurrentlyPlayingTrack
+  getCurrentUserCurrentlyPlayingTrack,
 } from '@/services/player';
 import { useFocusEffect } from '@react-navigation/native';
 

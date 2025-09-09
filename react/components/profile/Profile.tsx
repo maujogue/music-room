@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
-import { ImageSourcePropType, View, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Center } from '@/components/ui/center';
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallbackText,
-} from '@/components/ui/avatar';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
 import {
   Icon,
   ArrowLeftIcon,
   SettingsIcon,
-  EditIcon,
   CloseIcon,
 } from '@/components/ui/icon';
 import {

@@ -68,8 +68,9 @@ export default function EditProfileTextFeature({
 
   return (
     <VStack className='px-3'>
-      <HStack className={`w-full gap-2 items-center ${size === 'md' ? 'h-10' : 'h-15'}`}>
-
+      <HStack
+        className={`w-full gap-2 items-center ${size === 'md' ? 'h-10' : 'h-15'}`}
+      >
         {currentText.length > 0 ? (
           <Heading size={size} className='my-1 mx-3 flex-1'>
             {currentText}

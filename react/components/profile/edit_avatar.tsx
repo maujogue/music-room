@@ -3,7 +3,7 @@ import { supabase } from '@/services/supabase';
 import { Alert, Image, ImageSourcePropType } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { EditIcon, Icon } from '@/components/ui/icon';
 
 interface Props {

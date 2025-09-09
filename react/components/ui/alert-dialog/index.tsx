@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { createAlertDialog } from '@gluestack-ui/alert-dialog';
@@ -137,7 +136,7 @@ const AlertDialog = React.forwardRef<
       {...props}
       className={alertDialogStyle({ class: className })}
       context={{ size }}
-      pointerEvents="box-none"
+      pointerEvents='box-none'
     />
   );
 });
@@ -150,7 +149,7 @@ const AlertDialogContent = React.forwardRef<
 
   return (
     <UIAccessibleAlertDialog.Content
-      pointerEvents="auto"
+      pointerEvents='auto'
       ref={ref}
       initial={{
         scale: 0.9,

@@ -85,26 +85,26 @@ if (__DEV__) {
     try {
       // First try to sign up (create new user)
       console.log('🔄 Creating test user...');
-      const { data: signUpData, error: signUpError } =
-        await supabase.auth.signUp({
-          email: devEmail,
-          password: devPassword,
-          options: {
-            data: {
-              username: devUsername,
-            },
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: devEmail,
+        password: devPassword,
+        options: {
+          data: {
+            username: devUsername,
           },
-        });
+        },
+      });
 
       if (signUpError) {
         // If user already exists, try to sign in
         if (signUpError.message.includes('already registered')) {
           console.log('👤 User already exists, signing in...');
-          const { data: signInData, error: signInError } =
-            await supabase.auth.signInWithPassword({
+          const { error: signInError } = await supabase.auth.signInWithPassword(
+            {
               email: devEmail,
               password: devPassword,
-            });
+            }
+          );
 
           if (signInError) {
             console.error(

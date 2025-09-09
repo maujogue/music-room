@@ -3,7 +3,7 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Tabs, Stack } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';

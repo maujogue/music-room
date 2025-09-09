@@ -5,5 +5,4 @@ export type ApiError = {
 
 type ApiResponse<T> =
   | { success: true; data: T }
-  | { success: false; error: ApiError }
-
+  | { success: false; error: ApiError };
