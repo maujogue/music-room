@@ -113,44 +113,10 @@ export function useUserSearch() {
     }
   };
 
-  const handleFollowUser = async (userId: string) => {
-    const { error } = await followUser(userId);
-    if (error) {
-      setSearchError(error.message);
-      return false;
-    }
-    // Update search results to reflect the change
-    setSearchResults(prev =>
-      prev.map(user =>
-        user.id === userId ? { ...user, is_following: true } : user
-      )
-    );
-    return true;
-  };
-
-  const handleUnfollowUser = async (userId: string) => {
-    const { error } = await unfollowUser(userId);
-    if (error) {
-      setSearchError(error.message);
-      return false;
-    }
-    // Update search results to reflect the change
-    setSearchResults(prev =>
-      prev.map(user =>
-        user.id === userId
-          ? { ...user, is_following: false, is_friend: false }
-          : user
-      )
-    );
-    return true;
-  };
-
   return {
     searchResults,
     isSearching,
     searchError,
     search,
-    followUser: handleFollowUser,
-    unfollowUser: handleUnfollowUser,
   };
 }

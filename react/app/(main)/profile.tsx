@@ -13,11 +13,15 @@ import { connectToSpotify } from '@/services/auth';
 import PrivacySettings from '@/components/profile/PrivacySettings';
 import { PrivacySetting } from '@/types/user';
 import FollowingSection from '@/components/profile/FollowingSection';
+import UserList from '@/components/profile/UserList';
 import { HStack } from '@/components/ui/hstack';
 
 export default function Profile() {
   const { profile, updateProfile, followers, following } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+  const [showUserSearch, setShowUserSearch] = useState(false);
 
   const handlePressOauthSpotify = async () => {
     try {
@@ -108,10 +112,53 @@ export default function Profile() {
         />
         <Divider />
         <HStack className='gap-4 px-3'>
-          <FollowingSection users={followers} title='Followers' />
-          <FollowingSection users={following} title='Following' />
+          <FollowingSection
+            users={followers}
+            title='Followers'
+            onPress={() => setShowFollowers(true)}
+          />
+          <FollowingSection
+            users={following}
+            title='Following'
+            onPress={() => setShowFollowing(true)}
+          />
         </HStack>
+
+        {/* Find People Button */}
+        <Button
+          variant='outline'
+          className='mx-3 mt-2'
+          onPress={() => setShowUserSearch(true)}
+        >
+          <ButtonText>Find People to Follow</ButtonText>
+        </Button>
       </VStack>
+
+      {/* User List Modals */}
+      <UserList
+        onClose={() => setShowFollowers(false)}
+        type='followers'
+        initialUsers={followers}
+        title='Followers'
+        showFollowButtons={false}
+      />
+
+      <UserList
+        isOpen={showFollowing}
+        onClose={() => setShowFollowing(false)}
+        type='following'
+        initialUsers={following}
+        title='Following'
+        showFollowButtons={true}
+      />
+
+      <UserList
+        isOpen={showUserSearch}
+        onClose={() => setShowUserSearch(false)}
+        type='all'
+        title='Find People'
+        showFollowButtons={true}
+      />
     </View>
   );
 }

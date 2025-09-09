@@ -151,8 +151,28 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         setFollowers([]);
         setFollowing([]);
       } else {
-        setFollowers(followersResult.data || []);
-        setFollowing(followingResult.data || []);
+        // Add follow status to followers (they follow the current user)
+        const followersWithStatus = (followersResult.data || []).map(
+          follower => ({
+            ...follower,
+            is_follower: true,
+            is_following: false, // We don't follow them back yet
+            is_friend: false,
+          })
+        );
+
+        // Add follow status to following (we follow them)
+        const followingWithStatus = (followingResult.data || []).map(
+          followingUser => ({
+            ...followingUser,
+            is_follower: false, // They don't follow us back yet
+            is_following: true,
+            is_friend: false,
+          })
+        );
+
+        setFollowers(followersWithStatus);
+        setFollowing(followingWithStatus);
       }
     } catch (error) {
       console.error('Unexpected error fetching following data:', error);
