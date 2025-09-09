@@ -16,7 +16,7 @@ import FollowingSection from '@/components/profile/FollowingSection';
 import { HStack } from '@/components/ui/hstack';
 
 export default function Profile() {
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, followers, following } = useProfile();
   const [editProfile, setEditProfile] = useState(false);
 
   const handlePressOauthSpotify = async () => {
@@ -30,29 +30,6 @@ export default function Profile() {
   const handlePrivacyChange = async (privacy: PrivacySetting) => {
     await updateProfile({ privacy_setting: privacy });
   };
-
-  // Dummy data for testing
-  const dummyFollowers = [
-    { id: '1', username: 'alice', avatar_url: undefined },
-    { id: '2', username: 'bob', avatar_url: undefined },
-    { id: '3', username: 'charlie', avatar_url: undefined },
-    { id: '4', username: 'diana', avatar_url: undefined },
-    { id: '5', username: 'eve', avatar_url: undefined },
-    { id: '6', username: 'alice', avatar_url: undefined },
-    { id: '7', username: 'bob', avatar_url: undefined },
-    { id: '8', username: 'charlie', avatar_url: undefined },
-    { id: '9', username: 'diana', avatar_url: undefined },
-    { id: '10', username: 'eve', avatar_url: undefined },
-    { id: '11', username: 'charlie', avatar_url: undefined },
-    { id: '12', username: 'diana', avatar_url: undefined },
-    { id: '13', username: 'eve', avatar_url: undefined },
-  ];
-
-  const dummyFollowing = [
-    { id: '6', username: 'frank', avatar_url: undefined },
-    { id: '7', username: 'grace', avatar_url: undefined },
-    { id: '8', username: 'henry', avatar_url: undefined },
-  ];
 
   return (
     <View className='flex-1 pt-safe'>
@@ -131,8 +108,8 @@ export default function Profile() {
         />
         <Divider />
         <HStack className='gap-4 px-3'>
-          <FollowingSection users={dummyFollowers} title='Followers' />
-          <FollowingSection users={dummyFollowing} title='Following' />
+          <FollowingSection users={followers} title='Followers' />
+          <FollowingSection users={following} title='Following' />
         </HStack>
       </VStack>
     </View>

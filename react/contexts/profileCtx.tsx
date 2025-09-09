@@ -8,13 +8,19 @@ import {
 import { UserInfo } from '@/types/user';
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
+import { getUserFollowers, getUserFollowing } from '@/services/follow';
 
 interface ProfileContextType {
   profile: UserInfo | null;
   isLoading: boolean;
+  followers: any[];
+  following: any[];
+  followersCount: number;
+  followingCount: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateProfile: (updates: Partial<UserInfo>) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
+  refreshFollowingData: () => Promise<void>;
   clearProfile: () => void;
 }
 
@@ -31,6 +37,8 @@ export function useProfile() {
 export function ProfileProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserInfo | null>(null);
+  const [followers, setFollowers] = useState<any[]>([]);
+  const [following, setFollowing] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch profile and subscribe to realtime changes when user is authenticated
@@ -41,6 +49,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       if (!user) return;
 
       await refreshProfile();
+      await refreshFollowingData();
 
       // Subscribe to realtime changes for this user's profile
       subscription = supabase
@@ -56,6 +65,32 @@ export function ProfileProvider({ children }: PropsWithChildren) {
           () => {
             // On any change, refresh the profile
             refreshProfile();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'follows',
+            filter: `follower_id=eq.${user.id}`,
+          },
+          () => {
+            // On follow changes, refresh following data
+            refreshFollowingData();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'follows',
+            filter: `following_id=eq.${user.id}`,
+          },
+          () => {
+            // On follower changes, refresh following data
+            refreshFollowingData();
           }
         )
         .subscribe();
@@ -99,6 +134,33 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const refreshFollowingData = async () => {
+    if (!user) return;
+
+    try {
+      const [followersResult, followingResult] = await Promise.all([
+        getUserFollowers(user.id),
+        getUserFollowing(user.id),
+      ]);
+
+      if (followersResult.error || followingResult.error) {
+        console.error(
+          'Error fetching following data:',
+          followersResult.error || followingResult.error
+        );
+        setFollowers([]);
+        setFollowing([]);
+      } else {
+        setFollowers(followersResult.data || []);
+        setFollowing(followingResult.data || []);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching following data:', error);
+      setFollowers([]);
+      setFollowing([]);
+    }
+  };
+
   const updateProfile = async (
     updates: Partial<UserInfo>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -133,14 +195,21 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const clearProfile = () => {
     setProfile(null);
+    setFollowers([]);
+    setFollowing([]);
     setIsLoading(false);
   };
 
   const value: ProfileContextType = {
     profile,
     isLoading,
+    followers,
+    following,
+    followersCount: followers.length,
+    followingCount: following.length,
     updateProfile,
     refreshProfile,
+    refreshFollowingData,
     clearProfile,
   };
 
