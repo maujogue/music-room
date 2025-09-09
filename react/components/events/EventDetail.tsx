@@ -15,7 +15,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Text } from '@/components/ui/text';
 
 
-
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const [activeTab, setActiveTab] = useState<'votes' | 'guests'>('votes')

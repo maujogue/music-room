@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from "react";
 import { useProfile } from "@/contexts/profileCtx";
 import EditEventForm from "@/components/events/EditEventForm";
+import { createEvent } from "@/services/events";
 
 export default function AddNewEvent() {
   const router = useRouter()
@@ -18,11 +19,9 @@ export default function AddNewEvent() {
       return;
     }
 
-    const resp: ApiResponse<Event> = await apiFetch<Event>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/users/${profile.id}/events`,
-      {
-        method: "POST",
-        body: payload,
-      })
+    const resp: ApiResponse<Event> = await createEvent({
+      ...payload,
+    });
 
     if (!resp.success) {
       setError(resp.error ?? "Unknow API error");
