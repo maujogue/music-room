@@ -12,6 +12,8 @@ import { Divider } from '@/components/ui/divider';
 import { connectToSpotify } from '@/services/auth';
 import PrivacySettings from '@/components/profile/PrivacySettings';
 import { PrivacySetting } from '@/types/user';
+import FollowingSection from '@/components/profile/FollowingSection';
+import { HStack } from '@/components/ui/hstack';
 
 export default function Profile() {
   const { profile, updateProfile } = useProfile();
@@ -28,6 +30,29 @@ export default function Profile() {
   const handlePrivacyChange = async (privacy: PrivacySetting) => {
     await updateProfile({ privacy_setting: privacy });
   };
+
+  // Dummy data for testing
+  const dummyFollowers = [
+    { id: '1', username: 'alice', avatar_url: undefined },
+    { id: '2', username: 'bob', avatar_url: undefined },
+    { id: '3', username: 'charlie', avatar_url: undefined },
+    { id: '4', username: 'diana', avatar_url: undefined },
+    { id: '5', username: 'eve', avatar_url: undefined },
+    { id: '6', username: 'alice', avatar_url: undefined },
+    { id: '7', username: 'bob', avatar_url: undefined },
+    { id: '8', username: 'charlie', avatar_url: undefined },
+    { id: '9', username: 'diana', avatar_url: undefined },
+    { id: '10', username: 'eve', avatar_url: undefined },
+    { id: '11', username: 'charlie', avatar_url: undefined },
+    { id: '12', username: 'diana', avatar_url: undefined },
+    { id: '13', username: 'eve', avatar_url: undefined },
+  ];
+
+  const dummyFollowing = [
+    { id: '6', username: 'frank', avatar_url: undefined },
+    { id: '7', username: 'grace', avatar_url: undefined },
+    { id: '8', username: 'henry', avatar_url: undefined },
+  ];
 
   return (
     <View className='flex-1 pt-safe'>
@@ -78,16 +103,7 @@ export default function Profile() {
           isEdit={editProfile}
         />
         <Divider />
-        <PrivacySettings
-          currentSetting={profile?.privacy_setting || 'public'}
-          isEdit={editProfile}
-          onSettingChange={handlePrivacyChange}
-          publicText='Anyone can see your profile'
-          friendsText='Only people you follow back can see your profile'
-          privateText='Only you can see your profile'
-          title='Profile Visibility'
-        />
-        <Divider />
+
         <EditProfileTextFeature
           type='bio'
           currentText={profile?.bio || ''}
@@ -104,6 +120,20 @@ export default function Profile() {
           noHeader={false}
         />
         <Divider />
+        <PrivacySettings
+          currentSetting={profile?.privacy_setting || 'public'}
+          isEdit={editProfile}
+          onSettingChange={handlePrivacyChange}
+          publicText='Anyone can see your profile'
+          friendsText='Only people you follow back can see your profile'
+          privateText='Only you can see your profile'
+          title='Profile Visibility'
+        />
+        <Divider />
+        <HStack className='gap-4 px-3'>
+          <FollowingSection users={dummyFollowers} title='Followers' />
+          <FollowingSection users={dummyFollowing} title='Following' />
+        </HStack>
       </VStack>
     </View>
   );
