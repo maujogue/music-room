@@ -1,5 +1,3 @@
-import { SpotifyTrack } from '@/types/spotify';
-
 export const MOCK_TRACKS: SpotifyTrack[] = [
   {
     album: {

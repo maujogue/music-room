@@ -11,6 +11,7 @@ import { CircleIcon } from '@/components/ui/icon';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
+import EventDatesInfos from './Dates/EventDatesInfos';
 
 interface Props {
   event: MusicEvent;
@@ -19,7 +20,7 @@ interface Props {
 }
 
 const COMPACT_H = 80;
-const EXPANDED_H = 200;
+const EXPANDED_H = 210;
 
 export default function EventHeader({ event, expanded, onToggle }: Props) {
 
@@ -60,17 +61,17 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
 
   const chevronStyle = useAnimatedStyle(() => {
     return {
-      opacity: withTiming(expanded ? 1 : 0.3, { duration: 200 })
+      opacity: withTiming(expanded ? 1 : 0.5, { duration: 200 })
     }
   })
 
   return (
     <Animated.View style={containerStyle} className="bg-indigo-100">
       <Card className="rounded-lg bg-transparent gap-2" variant="elevated">
-        <HStack className="gap-2 ">
+        <HStack className="gap-2 items-top">
           <Image source={getImage()} className="rounded-md h-[60px] w-[60px]" alt="Playlist avatar" />
-          <VStack className="pt-1 flex-1">
-            <HStack className='justify-between'>
+          <VStack className="flex-1">
+            <HStack className='justify-between items-center'>
               <Heading size='md' className='text-typography-800'>{event.name}</Heading>
               <Badge size='sm' action={event.isPublic ? "info" : "warning"} className="rounded-full h-6">
                 <BadgeIcon size="md" as={event.isPublic ? CircleIcon : CloseCircleIcon} />
@@ -78,7 +79,10 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
               </Badge>
               <Button variant="link" onPress={onToggle} accessibilityRole='button' >
                 <Animated.View style={chevronStyle}>
-                  <Icon as={expanded ? ChevronDownIcon : ChevronUpIcon} size="sm" />
+                  <Badge size='md' className="rounded-xl bg-indigo-200">
+                    <BadgeIcon size="md" as={expanded ? ChevronDownIcon : ChevronUpIcon} />
+                  </Badge>
+                  {/* <Icon as={expanded ? ChevronDownIcon : ChevronUpIcon} size="sm" /> */}
                 </Animated.View>
               </Button>
             </HStack>
@@ -89,9 +93,10 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
         </HStack>
 
         {/* Expanded CONTENT */}
-        <Animated.View style={extraStyle} className="">
-          <HStack className='justify-between' >
+        <Animated.View style={extraStyle} className="mt-2">
+          <HStack className='justify-between items-top' >
             <EventLocationInfo location={event.location} />
+            <EventDatesInfos event={event} />
           </HStack>
         </Animated.View>
 

@@ -1,47 +1,26 @@
-import { getSession } from '@/services/session'
+import { apiFetch } from '@/utils/apiFetch';
 
 export async function getEventById(id: string) {
-  const session = await getSession();
-  const data = await fetch(
+  const res = await apiFetch<MusicEvent>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`, {
     method: 'GET',
-    headers: {
-      Authorization: `Bearer ${session?.access_token}`,
-      },
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .catch(error => {
-      console.error('Error fetching event:', error);
-      throw error;
-    });
-  return data;
+  })
+
+  if (!res.success) {
+		console.error('Error fetching Event:', res.error);
+		throw res.error;
+	}
+	return res.data;
 }
 
 export async function deleteEventById(id: string) {
-  const session = await getSession();
-  const data = await fetch(
+  const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`, {
     method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${session?.access_token}`,
-      'Content-Type': 'application/json',
-      },
     })
-    .then(async response => {
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`Delete failed (status ${response.status}): ${errorBody}`);
-      }
-      return response.json();
-    })
-    .catch(error => {
-      console.error('Error deleting vent:', error);
-      throw error;
-    });
-  return data;
+
+  if (!res.success) {
+		console.error('Error deleting Event:', res.error);
+		throw res.error;
+	}
 }

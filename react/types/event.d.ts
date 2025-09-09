@@ -6,6 +6,10 @@ type MusicEvent = {
   isPublic: boolean;
   location: MusicEventLocation
   // playlistId: string;
+
+  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  startDate: string;
+  endDate: string;
 };
 
 type Coordinates = {
@@ -29,3 +33,14 @@ type MusicEventSection = {
 type MusicEventPayload = {
   name: string;
 };
+
+type EventDateLabels = {
+  start: {date:string; time?:string, full:string};
+  end: {date:string; time?:string, full:string};
+  rangeLabel: string;
+  duration: { ms: number; minutes: number; hours: number; human: string};
+  isSameDay: boolean;
+  isCurrentYear: boolean;
+  timezone: string;
+  locale: string;
+}

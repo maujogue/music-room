@@ -28,14 +28,13 @@ export default function EventLocationInfo({ location }: Props) {
   }
 
   return (
-    <VStack className="gap-2 p-2">
+    <VStack className="gap-2">
 
       {venueName && (
         <Badge size="md" action="info" className="rounded-xl h-6">
           <BadgeIcon as={ShellIcon} size="lg" />
           <BadgeText className="pl-1 font-bold">{venueName}</BadgeText>
         </Badge>
-
       )}
 
       {(address || city || country) && (

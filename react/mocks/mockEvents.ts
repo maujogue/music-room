@@ -22,6 +22,8 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: "Paris",
       country: "France"
     },
+    startDate: "2025-10-12T20:00:00Z",
+    endDate: "2025-10-12T23:00:00Z",
   },
   {
     id: "1",
@@ -44,7 +46,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "Broadway & W 47th St",
       city: "New York",
       country: "United States"
-    }
+    },
+    startDate: "2025-11-01T19:30:00Z",
+    endDate: "2025-11-01T22:30:00Z",
   },
   {
     id: "2",
@@ -67,7 +71,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "1111 S Figueroa St",
       city: "Los Angeles",
       country: "United States"
-    }
+    },
+    startDate: "2025-12-05T21:00:00Z",
+    endDate: "2025-12-06T00:00:00Z"
   },
   {
     id: "3",
@@ -90,7 +96,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "2 Chome-3 Kitanomarukoen",
       city: "Tokyo",
       country: "Japan"
-    }
+    },
+    startDate: "2026-01-18T18:00:00Z",
+    endDate: "2026-01-18T21:00:00Z"
   },
   {
     id: "4",
@@ -113,7 +121,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "Bennelong Point",
       city: "Sydney",
       country: "Australia"
-    }
+    },
+    startDate: "2025-12-15T22:00:00Z",
+    endDate: "2025-12-15T04:00:00Z",
   },
   {
     id: "5",
@@ -136,7 +146,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "Av. Francisco Matarazzo, 1705",
       city: "São Paulo",
       country: "Brazil"
-    }
+    },
+    startDate: "2026-02-10T21:00:00Z",
+    endDate: "2026-02-10T21:30:00Z",
   },
   {
     id: "6",
@@ -159,7 +171,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       address: "Mercedes-Platz 1",
       city: "Berlin",
       country: "Germany"
-    }
+    },
+    startDate: "2025-11-20T19:00:00Z",
+    endDate: "2025-11-20T22:00:00Z",
   },
 
 
