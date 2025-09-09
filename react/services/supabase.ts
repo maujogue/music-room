@@ -70,3 +70,63 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+// Create test user in development
+if (__DEV__) {
+  const createTestUser = async () => {
+    const devEmail =
+      process.env.EXPO_PUBLIC_DEV_EMAIL || 'musicroom@gmail.com';
+    const devPassword = process.env.EXPO_PUBLIC_DEV_PASSWORD || 'musicroom';
+    const devUsername = process.env.EXPO_PUBLIC_DEV_USERNAME || 'musicroom';
+
+    try {
+      // First try to sign up (create new user)
+      console.log('🔄 Creating test user...');
+      const { data: signUpData, error: signUpError } =
+        await supabase.auth.signUp({
+          email: devEmail,
+          password: devPassword,
+          options: {
+            data: {
+              username: devUsername,
+            },
+          },
+        });
+
+      if (signUpError) {
+        // If user already exists, try to sign in
+        if (signUpError.message.includes('already registered')) {
+          console.log('👤 User already exists, signing in...');
+          const { data: signInData, error: signInError } =
+            await supabase.auth.signInWithPassword({
+              email: devEmail,
+              password: devPassword,
+            });
+
+          if (signInError) {
+            console.error(
+              '❌ Error signing in existing user:',
+              signInError.message
+            );
+          } else {
+            console.log('✅ Successfully signed in existing test user');
+            console.log(`📧 Email: ${devEmail}`);
+            console.log(`👤 Username: ${devUsername}`);
+          }
+        } else {
+          console.error('❌ Error creating test user:', signUpError.message);
+        }
+      } else {
+        console.log('✅ Test user created successfully!');
+        console.log(`📧 Email: ${devEmail}`);
+        console.log(`🔑 Password: ${devPassword}`);
+        console.log(`👤 Username: ${devUsername}`);
+      }
+    } catch (error) {
+      console.error('❌ Unexpected error during user setup:', error);
+    }
+  };
+
+  // Create test user when Supabase client is initialized
+  createTestUser();
+}

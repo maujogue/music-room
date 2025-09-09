@@ -73,10 +73,6 @@ start-supabase:
 	fi
 	@echo ""
 	@echo "🌱 Running seed file..."
-	@if [ -f "supabase/seed.sql" ]; then \
-		echo "✅ Seed file found and will be applied with migrations"; \
-	else \
-		echo "⚠️  No seed file found"; \
 	fi
 	@echo ""
 
