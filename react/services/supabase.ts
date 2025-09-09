@@ -74,11 +74,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Create test user in development
 if (__DEV__) {
   const createTestUser = async () => {
-    const devEmail =
-      process.env.EXPO_PUBLIC_DEV_EMAIL || 'musicroom@gmail.com';
+    const devEmail = process.env.EXPO_PUBLIC_DEV_EMAIL || 'musicroom@gmail.com';
     const devPassword = process.env.EXPO_PUBLIC_DEV_PASSWORD || 'musicroom';
     const devUsername = process.env.EXPO_PUBLIC_DEV_USERNAME || 'musicroom';
 
+    const session = await supabase.auth.getSession();
+    if (session) {
+      return;
+    }
     try {
       // First try to sign up (create new user)
       console.log('🔄 Creating test user...');
