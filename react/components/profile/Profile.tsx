@@ -12,17 +12,30 @@ import {
 } from '@/components/ui/avatar';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
-import { Icon, ArrowLeftIcon } from '@/components/ui/icon';
+import {
+  Icon,
+  ArrowLeftIcon,
+  SettingsIcon,
+  EditIcon,
+  CloseIcon,
+} from '@/components/ui/icon';
+import {
+  Menu,
+  MenuItem,
+  MenuItemLabel,
+  MenuSeparator,
+} from '@/components/ui/menu';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
 import { useFollow } from '@/hooks/useFollow';
 import { supabase } from '@/services/supabase';
+import { connectToSpotify } from '@/services/auth';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
+import EditAvatar from '@/components/profile/edit_avatar';
 import PrivacySettings from '@/components/profile/PrivacySettings';
 import FollowingSection from '@/components/profile/FollowingSection';
-import UserList from '@/components/profile/UserList';
 import { PrivacySetting } from '@/types/user';
 import vibingImg from '@/assets/vibing.jpg';
 
@@ -62,7 +75,7 @@ export default function Profile({
   onBack,
 }: ProfileProps) {
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, signOut } = useAuth();
   const {
     profile: ownProfile,
     updateProfile,
@@ -71,9 +84,6 @@ export default function Profile({
   } = useProfile();
   const { handleFollowUser, handleUnfollowUser } = useFollow();
   const [editProfile, setEditProfile] = useState(false);
-  const [showFollowers, setShowFollowers] = useState(false);
-  const [showFollowing, setShowFollowing] = useState(false);
-  const [showUserSearch, setShowUserSearch] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +102,7 @@ export default function Profile({
 
   const handlePressOauthSpotify = async () => {
     try {
-      // Add Spotify OAuth logic here
-      console.log('Connect to Spotify');
+      await connectToSpotify();
     } catch (error) {
       console.error('Error during Spotify OAuth:', error);
     }
@@ -285,27 +294,59 @@ export default function Profile({
       )}
 
       <VStack className='justify-center items-center p-6 gap-4'>
-        {/* Edit/Connect Buttons - Only for own profile */}
+        {/* Settings and Edit Profile Buttons - Only for own profile */}
         {canEdit && (
-          <View className='flex-row justify-between mt-2 w-full'>
-            <Button
-              className={`w-35 h-8 ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-              size='sm'
-              onPress={handlePressOauthSpotify}
-            >
-              <ButtonText className='text-white'>
-                Connect with Spotify
-              </ButtonText>
-            </Button>
-            <Button
-              className={`w-28 h-8 ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-              size='sm'
-              onPress={() => setEditProfile(!editProfile)}
-            >
-              <ButtonText className='text-white'>
-                {editProfile ? 'Save' : 'Edit Profile'}
-              </ButtonText>
-            </Button>
+          <View className='flex-row justify-between mt-2 w-full gap-3'>
+            {/* Settings Menu */}
+            <View className='flex-1'>
+              <Menu
+                trigger={({ ...triggerProps }) => (
+                  <Button
+                    {...triggerProps}
+                    variant='outline'
+                    className='w-full border-primary-500'
+                  >
+                    <ButtonText className='text-primary-500'>
+                      Settings
+                    </ButtonText>
+                  </Button>
+                )}
+              >
+                <MenuItem
+                  textValue='Connect Spotify Account'
+                  onPress={() => {
+                    handlePressOauthSpotify();
+                  }}
+                >
+                  <Icon as={SettingsIcon} size='sm' className='mr-3' />
+                  <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
+                </MenuItem>
+
+                <MenuSeparator />
+
+                <MenuItem
+                  textValue='Logout'
+                  onPress={() => {
+                    signOut();
+                  }}
+                >
+                  <Icon as={CloseIcon} size='sm' className='mr-3' />
+                  <MenuItemLabel>Logout</MenuItemLabel>
+                </MenuItem>
+              </Menu>
+            </View>
+
+            {/* Edit Profile Button */}
+            <View className='flex-1'>
+              <Button
+                className={`w-full ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
+                onPress={() => setEditProfile(!editProfile)}
+              >
+                <ButtonText className='text-white'>
+                  {editProfile ? 'Save' : 'Edit Profile'}
+                </ButtonText>
+              </Button>
+            </View>
           </View>
         )}
 
@@ -332,14 +373,16 @@ export default function Profile({
 
         {/* Avatar */}
         <Center>
-          <Avatar size='2xl'>
-            <AvatarFallbackText>
-              {profile.username.charAt(0).toUpperCase()}
-            </AvatarFallbackText>
-            {profile.avatar_url && (
-              <AvatarImage source={{ uri: profile.avatar_url }} />
-            )}
-          </Avatar>
+          <EditAvatar
+            url={profile.avatar_url || vibingImg}
+            onUpload={url => {
+              if (isOwnProfile) {
+                console.log('Uploading avatar', url);
+                updateProfile({ avatar_url: url });
+              }
+            }}
+            isEdit={canEdit && editProfile}
+          />
         </Center>
       </VStack>
 
@@ -350,7 +393,6 @@ export default function Profile({
           currentText={profile?.username || ''}
           size='4xl'
           isEdit={canEdit && editProfile}
-          noHeader={true}
         />
 
         {/* Music Genre */}
@@ -370,7 +412,6 @@ export default function Profile({
               currentText={profile?.bio || ''}
               size='md'
               isEdit={canEdit && editProfile}
-              noHeader={false}
             />
             <Divider />
           </>
@@ -384,7 +425,6 @@ export default function Profile({
               currentText={profile?.email || ''}
               size='md'
               isEdit={canEdit && editProfile}
-              noHeader={false}
             />
             <Divider />
           </>
@@ -413,12 +453,12 @@ export default function Profile({
               <FollowingSection
                 users={profileFollowers}
                 title='Followers'
-                onPress={() => setShowFollowers(true)}
+                onPress={() => router.push(`/profile/${userId}/followers`)}
               />
               <FollowingSection
                 users={profileFollowing}
                 title='Following'
-                onPress={() => setShowFollowing(true)}
+                onPress={() => router.push(`/profile/${userId}/following`)}
               />
             </HStack>
 
@@ -427,7 +467,7 @@ export default function Profile({
               <Button
                 variant='outline'
                 className='mx-3 mt-2'
-                onPress={() => setShowUserSearch(true)}
+                onPress={() => router.push('/profile/search')}
               >
                 <ButtonText>Find People to Follow</ButtonText>
               </Button>
@@ -447,33 +487,6 @@ export default function Profile({
           </VStack>
         )}
       </VStack>
-
-      {/* User List Modals */}
-      <UserList
-        isOpen={showFollowers}
-        onClose={() => setShowFollowers(false)}
-        type='followers'
-        initialUsers={profileFollowers}
-        title='Followers'
-        showFollowButtons={false}
-      />
-
-      <UserList
-        isOpen={showFollowing}
-        onClose={() => setShowFollowing(false)}
-        type='following'
-        initialUsers={profileFollowing}
-        title='Following'
-        showFollowButtons={true}
-      />
-
-      <UserList
-        isOpen={showUserSearch}
-        onClose={() => setShowUserSearch(false)}
-        type='all'
-        title='Find People'
-        showFollowButtons={true}
-      />
     </View>
   );
 }

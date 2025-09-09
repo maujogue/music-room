@@ -110,7 +110,7 @@ export default function PrivacySettings({
               setShowModal(true);
             }}
             size='sm'
-            className='bg-transparent'
+            className='bg-transparent '
           >
             <ButtonText>
               <Icon as={EditIcon} size='md' color='black' />

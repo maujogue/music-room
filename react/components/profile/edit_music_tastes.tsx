@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Text, Pressable } from 'react-native';
 import { Badge } from '../ui/badge';
+import { Heading } from '../ui/heading';
+import { VStack } from '../ui/vstack';
 import {
   Select,
   SelectItem,
@@ -69,83 +71,84 @@ export default function EditMusicTastes({
       console.error('Error updating genres:', error);
     }
   };
-
   return (
-    <HStack className='gap-2 mx-2 items-center h-10'>
-      <HStack>
-        {selectedGenres.length === 0 ? (
-          <Text style={{ color: '#888' }}>No genres selected</Text>
-        ) : (
-          selectedGenres.map(value => {
-            const genre = MUSIC_GENRES.find(g => g.value === value);
-            if (!genre) return null;
-            const badgeColor = genre.color || '#ccc';
-            return (
-              <Pressable
-                key={value}
-                onPress={() => isEdit && handleRemove(value)}
-                style={{ marginRight: 8 }}
-                accessibilityRole='button'
-                accessibilityLabel={`Remove ${genre.label}`}
-              >
-                <Badge
-                  style={{
-                    backgroundColor: badgeColor,
-                  }}
+    <VStack className='px-3'>
+
+      <HStack className='gap-2 mx-2 items-center min-h-10'>
+        <HStack>
+          {selectedGenres.length === 0 ? (
+            <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>
+              No genres selected
+            </Text>
+          ) : (
+            selectedGenres.map(value => {
+              const genre = MUSIC_GENRES.find(g => g.value === value);
+              if (!genre) return null;
+              const badgeColor = genre.color || '#ccc';
+              return (
+                <Pressable
+                  key={value}
+                  onPress={() => isEdit && handleRemove(value)}
+                  style={{ marginRight: 8 }}
+                  accessibilityRole='button'
+                  accessibilityLabel={`Remove ${genre.label}`}
                 >
-                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-                    {genre.label}{' '}
-                    {isEdit && (
-                      <Text style={{ color: '#fff', fontWeight: 'normal' }}>
-                        ×
-                      </Text>
-                    )}
-                  </Text>
-                </Badge>
-              </Pressable>
-            );
-          })
+                  <Badge
+                    style={{
+                      backgroundColor: badgeColor,
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                      {genre.label}{' '}
+                      {isEdit && (
+                        <Text style={{ color: '#fff', fontWeight: 'normal' }}>
+                          ×
+                        </Text>
+                      )}
+                    </Text>
+                  </Badge>
+                </Pressable>
+              );
+            })
+          )}
+        </HStack>
+        {isEdit && (
+          <Select
+            className='ml-auto'
+            onValueChange={async (value: string) => {
+              await handleSelect(value);
+            }}
+          >
+            <SelectTrigger variant='underlined' size='md'>
+              <SelectInput
+                placeholder={`Add genres (${selectedGenres.length}/3)`}
+                value=''
+                editable={false}
+                pointerEvents='none'
+              />
+              <SelectIcon className='mr-3' as={ChevronDownIcon} />
+            </SelectTrigger>
+            <SelectPortal>
+              <SelectBackdrop />
+              <SelectContent>
+                <SelectDragIndicatorWrapper>
+                  <SelectDragIndicator />
+                </SelectDragIndicatorWrapper>
+                {MUSIC_GENRES.filter(
+                  genre => !selectedGenres.includes(genre.value)
+                ).map(genre => (
+                  <SelectItem
+                    key={genre.value}
+                    label={genre.label}
+                    value={genre.value}
+                    isSelected={false}
+                  />
+                ))}
+              </SelectContent>
+            </SelectPortal>
+          </Select>
         )}
       </HStack>
-      {isEdit && (
-        <Select
-          className='ml-auto'
-          // The value is not controlled here, since we want multi-select behavior
-          // We use onSelectItem to handle selection
-          onValueChange={async (value: string) => {
-            console.log('onValueChange', value);
-            await handleSelect(value);
-          }}
-        >
-          <SelectTrigger variant='underlined' size='md'>
-            <SelectInput
-              placeholder={`Add genres (${selectedGenres.length}/3)`}
-              value=''
-              editable={false}
-              pointerEvents='none'
-            />
-            <SelectIcon className='mr-3' as={ChevronDownIcon} />
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectBackdrop />
-            <SelectContent>
-              <SelectDragIndicatorWrapper>
-                <SelectDragIndicator />
-              </SelectDragIndicatorWrapper>
-              {MUSIC_GENRES.filter(
-                genre => !selectedGenres.includes(genre.value)
-              ).map(genre => (
-                <SelectItem
-                  key={genre.value}
-                  label={genre.label}
-                  value={genre.value}
-                  isSelected={false}
-                />
-              ))}
-            </SelectContent>
-          </SelectPortal>
-        </Select>
-      )}
-    </HStack>
+    </VStack>
   );
 }

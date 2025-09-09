@@ -3,11 +3,11 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Tabs } from 'expo-router';
+import { Tabs, Stack } from 'expo-router';
 import { Text } from 'react-native';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
-import {  PlayIcon, Icon } from '@/components/ui/icon';
+import { PlayIcon, Icon } from '@/components/ui/icon';
 
 export default function AppLayout() {
   return (
@@ -24,7 +24,7 @@ export default function AppLayout() {
           name='playlists'
           options={{
             title: 'Playlists',
-            tabBarIcon: () => <Icon as={PlayIcon} size="md" />,
+            tabBarIcon: () => <Icon as={PlayIcon} size='md' />,
           }}
         />
         <Tabs.Screen

@@ -28,19 +28,18 @@ import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
 import { useProfile } from '@/contexts/profileCtx';
 import { UserInfo } from '@/types/user';
+import { Text } from '../ui/text';
 
 export default function EditProfileTextFeature({
   type,
   currentText,
   size,
   isEdit,
-  noHeader,
 }: {
   type: 'bio' | 'email' | 'username';
   currentText: string;
   size: 'sm' | 'md' | 'lg' | 'xl' | undefined;
   isEdit: boolean;
-  noHeader: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
   const [text, setText] = useState(currentText);
@@ -69,11 +68,17 @@ export default function EditProfileTextFeature({
 
   return (
     <VStack className='px-3'>
-      {!noHeader && <Heading size='sm'>{type}</Heading>}
-      <HStack className='w-full gap-2'>
-        <Heading size={size} className='my-1 mx-3 flex-1'>
-          {currentText}
-        </Heading>
+      <HStack className={`w-full gap-2 items-center ${size === 'md' ? 'h-10' : 'h-15'}`}>
+
+        {currentText.length > 0 ? (
+          <Heading size={size} className='my-1 mx-3 flex-1'>
+            {currentText}
+          </Heading>
+        ) : (
+          <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>
+            No {type} yet
+          </Text>
+        )}
 
         {isEdit && (
           <Button

@@ -12,7 +12,7 @@ interface Props {
   isEdit: boolean;
 }
 
-export default function Avatar({ url, onUpload, isEdit }: Props) {
+export default function EditAvatar({ url, onUpload, isEdit }: Props) {
   const [uploading, setUploading] = useState(false);
 
   async function uploadAvatar() {
@@ -78,10 +78,13 @@ export default function Avatar({ url, onUpload, isEdit }: Props) {
         resizeMode='cover'
       />
       {isEdit && (
-        <Button onPress={uploadAvatar} size='sm' className='right-0 absolute'>
-          <ButtonText disabled={uploading}>
-            <Icon as={EditIcon} size='md' color='white' />
-          </ButtonText>
+        <Button
+          onPress={uploadAvatar}
+          size='sm'
+          className='right-0 absolute'
+          disabled={uploading}
+        >
+          <Icon as={EditIcon} size='md' color='white' />
         </Button>
       )}
     </HStack>
