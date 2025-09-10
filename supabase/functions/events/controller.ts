@@ -64,14 +64,20 @@ export async function updateEventById(c: Context): Promise<any> {
   const user = c.get('user')
   const { locationData, ...eventData } = body;
 
-  const events = await getSupabaseEventByOwner(user.id)
-  const event = events.find((e: any) => e.id === id)
-  if (!event) {
-    throw new HTTPException(403, { message: 'You do not have permission to update this event' })
+  const data = await getSupabaseEventById(id)
+  if (!data) {
+    c.status(404)
+    return c.json({ error: 'Event not found' })
+  }
+  console.log('Fetched event for update:', data.event.owner_id, user.id);
+  if (data.event.owner_id !== user.id) {
+    c.status(403)
+    return c.json({ error: 'You do not have permission to update this event' })
   }
   const updated = await updateSupabaseEventById(id, eventData, locationData)
   if (!updated) {
-    throw new HTTPException(500, { message: 'Failed to update event' })
+    c.status(500)
+    return c.json({ error: 'Failed to update event' })
   }
 
   return c.json(updated)

@@ -25,7 +25,8 @@ export async function getSupabaseEventById(eventId: string): Promise<any> {
 
   if (error) {
     console.error('Supabase error:', error);
-    throw new HTTPException(500, { message: `Error fetching event: ${error.message}` });
+    const response = new Response('Event not found', { status: 404 });
+    throw new HTTPException(404, { res: response });
   }
 
   return data;
@@ -57,22 +58,43 @@ export async function deleteSupabaseEventById(eventId: string): Promise<boolean>
   return true;
 }
 
-export async function updateSupabaseEventById(eventId: string, eventData: any, locationData: any): Promise<any> {
-  const { data, error } = await supabaseClient
-    .from('events')
-    .update(eventData)
-    .eq('id', eventId)
-    .select();
+export async function updateSupabaseEventById(
+  eventId: string,
+  eventData?: Record<string, any>,
+  locationData?: Record<string, any>
+): Promise<{ event: any; location: any }> {
+  console.log('Updating event:', eventId, eventData, locationData);
 
-  const { data: locData, error: locError } = await supabaseClient
-    .from('location')
-    .update(locationData)
-    .eq('event_id', eventId)
-    .select();
+  let eventResult = null;
+  let locationResult = null;
 
-  if (error || locError) {
-    console.error('Supabase error:', error || locError);
-    throw new HTTPException(500, { message: `Error updating event: ${error?.message || locError?.message}` });
+  if (eventData && Object.keys(eventData).length > 0) {
+    const { data, error } = await supabaseClient
+      .from('events')
+      .update(eventData)
+      .eq('id', eventId)
+      .select();
+
+    if (error) {
+      console.error('Supabase event update error:', error);
+      throw new HTTPException(500, { message: `Error updating event: ${error.message}` });
+    }
+    eventResult = data;
   }
-  return data;
+
+  if (locationData && Object.keys(locationData).length > 0) {
+    const { data, error } = await supabaseClient
+      .from('location')
+      .update(locationData)
+      .eq('event_id', eventId)
+      .select();
+
+    if (error) {
+      console.error('Supabase location update error:', error);
+      throw new HTTPException(500, { message: `Error updating location: ${error.message}` });
+    }
+    locationResult = data;
+  }
+
+  return { event: eventResult, location: locationResult };
 }

@@ -3,33 +3,27 @@ import { useRouter } from 'expo-router';
 import { useState } from "react";
 import { useProfile } from "@/contexts/profileCtx";
 import EditEventForm from "@/components/events/EditEventForm";
-import { createEvent } from "@/services/events";
+import { updateEvent } from "@/services/events";
+import { useLocalSearchParams } from "expo-router";
 
-export default function AddEvent() {
+export default function EditEvent() {
   const router = useRouter()
   const [error, setError] = useState<string>('')
   const { profile } = useProfile();
-  const [eventId, setEventId] = useState<string | null>(null);
+  const { eventId: eventId } = useLocalSearchParams();
 
   const onSubmit = async (payload: EventPayload) => {
-
-	console.log("HERE IMPLEMENT POST NEW EVENT TO BACK")
-
 	if (!profile) {
 	  setError("Authentification error, try reconnect with Spotify please");
 	  return;
 	}
 
 	try {
-	  const resp = await createEvent({
+	  const resp = await updateEvent(eventId, {
 		...payload,
 	  });
-	  console.log("Event created successfully:", resp);
 	  if (router.canGoBack()) {
-		  router.replace({
-		  pathname: '/(main)/events/[eventId]',
-		  params: { eventId: resp.id },
-	  })
+		  router.back();
 	  }
 	} catch (error) {
 	  console.error("Error creating event:", error);

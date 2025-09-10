@@ -52,3 +52,17 @@ export async function getCurrentUserEvents() {
   }
   return res.data;
 }
+
+export async function updateEvent(id: string, payload: EventPayload) {
+  const res = await apiFetch<Event>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`, {
+    method: 'PUT',
+    body: payload,
+  })
+
+  if (!res.success) {
+    console.error('Error updating Event:', res.error);
+    throw res.error;
+  }
+  return res.data;
+}

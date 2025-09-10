@@ -19,6 +19,7 @@ type Props = {
 
 export default function EditEventForm({initialValues = {}, ApiError,  onSubmit}: Props) {
   const [name, setName] = useState(initialValues.name ?? '');
+  const [description, setDescription] = useState(initialValues.description ?? '');
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,6 +60,10 @@ export default function EditEventForm({initialValues = {}, ApiError,  onSubmit}:
             <InputField placeholder="Supacool event"
               value={name} onChangeText={setName} autoCapitalize="sentences" />
           </Input>
+          <Textarea>
+            <TextareaInput placeholder="Event description"
+              value={description} onChangeText={setDescription} autoCapitalize="sentences" />
+          </Textarea>
         </Box>
 
         {error ? (
