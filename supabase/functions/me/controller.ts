@@ -6,7 +6,13 @@ import {
   startPlayback,
   pausePlayback,
   skipToNextTrack
-} from './service.ts'
+} from './services/spotify.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL'),
+  Deno.env.get('EXPO_PUBLIC_SUPABASE_ANON_KEY')!
+);
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const spotify_token = c.get('spotify_token')
@@ -114,15 +120,22 @@ export async function updateCurrentUserProfile(c: Context) {
     return c.json({ error: 'Authentication required' }, 401)
   }
 
-  const { userId, updates } = await c.req.json()
+  const body = await c.req.parseBody()
+  const dataToUpdate = body['updates']
+  console.log("body", body)
+
+
+  console.log("updates", dataToUpdate)
+  console.log("user.id", user.id)
 
   const { data, error } = await supabase
     .from('profiles')
-    .update(updates)
-    .eq('id', userId)
+    .update(dataToUpdate)
+    .eq('id', user.id)
     .select()
-    .single()
 
+  console.log("error =", error)
+  console.log("data =", data)
   if (error) {
     console.error('Error updating profile:', error)
     throw new HTTPException(500, { message: `Error updating profile:', ${error}`})

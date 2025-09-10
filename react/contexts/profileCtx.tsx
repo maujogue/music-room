@@ -115,16 +115,16 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     setIsLoading(true);
     try {
       const session  = await getSession()
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('updates', JSON.stringify(updates)); // updates peut rester en stringifié si c'est un objet
+
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/profile`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({
-          userId: user.id,
-          updates: updates
-        })
+        body: formData
       });
 
       const result = await response.json();

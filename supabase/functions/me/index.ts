@@ -11,8 +11,7 @@ import { getCurrentUser, getUserToken } from '../auth.ts';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import meRoutes from './routes.ts';
 
-const functionName = "me"
-const app = new Hono().basePath(`/${functionName}`)
+const app = new Hono()
 
 serve(app.fetch);
 
@@ -28,6 +27,7 @@ app.use('*', async (c, next) => {
     c.set('spotify_token', token);
     await next();
   } catch (err) {
+    console.log("err", err)
     return c.json({ error: err.message }, 401);
   }
 });
