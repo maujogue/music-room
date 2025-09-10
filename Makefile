@@ -64,21 +64,7 @@ start-supabase:
 	@echo "🚀 Starting Supabase services..."
 	npx supabase start
 	@echo "✅ Supabase services started!"
-	@echo ""
-	@echo "🔄 Applying database migrations..."
-	@if npx supabase db push > /dev/null 2>&1; then \
-		echo "✅ Migrations applied successfully!"; \
-	else \
-		echo "⚠️  No new migrations to apply or migration failed"; \
-	fi
-	@echo ""
-	@echo "🌱 Running seed file..."
-	@if [ -f "supabase/seed.sql" ]; then \
-		echo "✅ Seed file found and will be applied with migrations"; \
-	else \
-		echo "⚠️  No seed file found"; \
-	fi
-	@echo ""
+
 
 # Stop local Supabase services
 stop-supabase:

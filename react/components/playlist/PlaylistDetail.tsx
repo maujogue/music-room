@@ -1,4 +1,9 @@
-import { useLocalSearchParams, useNavigation, useRouter, useFocusEffect } from 'expo-router';
+import {
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+  useFocusEffect,
+} from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/track/TrackList';
@@ -16,18 +21,12 @@ import DeleteAlert from '@/components/generics/DeleteAlert';
 import { ScrollView } from 'react-native';
 import { CircleIcon } from '@/components/ui/icon';
 
-
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const {
-    playlist,
-    loading,
-    error,
-    refetch,
-    deletePlaylist
-  } = usePlaylist(playlistId);
+  const { playlist, loading, error, refetch, deletePlaylist } =
+    usePlaylist(playlistId);
 
-  const [showAlertDialog, setShowAlertDialog] = useState(false)
+  const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -39,29 +38,33 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (<Playlist3DotMenu callDelete={() => setShowAlertDialog(true)} callEdit={onCallEdit} />),
+      headerRight: () => (
+        <Playlist3DotMenu
+          callDelete={() => setShowAlertDialog(true)}
+          callEdit={onCallEdit}
+        />
+      ),
     });
   }, [navigation]);
 
   const onDeletePlaylist = async () => {
     // [note] -> Clément :
     // Ici vérifier que la suppression produit bien une goBack dans la navigation
-    setShowAlertDialog(false)
-    console.log(`PlaylistDetailScreen(${playlistId}) Playlist delelete call`)
+    setShowAlertDialog(false);
+    console.log(`PlaylistDetailScreen(${playlistId}) Playlist delelete call`);
 
     await deletePlaylist();
     if (!error && !loading) {
-      router.push('(main)/playlists/')
+      router.push('(main)/playlists/');
     }
-  }
+  };
 
   const onCallEdit = () => {
-    console.log(`Edit call for playlist ${playlistId} | Not implemented yet`)
+    console.log(`Edit call for playlist ${playlistId} | Not implemented yet`);
     // [!] Implement this later (issue #54)
     // Can't retrieve playlist from usePlaylist() in edit.tsx
     // router.push(`(main)/playlists/${playlistId}/edit`)
-  }
-
+  };
 
   if (loading || !playlist) {
     return (
@@ -82,40 +85,49 @@ export default function PlaylistDetail() {
   const playlistTracks: PlaylistItemsResponse = playlist.tracks;
   const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
   const playlistTitle = playlist?.name ?? 'Playlist';
-  const playlistDescription = playlist?.description ?? 'No description available';
+  const playlistDescription =
+    playlist?.description ?? 'No description available';
   const playlistOwner = playlist?.owner?.display_name ?? 'Unknown';
-  const ispublic = playlist?.public ?? false
-  const isCollaborative = playlist?.collaborative ?? false
+  const ispublic = playlist?.public ?? false;
+  const isCollaborative = playlist?.collaborative ?? false;
 
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Card>
-          <Image source={{ uri: imageUri }} className="w-full h-80" alt="Playlist image" />
+          <Image
+            source={{ uri: imageUri }}
+            className='w-full h-80'
+            alt='Playlist image'
+          />
           <VStack className='px-4 pt-2'>
             <HStack className='justify-between'>
               <Heading size='xl'>{playlistTitle}</Heading>
               <HStack className='gap-2'>
                 {isCollaborative && (
-                  <Badge action="info" className="rounded-full">
-                    <BadgeIcon as={CircleIcon} className="" />
+                  <Badge action='info' className='rounded-full'>
+                    <BadgeIcon as={CircleIcon} className='' />
                   </Badge>
                 )}
                 {ispublic ? (
-                  <Badge action="success" className="rounded-full">
+                  <Badge action='success' className='rounded-full'>
                     <BadgeText>Public</BadgeText>
                   </Badge>
                 ) : (
-                  <Badge action="warning" className="rounded-full">
+                  <Badge action='warning' className='rounded-full'>
                     <BadgeText>Private</BadgeText>
                   </Badge>
                 )}
               </HStack>
             </HStack>
             {playlist?.description ? (
-              <Text size='sm' className='color-secondary-700'>{playlistDescription}</Text>
+              <Text size='sm' className='color-secondary-700'>
+                {playlistDescription}
+              </Text>
             ) : null}
-            <Text size='md' className='color-secondary-700' >By {playlistOwner}</Text>
+            <Text size='md' className='color-secondary-700'>
+              By {playlistOwner}
+            </Text>
           </VStack>
         </Card>
         <TrackList
@@ -126,11 +138,13 @@ export default function PlaylistDetail() {
         {/* </Box> */}
       </ScrollView>
 
-      <DeleteAlert showAlertDialog={showAlertDialog}
+      <DeleteAlert
+        showAlertDialog={showAlertDialog}
         setShowAlertDialog={setShowAlertDialog}
         onDelete={onDeletePlaylist}
         itemName={playlist?.name ?? 'playlist'}
-        itemType='playlist' />
+        itemType='playlist'
+      />
     </>
   );
 }

@@ -355,7 +355,6 @@ const ActionsheetItemText = React.forwardRef<
         bold: bold as boolean,
         underline: underline as boolean,
         strikeThrough: strikeThrough as boolean,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         size: size as any,
       })}
       ref={ref}
@@ -504,7 +503,6 @@ const ActionsheetSectionHeaderText = React.forwardRef<
         bold: bold as boolean,
         underline: underline as boolean,
         strikeThrough: strikeThrough as boolean,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         size: size as any,
         sub: sub as boolean,
         italic: italic as boolean,

@@ -4,22 +4,21 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useLocalSearchParams } from 'expo-router';
 
-
 export default function AddTrack() {
-    const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
+  const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
 
-    return (
-        <GestureHandlerRootView style={styles.container}>
-            <ScrollView>
-                <SearchTrack playlistId={playlistId} />
-            </ScrollView>
-        </GestureHandlerRootView>
-    );
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <ScrollView>
+        <SearchTrack playlistId={playlistId} />
+      </ScrollView>
+    </GestureHandlerRootView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    }
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
 });

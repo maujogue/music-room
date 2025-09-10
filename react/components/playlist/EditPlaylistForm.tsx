@@ -14,11 +14,15 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
-  ApiError: string,
+  ApiError: string;
   initialValues?: Partial<PlaylistPayload>;
 };
 
-export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmit}: Props) {
+export default function EditPlayListForm({
+  initialValues = {},
+  ApiError,
+  onSubmit,
+}: Props) {
   const [name, setName] = useState(initialValues.name ?? '');
   const [description, setDescription] = useState(
     initialValues.description ?? ''
@@ -40,9 +44,7 @@ export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmi
     }
 
     if (isCollaborative && isPublic) {
-      setError(
-        'A collaborative playlist must be private.'
-      );
+      setError('A collaborative playlist must be private.');
       return false;
     }
 
@@ -71,30 +73,36 @@ export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmi
   };
 
   return (
-    <FormControl className="p-4 border rounded-lg border-outline-300">
-      <VStack space="md">
+    <FormControl className='p-4 border rounded-lg border-outline-300'>
+      <VStack space='md'>
         <Box>
           <Text>Name</Text>
           <Input>
-            <InputField placeholder="Coolich Playlist"
-              value={name} onChangeText={setName} autoCapitalize="sentences" />
+            <InputField
+              placeholder='Coolich Playlist'
+              value={name}
+              onChangeText={setName}
+              autoCapitalize='sentences'
+            />
           </Input>
         </Box>
 
         <Box>
           <Text>Description</Text>
           <Textarea className=''>
-            <TextareaInput value={description}
+            <TextareaInput
+              value={description}
               onChangeText={setDescription}
               multiline
               numberOfLines={3}
-              textAlignVertical="top"
-              autoCapitalize="sentences" />
+              textAlignVertical='top'
+              autoCapitalize='sentences'
+            />
           </Textarea>
         </Box>
 
-        <HStack className="items-center">
-          <HStack className="items-center">
+        <HStack className='items-center'>
+          <HStack className='items-center'>
             <Text>Public</Text>
             <Switch
               value={isPublic}
@@ -108,7 +116,7 @@ export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmi
           </HStack>
 
           {!isPublic && (
-            <HStack className="items-center">
+            <HStack className='items-center'>
               <Text>Collaborative</Text>
               <Switch
                 value={isCollaborative}
@@ -124,31 +132,35 @@ export default function EditPlayListForm({initialValues = {}, ApiError,  onSubmi
 
         {error ? (
           <Center>
-            <HStack space="xs" className="items-center">
-              <Icon as={AlertCircleIcon} size="sm" />
+            <HStack space='xs' className='items-center'>
+              <Icon as={AlertCircleIcon} size='sm' />
               <Text>{error}</Text>
             </HStack>
           </Center>
-        ) : <Center className='p-3' />}
+        ) : (
+          <Center className='p-3' />
+        )}
 
         {ApiError !== '' ? (
           <Center>
-            <HStack space="xs" className="items-center color-red-500">
-              <Icon as={AlertCircleIcon} size="sm" />
+            <HStack space='xs' className='items-center color-red-500'>
+              <Icon as={AlertCircleIcon} size='sm' />
               <Text>{ApiError}</Text>
             </HStack>
           </Center>
-        ) : <Center className='p-3' />}
+        ) : (
+          <Center className='p-3' />
+        )}
 
         {/* Submit */}
         <Button
-          size="md"
-          variant="solid"
+          size='md'
+          variant='solid'
           disabled={loading}
           onPress={handlePressValid}
           action='positive'
         >
-          <Icon as={CheckIcon} color="white" size="sm" />
+          <Icon as={CheckIcon} color='white' size='sm' />
         </Button>
       </VStack>
     </FormControl>

@@ -70,7 +70,12 @@ type SpotifyTrackWithKey = SpotifyTrack & {
   __added_at: string | null;
 };
 
-type SpotifyEpisode = { type: 'episode'; id: string; uri: string; name: string };
+type SpotifyEpisode = {
+  type: 'episode';
+  id: string;
+  uri: string;
+  name: string;
+};
 
 type PlaylistItem = {
   added_at: string | null;
@@ -87,5 +92,3 @@ type PlaylistItemsResponse = {
   previous: string | null;
   total: number;
 };
-
-

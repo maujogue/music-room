@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, ViewProps } from 'react-native';
 
@@ -18,5 +17,3 @@ const Box = React.forwardRef<React.ComponentRef<typeof View>, IBoxProps>(
 
 Box.displayName = 'Box';
 export { Box };
-
- 

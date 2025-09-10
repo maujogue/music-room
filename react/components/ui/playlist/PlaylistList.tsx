@@ -4,34 +4,34 @@ import PlaylistListItem from '@/components/ui/playlist/PlaylistListItem';
 import { PlaylistSection } from '@/types/playlist';
 import { Link } from 'expo-router';
 
-
 type Props = {
   sections: PlaylistSection[];
 };
 
-
 export default function PlaylistList({ sections }: Props) {
-
   return (
-      <SectionList
-        sections={sections}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <Link href={{
-            pathname: "/(main)/(tabs)/playlists/[id]",
-            params: {id: item.id},
-          }} asChild>
-            <Pressable>
-              <PlaylistListItem playlist={item} />
-            </Pressable>
-          </Link>
-        )}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.sectionHeader}>{section.title}</Text>
-        )}
-        stickySectionHeadersEnabled={false}
-        showsVerticalScrollIndicator={false}
-      />
+    <SectionList
+      sections={sections}
+      keyExtractor={item => item.id}
+      renderItem={({ item }) => (
+        <Link
+          href={{
+            pathname: '/(main)/(tabs)/playlists/[id]',
+            params: { id: item.id },
+          }}
+          asChild
+        >
+          <Pressable>
+            <PlaylistListItem playlist={item} />
+          </Pressable>
+        </Link>
+      )}
+      renderSectionHeader={({ section }) => (
+        <Text style={styles.sectionHeader}>{section.title}</Text>
+      )}
+      stickySectionHeadersEnabled={false}
+      showsVerticalScrollIndicator={false}
+    />
   );
 }
 

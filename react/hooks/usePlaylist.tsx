@@ -57,6 +57,5 @@ export function usePlaylist(id: string) {
     }
   }, [id]);
 
-
   return { playlist, loading, error, refetch, deletePlaylist };
-};
+}

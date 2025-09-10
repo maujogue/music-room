@@ -32,6 +32,4 @@ export function useUserPlaylists() {
   }, []);
 
   return { playlists, refetch, loading, error };
-};
-
-
+}

@@ -6,7 +6,7 @@ import {
 import { Tabs } from 'expo-router';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
-import { PlayIcon, StarIcon, Icon } from '@/components/ui/icon';
+import { PlayIcon, Icon, StarIcon } from '@/components/ui/icon';
 
 export default function AppLayout() {
   return (

@@ -1,4 +1,3 @@
-
 import { tva } from '@gluestack-ui/nativewind-utils/tva';
 import { isWeb } from '@gluestack-ui/nativewind-utils/IsWeb';
 
@@ -9,5 +8,3 @@ const baseStyle = isWeb
 export const boxStyle = tva({
   base: baseStyle,
 });
-
- 

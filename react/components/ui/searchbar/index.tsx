@@ -10,11 +10,11 @@ type Props = {
 export function SearchBar({ value, onChange, onSubmit }: Props) {
   return (
     <Input>
-      <InputSlot className="pl-3">
+      <InputSlot className='pl-3'>
         <InputIcon as={SearchIcon} />
       </InputSlot>
       <InputField
-        placeholder="Search..."
+        placeholder='Search...'
         value={value}
         onChangeText={onChange}
         onSubmitEditing={onSubmit}
