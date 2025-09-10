@@ -46,31 +46,6 @@ app.onError((err, c) => {
 });
 
 
-app.put('/profile', async (c) => {
-
-  const user = c.get('user')
-  if (!user) {
-    return c.json({ error: 'Authentication required' }, 401)
-  }
-
-  const { userId, updates } = await c.req.json()
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', userId)
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Error updating profile:', error)
-    throw new HTTPException(500, { message: `Error updating profile:', ${error}`})
-  }
-  c.status(200)
-  return c.json({ data, error: null })
-})
-
-
 app.route('/me', meRoutes);
 
 /* To invoke locally:
