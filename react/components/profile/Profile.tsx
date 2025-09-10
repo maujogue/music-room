@@ -12,6 +12,7 @@ import {
   ArrowLeftIcon,
   SettingsIcon,
   CloseIcon,
+  LoaderIcon,
 } from '@/components/ui/icon';
 import {
   Menu,
@@ -32,12 +33,14 @@ import PrivacySettings from '@/components/profile/PrivacySettings';
 import FollowingSection from '@/components/profile/FollowingSection';
 import { PrivacySetting } from '@/types/user';
 import vibingImg from '@/assets/vibing.jpg';
+import { Spinner } from '../ui/spinner';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
 interface ProfileProps {
   userId: string;
   variant: ProfileVariant;
+  refreshVariant: () => void;
   showBackButton?: boolean;
   onBack?: () => void;
 }
@@ -65,6 +68,7 @@ interface ProfileData {
 export default function Profile({
   userId,
   variant,
+  refreshVariant,
   showBackButton = false,
   onBack,
 }: ProfileProps) {
@@ -76,10 +80,11 @@ export default function Profile({
     followers,
     following,
   } = useProfile();
-  const { handleFollowUser, handleUnfollowUser } = useFollow();
+  const { follow, unfollow } = useFollow();
   const [editProfile, setEditProfile] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Determine if this is the current user's own profile
@@ -113,21 +118,22 @@ export default function Profile({
 
     try {
       if (profileData?.is_following) {
-        await handleUnfollowUser(profile.id, profile.username);
+        await unfollow(profile.id);
       } else {
-        await handleFollowUser(profile.id, profile.username);
+        await follow(profile.id);
       }
       // Reload profile data to get updated follow status
-      await loadUserProfile();
+      refreshVariant();
+      await loadUserProfile(setIsRefreshingProfile);
     } catch (error) {
       console.error('Error with follow action:', error);
     }
   };
 
-  const loadUserProfile = async () => {
+  const loadUserProfile = async (setLoading: (loading: boolean) => void) => {
     if (isOwnProfile || !userId || !currentUser) return;
 
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
 
     try {
@@ -226,14 +232,14 @@ export default function Profile({
       setError('Failed to load user profile');
       console.error('Error loading user profile:', err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   // Load user profile when not own profile
   React.useEffect(() => {
     if (!isOwnProfile) {
-      loadUserProfile();
+      loadUserProfile(setIsLoading);
     }
   }, [userId, isOwnProfile]);
 
@@ -241,7 +247,7 @@ export default function Profile({
     return (
       <View className='flex-1 pt-safe bg-background-0'>
         <VStack className='items-center justify-center flex-1 gap-4'>
-          <Text className='text-typography-500'>Loading profile...</Text>
+          <Spinner />
         </VStack>
       </View>
     );
@@ -388,97 +394,102 @@ export default function Profile({
           size='4xl'
           isEdit={canEdit && editProfile}
         />
-
-        {/* Music Genre */}
-        {canViewMusicGenre && (
-          <EditMusicTastes
-            currentText={profile?.music_genre || []}
-            isEdit={canEdit && editProfile}
-          />
-        )}
-        <Divider />
-
-        {/* Bio */}
-        {canViewBio && (
+        {isRefreshingProfile ? (
+          <Spinner />
+        ) : (
           <>
-            <EditProfileTextFeature
-              type='bio'
-              currentText={profile?.bio || ''}
-              size='md'
-              isEdit={canEdit && editProfile}
-            />
-            <Divider />
-          </>
-        )}
-
-        {/* Email */}
-        {canViewEmail && (
-          <>
-            <EditProfileTextFeature
-              type='email'
-              currentText={profile?.email || ''}
-              size='md'
-              isEdit={canEdit && editProfile}
-            />
-            <Divider />
-          </>
-        )}
-
-        {/* Privacy Settings - Only for own profile */}
-        {canEdit && (
-          <>
-            <PrivacySettings
-              currentSetting={profile?.privacy_setting || 'public'}
-              isEdit={editProfile}
-              onSettingChange={handlePrivacyChange}
-              publicText='Anyone can see your profile'
-              friendsText='Only people you follow back can see your profile'
-              privateText='Only you can see your profile'
-              title='Profile Visibility'
-            />
-            <Divider />
-          </>
-        )}
-
-        {/* Followers/Following - Only if can view profile */}
-        {canViewFollowers && (
-          <>
-            <HStack className='gap-4 px-3'>
-              <FollowingSection
-                users={profileFollowers}
-                title='Followers'
-                onPress={() => router.push(`/profile/${userId}/followers`)}
+            {/* Music Genre */}
+            {canViewMusicGenre && (
+              <EditMusicTastes
+                currentText={profile?.music_genre || []}
+                isEdit={canEdit && editProfile}
               />
-              <FollowingSection
-                users={profileFollowing}
-                title='Following'
-                onPress={() => router.push(`/profile/${userId}/following`)}
-              />
-            </HStack>
+            )}
+            <Divider />
 
-            {/* Find People Button - Only for own profile */}
+            {/* Bio */}
+            {canViewBio && (
+              <>
+                <EditProfileTextFeature
+                  type='bio'
+                  currentText={profile?.bio || ''}
+                  size='md'
+                  isEdit={canEdit && editProfile}
+                />
+                <Divider />
+              </>
+            )}
+
+            {/* Email */}
+            {canViewEmail && (
+              <>
+                <EditProfileTextFeature
+                  type='email'
+                  currentText={profile?.email || ''}
+                  size='md'
+                  isEdit={canEdit && editProfile}
+                />
+                <Divider />
+              </>
+            )}
+
+            {/* Privacy Settings - Only for own profile */}
             {canEdit && (
-              <Button
-                variant='outline'
-                className='mx-3 mt-2'
-                onPress={() => router.push('/profile/search')}
-              >
-                <ButtonText>Find People to Follow</ButtonText>
-              </Button>
+              <>
+                <PrivacySettings
+                  currentSetting={profile?.privacy_setting || 'public'}
+                  isEdit={editProfile}
+                  onSettingChange={handlePrivacyChange}
+                  publicText='Anyone can see your profile'
+                  friendsText='Only people you follow back can see your profile'
+                  privateText='Only you can see your profile'
+                  title='Profile Visibility'
+                />
+                <Divider />
+              </>
+            )}
+
+            {/* Followers/Following - Only if can view profile */}
+            {canViewFollowers && (
+              <>
+                <HStack className='gap-4 px-3'>
+                  <FollowingSection
+                    users={profileFollowers}
+                    title='Followers'
+                    onPress={() => router.push(`/profile/${userId}/followers`)}
+                  />
+                  <FollowingSection
+                    users={profileFollowing}
+                    title='Following'
+                    onPress={() => router.push(`/profile/${userId}/following`)}
+                  />
+                </HStack>
+
+                {/* Find People Button - Only for own profile */}
+                {canEdit && (
+                  <Button
+                    variant='outline'
+                    className='mx-3 mt-2'
+                    onPress={() => router.push('/profile/search')}
+                  >
+                    <ButtonText>Find People to Follow</ButtonText>
+                  </Button>
+                )}
+              </>
+            )}
+
+            {/* Private Profile Message */}
+            {variant === 'private' && (
+              <VStack className='items-center py-8 gap-4 px-6'>
+                <Text className='text-typography-500 text-center text-lg'>
+                  This profile is private
+                </Text>
+                <Text className='text-typography-400 text-center'>
+                  You need to follow each other to see this profile
+                </Text>
+              </VStack>
             )}
           </>
-        )}
-
-        {/* Private Profile Message */}
-        {variant === 'private' && (
-          <VStack className='items-center py-8 gap-4 px-6'>
-            <Text className='text-typography-500 text-center text-lg'>
-              This profile is private
-            </Text>
-            <Text className='text-typography-400 text-center'>
-              You need to follow each other to see this profile
-            </Text>
-          </VStack>
         )}
       </VStack>
     </View>

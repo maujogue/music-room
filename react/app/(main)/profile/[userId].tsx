@@ -2,22 +2,19 @@ import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useProfileVariant } from '@/hooks/useProfileVariant';
 import Profile from '@/components/profile/Profile';
+import { Spinner } from '@/components/ui/spinner';
+
 
 export default function UserProfilePage() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { variant, isLoading, error } = useProfileVariant(userId || '');
+  const {
+    variant,
+    isLoading,
+    error,
+    refresh: refreshVariant,
+  } = useProfileVariant(userId || '');
 
-  if (isLoading) {
-    return (
-      <Profile
-        userId={userId || ''}
-        variant='public' // Default while loading
-        showBackButton={true}
-      />
-    );
-  }
-
-  if (error || !variant) {
+  if (isLoading || error || !variant) {
     return (
       <Profile
         userId={userId || ''}
@@ -28,6 +25,11 @@ export default function UserProfilePage() {
   }
 
   return (
-    <Profile userId={userId || ''} variant={variant} showBackButton={true} />
+    <Profile
+      userId={userId || ''}
+      variant={variant}
+      refreshVariant={refreshVariant}
+      showBackButton={true}
+    />
   );
 }

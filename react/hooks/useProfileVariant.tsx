@@ -8,6 +8,7 @@ interface UseProfileVariantResult {
   variant: ProfileVariant | null;
   isLoading: boolean;
   error: string | null;
+  refresh: () => void;
 }
 
 export function useProfileVariant(userId: string): UseProfileVariantResult {
@@ -95,5 +96,5 @@ export function useProfileVariant(userId: string): UseProfileVariantResult {
     }
   };
 
-  return { variant, isLoading, error };
+  return { variant, isLoading, error, refresh: determineVariant };
 }
