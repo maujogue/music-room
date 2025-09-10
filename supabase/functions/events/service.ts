@@ -21,10 +21,7 @@ export async function createSupabaseEvent(eventData: any): Promise<any> {
 }
 
 export async function getSupabaseEventById(eventId: string): Promise<any> {
-  const { data, error } = await supabaseClient.from('events')
-    .select('*')
-    .eq('id', eventId)
-    .single();
+  const { data, error } = await supabaseClient.rpc('get_complete_event', { event_id: eventId });
 
   if (error) {
     console.error('Supabase error:', error);
@@ -44,5 +41,38 @@ export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
     throw new HTTPException(500, { message: `Error fetching events: ${error.message}` });
   }
 
+  return data;
+}
+
+export async function deleteSupabaseEventById(eventId: string): Promise<boolean> {
+  const { error } = await supabaseClient.from('events')
+    .delete()
+    .eq('id', eventId);
+
+  if (error) {
+    console.error('Supabase error:', error);
+    throw new HTTPException(500, { message: `Error deleting event: ${error.message}` });
+  }
+
+  return true;
+}
+
+export async function updateSupabaseEventById(eventId: string, eventData: any, locationData: any): Promise<any> {
+  const { data, error } = await supabaseClient
+    .from('events')
+    .update(eventData)
+    .eq('id', eventId)
+    .select();
+
+  const { data: locData, error: locError } = await supabaseClient
+    .from('location')
+    .update(locationData)
+    .eq('event_id', eventId)
+    .select();
+
+  if (error || locError) {
+    console.error('Supabase error:', error || locError);
+    throw new HTTPException(500, { message: `Error updating event: ${error?.message || locError?.message}` });
+  }
   return data;
 }

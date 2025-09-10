@@ -4,12 +4,14 @@ import {
     fetchCurrentUserPlayingTrack,
     startUserPlayback,
     pauseUserPlayback,
-    skipToNextUserTrack
+    skipToNextUserTrack,
+    fetchCurrentUserEvents
 } from './controller.ts'
 
 const router = new Hono()
 
 router.get('/playlists', fetchCurrentUserPlaylists)
+router.get('/events', fetchCurrentUserEvents)
 router.get('/player/currently-playing', fetchCurrentUserPlayingTrack)
 router.put('/player/play', startUserPlayback)
 router.put('/player/pause', pauseUserPlayback)

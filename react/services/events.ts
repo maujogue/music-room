@@ -33,8 +33,22 @@ export async function deleteEventById(id: string) {
     method: 'DELETE',
     })
 
+  console.log('deleteEventById', { id, res });
   if (!res.success) {
 		console.error('Error deleting Event:', res.error);
 		throw res.error;
 	}
+}
+
+export async function getCurrentUserEvents() {
+  const res = await apiFetch<MusicEvent[]>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`, {
+    method: 'GET',
+  })
+
+  if (!res.success) {
+    console.error('Error fetching user Events:', res.error);
+    throw res.error;
+  }
+  return res.data;
 }

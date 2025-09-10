@@ -6,7 +6,8 @@ import {
   startPlayback,
   pausePlayback,
   skipToNextTrack
-} from './service.ts'
+} from './services/spotify.ts'
+import { getSupabaseEventByOwner } from './services/supabase.ts'
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const spotify_token = c.get('spotify_token')
@@ -108,3 +109,13 @@ export async function skipToNextUserTrack(c: Context): Promise<Response> {
     return c.body(null);
 }
 
+export async function fetchCurrentUserEvents(c: Context): Promise<any> {
+  const user = c.get('user')
+
+  const events = await getSupabaseEventByOwner(user.id)
+  if (!events) {
+    throw new HTTPException(500, { message: 'Failed to fetch events' })
+  }
+
+  return c.json(events)
+}

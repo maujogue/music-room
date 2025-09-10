@@ -61,7 +61,6 @@ export async function apiFetch<T>(
       }
 
       const data = isJson ? await res.json() : await res.text();
-      console.log("Response data:", data);
 
       return { success: true, data };
     } catch (err) {

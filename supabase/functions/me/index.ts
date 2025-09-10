@@ -17,10 +17,6 @@ serve(app.fetch);
 
 app.use('*', async (c, next) => {
   try {
-    console.log('Authenticating request...');
-    // console.log('url:', c.req.url);
-    // console.log('method:', c.req.method);
-    // console.log('headers:', JSON.stringify(c.req.headers, null, 2));
     const user = await getCurrentUser(c.req);
     const token = await getUserToken(user.id);
     c.set('user', user);

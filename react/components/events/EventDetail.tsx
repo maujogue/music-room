@@ -54,8 +54,10 @@ export default function EventDetail() {
   }
 
   const onEditEvent = () => {
-    console.log(`Edit call for event ${eventId} | Not implemented yet`)
-    // [!] Implement this later (see for playlist same => issue #54)
+    router.push({
+      pathname: '/(main)/events/[eventId]/edit',
+      params: { eventId }
+    })
   }
 
   const onToggleHeader = () => {
