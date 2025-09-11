@@ -25,7 +25,6 @@ export default function EventDetail() {
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
-
   const {
     data,
     loading,

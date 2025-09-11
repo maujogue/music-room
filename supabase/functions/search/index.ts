@@ -3,14 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getCurrentUser, getUserToken } from '../auth.ts'
+import searchRoutes from './routes.ts'
 
-const functionName = 'search'
-const app = new Hono().basePath(`/${functionName}`)
-
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321'
+const app = new Hono()
 
 serve(app.fetch)
 
@@ -35,42 +30,4 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal Server Error' }, 500)
 })
 
-app.get('/', async (c) => {
-  const spotify_token = c.get('spotify_token')
-  const { q, type, limit, offset } = c.req.query()
-
-  const res = await fetchSpotifySearch(spotify_token, { q, type, limit, offset })
-
-  if (!res) {
-    const errorResponse = new Response('Failed to fetch Spotify playlists', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
-  if (res.error) {
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
-
-  c.status(200)
-  return c.json(res)
-})
-
-async function fetchSpotifySearch(
-  spotify_token: string,
-  params: { q: string; type: string; limit?: string; offset?: string }
-): Promise<any> {
-  const url = new URL('https://api.spotify.com/v1/search');
-  url.searchParams.append('q', params.q);
-  url.searchParams.append('type', params.type);
-  if (params.limit) url.searchParams.append('limit', params.limit);
-  if (params.offset) url.searchParams.append('offset', params.offset);
-
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${spotify_token}`,
-    }
-  });
-  return response.json();
-}
-
-
+app.route('/search', searchRoutes)

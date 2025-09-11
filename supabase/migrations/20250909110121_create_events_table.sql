@@ -26,7 +26,7 @@ create table if not exists public.location (
     coordinates POINT,
     venueName TEXT,
     complement TEXT,
-    address VARCHAR(10),
+    address TEXT,
     city TEXT,
     country TEXT
 );
