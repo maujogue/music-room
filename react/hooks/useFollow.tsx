@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   followUser,
   unfollowUser,
-  getUserFollowers,
-  getUserFollowing,
+  getUserFollows,
   searchUsers,
 } from '@/services/profile';
 
@@ -20,24 +19,20 @@ export function useFollow(userId?: string) {
     setError(null);
 
     try {
-      const [followersResult, followingResult] = await Promise.all([
-        getUserFollowers(userId),
-        getUserFollowing(userId),
-      ]);
+      const result = await getUserFollows(userId);
 
-      if (followersResult.error) {
-        setError(followersResult.error.message);
+      if (result.error) {
+        setError(result.error.message);
+        setFollowers([]);
+        setFollowing([]);
       } else {
-        setFollowers(followersResult.data || []);
-      }
-
-      if (followingResult.error) {
-        setError(followingResult.error.message);
-      } else {
-        setFollowing(followingResult.data || []);
+        setFollowers(result.data?.followers || []);
+        setFollowing(result.data?.following || []);
       }
     } catch (err) {
       setError('An unexpected error occurred', err);
+      setFollowers([]);
+      setFollowing([]);
     } finally {
       setIsLoading(false);
     }

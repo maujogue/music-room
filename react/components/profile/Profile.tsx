@@ -7,6 +7,7 @@ import { Text } from '@/components/ui/text';
 import { Center } from '@/components/ui/center';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
+import { Badge, BadgeText, BadgeIcon } from '@/components/ui/badge';
 import {
   Icon,
   ArrowLeftIcon,
@@ -14,6 +15,7 @@ import {
   CloseIcon,
   LoaderIcon,
 } from '@/components/ui/icon';
+import { Handshake } from 'lucide-react-native';
 import {
   Menu,
   MenuItem,
@@ -398,6 +400,23 @@ export default function Profile({
           <Spinner />
         ) : (
           <>
+            {/* Friend Badge - Only for other users who are friends */}
+            {canViewProfile && !canEdit && profileData?.is_friend && (
+              <>
+              <View className='w-auto self-start ml-3'>
+                <Badge
+                  size='sm'
+                  variant='solid'
+                  action='success'
+                  className='ml-1'
+                >
+                  <BadgeIcon as={Handshake} className='mr-1' />
+                  <BadgeText>Friend</BadgeText>
+                </Badge>
+              </View>
+              <Divider />
+            </>
+            )}
             {/* Music Genre */}
             {canViewMusicGenre && (
               <EditMusicTastes

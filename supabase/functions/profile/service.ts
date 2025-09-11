@@ -64,89 +64,172 @@ export async function updateUserProfile(
   }
 }
 
-// Get user's followers
-export async function getUserFollowers(
-  userId: string
-): Promise<{ data: any[]; error: any }> {
+// Get user's follows (both followers and following)
+export async function getUserFollows(
+  userId: string,
+  currentUserId?: string
+): Promise<{ data: { followers: any[]; following: any[] }; error: any }> {
   try {
-    const { data, error } = await supabase
-      .from('follows')
-      .select(
+    // Get both followers and following in parallel
+    const [followersResult, followingResult] = await Promise.all([
+      supabase
+        .from('follows')
+        .select(
+          `
+          created_at,
+          follower:profiles!follows_follower_id_fkey(
+            id,
+            username,
+            avatar_url
+          )
         `
-        created_at,
-        follower:profiles!follows_follower_id_fkey(
-          id,
-          username,
-          avatar_url
         )
-      `
-      )
-      .eq('following_id', userId)
-      .order('created_at', { ascending: false });
+        .eq('following_id', userId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('follows')
+        .select(
+          `
+          created_at,
+          following:profiles!follows_following_id_fkey(
+            id,
+            username,
+            avatar_url
+          )
+        `
+        )
+        .eq('follower_id', userId)
+        .order('created_at', { ascending: false }),
+    ]);
 
-    if (error) {
-      console.error('Error fetching followers:', error);
-      return { data: [], error };
+    if (followersResult.error) {
+      console.error('Error fetching followers:', followersResult.error);
+      return {
+        data: { followers: [], following: [] },
+        error: followersResult.error,
+      };
     }
 
+    if (followingResult.error) {
+      console.error('Error fetching following:', followingResult.error);
+      return {
+        data: { followers: [], following: [] },
+        error: followingResult.error,
+      };
+    }
+
+    // If no current user, return basic info
+    if (!currentUserId) {
+      const followers =
+        followersResult.data?.map((follow) => ({
+          id: follow.follower.id,
+          username: follow.follower.username,
+          avatar_url: follow.follower.avatar_url,
+          created_at: follow.created_at,
+          is_follower: false,
+          is_following: false,
+          is_friend: false,
+        })) || [];
+
+      const following =
+        followingResult.data?.map((follow) => ({
+          id: follow.following.id,
+          username: follow.following.username,
+          avatar_url: follow.following.avatar_url,
+          created_at: follow.created_at,
+          is_follower: false,
+          is_following: false,
+          is_friend: false,
+        })) || [];
+
+      return { data: { followers, following }, error: null };
+    }
+
+    // Get current user's follow relationships (both following and followers)
+    const [currentUserFollowsResult, currentUserFollowersResult] =
+      await Promise.all([
+        supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', currentUserId),
+        supabase
+          .from('follows')
+          .select('follower_id')
+          .eq('following_id', currentUserId),
+      ]);
+
+    if (currentUserFollowsResult.error) {
+      console.error(
+        'Error fetching current user follows:',
+        currentUserFollowsResult.error
+      );
+      return {
+        data: { followers: [], following: [] },
+        error: currentUserFollowsResult.error,
+      };
+    }
+
+    if (currentUserFollowersResult.error) {
+      console.error(
+        'Error fetching current user followers:',
+        currentUserFollowersResult.error
+      );
+      return {
+        data: { followers: [], following: [] },
+        error: currentUserFollowersResult.error,
+      };
+    }
+
+    const followingSet = new Set(
+      currentUserFollowsResult.data?.map((f) => f.following_id) || []
+    );
+    const followersSet = new Set(
+      currentUserFollowersResult.data?.map((f) => f.follower_id) || []
+    );
+
+    // Process followers
     const followers =
-      data?.map((follow) => ({
-        id: follow.follower.id,
-        username: follow.follower.username,
-        avatar_url: follow.follower.avatar_url,
-        created_at: follow.created_at,
-        is_follower: true,
-        is_following: false,
-        is_friend: false,
-      })) || [];
+      followersResult.data?.map((follow) => {
+        const followerId = follow.follower.id;
+        const isFollowing = followingSet.has(followerId);
+        const isFollower = followersSet.has(followerId);
 
-    return { data: followers, error: null };
-  } catch (error) {
-    console.error('Unexpected error fetching followers:', error);
-    return { data: [], error: { message: 'An unexpected error occurred' } };
-  }
-}
+        return {
+          id: followerId,
+          username: follow.follower.username,
+          avatar_url: follow.follower.avatar_url,
+          created_at: follow.created_at,
+          is_follower: isFollower, // This user follows the current user
+          is_following: isFollowing, // Current user follows this follower
+          is_friend: isFollowing && isFollower, // Mutual follow
+        };
+      }) || [];
 
-// Get user's following
-export async function getUserFollowing(
-  userId: string
-): Promise<{ data: any[]; error: any }> {
-  try {
-    const { data, error } = await supabase
-      .from('follows')
-      .select(
-        `
-        created_at,
-        following:profiles!follows_following_id_fkey(
-          id,
-          username,
-          avatar_url
-        )
-      `
-      )
-      .eq('follower_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching following:', error);
-      return { data: [], error };
-    }
-
+    // Process following
     const following =
-      data?.map((follow) => ({
-        id: follow.following.id,
-        username: follow.following.username,
-        avatar_url: follow.following.avatar_url,
-        created_at: follow.created_at,
-        is_follower: false,
-        is_following: true,
-        is_friend: false,
-      })) || [];
+      followingResult.data?.map((follow) => {
+        const followingId = follow.following.id;
+        const isFollowing = followingSet.has(followingId);
+        const isFollower = followersSet.has(followingId);
 
-    return { data: following, error: null };
+        return {
+          id: followingId,
+          username: follow.following.username,
+          avatar_url: follow.following.avatar_url,
+          created_at: follow.created_at,
+          is_follower: isFollower, // This user follows the current user
+          is_following: isFollowing, // Current user follows this user
+          is_friend: isFollowing && isFollower, // Mutual follow
+        };
+      }) || [];
+
+    return { data: { followers, following }, error: null };
   } catch (error) {
-    console.error('Unexpected error fetching following:', error);
-    return { data: [], error: { message: 'An unexpected error occurred' } };
+    console.error('Unexpected error fetching user follows:', error);
+    return {
+      data: { followers: [], following: [] },
+      error: { message: 'An unexpected error occurred' },
+    };
   }
 }
 

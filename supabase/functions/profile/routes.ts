@@ -2,8 +2,7 @@ import { Hono } from 'jsr:@hono/hono';
 import {
   fetchProfile,
   updateProfile,
-  fetchUserFollowers,
-  fetchUserFollowing,
+  fetchUserFollows,
   followUser,
   unfollowUser,
   searchUsers,
@@ -17,8 +16,7 @@ router.get('/get', fetchProfile);
 router.put('/update', updateProfile);
 
 // Follow system
-router.get('/followers/:userId', fetchUserFollowers);
-router.get('/following/:userId', fetchUserFollowing);
+router.get('/follows/:userId', fetchUserFollows);
 router.post('/follow/:userId', followUser);
 router.delete('/follow/:userId', unfollowUser);
 router.get('/search', searchUsers);

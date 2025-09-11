@@ -97,20 +97,22 @@ export default function UserList({
     try {
       if (userItem.is_following) {
         await unfollow(userItem.id);
-        // Update local state immediately for better UX
+        // After unfollowing, check if the user is still a friend (mutual follow)
         setFilteredUsers(prevUsers =>
           prevUsers.map(user =>
             user.id === userItem.id
-              ? { ...user, is_following: false, is_friend: false }
+              ? { ...user, is_following: false, is_friend: user.is_follower && false }
               : user
           )
         );
       } else {
         await follow(userItem.id);
-        // Update local state immediately for better UX
+        // After following, check if the user is now a friend (mutual follow)
         setFilteredUsers(prevUsers =>
           prevUsers.map(user =>
-            user.id === userItem.id ? { ...user, is_following: true } : user
+            user.id === userItem.id
+              ? { ...user, is_following: true, is_friend: user.is_follower && true }
+              : user
           )
         );
       }

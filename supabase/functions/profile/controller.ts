@@ -3,8 +3,7 @@ import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts
 import {
   getProfile,
   updateUserProfile,
-  getUserFollowers,
-  getUserFollowing,
+  getUserFollows,
   followUserById,
   unfollowUserById,
   searchUsersByQuery,
@@ -47,37 +46,19 @@ export async function updateProfile(c: Context): Promise<Response> {
   return c.json(res.data);
 }
 
-export async function fetchUserFollowers(c: Context): Promise<Response> {
+export async function fetchUserFollows(c: Context): Promise<Response> {
   const userId = c.req.param('userId');
-  const res = await getUserFollowers(userId);
+  const currentUser = c.get('user');
+  const res = await getUserFollows(userId, currentUser?.id);
 
   if (!res) {
-    throw new HTTPException(500, { message: 'Failed to fetch user followers' });
+    throw new HTTPException(500, { message: 'Failed to fetch user follows' });
   }
 
   if (res.error) {
     c.status(res.error.status || 500);
     return c.json({
-      error: res.error.message || 'Failed to fetch user followers',
-    });
-  }
-
-  c.status(200);
-  return c.json(res.data);
-}
-
-export async function fetchUserFollowing(c: Context): Promise<Response> {
-  const userId = c.req.param('userId');
-  const res = await getUserFollowing(userId);
-
-  if (!res) {
-    throw new HTTPException(500, { message: 'Failed to fetch user following' });
-  }
-
-  if (res.error) {
-    c.status(res.error.status || 500);
-    return c.json({
-      error: res.error.message || 'Failed to fetch user following',
+      error: res.error.message || 'Failed to fetch user follows',
     });
   }
 
