@@ -6,7 +6,7 @@ import {
   searchUsers,
 } from '@/services/profile';
 
-export function useFollow(userId?: string) {
+export function useSearch(userId?: string) {
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);

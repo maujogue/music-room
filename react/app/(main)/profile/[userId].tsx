@@ -11,7 +11,7 @@ export default function UserProfilePage() {
     variant,
     isLoading,
     error,
-    refresh: refreshVariant,
+    refreshVariant,
   } = useProfileVariant(userId || '');
 
   if (isLoading || error || !variant) {

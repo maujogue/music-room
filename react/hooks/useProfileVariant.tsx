@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/services/supabase';
 import { useAuth } from '@/contexts/authCtx';
+import { getUserProfile } from '@/services/profile';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
@@ -23,10 +23,10 @@ export function useProfileVariant(userId: string): UseProfileVariantResult {
       return;
     }
 
-    determineVariant();
+    refreshVariant();
   }, [userId, currentUser]);
 
-  const determineVariant = async () => {
+  const refreshVariant = async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -39,48 +39,20 @@ export function useProfileVariant(userId: string): UseProfileVariantResult {
       }
 
       // Get the target user's profile to check privacy settings
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('privacy_setting')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) {
-        setError('User not found');
+      const { data: user, error: profileError } = await getUserProfile(userId);
+      if (!user) {
+        setError('User not found', profileError);
+        setIsLoading(false);
         return;
       }
-
-      // Get follow relationships
-      const { data: follows, error: followsError } = await supabase
-        .from('follows')
-        .select('follower_id, following_id')
-        .or(
-          `and(follower_id.eq.${currentUser.id},following_id.eq.${userId}),and(follower_id.eq.${userId},following_id.eq.${currentUser.id})`
-        );
-
-      if (followsError) {
-        console.error('Error fetching follow relationships:', followsError);
-        setVariant('private'); // Default to private if we can't determine relationship
-        return;
-      }
-
-      const isFollowing =
-        follows?.some(
-          f => f.follower_id === currentUser.id && f.following_id === userId
-        ) || false;
-      const isFollower =
-        follows?.some(
-          f => f.follower_id === userId && f.following_id === currentUser.id
-        ) || false;
-      const isFriend = isFollowing && isFollower;
-
+      console.log('user profile', user);
       // Determine variant based on privacy settings and relationship
-      switch (profile.privacy_setting) {
+      switch (user.profile.privacy_setting) {
         case 'public':
           setVariant('public');
           break;
         case 'friends':
-          setVariant(isFriend ? 'friends' : 'private');
+          setVariant(user.is_friend ? 'friends' : 'private');
           break;
         case 'private':
           setVariant('private');
@@ -89,12 +61,12 @@ export function useProfileVariant(userId: string): UseProfileVariantResult {
           setVariant('public'); // Default to public
       }
     } catch (err) {
-      setError('Failed to determine profile variant');
+      setError('Failed to determine profile variant', err);
       console.error('Error determining profile variant:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { variant, isLoading, error, refresh: determineVariant };
+  return { variant, isLoading, error, refreshVariant };
 }

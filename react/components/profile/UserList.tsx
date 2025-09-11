@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/avatar';
 import { Heading } from '@/components/ui/heading';
 import { Icon, SearchIcon, ArrowLeftIcon } from '@/components/ui/icon';
-import { useUserSearch, useFollow } from '@/hooks/useFollow';
+import { useUserSearch } from '@/hooks/useSearch';
+import { followUser, unfollowUser } from '@/services/profile';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
 
@@ -47,7 +48,6 @@ export default function UserList({
   const [filteredUsers, setFilteredUsers] =
     useState<UserWithFollowStatus[]>(initialUsers);
   const { user } = useAuth();
-  const { follow, unfollow } = useFollow();
   const { refreshProfile } = useProfile();
   const router = useRouter();
 
@@ -96,22 +96,30 @@ export default function UserList({
   const handleFollowAction = async (userItem: UserWithFollowStatus) => {
     try {
       if (userItem.is_following) {
-        await unfollow(userItem.id);
+        await unfollowUser(userItem.id);
         // After unfollowing, check if the user is still a friend (mutual follow)
         setFilteredUsers(prevUsers =>
           prevUsers.map(user =>
             user.id === userItem.id
-              ? { ...user, is_following: false, is_friend: user.is_follower && false }
+              ? {
+                  ...user,
+                  is_following: false,
+                  is_friend: user.is_follower && false,
+                }
               : user
           )
         );
       } else {
-        await follow(userItem.id);
+        await followUser(userItem.id);
         // After following, check if the user is now a friend (mutual follow)
         setFilteredUsers(prevUsers =>
           prevUsers.map(user =>
             user.id === userItem.id
-              ? { ...user, is_following: true, is_friend: user.is_follower && true }
+              ? {
+                  ...user,
+                  is_following: true,
+                  is_friend: user.is_follower && true,
+                }
               : user
           )
         );
