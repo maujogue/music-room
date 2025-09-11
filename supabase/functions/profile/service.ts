@@ -10,10 +10,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   },
 });
 
-// Get another user's profile with follow relationships
 export async function getUserProfile(
-  userId: string,
-  currentUserId?: string
+  userId: string
 ): Promise<{ data: any; error: any }> {
   try {
     // Get the user's profile
@@ -27,15 +25,44 @@ export async function getUserProfile(
       console.error('Error fetching user profile:', profileError);
       return { data: null, error: profileError };
     }
+    // Get follows data for display
+    const followsRes = await getUserFollows(userId);
+    if (followsRes.error) {
+      console.error('Error fetching user follows:', followsRes.error);
+      return { data: null, error: followsRes.error };
+    }
 
-    // Get the target user's followers and following (this already includes relationship status)
-    const followsData = await getUserFollows(userId, currentUserId);
+    const res = {
+      profile: profile,
+      followers: followsRes.data?.followers || [],
+      following: followsRes.data?.following || [],
+    };
+    return { data: res, error: null };
+  } catch (error) {
+    console.error('Unexpected error fetching user profile:', error);
+    return { data: null, error: { message: 'An unexpected error occurred' } };
+  }
+}
 
+// Get user's profile with follow relationships (for other users)
+export async function getUserProfileWithFollows(
+  targetUserId: string,
+  currentUserId: string
+): Promise<{ data: any; error: any }> {
+  try {
+    // Get the target user's profile
+    const profileRes = await getUserProfile(targetUserId);
+    if (profileRes.error) {
+      return profileRes;
+    }
+
+    // Get the target user's followers and following
+    const followsData = await getUserFollows(targetUserId, currentUserId);
     if (followsData.error) {
       console.error('Error fetching user follows:', followsData.error);
       return {
         data: {
-          profile,
+          profile: profileRes.data,
           is_following: false,
           is_follower: false,
           is_friend: false,
@@ -52,26 +79,27 @@ export async function getUserProfile(
 
     // Find the current user in the followers/following lists to determine relationships
     let isFollowing = false;
-    let isFollower = false;
-
-    if (currentUserId) {
-      isFollower = followers.some((f) => f.id === currentUserId);
-      isFollowing = following.some((f) => f.id === currentUserId);
-    }
+    // is_following: true if current user is following the target user (i.e., target user's id is in current user's following list)
+    // is_follower: true if current user is followed by the target user (i.e., target user's id is in current user's followers list)
+    let is_following = followers.some((f) => f.id === currentUserId);
+    let is_follower = following.some((f) => f.id === currentUserId);
 
     return {
       data: {
-        profile,
-        is_following: isFollowing,
-        is_follower: isFollower,
-        is_friend: isFollowing && isFollower,
+        profile: profileRes.data.profile,
+        is_following,
+        is_follower,
+        is_friend: is_following && is_follower,
         followers,
         following,
       },
       error: null,
     };
   } catch (error) {
-    console.error('Unexpected error fetching user profile:', error);
+    console.error(
+      'Unexpected error fetching user profile with follows:',
+      error
+    );
     return { data: null, error: { message: 'An unexpected error occurred' } };
   }
 }

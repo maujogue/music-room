@@ -45,7 +45,6 @@ export function useProfileVariant(userId: string): UseProfileVariantResult {
         setIsLoading(false);
         return;
       }
-      console.log('user profile', user);
       // Determine variant based on privacy settings and relationship
       switch (user.profile.privacy_setting) {
         case 'public':

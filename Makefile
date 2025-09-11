@@ -137,7 +137,7 @@ dev:
 
 dev-tunnel:
 	@echo "📱 Starting Expo development server..."
-	npx supabase functions serve --no-verify-jwt --env-file react/.env --debug & \
+	npx supabase functions serve --no-verify-jwt --env-file react/.env & \
 	cd ${REACT_APP_DIR} && npm start --tunnel
 
 # Clean up build files and node_modules

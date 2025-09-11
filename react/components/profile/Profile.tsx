@@ -25,9 +25,8 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { useFollow } from '@/hooks/useFollow';
 import { connectToSpotify } from '@/services/auth';
-import { getUserProfile } from '@/services/profile';
+import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import EditAvatar from '@/components/profile/edit_avatar';
@@ -82,10 +81,9 @@ export default function Profile({
     followers,
     following,
   } = useProfile();
-  const { follow, unfollow } = useFollow();
   const [editProfile, setEditProfile] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,22 +118,22 @@ export default function Profile({
 
     try {
       if (profileData?.is_following) {
-        await unfollow(profile.id);
+        await unfollowUser(profileData.profile.id);
       } else {
-        await follow(profile.id);
+        await followUser(profileData.profile.id);
       }
-      // Reload profile data to get updated follow status
-      refreshVariant();
-      await loadUserProfile(setIsRefreshingProfile);
+      setIsRefreshingProfile(true);
+      await refreshVariant();
+      await loadUserProfile();
+      setIsRefreshingProfile(false);
     } catch (error) {
       console.error('Error with follow action:', error);
     }
   };
 
-  const loadUserProfile = async (setLoading: (loading: boolean) => void) => {
+  const loadUserProfile = async () => {
     if (isOwnProfile || !userId || !currentUser) return;
 
-    setLoading(true);
     setError(null);
 
     try {
@@ -163,15 +161,15 @@ export default function Profile({
     } catch (err) {
       setError('Failed to load user profile');
       console.error('Error loading user profile:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
   // Load user profile when not own profile
   React.useEffect(() => {
     if (!isOwnProfile) {
-      loadUserProfile(setIsLoading);
+      setIsLoading(true);
+      loadUserProfile();
+      setIsLoading(false);
     }
   }, [userId, isOwnProfile]);
 
@@ -185,7 +183,7 @@ export default function Profile({
     );
   }
 
-  if (error || (!profile && !isOwnProfile)) {
+  if (error) {
     return (
       <View className='flex-1 pt-safe bg-background-0'>
         <VStack className='items-center justify-center flex-1 gap-4 p-6'>
@@ -326,6 +324,7 @@ export default function Profile({
           size='4xl'
           isEdit={canEdit && editProfile}
         />
+        <Divider />
         {isRefreshingProfile ? (
           <Spinner />
         ) : (
@@ -344,17 +343,18 @@ export default function Profile({
                     <BadgeText>Friend</BadgeText>
                   </Badge>
                 </View>
-                <Divider />
               </>
             )}
             {/* Music Genre */}
             {canViewMusicGenre && (
-              <EditMusicTastes
-                currentText={profile?.music_genre || []}
-                isEdit={canEdit && editProfile}
-              />
+              <>
+                <EditMusicTastes
+                  currentText={profile?.music_genre || []}
+                  isEdit={canEdit && editProfile}
+                />
+                <Divider />
+              </>
             )}
-            <Divider />
 
             {/* Bio */}
             {canViewBio && (

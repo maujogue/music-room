@@ -120,7 +120,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const { data, error } = await getUserProfile(user.id);
+      const { data, error } = await getUserProfile('me');
 
       if (error) {
         console.error('Error fetching profile:', error);

@@ -2,6 +2,7 @@ import { Context } from 'jsr:@hono/hono';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
 import {
   getUserProfile,
+  getUserProfileWithFollows,
   updateUserProfile,
   getUserFollows,
   followUserById,
@@ -14,10 +15,13 @@ export async function fetchUserProfile(c: Context): Promise<Response> {
   const userId = c.req.param('userId');
   const currentUser = c.get('user');
 
+  let res;
   // If userId is "me", use current user's ID
-  const targetUserId = userId === 'me' ? currentUser.id : userId;
-
-  const res = await getUserProfile(targetUserId, currentUser?.id);
+  if (userId === 'me') {
+    res = await getUserProfile(currentUser.id);
+  } else {
+    res = await getUserProfileWithFollows(userId, currentUser.id);
+  }
 
   if (!res) {
     throw new HTTPException(500, { message: 'Failed to fetch user profile' });
