@@ -11,8 +11,8 @@ import { useAuth } from './authCtx';
 import {
   getProfile,
   updateProfile as updateProfileAPI,
-  getFollowers,
-  getFollowing,
+  getUserFollowers,
+  getUserFollowing,
   followUser,
   unfollowUser,
   searchUsers,
@@ -145,8 +145,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     try {
       const [followersResult, followingResult] = await Promise.all([
-        getFollowers(),
-        getFollowing(),
+        getUserFollowers(user.id),
+        getUserFollowing(user.id),
       ]);
       if (followersResult.error || followingResult.error) {
         console.error(

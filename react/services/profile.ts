@@ -5,7 +5,7 @@ console.log('baseUrl:', baseUrl);
 // Get current user's profile
 export async function getProfile(): Promise<{ data: any; error: any }> {
   try {
-    const response = await apiFetch(`${baseUrl}/get-profile`);
+    const response = await apiFetch(`${baseUrl}/get`);
     console.log('profile response:', response);
     return { data: response.data, error: null };
   } catch (error) {
@@ -19,7 +19,7 @@ export async function updateProfile(
   updates: Partial<UserInfo>
 ): Promise<{ data: any; error: any }> {
   try {
-    const response = await apiFetch(`${baseUrl}/update-profile`, {
+    const response = await apiFetch(`${baseUrl}/update`, {
       method: 'PUT',
       body: updates,
     });
@@ -28,28 +28,6 @@ export async function updateProfile(
   } catch (error) {
     console.error('Error updating profile:', error);
     return { data: null, error };
-  }
-}
-
-// Get user's followers
-export async function getFollowers(): Promise<{ data: any[]; error: any }> {
-  try {
-    const response = await apiFetch(`${baseUrl}/followers`);
-    return { data: response.data || [], error: null };
-  } catch (error) {
-    console.error('Error fetching followers:', error);
-    return { data: [], error };
-  }
-}
-
-// Get user's following
-export async function getFollowing(): Promise<{ data: any[]; error: any }> {
-  try {
-    const response = await apiFetch(`${baseUrl}/following`);
-    return { data: response.data || [], error: null };
-  } catch (error) {
-    console.error('Error fetching following:', error);
-    return { data: [], error };
   }
 }
 
@@ -79,17 +57,57 @@ export async function unfollowUser(userId: string): Promise<{ error: any }> {
   }
 }
 
+// Get user's followers by userId
+export async function getUserFollowers(
+  userId: string
+): Promise<{ data: any[] | null; error: any }> {
+  try {
+    const response = await apiFetch(`${baseUrl}/followers/${userId}`);
+    return { data: response.data || null, error: null };
+  } catch (error) {
+    console.error('Error fetching user followers:', error);
+    return { data: null, error };
+  }
+}
+
+// Get user's following by userId
+export async function getUserFollowing(
+  userId: string
+): Promise<{ data: any[] | null; error: any }> {
+  try {
+    const response = await apiFetch(`${baseUrl}/following/${userId}`);
+    return { data: response.data || null, error: null };
+  } catch (error) {
+    console.error('Error fetching user following:', error);
+    return { data: null, error };
+  }
+}
+
 // Search users
 export async function searchUsers(
   query: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: any[] | null; error: any }> {
   try {
     const response = await apiFetch(
       `${baseUrl}/search?q=${encodeURIComponent(query)}`
     );
-    return { data: response.data, error: null };
+    return { data: response.data || null, error: null };
   } catch (error) {
     console.error('Error searching users:', error);
-    return { data: [], error };
+    return { data: null, error };
+  }
+}
+
+// Check if two users are friends
+export async function areUsersFriends(
+  userId1: string,
+  userId2: string
+): Promise<{ data: boolean | null; error: any }> {
+  try {
+    const response = await apiFetch(`${baseUrl}/friends/${userId1}/${userId2}`);
+    return { data: response.areFriends || null, error: null };
+  } catch (error) {
+    console.error('Error checking friendship:', error);
+    return { data: null, error };
   }
 }

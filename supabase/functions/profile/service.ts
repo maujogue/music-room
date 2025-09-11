@@ -268,3 +268,38 @@ export async function searchUsersByQuery(
     return { data: [], error: { message: 'An unexpected error occurred' } };
   }
 }
+
+// Check if two users are friends (mutual follow)
+export async function areUsersFriends(
+  userId1: string,
+  userId2: string
+): Promise<{ data: boolean; error: any }> {
+  try {
+    const { data, error } = await supabase
+      .from('follows')
+      .select('follower_id, following_id')
+      .or(
+        `and(follower_id.eq.${userId1},following_id.eq.${userId2}),and(follower_id.eq.${userId2},following_id.eq.${userId1})`
+      );
+
+    if (error) {
+      console.error('Error checking friendship:', error);
+      return { data: false, error };
+    }
+
+    // Check if both directions exist (mutual follow)
+    const user1FollowsUser2 = data?.some(
+      (f) => f.follower_id === userId1 && f.following_id === userId2
+    );
+    const user2FollowsUser1 = data?.some(
+      (f) => f.follower_id === userId2 && f.following_id === userId1
+    );
+
+    const areFriends = user1FollowsUser2 && user2FollowsUser1;
+
+    return { data: areFriends, error: null };
+  } catch (error) {
+    console.error('Unexpected error checking friendship:', error);
+    return { data: false, error: { message: 'An unexpected error occurred' } };
+  }
+}

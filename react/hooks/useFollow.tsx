@@ -5,7 +5,7 @@ import {
   getUserFollowers,
   getUserFollowing,
   searchUsers,
-} from '@/services/follow';
+} from '@/services/profile';
 
 export function useFollow(userId?: string) {
   const [followers, setFollowers] = useState<any[]>([]);
