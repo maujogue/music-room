@@ -16,11 +16,11 @@ export default function AllEvents() {
   const sections: MusicEventSection[] = [
     {
       title: 'Subscribed events',
-      data: events.filter(e => e.owner.id !== profile.id),
+      data: events.filter(e => e.owner_id !== profile.id),
     },
     {
       title: 'My events',
-      data: events.filter(e => e.owner.id == profile.id),
+      data: events.filter(e => e.owner_id === profile.id),
     },
   ];
 

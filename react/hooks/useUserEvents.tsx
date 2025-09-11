@@ -1,75 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getSession } from '@/services/session';
 import { Session } from '@/types/session';
 import { MOCK_EVENTS } from '@/mocks/mockEvents';
+import { getCurrentUserEvents } from '@/services/events';
 
 export function useUserEvents() {
   const [events, setEvents] = useState<MusicEvent[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isActive = true;
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
-    console.log('useUserEvents called');
-
-    const fetchPlaylists = async (session: Session) => {
-      try {
-        return fetch(
-          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`,
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${session?.access_token}`,
-            },
-          }
-        ).then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        });
-      } catch (e) {
-        console.error('Error fetching events:', e);
-        if (isActive) {
-          setError('fetch playlists error');
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
-      }
-    };
-
-    getSession()
-      .then(res => {
-        if (res == null) throw new Error('Session retrieve error');
-
-        // MOCK-DATA OVERRIDE HERE
-        // -----------------------
-        if (isActive) {
-          setEvents(MOCK_EVENTS);
-          setLoading(false);
-          return;
-        }
-        // -----------------------
-
-        fetchPlaylists(res).then(data => {
-          if (isActive) {
-            // [!] Note to backend : decide foramt response (wrap in .items or whatever)
-            setEvents(data.items || []);
-          }
-        });
-      })
-      .catch(err => {
-        console.error('Erreur dans useUserPlaylists:', err);
-      });
-
-    return () => {
-      isActive = false;
-    };
+    try {
+      const session = await getSession();
+      if (!session) throw new Error('Session retrieve error');
+      const data = await getCurrentUserEvents();
+      setEvents(data || []);
+    } catch (e) {
+      console.error('Error fetching events:', e);
+      setError('fetch events error');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { events, loading, error };
-}
+  const refetch = useCallback(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  return { events, refetch, loading, error };
+};
+
+

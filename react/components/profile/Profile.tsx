@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, ScrollView } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
@@ -217,224 +217,210 @@ export default function Profile({
         </HStack>
       )}
 
-      <VStack className='justify-center items-center p-6 gap-4'>
-        {/* Settings and Edit Profile Buttons - Only for own profile */}
-        {canEdit && (
-          <View className='flex-row justify-between mt-2 w-full gap-3'>
-            {/* Settings Menu */}
-            <View className='flex-1'>
-              <Menu
-                trigger={({ ...triggerProps }) => (
-                  <Button
-                    {...triggerProps}
-                    variant='outline'
-                    className='w-full border-primary-500'
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 32 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <VStack className='justify-center items-center p-6 gap-4'>
+          {/* Settings and Edit Profile Buttons - Only for own profile */}
+          {canEdit && (
+            <View className='flex-row justify-between mt-2 w-full gap-3'>
+              {/* Settings Menu */}
+              <View className='flex-1'>
+                <Menu
+                  trigger={({ ...triggerProps }) => (
+                    <Button
+                      {...triggerProps}
+                      variant='outline'
+                      className='w-full border-primary-500'
+                    >
+                      <ButtonText className='text-primary-500'>
+                        Settings
+                      </ButtonText>
+                    </Button>
+                  )}
+                >
+                  <MenuItem
+                    textValue='Connect Spotify Account'
+                    onPress={() => {
+                      handlePressOauthSpotify();
+                    }}
                   >
-                    <ButtonText className='text-primary-500'>
-                      Settings
-                    </ButtonText>
-                  </Button>
-                )}
-              >
-                <MenuItem
-                  textValue='Connect Spotify Account'
-                  onPress={() => {
-                    handlePressOauthSpotify();
-                  }}
+                    <Icon as={SettingsIcon} size='sm' className='mr-3' />
+                    <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
+                  </MenuItem>
+
+                  <MenuSeparator />
+
+                  <MenuItem
+                    textValue='Logout'
+                    onPress={() => {
+                      signOut();
+                    }}
+                  >
+                    <Icon as={CloseIcon} size='sm' className='mr-3' />
+                    <MenuItemLabel>Logout</MenuItemLabel>
+                  </MenuItem>
+                </Menu>
+              </View>
+
+              {/* Edit Profile Button */}
+              <View className='flex-1'>
+                <Button
+                  className={`w-full ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
+                  onPress={() => setEditProfile(!editProfile)}
                 >
-                  <Icon as={SettingsIcon} size='sm' className='mr-3' />
-                  <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
-                </MenuItem>
-
-                <MenuSeparator />
-
-                <MenuItem
-                  textValue='Logout'
-                  onPress={() => {
-                    signOut();
-                  }}
-                >
-                  <Icon as={CloseIcon} size='sm' className='mr-3' />
-                  <MenuItemLabel>Logout</MenuItemLabel>
-                </MenuItem>
-              </Menu>
+                  <ButtonText className='text-white'>
+                    {editProfile ? 'Save' : 'Edit Profile'}
+                  </ButtonText>
+                </Button>
+              </View>
             </View>
+          )}
 
-            {/* Edit Profile Button */}
-            <View className='flex-1'>
-              <Button
-                className={`w-full ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-                onPress={() => setEditProfile(!editProfile)}
-              >
-                <ButtonText className='text-white'>
-                  {editProfile ? 'Save' : 'Edit Profile'}
-                </ButtonText>
-              </Button>
-            </View>
-          </View>
-        )}
-
-        {/* Follow Button - Only for other users */}
-        {!canEdit && profile.id !== currentUser?.id && (
-          <Button
-            variant={profileData?.is_following ? 'outline' : 'solid'}
-            onPress={handleFollowAction}
-            className={
-              profileData?.is_following
-                ? 'border-primary-500'
-                : 'bg-primary-500'
-            }
-          >
-            <ButtonText
+          {/* Follow Button - Only for other users */}
+          {!canEdit && profile.id !== currentUser?.id && (
+            <Button
+              variant={profileData?.is_following ? 'outline' : 'solid'}
+              onPress={handleFollowAction}
               className={
-                profileData?.is_following ? 'text-primary-500' : 'text-white'
+                profileData?.is_following
+                  ? 'border-primary-500'
+                  : 'bg-primary-500'
               }
             >
-              {profileData?.is_following ? 'Unfollow' : 'Follow'}
-            </ButtonText>
-          </Button>
-        )}
+              <ButtonText
+                className={
+                  profileData?.is_following ? 'text-primary-500' : 'text-white'
+                }
+              >
+                {profileData?.is_following ? 'Unfollow' : 'Follow'}
+              </ButtonText>
+            </Button>
+          )}
 
-        {/* Avatar */}
-        <Center>
-          <EditAvatar
-            url={profile.avatar_url || vibingImg}
-            onUpload={url => {
-              if (isOwnProfile) {
-                console.log('Uploading avatar', url);
-                updateProfile({ avatar_url: url });
-              }
-            }}
+          {/* Avatar */}
+          <Center>
+            <EditAvatar
+              url={profile.avatar_url || vibingImg}
+              onUpload={url => {
+                if (isOwnProfile) {
+                  console.log('Uploading avatar', url);
+                  updateProfile({ avatar_url: url });
+                }
+              }}
+              isEdit={canEdit && editProfile}
+            />
+          </Center>
+        </VStack>
+
+        <VStack className='gap-4'>
+          {/* Username */}
+          <EditProfileTextFeature
+            type='username'
+            currentText={profile?.username || ''}
+            size='4xl'
             isEdit={canEdit && editProfile}
           />
-        </Center>
-      </VStack>
-
-      <VStack className='gap-4'>
-        {/* Username */}
-        <EditProfileTextFeature
-          type='username'
-          currentText={profile?.username || ''}
-          size='4xl'
-          isEdit={canEdit && editProfile}
-        />
-        <Divider />
-        {isRefreshingProfile ? (
-          <Spinner />
-        ) : (
-          <>
-            {/* Friend Badge - Only for other users who are friends */}
-            {canViewProfile && !canEdit && profileData?.is_friend && (
-              <>
-                <View className='w-auto self-start ml-3'>
-                  <Badge
-                    size='sm'
-                    variant='solid'
-                    action='success'
-                    className='ml-1'
-                  >
-                    <BadgeIcon as={Handshake} className='mr-1' />
-                    <BadgeText>Friend</BadgeText>
-                  </Badge>
-                </View>
-              </>
-            )}
-            {/* Music Genre */}
-            {canViewMusicGenre && (
-              <>
+          {isRefreshingProfile ? (
+            <Spinner />
+          ) : (
+            <>
+              {/* Music Genre */}
+              {canViewMusicGenre && (
                 <EditMusicTastes
                   currentText={profile?.music_genre || []}
                   isEdit={canEdit && editProfile}
                 />
-                <Divider />
-              </>
-            )}
+              )}
+              <Divider />
 
-            {/* Bio */}
-            {canViewBio && (
-              <>
-                <EditProfileTextFeature
-                  type='bio'
-                  currentText={profile?.bio || ''}
-                  size='md'
-                  isEdit={canEdit && editProfile}
-                />
-                <Divider />
-              </>
-            )}
-
-            {/* Email */}
-            {canViewEmail && (
-              <>
-                <EditProfileTextFeature
-                  type='email'
-                  currentText={profile?.email || ''}
-                  size='md'
-                  isEdit={canEdit && editProfile}
-                />
-                <Divider />
-              </>
-            )}
-
-            {/* Privacy Settings - Only for own profile */}
-            {canEdit && (
-              <>
-                <PrivacySettings
-                  currentSetting={profile?.privacy_setting || 'public'}
-                  isEdit={editProfile}
-                  onSettingChange={handlePrivacyChange}
-                  publicText='Anyone can see your profile'
-                  friendsText='Only people you follow back can see your profile'
-                  privateText='Only you can see your profile'
-                  title='Profile Visibility'
-                />
-                <Divider />
-              </>
-            )}
-
-            {/* Followers/Following - Only if can view profile */}
-            {canViewFollowers && (
-              <>
-                <HStack className='gap-4 px-3'>
-                  <FollowingSection
-                    users={profileFollowers}
-                    title='Followers'
-                    onPress={() => router.push(`/profile/${userId}/followers`)}
+              {/* Bio */}
+              {canViewBio && (
+                <>
+                  <EditProfileTextFeature
+                    type='bio'
+                    currentText={profile?.bio || ''}
+                    size='md'
+                    isEdit={canEdit && editProfile}
                   />
-                  <FollowingSection
-                    users={profileFollowing}
-                    title='Following'
-                    onPress={() => router.push(`/profile/${userId}/following`)}
+                  <Divider />
+                </>
+              )}
+
+              {/* Email */}
+              {canViewEmail && (
+                <>
+                  <EditProfileTextFeature
+                    type='email'
+                    currentText={profile?.email || ''}
+                    size='md'
+                    isEdit={canEdit && editProfile}
                   />
-                </HStack>
+                  <Divider />
+                </>
+              )}
 
-                {/* Find People Button - Only for own profile */}
-                {canEdit && (
-                  <Button
-                    variant='outline'
-                    className='mx-3 mt-2'
-                    onPress={() => router.push('/profile/search')}
-                  >
-                    <ButtonText>Find People to Follow</ButtonText>
-                  </Button>
-                )}
-              </>
-            )}
+              {/* Privacy Settings - Only for own profile */}
+              {canEdit && (
+                <>
+                  <PrivacySettings
+                    currentSetting={profile?.privacy_setting || 'public'}
+                    isEdit={editProfile}
+                    onSettingChange={handlePrivacyChange}
+                    publicText='Anyone can see your profile'
+                    friendsText='Only people you follow back can see your profile'
+                    privateText='Only you can see your profile'
+                    title='Profile Visibility'
+                  />
+                  <Divider />
+                </>
+              )}
 
-            {/* Private Profile Message */}
-            {variant === 'private' && (
-              <VStack className='items-center py-8 gap-4 px-6'>
-                <Text className='text-typography-500 text-center text-lg'>
-                  This profile is private
-                </Text>
-                <Text className='text-typography-400 text-center'>
-                  You need to follow each other to see this profile
-                </Text>
-              </VStack>
-            )}
-          </>
-        )}
-      </VStack>
+              {/* Followers/Following - Only if can view profile */}
+              {canViewFollowers && (
+                <>
+                  <HStack className='gap-4 px-3'>
+                    <FollowingSection
+                      users={profileFollowers}
+                      title='Followers'
+                      onPress={() => router.push(`/profile/${userId}/followers`)}
+                    />
+                    <FollowingSection
+                      users={profileFollowing}
+                      title='Following'
+                      onPress={() => router.push(`/profile/${userId}/following`)}
+                    />
+                  </HStack>
+
+                  {/* Find People Button - Only for own profile */}
+                  {canEdit && (
+                    <Button
+                      variant='outline'
+                      className='mx-3 mt-2'
+                      onPress={() => router.push('/profile/search')}
+                    >
+                      <ButtonText>Find People to Follow</ButtonText>
+                    </Button>
+                  )}
+                </>
+              )}
+
+              {/* Private Profile Message */}
+              {variant === 'private' && (
+                <VStack className='items-center py-8 gap-4 px-6'>
+                  <Text className='text-typography-500 text-center text-lg'>
+                    This profile is private
+                  </Text>
+                  <Text className='text-typography-400 text-center'>
+                    You need to follow each other to see this profile
+                  </Text>
+                </VStack>
+              )}
+            </>
+          )}
+        </VStack>
+      </ScrollView>
     </View>
   );
 }

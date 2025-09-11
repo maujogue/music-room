@@ -36,5 +36,8 @@
       "npx prettier --write",
       "npx eslint --fix --config eslint.config.mjs"
     ]
+  },
+  "dependencies": {
+    "expo-router": "~5.1.6"
   }
 }

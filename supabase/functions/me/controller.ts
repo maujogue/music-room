@@ -6,7 +6,8 @@ import {
   startPlayback,
   pausePlayback,
   skipToNextTrack
-} from './service.ts'
+} from './services/spotify.ts'
+import { getSupabaseEventByOwner } from './services/supabase.ts'
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const spotify_token = c.get('spotify_token')
@@ -53,7 +54,8 @@ export async function startUserPlayback(c: Context): Promise<Response> {
     const res = await startPlayback(spotify_token, body)
 
     if (!res) {
-      throw new HTTPException(500, { message: 'Failed to start Spotify playback' })
+      c.status(500)
+      return c.json({ error: 'Failed to start Spotify playback' })
     }
 
     console.log('Response from startPlayback:', res);
@@ -76,7 +78,8 @@ export async function pauseUserPlayback(c: Context): Promise<Response> {
     const res = await pausePlayback(spotify_token)
 
     if (!res) {
-      throw new HTTPException(500, { message: 'Failed to pause Spotify playback' })
+      c.status(500)
+      return c.json({ error: 'Failed to pause Spotify playback' })
     }
     if (res.error) {
       c .status(res.error.status || 500)
@@ -92,7 +95,8 @@ export async function skipToNextUserTrack(c: Context): Promise<Response> {
     const res = await skipToNextTrack(spotify_token)
 
     if (!res) {
-      throw new HTTPException(500, { message: 'Failed to skip to next Spotify track' })
+      c.status(500)
+      return c.json({ error: 'Failed to skip to next Spotify track' })
     }
     if (res.error || !res.ok) {
       console.error('Error from Spotify API:', res.error);
@@ -108,3 +112,13 @@ export async function skipToNextUserTrack(c: Context): Promise<Response> {
     return c.body(null);
 }
 
+export async function fetchCurrentUserEvents(c: Context): Promise<any> {
+  const user = c.get('user')
+
+  const events = await getSupabaseEventByOwner(user.id)
+  if (!events) {
+    throw new HTTPException(500, { message: 'Failed to fetch events' })
+  }
+
+  return c.json(events)
+}
