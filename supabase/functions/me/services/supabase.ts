@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { formatDbError } from '../../utils/postgres_errors_map.tsx'
+import { formatDbError } from '../../../utils/postgres_errors_map.tsx'
 
 const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
