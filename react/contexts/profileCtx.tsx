@@ -153,7 +153,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const { data, error } = await updateProfileAPI(updates);
+      const { error } = await updateProfileAPI(updates);
 
       if (error) {
         console.error('Error updating profile:', error);

@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById, getEventById } from '@/services/events';
+import { deleteEventById } from '@/services/events';
 import { MOCK_EVENTS } from '@/mocks/mockEvents';
-
 
 export function useEvent(id: string) {
   const [event, setPlaylist] = useState<MusicEvent | null>(null);
@@ -56,7 +55,5 @@ export function useEvent(id: string) {
     }
   }, [id]);
 
-
   return { event, loading, error, refetch, deleteEvent };
-
 }

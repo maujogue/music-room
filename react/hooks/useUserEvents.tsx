@@ -16,18 +16,20 @@ export function useUserEvents() {
 
     const fetchPlaylists = async (session: Session) => {
       try {
-        return fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-        })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          });
+        return fetch(
+          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+            },
+          }
+        ).then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        });
       } catch (e) {
         console.error('Error fetching events:', e);
         if (isActive) {
@@ -40,28 +42,29 @@ export function useUserEvents() {
       }
     };
 
-    getSession().then((res) => {
-      if (res == null)
-        throw new Error("Session retrieve error")
+    getSession()
+      .then(res => {
+        if (res == null) throw new Error('Session retrieve error');
 
-      // MOCK-DATA OVERRIDE HERE
-      // -----------------------
-      if (isActive) {
-        setEvents(MOCK_EVENTS)
-        setLoading(false)
-        return;
-      }
-      // -----------------------
-
-      fetchPlaylists(res).then((data) => {
+        // MOCK-DATA OVERRIDE HERE
+        // -----------------------
         if (isActive) {
-          // [!] Note to backend : decide foramt response (wrap in .items or whatever)
-          setEvents(data.items || [])
+          setEvents(MOCK_EVENTS);
+          setLoading(false);
+          return;
         }
+        // -----------------------
+
+        fetchPlaylists(res).then(data => {
+          if (isActive) {
+            // [!] Note to backend : decide foramt response (wrap in .items or whatever)
+            setEvents(data.items || []);
+          }
+        });
+      })
+      .catch(err => {
+        console.error('Erreur dans useUserPlaylists:', err);
       });
-    }).catch((err) => {
-      console.error('Erreur dans useUserPlaylists:', err)
-    });
 
     return () => {
       isActive = false;
@@ -69,6 +72,4 @@ export function useUserEvents() {
   }, []);
 
   return { events, loading, error };
-};
-
-
+}

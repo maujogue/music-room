@@ -1,6 +1,5 @@
 import { Stack } from 'expo-router';
 import NewItemButton from '@/components/generics/NewItemButton';
-import CancelButton from '@/components/generics/CancelButton';
 
 export default function EventLayout() {
   return (

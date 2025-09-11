@@ -8,13 +8,7 @@ import { Center } from '@/components/ui/center';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
 import { Badge, BadgeText, BadgeIcon } from '@/components/ui/badge';
-import {
-  Icon,
-  ArrowLeftIcon,
-  SettingsIcon,
-  CloseIcon,
-  LoaderIcon,
-} from '@/components/ui/icon';
+import { Icon, ArrowLeftIcon, SettingsIcon, CloseIcon } from '@/components/ui/icon';
 import { Handshake } from 'lucide-react-native';
 import {
   Menu,
