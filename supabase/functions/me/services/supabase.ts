@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { formatDbError } from '../../utils/postgres_errors_map.tsx'
 
 const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
@@ -12,7 +13,8 @@ export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
 
   if (error) {
 	console.error('Supabase error:', error);
-	throw new HTTPException(500, { message: `Error fetching events: ${error.message}` });
+  const pgError = formatDbError(error);
+	throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
   return data;

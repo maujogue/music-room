@@ -11,7 +11,7 @@ import {
 
 
 export async function createEvent(c: Context): Promise<any> {
-  const body = await c.req.json()
+  const body: EventPayload = await c.req.json()
   body.owner_id = c.get('user').id
 
   if (!body.name || body.name.length < 3) {
@@ -22,8 +22,6 @@ export async function createEvent(c: Context): Promise<any> {
   if (!event) {
     throw new HTTPException(500, { message: 'Failed to create event' })
   }
-
-  console.log('Event created:', event);
 
   c.status(201)
   return c.json(event)

@@ -11,22 +11,6 @@ create table if not exists public.events (
     ending_at timestamp with time zone
 );
 
--- Trigger function to create a location row when an event is created
-CREATE OR REPLACE FUNCTION create_location_for_event()
-RETURNS trigger AS $$
-BEGIN
-    INSERT INTO public.location (event_id)
-    VALUES (NEW.id);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger on events table
-CREATE TRIGGER trg_create_location_for_event
-AFTER INSERT ON public.events
-FOR EACH ROW
-EXECUTE FUNCTION create_location_for_event();
-
 -- Junction table for event members
 create table if not exists public.event_members (
     event_id uuid references events(id) on delete cascade,
@@ -38,7 +22,7 @@ create table if not exists public.event_members (
 -- Table for event addresses
 create table if not exists public.location (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+    event_id UUID REFERENCES events(id) ON DELETE CASCADE unique,
     coordinates POINT,
     venueName TEXT,
     complement TEXT,

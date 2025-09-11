@@ -8,8 +8,8 @@ type MusicEvent = {
   // playlistId: string;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
-  startDate: string;
-  endDate: string;
+  beginning_at: string;
+  ending_at: string;
 };
 
 type Coordinates = {

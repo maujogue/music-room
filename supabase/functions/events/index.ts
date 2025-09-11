@@ -21,10 +21,11 @@ app.use('*', async (c, next) => {
 })
 
 app.onError((err, c) => {
-  console.error('Error occurred:', err)
   if (err instanceof HTTPException) {
-    return err.getResponse()
+    c.status(err.status);
+    return c.json({ message: err.message }, err.status);
   }
+
   return c.json({
     message: 'Internal Server Error'
   }, 500);
