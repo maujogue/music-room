@@ -14,20 +14,15 @@ export default function EventLocationInfo({ location }: Props) {
     return null;
   }
 
-  const {
-    coordinates,
-    venueName,
-    address,
-    city,
-    country,
-  } = location;
+  const { coordinates, venueName, address, city, country } = location;
 
   if (!coordinates && !venueName && !address && !city && !country) {
     return null;
   }
 
-  const parsedCoordinates = coordinates ? parsePointCoordinates(coordinates) : null;
-
+  const parsedCoordinates = coordinates
+    ? parsePointCoordinates(coordinates)
+    : null;
 
   return (
     <VStack className='gap-2'>
@@ -54,9 +49,15 @@ export default function EventLocationInfo({ location }: Props) {
       )}
 
       {parsedCoordinates && (
-        <Badge size="md" action="muted" className="rounded-md bg-indigo-200 h-6">
-          <BadgeIcon as={MapPinIcon} size="lg" />
-          <BadgeText className="pl-1">{parsedCoordinates.y.toFixed(5)}, {parsedCoordinates.x.toFixed(5)}</BadgeText>
+        <Badge
+          size='md'
+          action='muted'
+          className='rounded-md bg-indigo-200 h-6'
+        >
+          <BadgeIcon as={MapPinIcon} size='lg' />
+          <BadgeText className='pl-1'>
+            {parsedCoordinates.y.toFixed(5)}, {parsedCoordinates.x.toFixed(5)}
+          </BadgeText>
         </Badge>
       )}
     </VStack>

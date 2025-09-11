@@ -18,7 +18,8 @@ export default function AddNewPlayList() {
       return;
     }
 
-    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists`,
+    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists`,
       {
         method: 'POST',
         body: payload,

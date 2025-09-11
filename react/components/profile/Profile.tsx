@@ -8,7 +8,12 @@ import { Center } from '@/components/ui/center';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
 import { Badge, BadgeText, BadgeIcon } from '@/components/ui/badge';
-import { Icon, ArrowLeftIcon, SettingsIcon, CloseIcon } from '@/components/ui/icon';
+import {
+  Icon,
+  ArrowLeftIcon,
+  SettingsIcon,
+  CloseIcon,
+} from '@/components/ui/icon';
 import { Handshake } from 'lucide-react-native';
 import {
   Menu,
@@ -219,7 +224,7 @@ export default function Profile({
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps='handled'
       >
         <VStack className='justify-center items-center p-6 gap-4'>
           {/* Settings and Edit Profile Buttons - Only for own profile */}
@@ -384,12 +389,16 @@ export default function Profile({
                     <FollowingSection
                       users={profileFollowers}
                       title='Followers'
-                      onPress={() => router.push(`/profile/${userId}/followers`)}
+                      onPress={() =>
+                        router.push(`/profile/${userId}/followers`)
+                      }
                     />
                     <FollowingSection
                       users={profileFollowing}
                       title='Following'
-                      onPress={() => router.push(`/profile/${userId}/following`)}
+                      onPress={() =>
+                        router.push(`/profile/${userId}/following`)
+                      }
                     />
                   </HStack>
 

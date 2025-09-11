@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 
-export function parsePointCoordinates(pointString: string): { x: number; y: number } | null {
+export function parsePointCoordinates(
+  pointString: string
+): { x: number; y: number } | null {
   if (!pointString) return null;
 
   // Format attendu: "(x,y)" ou "EventLocationInfo (x,y)"
@@ -23,12 +25,14 @@ export function useEventCoordinates(event: CompleteEvent | null) {
     const address = event.adresses[0]; // Première adresse
     const coords = parsePointCoordinates(address.coordinates);
 
-    return coords ? {
-      x: coords.x,
-      y: coords.y,
-      latitude: coords.y, // Convention: y = latitude
-      longitude: coords.x, // Convention: x = longitude
-      address
-    } : null;
+    return coords
+      ? {
+          x: coords.x,
+          y: coords.y,
+          latitude: coords.y, // Convention: y = latitude
+          longitude: coords.x, // Convention: x = longitude
+          address,
+        }
+      : null;
   }, [event]);
 }

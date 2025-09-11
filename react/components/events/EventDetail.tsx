@@ -59,9 +59,9 @@ export default function EventDetail() {
   const onEditEvent = () => {
     router.push({
       pathname: '/(main)/events/[eventId]/edit',
-      params: { eventId }
-    })
-  }
+      params: { eventId },
+    });
+  };
 
   const onToggleHeader = () => {
     setIsExpanded(v => !v);

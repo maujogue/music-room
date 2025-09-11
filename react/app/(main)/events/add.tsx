@@ -1,9 +1,9 @@
 import { apiFetch } from '@/utils/apiFetch';
 import { useRouter } from 'expo-router';
-import { useState } from "react";
-import { useProfile } from "@/contexts/profileCtx";
-import EditEventForm from "@/components/events/EditEventForm";
-import { createEvent } from "@/services/events";
+import { useState } from 'react';
+import { useProfile } from '@/contexts/profileCtx';
+import EditEventForm from '@/components/events/EditEventForm';
+import { createEvent } from '@/services/events';
 
 export default function AddNewEvent() {
   const router = useRouter();
@@ -22,19 +22,19 @@ export default function AddNewEvent() {
       const resp = await createEvent({
         ...payload,
       });
-      console.log("Event created successfully:", resp);
+      console.log('Event created successfully:', resp);
       if (router.canGoBack()) {
-          router.replace({
+        router.replace({
           pathname: '/(main)/events/[eventId]',
           params: { eventId: resp.id },
-      })
+        });
       }
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error('Error creating event:', error);
       setError(`Error creating event: ${error}`);
       return;
     }
-  }
+  };
 
   return <EditEventForm onSubmit={onSubmit} ApiError={error} />;
 }
