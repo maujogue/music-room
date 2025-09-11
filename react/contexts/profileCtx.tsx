@@ -9,10 +9,8 @@ import { UserInfo } from '@/types/user';
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
 import {
-  getProfile,
+  getUserProfile,
   updateProfile as updateProfileAPI,
-  getUserFollowers,
-  getUserFollowing,
   followUser,
   unfollowUser,
   searchUsers,
@@ -27,7 +25,6 @@ interface ProfileContextType {
   followingCount: number;
   updateProfile: (updates: Partial<UserInfo>) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
-  refreshFollowingData: () => Promise<void>;
   clearProfile: () => void;
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
@@ -59,7 +56,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       if (!user) return;
 
       await refreshProfile();
-      await refreshFollowingData();
 
       // Subscribe to realtime changes for this user's profile
       subscription = supabase
@@ -87,7 +83,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
           },
           () => {
             // On follow changes, refresh following data
-            refreshFollowingData();
+            refreshProfile();
           }
         )
         .on(
@@ -100,7 +96,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
           },
           () => {
             // On follower changes, refresh following data
-            refreshFollowingData();
+            refreshProfile();
           }
         )
         .subscribe();
@@ -124,45 +120,26 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const { data, error } = await getProfile();
+      const { data, error } = await getUserProfile(user.id);
 
       if (error) {
         console.error('Error fetching profile:', error);
         setProfile(null);
+        setFollowers([]);
+        setFollowing([]);
       } else {
-        setProfile(data);
+        // The data now includes both profile and follow information
+        setProfile(data?.profile || data);
+        setFollowers(data?.followers || []);
+        setFollowing(data?.following || []);
       }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
       setProfile(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshFollowingData = async () => {
-    if (!user) return;
-
-    try {
-      const [followersResult, followingResult] = await Promise.all([
-        getUserFollowers(user.id),
-        getUserFollowing(user.id),
-      ]);
-      if (followersResult.error || followingResult.error) {
-        console.error(
-          'Error fetching following data:',
-          followersResult.error || followingResult.error
-        );
-        setFollowers([]);
-        setFollowing([]);
-      } else {
-        setFollowers(followersResult.data || []);
-        setFollowing(followingResult.data || []);
-      }
-    } catch (error) {
-      console.error('Unexpected error fetching following data:', error);
       setFollowers([]);
       setFollowing([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -206,7 +183,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       const { error } = await followUser(userId);
       if (!error) {
         // Refresh following data after successful follow
-        await refreshFollowingData();
+        await refreshProfile();
       }
       return { error };
     } catch (error) {
@@ -222,7 +199,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       const { error } = await unfollowUser(userId);
       if (!error) {
         // Refresh following data after successful unfollow
-        await refreshFollowingData();
+        await refreshProfile();
       }
       return { error };
     } catch (error) {
@@ -251,7 +228,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     followingCount: following.length,
     updateProfile,
     refreshProfile,
-    refreshFollowingData,
     clearProfile,
     followUser: handleFollowUser,
     unfollowUser: handleUnfollowUser,

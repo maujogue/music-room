@@ -9,27 +9,69 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
     detectSessionInUrl: false,
   },
 });
-// Get user profile
-export async function getProfile(
-  userId: string
-): Promise<{ data: any; error: any }> {
-  console.log('getProfile called with userId:', userId);
 
+// Get another user's profile with follow relationships
+export async function getUserProfile(
+  userId: string,
+  currentUserId?: string
+): Promise<{ data: any; error: any }> {
   try {
-    const { data, error } = await supabase
+    // Get the user's profile
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return { data: null, error };
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+      return { data: null, error: profileError };
     }
 
-    return { data, error: null };
+    // Get the target user's followers and following (this already includes relationship status)
+    const followsData = await getUserFollows(userId, currentUserId);
+
+    if (followsData.error) {
+      console.error('Error fetching user follows:', followsData.error);
+      return {
+        data: {
+          profile,
+          is_following: false,
+          is_follower: false,
+          is_friend: false,
+          followers: [],
+          following: [],
+        },
+        error: null,
+      };
+    }
+
+    // Extract relationship status from the follows data
+    const followers = followsData.data?.followers || [];
+    const following = followsData.data?.following || [];
+
+    // Find the current user in the followers/following lists to determine relationships
+    let isFollowing = false;
+    let isFollower = false;
+
+    if (currentUserId) {
+      isFollower = followers.some((f) => f.id === currentUserId);
+      isFollowing = following.some((f) => f.id === currentUserId);
+    }
+
+    return {
+      data: {
+        profile,
+        is_following: isFollowing,
+        is_follower: isFollower,
+        is_friend: isFollowing && isFollower,
+        followers,
+        following,
+      },
+      error: null,
+    };
   } catch (error) {
-    console.error('Unexpected error fetching profile:', error);
+    console.error('Unexpected error fetching user profile:', error);
     return { data: null, error: { message: 'An unexpected error occurred' } };
   }
 }

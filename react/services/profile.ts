@@ -1,15 +1,25 @@
 import { apiFetch } from '@/utils/apiFetch';
+import { UserInfo } from '@/types/user';
 
 const baseUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/profile`;
-console.log('baseUrl:', baseUrl);
-// Get current user's profile
-export async function getProfile(): Promise<{ data: any; error: any }> {
+
+// Get another user's profile with follow relationships
+export async function getUserProfile(userId: string): Promise<{
+  data: {
+    profile: any;
+    is_following: boolean;
+    is_follower: boolean;
+    is_friend: boolean;
+    followers: any[];
+    following: any[];
+  } | null;
+  error: any;
+}> {
   try {
-    const response = await apiFetch(`${baseUrl}/get`);
-    console.log('profile response:', response);
-    return { data: response.data, error: null };
+    const response = await apiFetch(`${baseUrl}/user/${userId}`);
+    return { data: response.data || null, error: null };
   } catch (error) {
-    console.error('Error fetching profile:', error);
+    console.error('Error fetching user profile with follows:', error);
     return { data: null, error };
   }
 }
@@ -58,9 +68,7 @@ export async function unfollowUser(userId: string): Promise<{ error: any }> {
 }
 
 // Get user's follows (both followers and following)
-export async function getUserFollows(
-  userId: string
-): Promise<{
+export async function getUserFollows(userId: string): Promise<{
   data: { followers: any[]; following: any[] } | null;
   error: any;
 }> {

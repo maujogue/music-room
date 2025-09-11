@@ -26,8 +26,8 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
 import { useFollow } from '@/hooks/useFollow';
-import { supabase } from '@/services/supabase';
 import { connectToSpotify } from '@/services/auth';
+import { getUserProfile } from '@/services/profile';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import EditAvatar from '@/components/profile/edit_avatar';
@@ -139,96 +139,26 @@ export default function Profile({
     setError(null);
 
     try {
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const { data, error } = await getUserProfile(userId);
 
-      if (profileError) {
+      if (error) {
+        setError('User not found');
+        console.error('Error loading user profile:', error);
+        return;
+      }
+
+      if (!data) {
         setError('User not found');
         return;
       }
 
-      // Get follow relationships
-      const { data: follows, error: followsError } = await supabase
-        .from('follows')
-        .select('follower_id, following_id')
-        .or(
-          `and(follower_id.eq.${currentUser.id},following_id.eq.${userId}),and(follower_id.eq.${userId},following_id.eq.${currentUser.id})`
-        );
-
-      if (followsError) {
-        console.error('Error fetching follow relationships:', followsError);
-      }
-
-      const isFollowing =
-        follows?.some(
-          f => f.follower_id === currentUser.id && f.following_id === userId
-        ) || false;
-      const isFollower =
-        follows?.some(
-          f => f.follower_id === userId && f.following_id === currentUser.id
-        ) || false;
-      const isFriend = isFollowing && isFollower;
-
-      // Get followers and following for this user
-      const { data: userFollowers } = await supabase
-        .from('follows')
-        .select(
-          `
-          created_at,
-          follower:profiles!follows_follower_id_fkey(
-            id,
-            username,
-            avatar_url
-          )
-        `
-        )
-        .eq('following_id', userId);
-
-      const { data: userFollowing } = await supabase
-        .from('follows')
-        .select(
-          `
-          created_at,
-          following:profiles!follows_following_id_fkey(
-            id,
-            username,
-            avatar_url
-          )
-        `
-        )
-        .eq('follower_id', userId);
-
-      const followersWithStatus = (userFollowers || []).map(follow => ({
-        id: follow.follower.id,
-        username: follow.follower.username,
-        avatar_url: follow.follower.avatar_url,
-        created_at: follow.created_at,
-        is_follower: true,
-        is_following: false,
-        is_friend: false,
-      }));
-
-      const followingWithStatus = (userFollowing || []).map(follow => ({
-        id: follow.following.id,
-        username: follow.following.username,
-        avatar_url: follow.following.avatar_url,
-        created_at: follow.created_at,
-        is_follower: false,
-        is_following: true,
-        is_friend: false,
-      }));
-
       setProfileData({
-        profile,
-        is_following: isFollowing,
-        is_follower: isFollower,
-        is_friend: isFriend,
-        followers: followersWithStatus,
-        following: followingWithStatus,
+        profile: data.profile,
+        is_following: data.is_following,
+        is_follower: data.is_follower,
+        is_friend: data.is_friend,
+        followers: data.followers,
+        following: data.following,
       });
     } catch (err) {
       setError('Failed to load user profile');
@@ -403,19 +333,19 @@ export default function Profile({
             {/* Friend Badge - Only for other users who are friends */}
             {canViewProfile && !canEdit && profileData?.is_friend && (
               <>
-              <View className='w-auto self-start ml-3'>
-                <Badge
-                  size='sm'
-                  variant='solid'
-                  action='success'
-                  className='ml-1'
-                >
-                  <BadgeIcon as={Handshake} className='mr-1' />
-                  <BadgeText>Friend</BadgeText>
-                </Badge>
-              </View>
-              <Divider />
-            </>
+                <View className='w-auto self-start ml-3'>
+                  <Badge
+                    size='sm'
+                    variant='solid'
+                    action='success'
+                    className='ml-1'
+                  >
+                    <BadgeIcon as={Handshake} className='mr-1' />
+                    <BadgeText>Friend</BadgeText>
+                  </Badge>
+                </View>
+                <Divider />
+              </>
             )}
             {/* Music Genre */}
             {canViewMusicGenre && (

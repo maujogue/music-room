@@ -1,6 +1,6 @@
 import { Hono } from 'jsr:@hono/hono';
 import {
-  fetchProfile,
+  fetchUserProfile,
   updateProfile,
   fetchUserFollows,
   followUser,
@@ -12,7 +12,7 @@ import {
 const router = new Hono();
 
 // Profile CRUD operations
-router.get('/get', fetchProfile);
+router.get('/user/:userId', fetchUserProfile);
 router.put('/update', updateProfile);
 
 // Follow system

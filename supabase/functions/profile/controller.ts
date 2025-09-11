@@ -1,7 +1,7 @@
 import { Context } from 'jsr:@hono/hono';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
 import {
-  getProfile,
+  getUserProfile,
   updateUserProfile,
   getUserFollows,
   followUserById,
@@ -10,18 +10,24 @@ import {
   areUsersFriends,
 } from './service.ts';
 
-export async function fetchProfile(c: Context): Promise<Response> {
-  console.log('fetchProfile called');
-  const user = c.get('user');
-  const res = await getProfile(user.id);
+export async function fetchUserProfile(c: Context): Promise<Response> {
+  const userId = c.req.param('userId');
+  const currentUser = c.get('user');
+
+  // If userId is "me", use current user's ID
+  const targetUserId = userId === 'me' ? currentUser.id : userId;
+
+  const res = await getUserProfile(targetUserId, currentUser?.id);
 
   if (!res) {
-    throw new HTTPException(500, { message: 'Failed to fetch profile' });
+    throw new HTTPException(500, { message: 'Failed to fetch user profile' });
   }
 
   if (res.error) {
     c.status(res.error.status || 500);
-    return c.json({ error: res.error.message || 'Failed to fetch profile' });
+    return c.json({
+      error: res.error.message || 'Failed to fetch user profile',
+    });
   }
 
   c.status(200);

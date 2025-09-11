@@ -48,7 +48,7 @@ export default function UserList({
     useState<UserWithFollowStatus[]>(initialUsers);
   const { user } = useAuth();
   const { follow, unfollow } = useFollow();
-  const { refreshFollowingData } = useProfile();
+  const { refreshProfile } = useProfile();
   const router = useRouter();
 
   // For 'all' type, use the search hook
@@ -118,7 +118,7 @@ export default function UserList({
       }
 
       // Refresh the profile context data to keep everything in sync
-      await refreshFollowingData();
+      await refreshProfile();
     } catch (error) {
       console.error('Error with follow action:', error);
     }
