@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById } from '@/services/events';
+import { deleteEventById, getEventById } from '@/services/events';
 import { MOCK_EVENTS } from '@/mocks/mockEvents';
 
 export function useEvent(id: string) {
