@@ -1,6 +1,6 @@
-import EditPlayListForm from "@/components/playlist/EditPlaylistForm";
-import { useProfile } from "@/contexts/profileCtx";
-import { apiFetch } from "@/utils/apiFetch";
+import EditPlayListForm from '@/components/playlist/EditPlaylistForm';
+import { useProfile } from '@/contexts/profileCtx';
+import { apiFetch } from '@/utils/apiFetch';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
@@ -18,7 +18,8 @@ export default function AddNewPlayList() {
       return;
     }
 
-    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists`,
+    const resp: ApiResponse<SpotifyPlaylist> = await apiFetch<SpotifyPlaylist>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists`,
       {
         method: 'POST',
         body: payload,

@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { createPressable } from '@gluestack-ui/pressable';
@@ -38,5 +37,3 @@ const Pressable = React.forwardRef<
 
 Pressable.displayName = 'Pressable';
 export { Pressable };
-
-

@@ -7,13 +7,14 @@ import { Text } from '@/components/ui/text';
 import { Center } from '@/components/ui/center';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
+import { Badge, BadgeText, BadgeIcon } from '@/components/ui/badge';
 import {
   Icon,
   ArrowLeftIcon,
   SettingsIcon,
   CloseIcon,
-  LoaderIcon,
 } from '@/components/ui/icon';
+import { Handshake } from 'lucide-react-native';
 import {
   Menu,
   MenuItem,
@@ -23,9 +24,8 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { useFollow } from '@/hooks/useFollow';
-import { supabase } from '@/services/supabase';
 import { connectToSpotify } from '@/services/auth';
+import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import EditAvatar from '@/components/profile/edit_avatar';
@@ -80,10 +80,9 @@ export default function Profile({
     followers,
     following,
   } = useProfile();
-  const { follow, unfollow } = useFollow();
   const [editProfile, setEditProfile] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -118,128 +117,58 @@ export default function Profile({
 
     try {
       if (profileData?.is_following) {
-        await unfollow(profile.id);
+        await unfollowUser(profileData.profile.id);
       } else {
-        await follow(profile.id);
+        await followUser(profileData.profile.id);
       }
-      // Reload profile data to get updated follow status
-      refreshVariant();
-      await loadUserProfile(setIsRefreshingProfile);
+      setIsRefreshingProfile(true);
+      await refreshVariant();
+      await loadUserProfile();
+      setIsRefreshingProfile(false);
     } catch (error) {
       console.error('Error with follow action:', error);
     }
   };
 
-  const loadUserProfile = async (setLoading: (loading: boolean) => void) => {
+  const loadUserProfile = async () => {
     if (isOwnProfile || !userId || !currentUser) return;
 
-    setLoading(true);
     setError(null);
 
     try {
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const { data, error } = await getUserProfile(userId);
 
-      if (profileError) {
+      if (error) {
+        setError('User not found');
+        console.error('Error loading user profile:', error);
+        return;
+      }
+
+      if (!data) {
         setError('User not found');
         return;
       }
 
-      // Get follow relationships
-      const { data: follows, error: followsError } = await supabase
-        .from('follows')
-        .select('follower_id, following_id')
-        .or(
-          `and(follower_id.eq.${currentUser.id},following_id.eq.${userId}),and(follower_id.eq.${userId},following_id.eq.${currentUser.id})`
-        );
-
-      if (followsError) {
-        console.error('Error fetching follow relationships:', followsError);
-      }
-
-      const isFollowing =
-        follows?.some(
-          f => f.follower_id === currentUser.id && f.following_id === userId
-        ) || false;
-      const isFollower =
-        follows?.some(
-          f => f.follower_id === userId && f.following_id === currentUser.id
-        ) || false;
-      const isFriend = isFollowing && isFollower;
-
-      // Get followers and following for this user
-      const { data: userFollowers } = await supabase
-        .from('follows')
-        .select(
-          `
-          created_at,
-          follower:profiles!follows_follower_id_fkey(
-            id,
-            username,
-            avatar_url
-          )
-        `
-        )
-        .eq('following_id', userId);
-
-      const { data: userFollowing } = await supabase
-        .from('follows')
-        .select(
-          `
-          created_at,
-          following:profiles!follows_following_id_fkey(
-            id,
-            username,
-            avatar_url
-          )
-        `
-        )
-        .eq('follower_id', userId);
-
-      const followersWithStatus = (userFollowers || []).map(follow => ({
-        id: follow.follower.id,
-        username: follow.follower.username,
-        avatar_url: follow.follower.avatar_url,
-        created_at: follow.created_at,
-        is_follower: true,
-        is_following: false,
-        is_friend: false,
-      }));
-
-      const followingWithStatus = (userFollowing || []).map(follow => ({
-        id: follow.following.id,
-        username: follow.following.username,
-        avatar_url: follow.following.avatar_url,
-        created_at: follow.created_at,
-        is_follower: false,
-        is_following: true,
-        is_friend: false,
-      }));
-
       setProfileData({
-        profile,
-        is_following: isFollowing,
-        is_follower: isFollower,
-        is_friend: isFriend,
-        followers: followersWithStatus,
-        following: followingWithStatus,
+        profile: data.profile,
+        is_following: data.is_following,
+        is_follower: data.is_follower,
+        is_friend: data.is_friend,
+        followers: data.followers,
+        following: data.following,
       });
     } catch (err) {
       setError('Failed to load user profile');
       console.error('Error loading user profile:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
   // Load user profile when not own profile
   React.useEffect(() => {
     if (!isOwnProfile) {
-      loadUserProfile(setIsLoading);
+      setIsLoading(true);
+      loadUserProfile();
+      setIsLoading(false);
     }
   }, [userId, isOwnProfile]);
 
@@ -253,7 +182,7 @@ export default function Profile({
     );
   }
 
-  if (error || (!profile && !isOwnProfile)) {
+  if (error) {
     return (
       <View className='flex-1 pt-safe bg-background-0'>
         <VStack className='items-center justify-center flex-1 gap-4 p-6'>
@@ -295,7 +224,7 @@ export default function Profile({
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps='handled'
       >
         <VStack className='justify-center items-center p-6 gap-4'>
           {/* Settings and Edit Profile Buttons - Only for own profile */}
@@ -460,12 +389,16 @@ export default function Profile({
                     <FollowingSection
                       users={profileFollowers}
                       title='Followers'
-                      onPress={() => router.push(`/profile/${userId}/followers`)}
+                      onPress={() =>
+                        router.push(`/profile/${userId}/followers`)
+                      }
                     />
                     <FollowingSection
                       users={profileFollowing}
                       title='Following'
-                      onPress={() => router.push(`/profile/${userId}/following`)}
+                      onPress={() =>
+                        router.push(`/profile/${userId}/following`)
+                      }
                     />
                   </HStack>
 

@@ -6,5 +6,5 @@ export default function EventsHome() {
     <SafeAreaView style={{ flex: 1, paddingHorizontal: 12 }} edges={['top']}>
       <AllEvents />
     </SafeAreaView>
-  )
+  );
 }

@@ -3,7 +3,6 @@ import { getErrorMsg } from '@/utils/getErrorMsg';
 import { deleteEventById, getEventById } from '@/services/events';
 import { MOCK_EVENTS } from '@/mocks/mockEvents';
 
-
 export function useEvent(id: string) {
   const [event, setEvent] = useState<MusicEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,5 +54,4 @@ export function useEvent(id: string) {
   }, [id]);
 
   return { event, loading, error, refetch, deleteEvent };
-
 }

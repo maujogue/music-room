@@ -1,21 +1,20 @@
-import { apiFetch } from "@/utils/apiFetch";
+import { apiFetch } from '@/utils/apiFetch';
 import { useRouter } from 'expo-router';
-import { useState } from "react";
-import { useProfile } from "@/contexts/profileCtx";
-import EditEventForm from "@/components/events/EditEventForm";
-import { createEvent } from "@/services/events";
+import { useState } from 'react';
+import { useProfile } from '@/contexts/profileCtx';
+import EditEventForm from '@/components/events/EditEventForm';
+import { createEvent } from '@/services/events';
 
 export default function AddNewEvent() {
-  const router = useRouter()
-  const [error, setError] = useState<string>('')
+  const router = useRouter();
+  const [error, setError] = useState<string>('');
   const { profile } = useProfile();
 
   const onSubmit = async (payload: EventPayload) => {
-
-    console.log("HERE IMPLEMENT POST NEW EVENT TO BACK")
+    console.log('HERE IMPLEMENT POST NEW EVENT TO BACK');
 
     if (!profile) {
-      setError("Authentification error, try reconnect with Spotify please");
+      setError('Authentification error, try reconnect with Spotify please');
       return;
     }
 
@@ -23,21 +22,19 @@ export default function AddNewEvent() {
       const resp = await createEvent({
         ...payload,
       });
-      console.log("Event created successfully:", resp);
+      console.log('Event created successfully:', resp);
       if (router.canGoBack()) {
-          router.replace({
+        router.replace({
           pathname: '/(main)/events/[eventId]',
           params: { eventId: resp.id },
-      })
+        });
       }
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error('Error creating event:', error);
       setError(`Error creating event: ${error}`);
       return;
     }
-  }
+  };
 
-  return (
-    <EditEventForm onSubmit={onSubmit} ApiError={error} />
-  );
+  return <EditEventForm onSubmit={onSubmit} ApiError={error} />;
 }

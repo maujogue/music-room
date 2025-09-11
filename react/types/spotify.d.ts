@@ -2,7 +2,7 @@ type SpotifyImage = {
   url: string;
   height?: number;
   width?: number;
-}
+};
 
 type SpotifyOwner = {
   display_name: string;
@@ -10,7 +10,7 @@ type SpotifyOwner = {
   href: string;
   type: 'user';
   uri: string;
-}
+};
 
 type SpotifyPlaylist = {
   collaborative: boolean;
@@ -30,7 +30,7 @@ type SpotifyPlaylist = {
   };
   type: 'playlist';
   uri: string;
-}
+};
 
 type SpotifyTrack = {
   album: {
@@ -63,7 +63,7 @@ type SpotifyTrack = {
   track_number: number;
   type: 'track' | string;
   uri: string;
-}
+};
 
 type SpotifyTrackWithKey = SpotifyTrack & {
   __key: string;

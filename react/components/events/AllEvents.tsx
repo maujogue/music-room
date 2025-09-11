@@ -4,10 +4,9 @@ import { useUserEvents } from '@/hooks/useUserEvents';
 import { useProfile } from '@/contexts/profileCtx';
 import EventList from '@/components/events/EventList';
 
-
 export default function AllEvents() {
   const { events, loading, error } = useUserEvents();
-  const { profile } = useProfile()
+  const { profile } = useProfile();
 
   if (loading) return <Text>Events loading...</Text>;
   if (!profile) return <Text>Events loading but profileError...</Text>;
@@ -25,7 +24,5 @@ export default function AllEvents() {
     },
   ];
 
-  return (
-    <EventList sections={sections} />
-  );
+  return <EventList sections={sections} />;
 }

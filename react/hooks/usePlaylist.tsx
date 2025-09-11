@@ -48,7 +48,9 @@ export function usePlaylist(id: string) {
     try {
       // await deletePlaylistService(id);
       // setPlaylist(null);
-      console.log("Delete playlist service not implemented. Remove this button ?")
+      console.log(
+        'Delete playlist service not implemented. Remove this button ?'
+      );
     } catch (e: any) {
       setError(`delete playlist error: ${e.message ?? e}`);
       console.error('Delete playlist error:', e);

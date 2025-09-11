@@ -2,17 +2,12 @@ import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useProfileVariant } from '@/hooks/useProfileVariant';
 import Profile from '@/components/profile/Profile';
-import { Spinner } from '@/components/ui/spinner';
-
 
 export default function UserProfilePage() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const {
-    variant,
-    isLoading,
-    error,
-    refresh: refreshVariant,
-  } = useProfileVariant(userId || '');
+  const { variant, isLoading, error, refreshVariant } = useProfileVariant(
+    userId || ''
+  );
 
   if (isLoading || error || !variant) {
     return (

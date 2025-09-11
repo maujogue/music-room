@@ -72,7 +72,7 @@ export default function EditMusicTastes({
   };
   return (
     <VStack className='px-3'>
-      <HStack className='gap-2 mx-2 items-center min-h-10'>
+      <HStack className='gap-2 items-center min-h-10'>
         <HStack>
           {selectedGenres.length === 0 ? (
             <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>

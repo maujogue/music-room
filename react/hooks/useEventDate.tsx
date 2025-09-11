@@ -1,31 +1,30 @@
 import { useMemo } from 'react';
-import * as Localization from 'expo-localization'
-import { DateTime, Duration } from 'luxon'
+import * as Localization from 'expo-localization';
+import { DateTime, Duration } from 'luxon';
 
 type UseEventDateOptions = {
-  timezone?: string
-  locale?: string
-  showTime?: string
-}
+  timezone?: string;
+  locale?: string;
+  showTime?: string;
+};
 
 export const useEventDate = (
   startISO: string,
   endISO: string,
   options: UseEventDateOptions = {}
 ): EventDateLabels => {
-
   const {
     timezone = Localization.getCalendars?.()[0]?.timeZone || 'UTC',
     locale = Localization.getLocales?.()[0]?.languageTag || 'fr-FR',
-    showTime = true
-  } = options
+    showTime = true,
+  } = options;
 
   return useMemo(() => {
-    const start = DateTime.fromISO(startISO, { zone: timezone }).setLocale(locale);
-    const end = (endISO
-      ? DateTime.fromISO(endISO, { zone: timezone })
-      : start // fallback if end missing
-    ).setLocale(locale);
+    const start = DateTime.fromISO(startISO, { zone: timezone }).setLocale(
+      locale
+    );
+    const end = (endISO ? DateTime.fromISO(endISO, { zone: timezone }) : start) // fallback if end missing
+      .setLocale(locale);
 
     const now = DateTime.now().setZone(timezone);
     const isCurrentYear = start.year === now.year && end.year === now.year;
@@ -52,15 +51,23 @@ export const useEventDate = (
         minute: '2-digit',
       });
 
-    const startDateLabel = isCurrentYear ? fmtDayMonthNoYear(start) : fmtDayMonthYear(start);
-    const endDateLabel = isCurrentYear ? fmtDayMonthNoYear(end) : fmtDayMonthYear(end);
+    const startDateLabel = isCurrentYear
+      ? fmtDayMonthNoYear(start)
+      : fmtDayMonthYear(start);
+    const endDateLabel = isCurrentYear
+      ? fmtDayMonthNoYear(end)
+      : fmtDayMonthYear(end);
 
     const dur = end.diff(start);
     const durMinutes = Math.max(0, Math.round(dur.as('minutes')));
     const durHoursFloat = dur.as('hours');
     const durHuman = (() => {
       if (durMinutes < 1) return 'less than 1 min';
-      const d = Duration.fromObject({ minutes: durMinutes }).shiftTo('days', 'hours', 'minutes');
+      const d = Duration.fromObject({ minutes: durMinutes }).shiftTo(
+        'days',
+        'hours',
+        'minutes'
+      );
       const parts: string[] = [];
       if (d.days) parts.push(`${d.days} d`);
       if (d.hours) parts.push(`${d.hours} h`);
@@ -87,12 +94,22 @@ export const useEventDate = (
       }
     }
 
-    const startFull = showTime ? `${startDateLabel} ${fmtTime(start)}` : startDateLabel;
+    const startFull = showTime
+      ? `${startDateLabel} ${fmtTime(start)}`
+      : startDateLabel;
     const endFull = showTime ? `${endDateLabel} ${fmtTime(end)}` : endDateLabel;
 
     return {
-      start: { date: startDateLabel, time: showTime ? fmtTime(start) : undefined, full: startFull },
-      end: { date: endDateLabel, time: showTime ? fmtTime(end) : undefined, full: endFull },
+      start: {
+        date: startDateLabel,
+        time: showTime ? fmtTime(start) : undefined,
+        full: startFull,
+      },
+      end: {
+        date: endDateLabel,
+        time: showTime ? fmtTime(end) : undefined,
+        full: endFull,
+      },
       rangeLabel,
       duration: {
         ms: dur.toMillis(),
@@ -106,4 +123,4 @@ export const useEventDate = (
       locale,
     };
   }, [startISO, endISO, timezone, locale, showTime]);
-}
+};

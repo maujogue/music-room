@@ -8,7 +8,13 @@ import {
 import { UserInfo } from '@/types/user';
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
-import { getUserFollowers, getUserFollowing } from '@/services/follow';
+import {
+  getUserProfile,
+  updateProfile as updateProfileAPI,
+  followUser,
+  unfollowUser,
+  searchUsers,
+} from '@/services/profile';
 
 interface ProfileContextType {
   profile: UserInfo | null;
@@ -19,8 +25,10 @@ interface ProfileContextType {
   followingCount: number;
   updateProfile: (updates: Partial<UserInfo>) => Promise<{ error: any }>;
   refreshProfile: () => Promise<void>;
-  refreshFollowingData: () => Promise<void>;
   clearProfile: () => void;
+  followUser: (userId: string) => Promise<{ error: any }>;
+  unfollowUser: (userId: string) => Promise<{ error: any }>;
+  searchUsers: (query: string) => Promise<{ data: any[]; error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -48,7 +56,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       if (!user) return;
 
       await refreshProfile();
-      await refreshFollowingData();
 
       // Subscribe to realtime changes for this user's profile
       subscription = supabase
@@ -76,7 +83,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
           },
           () => {
             // On follow changes, refresh following data
-            refreshFollowingData();
+            refreshProfile();
           }
         )
         .on(
@@ -89,7 +96,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
           },
           () => {
             // On follower changes, refresh following data
-            refreshFollowingData();
+            refreshProfile();
           }
         )
         .subscribe();
@@ -113,70 +120,26 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      const { data, error } = await getUserProfile('me');
 
       if (error) {
         console.error('Error fetching profile:', error);
         setProfile(null);
+        setFollowers([]);
+        setFollowing([]);
       } else {
-        setProfile(data);
+        // The data now includes both profile and follow information
+        setProfile(data?.profile || data);
+        setFollowers(data?.followers || []);
+        setFollowing(data?.following || []);
       }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
       setProfile(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshFollowingData = async () => {
-    if (!user) return;
-
-    try {
-      const [followersResult, followingResult] = await Promise.all([
-        getUserFollowers(user.id),
-        getUserFollowing(user.id),
-      ]);
-
-      if (followersResult.error || followingResult.error) {
-        console.error(
-          'Error fetching following data:',
-          followersResult.error || followingResult.error
-        );
-        setFollowers([]);
-        setFollowing([]);
-      } else {
-        // Add follow status to followers (they follow the current user)
-        const followersWithStatus = (followersResult.data || []).map(
-          follower => ({
-            ...follower,
-            is_follower: true,
-            is_following: false, // We don't follow them back yet
-            is_friend: false,
-          })
-        );
-
-        // Add follow status to following (we follow them)
-        const followingWithStatus = (followingResult.data || []).map(
-          followingUser => ({
-            ...followingUser,
-            is_follower: false, // They don't follow us back yet
-            is_following: true,
-            is_friend: false,
-          })
-        );
-
-        setFollowers(followersWithStatus);
-        setFollowing(followingWithStatus);
-      }
-    } catch (error) {
-      console.error('Unexpected error fetching following data:', error);
       setFollowers([]);
       setFollowing([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -190,10 +153,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      const { error } = await updateProfileAPI(updates);
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -218,6 +178,47 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     setIsLoading(false);
   };
 
+  const handleFollowUser = async (userId: string): Promise<{ error: any }> => {
+    try {
+      const { error } = await followUser(userId);
+      if (!error) {
+        // Refresh following data after successful follow
+        await refreshProfile();
+      }
+      return { error };
+    } catch (error) {
+      console.error('Unexpected error following user:', error);
+      return { error: { message: 'An unexpected error occurred' } };
+    }
+  };
+
+  const handleUnfollowUser = async (
+    userId: string
+  ): Promise<{ error: any }> => {
+    try {
+      const { error } = await unfollowUser(userId);
+      if (!error) {
+        // Refresh following data after successful unfollow
+        await refreshProfile();
+      }
+      return { error };
+    } catch (error) {
+      console.error('Unexpected error unfollowing user:', error);
+      return { error: { message: 'An unexpected error occurred' } };
+    }
+  };
+
+  const handleSearchUsers = async (
+    query: string
+  ): Promise<{ data: any[]; error: any }> => {
+    try {
+      return await searchUsers(query);
+    } catch (error) {
+      console.error('Unexpected error searching users:', error);
+      return { data: [], error: { message: 'An unexpected error occurred' } };
+    }
+  };
+
   const value: ProfileContextType = {
     profile,
     isLoading,
@@ -227,8 +228,10 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     followingCount: following.length,
     updateProfile,
     refreshProfile,
-    refreshFollowingData,
     clearProfile,
+    followUser: handleFollowUser,
+    unfollowUser: handleUnfollowUser,
+    searchUsers: handleSearchUsers,
   };
 
   return (

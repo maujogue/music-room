@@ -34,6 +34,4 @@ export function useUserEvents() {
   }, []);
 
   return { events, refetch, loading, error };
-};
-
-
+}
