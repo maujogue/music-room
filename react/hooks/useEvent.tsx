@@ -5,7 +5,7 @@ import { MOCK_EVENTS } from '@/mocks/mockEvents';
 
 
 export function useEvent(id: string) {
-  const [event, setPlaylist] = useState<MusicEvent | null>(null);
+  const [event, setEvent] = useState<MusicEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,10 +19,8 @@ export function useEvent(id: string) {
       setLoading(true);
       setError(null);
 
-      const data = MOCK_EVENTS[Number(id)];
-      // Uncomment when ready
-      // const data = await getEventById(id);
-      setPlaylist(data);
+      const data = await getEventById(id);
+      setEvent(data);
     } catch (err) {
       setError(getErrorMsg(err));
     } finally {
@@ -47,7 +45,7 @@ export function useEvent(id: string) {
 
     try {
       await deleteEventById(id);
-      setPlaylist(null);
+      setEvent(null);
     } catch (e: any) {
       setError(`delete Event error: ${e.message ?? e}`);
       console.error('Delete Event error:', e);
@@ -55,7 +53,6 @@ export function useEvent(id: string) {
       setLoading(false);
     }
   }, [id]);
-
 
   return { event, loading, error, refetch, deleteEvent };
 

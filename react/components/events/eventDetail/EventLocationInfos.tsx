@@ -3,12 +3,17 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { MapPinIcon, ShellIcon } from 'lucide-react-native';
+import { parsePointCoordinates } from '@/utils/parsePointCoordinates';
 
 type Props = {
-  location: MusicEventLocation;
+  location?: MusicEventLocation;
 };
 
 export default function EventLocationInfo({ location }: Props) {
+  if (!location) {
+    return null;
+  }
+  
   const {
     coordinates,
     venueName,
@@ -26,6 +31,9 @@ export default function EventLocationInfo({ location }: Props) {
   ) {
     return null;
   }
+
+  const parsedCoordinates = coordinates ? parsePointCoordinates(coordinates) : null;
+
 
   return (
     <VStack className="gap-2">
@@ -48,10 +56,10 @@ export default function EventLocationInfo({ location }: Props) {
         </VStack>
       )}
 
-      {coordinates && (
+      {parsedCoordinates && (
         <Badge size="md" action="muted" className="rounded-md bg-indigo-200 h-6">
           <BadgeIcon as={MapPinIcon} size="lg" />
-          <BadgeText className="pl-1">{coordinates.lat.toFixed(5)}, {coordinates.long.toFixed(5)}</BadgeText>
+          <BadgeText className="pl-1">{parsedCoordinates.y.toFixed(5)}, {parsedCoordinates.x.toFixed(5)}</BadgeText>
         </Badge>
       )}
     </VStack>
