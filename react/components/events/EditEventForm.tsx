@@ -4,6 +4,7 @@ import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
+import { Box } from '@/components/ui/box';
 import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
 import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
