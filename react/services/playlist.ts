@@ -17,13 +17,15 @@ export async function getCurrentUserPlaylists() {
 
 export async function getPlaylistById(id: string) {
   console.log(`Fetching playlist with id: ${id}`);
-  const res = await apiFetch<SpotifyPlaylist>(
+  const res = await apiFetch<SpotifyPlaylistWithTracks>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
     {
       method: 'GET',
     }
   );
+
   console.log('API response:', res);
+
   if (!res.success) {
     console.error('Error fetching playlist:', res.error);
     throw res.error;

@@ -6,8 +6,8 @@ import { getPlaylistById } from '@/services/playlist';
 // Hook with mock-datas (TODO : connect fetch backend when ready)
 // -------------------------------------------------------------------
 
-export function usePlaylist(id: string) {
-  const [playlist, setPlaylist] = useState<SpotifyPlaylist | null>(null);
+export function usePlaylist(id: string | null) {
+  const [playlist, setPlaylist] = useState<SpotifyPlaylistWithTracks | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +16,6 @@ export function usePlaylist(id: string) {
   // ---------------------------------------------------------------
   const fetchPlaylist = useCallback(async () => {
     if (!id) return;
-
     try {
       setLoading(true);
       setError(null);

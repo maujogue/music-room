@@ -1,3 +1,3 @@
-export interface Session {
-  access_token: string;
+type Session = {
+    access_token: string;
 }

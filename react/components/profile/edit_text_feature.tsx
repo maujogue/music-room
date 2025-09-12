@@ -1,4 +1,5 @@
 import { Button, ButtonText } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
 import { Heading } from '@/components/ui/heading';
 import {
   Modal,
@@ -28,7 +29,6 @@ import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
 import { useProfile } from '@/contexts/profileCtx';
 import { UserInfo } from '@/types/user';
-import { Text } from '../ui/text';
 
 export default function EditProfileTextFeature({
   type,

@@ -3,6 +3,8 @@ import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 
 export default function AllPlaylists() {
   const { playlists, refetch, loading, error } = useUserPlaylists();
@@ -13,9 +15,9 @@ export default function AllPlaylists() {
     }, [refetch])
   );
 
-  if (loading) return <Text>Playlists loading...</Text>;
-  if (error) return <Text style={{ color: 'red' }}>{error}</Text>;
-  if (!playlists) return <Text>No playlist found</Text>;
+  if (loading) return (<LoadingSpinner text={"Playlists loading..."} />);
+  if (error) return (<ErrorScreen error={error} />);
+  if (!playlists) return (<ErrorScreen error={"No playlist found"} />);;
 
   if (playlists.length === 0) {
     return <Text>no playlist found</Text>;

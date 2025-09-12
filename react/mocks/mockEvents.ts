@@ -1,3 +1,29 @@
+
+// Mock note : use here a real spotify playlist ID to use the mock event model
+const my_playlist_id: string = "388NOl9u5ZDAZRBlQXrX5c"
+
+export const MOCK_VOTES: EventVote[] = [
+  {
+    eventId: "0",
+    trackId: "3bKeShmrQ2u9VJoJRVGUvJ",
+    users: [],
+    number: 5
+  },
+  {
+    eventId: "0",
+    trackId: "54iSPXKuDKAp4jvCBq2MjE",
+    users: [],
+    number: 2
+  },
+  {
+    eventId: "0",
+    trackId: "76xQksu4irwgEKw9F5OaL7",
+    users: [],
+    number: 1
+  },
+
+]
+
 export const MOCK_EVENTS: MusicEvent[] = [
   {
     id: '0',
@@ -21,8 +47,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'Paris',
       country: 'France',
     },
-    startDate: '2025-10-12T20:00:00Z',
-    endDate: '2025-10-12T23:00:00Z',
+    startDate: "2025-10-12T20:00:00Z",
+    endDate: "2025-10-12T23:00:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '1',
@@ -46,8 +74,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'New York',
       country: 'United States',
     },
-    startDate: '2025-11-01T19:30:00Z',
-    endDate: '2025-11-01T22:30:00Z',
+    startDate: "2025-11-01T19:30:00Z",
+    endDate: "2025-11-01T22:30:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '2',
@@ -71,8 +101,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'Los Angeles',
       country: 'United States',
     },
-    startDate: '2025-12-05T21:00:00Z',
-    endDate: '2025-12-06T00:00:00Z',
+    startDate: "2025-12-05T21:00:00Z",
+    endDate: "2025-12-06T00:00:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '3',
@@ -96,8 +128,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'Tokyo',
       country: 'Japan',
     },
-    startDate: '2026-01-18T18:00:00Z',
-    endDate: '2026-01-18T21:00:00Z',
+    startDate: "2026-01-18T18:00:00Z",
+    endDate: "2026-01-18T21:00:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '4',
@@ -121,8 +155,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'Sydney',
       country: 'Australia',
     },
-    startDate: '2025-12-15T22:00:00Z',
-    endDate: '2025-12-15T04:00:00Z',
+    startDate: "2025-12-15T22:00:00Z",
+    endDate: "2025-12-15T04:00:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '5',
@@ -146,8 +182,10 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'São Paulo',
       country: 'Brazil',
     },
-    startDate: '2026-02-10T21:00:00Z',
-    endDate: '2026-02-10T21:30:00Z',
+    startDate: "2026-02-10T21:00:00Z",
+    endDate: "2026-02-10T21:30:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
   {
     id: '6',
@@ -171,7 +209,9 @@ export const MOCK_EVENTS: MusicEvent[] = [
       city: 'Berlin',
       country: 'Germany',
     },
-    startDate: '2025-11-20T19:00:00Z',
-    endDate: '2025-11-20T22:00:00Z',
+    startDate: "2025-11-20T19:00:00Z",
+    endDate: "2025-11-20T22:00:00Z",
+    playlistId: my_playlist_id,
+    votes: [],
   },
 ];

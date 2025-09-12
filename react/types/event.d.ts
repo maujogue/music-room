@@ -1,14 +1,32 @@
+type MusicEventFetchResult = {
+  event: MusicEvent;
+  location: MusicEventLocation;
+  members: UserInfo[];
+  owner: UserInfo;
+}
+
 type MusicEvent = {
   id: string;
   name: string;
   images: SpotifyImage[];
+  owner_id: string;
   owner: SpotifyOwner;
   isPublic: boolean;
-  location: MusicEventLocation;
-  // playlistId: string;
-  startDate: string;
-  endDate: string;
+  playlist_id: string;
+
+  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  beginning_at: string;
+  ending_at: string;
 };
+
+type EventVote = {
+  eventId: string;
+  trackId: string;
+  users: Guest[];
+  number: number;
+}
+
+type Guest = Omit<UserInfo, "email" | "bio" | "music_genre">;
 
 type Coordinates = {
   lat: number;
@@ -16,9 +34,12 @@ type Coordinates = {
 };
 
 type MusicEventLocation = {
-  coordinates?: Coordinates;
-  venueName?: string; // a name assigned to a specific location
+  id: string;
+  event_id: string;
+  coordinates?: string;
+  venuename?: string;
   address?: string;
+  complement?: string;
   city?: string;
   country?: string;
 };
@@ -33,8 +54,8 @@ type MusicEventPayload = {
 };
 
 type EventDateLabels = {
-  start: { date: string; time?: string; full: string };
-  end: { date: string; time?: string; full: string };
+  start: { date: string; time?: string, full: string };
+  end: { date: string; time?: string, full: string };
   rangeLabel: string;
   duration: { ms: number; minutes: number; hours: number; human: string };
   isSameDay: boolean;

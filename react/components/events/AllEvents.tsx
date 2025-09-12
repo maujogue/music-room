@@ -1,4 +1,3 @@
-// import { useUserEvents } from '@/hooks/useUserEvents';
 import { Text } from '@/components/ui/text';
 import { useUserEvents } from '@/hooks/useUserEvents';
 import { useProfile } from '@/contexts/profileCtx';

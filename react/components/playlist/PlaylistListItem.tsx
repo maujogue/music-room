@@ -58,11 +58,13 @@ export default function PlaylistListItem({ playlist }: Props) {
             )}
           </HStack>
         </HStack>
-        {playlist.owner?.display_name && (
-          <Text size='sm' className='text-typography-400'>
-            By {playlist.owner.display_name}
-          </Text>
-        )}
+        <HStack className='justify-between'>
+          {playlist.owner?.display_name && (
+            <Text size='sm' className="text-typography-400">By {playlist.owner.display_name}</Text>
+          )}
+          {/* TODO REMOVE AFTER DEBUG */}
+          <Text size='sm' className="text-typography-400">Id {playlist.id}</Text>
+        </HStack>
       </VStack>
     </Card>
   );

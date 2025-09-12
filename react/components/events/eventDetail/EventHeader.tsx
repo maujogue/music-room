@@ -5,11 +5,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CloseCircleIcon,
-} from '@/components/ui/icon';
+import { ChevronDownIcon, ChevronUpIcon, CloseCircleIcon } from '@/components/ui/icon';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { CircleIcon } from '@/components/ui/icon';
 import Animated, {
@@ -24,7 +20,7 @@ import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfo
 import EventDatesInfos from './Dates/EventDatesInfos';
 
 interface Props {
-  event: MusicEvent;
+  eventData: MusicEventFetchResult;
   expanded: boolean;
   onToggle: () => void;
 }
@@ -32,15 +28,18 @@ interface Props {
 const COMPACT_H = 80;
 const EXPANDED_H = 210;
 
-export default function EventHeader({ event, expanded, onToggle }: Props) {
+export default function EventHeader({ eventData, expanded, onToggle }: Props) {
+
   const getImage = () => {
     const hasValidImage =
-      Array.isArray(event.images) &&
-      event.images.length > 0 &&
-      event.images[0]?.url;
+      Array.isArray(eventData.event.images) &&
+      eventData.event.images.length > 0 &&
+      eventData.event.images[0]?.url;
 
     return {
-      uri: hasValidImage ? event.images[0]!.url : 'https://picsum.photos/111',
+      uri: hasValidImage
+        ? eventData.event.images[0]!.url
+        : 'https://picsum.photos/111',
     };
   };
 
@@ -83,21 +82,10 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
           />
           <VStack className='flex-1'>
             <HStack className='justify-between items-center'>
-              <Heading size='md' className='text-typography-800'>
-                {event.name}
-              </Heading>
-              <Badge
-                size='sm'
-                action={event.isPublic ? 'info' : 'warning'}
-                className='rounded-full h-6'
-              >
-                <BadgeIcon
-                  size='md'
-                  as={event.isPublic ? CircleIcon : CloseCircleIcon}
-                />
-                <BadgeText className='ml-1'>
-                  {event.isPublic ? 'Public' : 'Private'}
-                </BadgeText>
+              <Heading size='md' className='text-typography-800'>{eventData.event.name}</Heading>
+              <Badge size='sm' action={eventData.event.isPublic ? "info" : "warning"} className="rounded-full h-6">
+                <BadgeIcon size="md" as={eventData.event.isPublic ? CircleIcon : CloseCircleIcon} />
+                <BadgeText className='ml-1'>{eventData.event.isPublic ? "Public" : "Private"}</BadgeText>
               </Badge>
               <Button
                 variant='link'
@@ -115,19 +103,17 @@ export default function EventHeader({ event, expanded, onToggle }: Props) {
                 </Animated.View>
               </Button>
             </HStack>
-            {event.owner?.display_name && (
-              <Text size='sm' className='text-typography-400'>
-                By {event.owner.display_name}
-              </Text>
+            {eventData.event.owner?.display_name && (
+              <Text size='sm' className="text-typography-400">By {eventData.event.owner.display_name}</Text>
             )}
           </VStack>
         </HStack>
 
         {/* Expanded CONTENT */}
-        <Animated.View style={extraStyle} className='mt-2'>
-          <HStack className='justify-between items-top'>
-            <EventLocationInfo location={event.location} />
-            <EventDatesInfos event={event} />
+        <Animated.View style={extraStyle} className="mt-2">
+          <HStack className='justify-between items-top' >
+            <EventLocationInfo location={eventData.location} />
+            <EventDatesInfos event={eventData.event} />
           </HStack>
         </Animated.View>
       </Card>

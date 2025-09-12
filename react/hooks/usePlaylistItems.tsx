@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
+export function usePlaylistItems(id: string, data: SpotifyTracksArray) {
   const [tracks, setTracks] = useState<SpotifyTrackWithKey[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +38,10 @@ export function usePlaylistItems(id: string, data: PlaylistItemsResponse) {
 
         if (!cancelled) setTracks(mapped);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? String(e));
+        if (!cancelled) {
+          setError(e?.message ?? String(e));
+          console.log("ERROR", e?.message ?? String(e))
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

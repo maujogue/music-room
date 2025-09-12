@@ -1,7 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getSession } from '@/services/session';
-import { Session } from '@/types/session';
-import { MOCK_EVENTS } from '@/mocks/mockEvents';
 import { getCurrentUserEvents } from '@/services/events';
 
 export function useUserEvents() {
