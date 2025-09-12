@@ -12,5 +12,6 @@
     "typescript",
     "typescriptreact"
   ],
-  "deno.enable": true
+"deno.enable": true,
+"kiroAgent.configureMCP": "Disabled"
 }
