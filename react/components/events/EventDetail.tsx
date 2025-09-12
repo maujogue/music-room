@@ -100,7 +100,7 @@ export default function EventDetail() {
           {activeTab == 'votes' ? (
             <VotesRoom eventId={eventId} />
           ) : (
-            <GuestsRoom eventId={eventId} />
+            <GuestsRoom data={data} />
           )}
         </Center>
         {/* ------------------ */}
