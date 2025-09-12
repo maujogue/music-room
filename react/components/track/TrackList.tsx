@@ -1,16 +1,11 @@
-import { Link, router } from 'expo-router';
+import React from 'react';
+import { useRouter } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { Icon, TrashIcon } from '@/components/ui/icon';
 import { AddIcon } from '@/components/ui/icon';
-import {
-  ActivityIndicator,
-  Text,
-  Pressable,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import { deleteItemFromPlaylist } from '@/services/playlist';
 import Reanimated from 'react-native-reanimated';
@@ -30,6 +25,7 @@ export default function TrackList({
   playlistTracks,
   onTrackDeleted,
 }: Props) {
+  const router = useRouter();
   const handlePress = () => {
     router.push({
       pathname: '/(main)/playlists/[playlistId]/tracks/add',
@@ -80,33 +76,24 @@ export default function TrackList({
         <ButtonIcon as={AddIcon} className='ml-2' />
       </Button>
 
-      {tracks.map(item => (
-        <Link
-          key={item.__key}
-          href={{
-            pathname: '/(main)/playlists/[playlistId]/tracks/[trackId]',
-            params: { playlistId, trackId: item.id },
-          }}
-          asChild
-        >
-          <Pressable>
-            <TrackListItem
-              track={item}
-              renderRightAction={() => (
-                <Reanimated.View style={[styles.deleteAction]}>
-                  <View className="flex-1 justify-center items-end w-full p-4">
-                    <Icon as={TrashIcon} color="white" size={"sm"} />
-                  </View>
-                </Reanimated.View>
-              )}
-              onSwipeableOpen={() => handleSwipeableOpen(item?.id ?? "0")}
-            />
-          </Pressable>
-        </Link>
+      {tracks.map((item, index) => (
+        <TrackListItem
+          key={item.__key || item.id || `track-${index}`} // ✅ Ajouter la key ici
+          track={item}
+          renderRightAction={() => (
+            <Reanimated.View style={[styles.deleteAction]}>
+              <View className='flex-1 justify-center items-end w-full p-4'>
+                <Icon as={TrashIcon} color='white' size={6} />
+              </View>
+            </Reanimated.View>
+          )}
+          onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+        />
       ))}
     </GestureHandlerRootView>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },

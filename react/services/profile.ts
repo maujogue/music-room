@@ -15,13 +15,12 @@ export async function getUserProfile(userId: string): Promise<{
   } | null;
   error: any;
 }> {
-  try {
-    const response = await apiFetch(`${baseUrl}/user/${userId}`);
-    return { data: response.data || null, error: null };
-  } catch (error) {
-    console.error('Error fetching user profile with follows:', error);
-    return { data: null, error };
-  }
+    const res = await apiFetch(`${baseUrl}/user/${userId}`);
+    if (!res.success) {
+      console.error('Error fetching user profile:', res.error);
+      throw res.error;
+    }
+    return res.data;
 }
 
 // Update current user's profile

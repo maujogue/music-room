@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/authCtx';
 import { getUserProfile } from '@/services/profile';
 
-export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
 interface UseProfileVariantResult {
   variant: ProfileVariant | null;

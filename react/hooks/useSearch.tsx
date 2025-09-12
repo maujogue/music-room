@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  followUser,
-  unfollowUser,
-  getUserFollows,
-  searchUsers,
-} from '@/services/profile';
+import { followUser, unfollowUser, getUserFollows } from '@/services/profile';
 
 export function useSearch(userId?: string) {
   const [followers, setFollowers] = useState<any[]>([]);
@@ -74,43 +69,5 @@ export function useSearch(userId?: string) {
     follow: handleFollow,
     unfollow: handleUnfollow,
     refresh: loadFollowData,
-  };
-}
-
-export function useUserSearch() {
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
-
-  const search = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchError(null);
-
-    try {
-      const { data, error } = await searchUsers(query);
-      if (error) {
-        setSearchError(error.message);
-        setSearchResults([]);
-      } else {
-        setSearchResults(data || []);
-      }
-    } catch (err) {
-      setSearchError('An unexpected error occurred', err);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  return {
-    searchResults,
-    isSearching,
-    searchError,
-    search,
   };
 }

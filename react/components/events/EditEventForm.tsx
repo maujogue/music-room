@@ -8,7 +8,6 @@ import { Box } from '@/components/ui/box';
 import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
 import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
-import { Switch } from '@/components/ui/switch';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ScrollView } from 'react-native';
 

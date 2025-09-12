@@ -6,8 +6,8 @@ export default function SearchPage() {
   const { user } = useAuth();
 
   if (!user) {
-	return null;
+    return null;
   }
 
-  return <Search defaultType="All" />;
+  return <Search defaultType='All' />;
 }

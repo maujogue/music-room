@@ -13,6 +13,7 @@ export async function search(c: Context) {
 		eventResults
 	} = []
 
+	console.log('Search params:', { q, type, limit, offset });
 	if (!q) {
 		c.status(400)
 		return c.json({ error: 'Query parameter "q" is required' })
@@ -45,6 +46,7 @@ export async function search(c: Context) {
 }
 
 async function searchTracks(spotify_token: string, params: { query: string, limit: number, offset: number }) {
+	console.log('Searching tracks with params:', params);
 	const trackResults = await fetchSpotifySearch(spotify_token, { ...params, type: 'track' })
 	if (trackResults.error) {
 		throw new HTTPException(trackResults.error.status || 500, { message: trackResults.error.message || 'Unknown error from Spotify API' })

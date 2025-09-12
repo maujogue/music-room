@@ -8,35 +8,47 @@ import TrackListItem from '@/components/track/TrackListItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import UserListItem from '@/components/profile/UserListItem';
 import EventListItem from '@/components/events/EventListItem';
-import { Text } from '@/components/ui/text';
 
 interface Props {
+  placeholder?: string;
   showFilters?: boolean;
   defaultType?: string;
+  renderItemTrack?: (item: any) => React.ReactNode;
+  renderItemPlaylist?: (item: any) => React.ReactNode;
+  renderItemUser?: (item: any) => React.ReactNode;
+  renderItemEvent?: (item: any) => React.ReactNode;
 }
 
-export default function Search({ showFilters = true, defaultType = 'All' }: Props) {
-  const {
-    query,
-    setQuery,
-    filter,
-    setFilter,
-    onChangeFilter,
-    loading,
-    results
-  } = useSearchGlobal(defaultType);
+export default function Search({
+  placeholder = 'Search for songs, playlists, users, events...',
+  showFilters = true,
+  defaultType = 'All',
+  renderItemTrack = (item: any) => <TrackListItem track={item} key={item.id} />,
+  renderItemPlaylist = (item: any) => (
+    <PlaylistListItem playlist={item} key={item.id} />
+  ),
+  renderItemUser = (item: any) => (
+    <UserListItem user={item} key={item.id} showFollowButtons={false} />
+  ),
+  renderItemEvent = (item: any) => <EventListItem event={item} key={item.id} />,
+}: Props) {
+  const { query, setQuery, filter, setFilter, onChangeFilter, results } =
+    useSearchGlobal(defaultType);
 
   const users = results.userResults ?? [];
-  const playlists = results.playlistResults?.playlists?.items ?? results.playlistResults ?? [];
-  const tracks = results.trackResults?.tracks?.items ?? results.trackResults ?? [];
+  const playlists =
+    results.playlistResults?.playlists?.items ?? results.playlistResults ?? [];
+  const tracks =
+    results.trackResults?.tracks?.items ?? results.trackResults ?? [];
   const events = results.eventResults?.events ?? results.eventResults ?? [];
 
   const limit = filter === 'all' ? 3 : undefined;
 
   return (
     <GestureHandlerRootView>
-      <ScrollView keyboardShouldPersistTaps="handled">
+      <ScrollView keyboardShouldPersistTaps='handled'>
         <SearchHeader
+          placeholder={placeholder}
           query={query}
           onChangeQuery={setQuery}
           selectedFilter={filter}
@@ -46,43 +58,43 @@ export default function Search({ showFilters = true, defaultType = 'All' }: Prop
         />
 
         <ResultsSection
-          title="Tracks"
+          title='Tracks'
           items={tracks}
           limit={limit}
-          renderItem={(t: any) => <TrackListItem track={t} key={t.id} />}
+          renderItem={renderItemTrack}
         />
 
         <ResultsSection
-          title="Playlists"
+          title='Playlists'
           items={playlists}
           limit={limit}
-          onShowMore={(label) => {
+          onShowMore={label => {
             setFilter(label);
             console.log('filter:', filter);
           }}
-          renderItem={(p: any) => <PlaylistListItem playlist={p} key={p.id} />}
+          renderItem={renderItemPlaylist}
         />
 
         <ResultsSection
-          title="Users"
-          items={users}
-          limit={limit}
-          onShowMore={(label) => {
-            setFilter(label);
-            console.log('filter:', filter);
-          }}
-          renderItem={(u: any) => <UserListItem user={u} key={u.id} showFollowButtons={false} />}
-        />
-
-        <ResultsSection
-          title="Events"
+          title='Events'
           items={events}
           limit={limit}
-          onShowMore={(label) => {
+          onShowMore={label => {
             setFilter(label);
             console.log('filter:', filter);
           }}
-          renderItem={(e: any) => <EventListItem event={e} key={e.id} />}
+          renderItem={renderItemEvent}
+        />
+
+        <ResultsSection
+          title='Users'
+          items={users}
+          limit={limit}
+          onShowMore={label => {
+            setFilter(label);
+            console.log('filter:', filter);
+          }}
+          renderItem={renderItemUser}
         />
       </ScrollView>
     </GestureHandlerRootView>

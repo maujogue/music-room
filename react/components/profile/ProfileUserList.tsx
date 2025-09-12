@@ -61,8 +61,7 @@ export default function ProfileUserList({
         type={type}
         title={title}
         showFollowButtons={true}
-        targetUserId={userId}
-        initialUsers={[]}
+        userId={userId}
       />
     );
   }
@@ -72,8 +71,7 @@ export default function ProfileUserList({
       type={type}
       title={title}
       showFollowButtons={true}
-      targetUserId={userId}
-      initialUsers={initialUsers}
+      userId={userId}
     />
   );
 }

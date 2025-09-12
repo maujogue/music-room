@@ -1,13 +1,15 @@
 export async function fetchSpotifySearch(
   spotify_token: string,
-  params: { q: string; type: string; limit?: string; offset?: string }
+  params: { query: string; type: string; limit?: string; offset?: string }
 ): Promise<any> {
   const url = new URL('https://api.spotify.com/v1/search');
-  url.searchParams.append('q', params.q);
+  url.searchParams.append('q', params.query);
   url.searchParams.append('type', params.type);
   if (params.limit) url.searchParams.append('limit', params.limit);
   if (params.offset) url.searchParams.append('offset', params.offset);
 
+  console.log('Fetching Spotify search with params:', params);
+  console.log('Fetching Spotify search with URL:', url.toString());
   const response = await fetch(url.toString(), {
     method: 'GET',
     headers: {
