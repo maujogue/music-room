@@ -15,7 +15,6 @@ export default function ProfileUserList({
   type,
   title,
 }: ProfileUserListProps) {
-  const [initialUsers, setInitialUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -29,25 +28,11 @@ export default function ProfileUserList({
 
         if (result.error) {
           console.error(`Error loading ${type}:`, result.error);
-          setInitialUsers([]);
           return;
         }
 
-        const users = result.data || [];
-
-        // Map to include follow status based on type
-        console.log('users', users);
-        const usersWithStatus = users.map(user => ({
-          ...user,
-          is_follower: user.is_follower,
-          is_following: user.is_following,
-          is_friend: user.is_friend,
-        }));
-
-        setInitialUsers(usersWithStatus);
       } catch (error) {
         console.error(`Error loading ${type}:`, error);
-        setInitialUsers([]);
       }
       setIsLoading(false);
     };

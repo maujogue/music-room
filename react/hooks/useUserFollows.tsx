@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { getUserProfile } from '@/services/profile';
 
 interface UseUserFollowsReturn {
@@ -13,7 +14,7 @@ export function useUserFollows(userId: string, type: FollowType): UseUserFollows
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (!userId) return;
 
     setIsLoading(true);
@@ -32,14 +33,19 @@ export function useUserFollows(userId: string, type: FollowType): UseUserFollows
     } finally {
       setIsLoading(false);
     }
-  };
-
-  console.log('useUserFollows setup with userId:', userId, 'type:', type);
-
-  useEffect(() => {
-    console.log('useUserFollows called with userId:', userId, 'type:', type);
-    fetchUsers();
   }, [userId, type]);
+
+  // Initial load
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Refresh when user returns to the screen
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsers();
+    }, [fetchUsers])
+  );
 
   const refetch = async () => {
     await fetchUsers();

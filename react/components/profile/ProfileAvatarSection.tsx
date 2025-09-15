@@ -10,13 +10,13 @@ interface ProfileAvatarSectionProps {
   canEdit: boolean;
   editProfile: boolean;
   isFollowing?: boolean;
-  isOwnProfile: boolean;
-  currentUserId?: string;
-  onEditToggle: () => void;
-  onSpotifyConnect: () => void;
-  onSignOut: () => void;
-  onFollowAction?: () => void;
-  onAvatarUpload: (url: string) => void;
+  actions: {
+    handleEditToggle: () => void;
+    handleSpotifyConnect: () => void;
+    handleFollowAction?: () => void;
+    handleAvatarUpload: (url: string) => void;
+    signOut: () => void;
+  };
 }
 
 export default function ProfileAvatarSection({
@@ -24,12 +24,7 @@ export default function ProfileAvatarSection({
   canEdit,
   editProfile,
   isFollowing,
-  currentUserId,
-  onEditToggle,
-  onSpotifyConnect,
-  onSignOut,
-  onFollowAction,
-  onAvatarUpload,
+  actions,
 }: ProfileAvatarSectionProps) {
   return (
     <VStack className='justify-center items-center p-6 gap-4'>
@@ -37,19 +32,14 @@ export default function ProfileAvatarSection({
         canEdit={canEdit}
         editProfile={editProfile}
         isFollowing={isFollowing}
-        onEditToggle={onEditToggle}
-        onSpotifyConnect={onSpotifyConnect}
-        onSignOut={onSignOut}
-        onFollowAction={
-          !canEdit && profile.id !== currentUserId ? onFollowAction : undefined
-        }
+        actions={actions}
       />
 
       {/* Avatar */}
       <Center>
         <EditAvatar
           url={profile.avatar_url || vibingImg}
-          onUpload={onAvatarUpload}
+          onUpload={actions.handleAvatarUpload}
           isEdit={canEdit && editProfile}
         />
       </Center>

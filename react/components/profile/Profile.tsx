@@ -7,57 +7,37 @@ import { useRouter } from 'expo-router';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileAvatarSection from '@/components/profile/ProfileAvatarSection';
 import ProfileContent from '@/components/profile/ProfileContent';
-import { useProfileLogic } from '@/hooks/useProfileLogic';
+import { useProfileData } from '@/hooks/useProfileData';
 import { Spinner } from '../ui/spinner';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
 interface ProfileProps {
   userId: string;
-  variant: ProfileVariant;
-  refreshVariant: () => void;
   showBackButton?: boolean;
   onBack?: () => void;
 }
 
 export default function Profile({
   userId,
-  variant,
-  refreshVariant,
   showBackButton = false,
   onBack,
 }: ProfileProps) {
   const router = useRouter();
   const {
-    // State
     profile,
-    profileData,
+    variant,
     editProfile,
     isLoading,
-    isRefreshingProfile,
     error,
-    isOwnProfile,
     profileFollowers,
     profileFollowing,
-    currentUser,
+    otherUserData,
+    permissions,
+    actions,
+  } = useProfileData(userId);
 
-    // Permissions
-    canViewEmail,
-    canViewBio,
-    canViewMusicGenre,
-    canViewFollowers,
-    canEdit,
-
-    // Handlers
-    handlePressOauthSpotify,
-    handlePrivacyChange,
-    handleFollowAction,
-    handleEditToggle,
-    handleAvatarUpload,
-    signOut,
-  } = useProfileLogic(userId, variant, refreshVariant);
-
-  console.log('Variant:', variant, 'Profile:', profile);
+  const isOwnProfile = variant === 'own';
 
 
   if (isLoading && !isOwnProfile) {
@@ -95,38 +75,27 @@ export default function Profile({
         onBack={onBack || (() => router.back())}
       />
 
-      <ScrollView
+            <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >
         <ProfileAvatarSection
           profile={profile}
-          canEdit={canEdit}
+          canEdit={permissions.canEdit}
           editProfile={editProfile}
-          isFollowing={profileData?.is_following}
-          isOwnProfile={isOwnProfile}
-          currentUserId={currentUser?.id}
-          onEditToggle={handleEditToggle}
-          onSpotifyConnect={handlePressOauthSpotify}
-          onSignOut={signOut}
-          onFollowAction={handleFollowAction}
-          onAvatarUpload={handleAvatarUpload}
+          isFollowing={otherUserData?.is_following}
+          actions={actions}
         />
 
         <ProfileContent
           profile={profile}
           userId={userId}
-          canEdit={canEdit}
           editProfile={editProfile}
-          canViewEmail={canViewEmail}
-          canViewBio={canViewBio}
-          canViewMusicGenre={canViewMusicGenre}
-          canViewFollowers={canViewFollowers}
-          isRefreshingProfile={isRefreshingProfile}
+          variant={variant}
           profileFollowers={profileFollowers}
           profileFollowing={profileFollowing}
-          variant={variant}
-          onPrivacyChange={handlePrivacyChange}
+          permissions={permissions}
+          actions={actions}
         />
       </ScrollView>
     </View>

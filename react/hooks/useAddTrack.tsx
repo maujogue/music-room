@@ -4,7 +4,7 @@ import { Icon, AddIcon } from '@/components/ui/icon';
 import { Box } from '@/components/ui/box';
 import Reanimated from 'react-native-reanimated';
 
-export function useSearchTrack(playlistId: string) {
+export default function useAddTrack(playlistId: string) {
   const onSwipeableOpen = async (trackId: string) => {
     try {
       console.log('Adding track to playlist:', trackId);

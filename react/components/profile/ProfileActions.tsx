@@ -8,20 +8,19 @@ interface ProfileActionsProps {
   canEdit: boolean;
   editProfile: boolean;
   isFollowing?: boolean;
-  onEditToggle: () => void;
-  onSpotifyConnect: () => void;
-  onSignOut: () => void;
-  onFollowAction?: () => void;
+  actions: {
+    handleEditToggle: () => void;
+    handleSpotifyConnect: () => void;
+    handleFollowAction?: () => void;
+    signOut: () => void;
+  };
 }
 
 export default function ProfileActions({
   canEdit,
   editProfile,
   isFollowing,
-  onEditToggle,
-  onSpotifyConnect,
-  onSignOut,
-  onFollowAction,
+  actions,
 }: ProfileActionsProps) {
   return (
     <>
@@ -41,12 +40,12 @@ export default function ProfileActions({
                 </Button>
               )}
             >
-              <MenuItem textValue='Connect Spotify Account' onPress={onSpotifyConnect}>
+              <MenuItem textValue='Connect Spotify Account' onPress={actions.handleSpotifyConnect}>
                 <Icon as={SettingsIcon} size='sm' className='mr-3' />
                 <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
               </MenuItem>
               <MenuSeparator />
-              <MenuItem textValue='Logout' onPress={onSignOut}>
+              <MenuItem textValue='Logout' onPress={actions.signOut}>
                 <Icon as={CloseIcon} size='sm' className='mr-3' />
                 <MenuItemLabel>Logout</MenuItemLabel>
               </MenuItem>
@@ -57,7 +56,7 @@ export default function ProfileActions({
           <View className='flex-1'>
             <Button
               className={`w-full ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-              onPress={onEditToggle}
+              onPress={actions.handleEditToggle}
             >
               <ButtonText className='text-white'>
                 {editProfile ? 'Save' : 'Edit Profile'}
@@ -68,10 +67,10 @@ export default function ProfileActions({
       )}
 
       {/* Follow Button - Only for other users */}
-      {!canEdit && onFollowAction && (
+      {!canEdit && actions.handleFollowAction && (
         <Button
           variant={isFollowing ? 'outline' : 'solid'}
-          onPress={onFollowAction}
+          onPress={actions.handleFollowAction}
           className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
         >
           <ButtonText className={isFollowing ? 'text-primary-500' : 'text-white'}>
