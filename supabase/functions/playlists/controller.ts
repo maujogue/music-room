@@ -7,7 +7,15 @@ import {
   deleteItemsFromSpotifyPlaylist,
   fetchSpotifyPlaylist,
   fetchSpotifyUserProfile
-} from './service.ts'
+} from './services/spotify.ts'
+import {
+  getSupabasePlaylistByOwner,
+  createPlaylistInSupabase,
+  getSupabasePlaylistById,
+  deletePlaylistInSupabase
+} from './services/supabase.ts'
+//import { PlaylistPayload } from '../types/playlist.d.ts'
+import { validateCreatePlaylistPayload } from './validators.ts';
 
 
 export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
@@ -62,9 +70,8 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
 
 export async function fetchPlaylistItems(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
 
-  const playlist_items = await fetchSpotifyPlaylist(spotify_access_token, id)
+  const playlist_items = await getSupabasePlaylistById(id)
 
   if (!playlist_items) {
     c.status(500)
@@ -75,27 +82,18 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   return c.json(playlist_items)
 }
 
+
 export async function createPlaylist(c: Context): Promise<any> {
-  const spotify_access_token = c.get('spotify_token')
-  const body = await c.req.json()
-  const user = await fetchSpotifyUserProfile(spotify_access_token)
-  if (!user) {
-    const errorResponse = new Response('Failed to fetch Spotify user profile', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
+  const user = c.get('user');
+  const body = await c.req.json();
 
-  const res = await createSpotifyPlaylist(spotify_access_token, user.id, body)
+  const validatedPayload = validateCreatePlaylistPayload(body);
+
+  const res = await createPlaylistInSupabase(user.id, validatedPayload);
   if (!res) {
-    const errorResponse = new Response('Failed to delete Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
+    throw new HTTPException(500, { message: 'Failed to create playlist in Supabase' });
   }
 
-  if (res.error) {
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
-
-  c.status(201)
-  return c.json(res)
+  c.status(201);
+  return c.json(res);
 }
-

@@ -7,6 +7,20 @@ const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_ANON_KEY')!
 );
 
+export async function getSupabasePlaylistByOwner(ownerId: string): Promise<any[]> {
+    const { data, error } = await supabase.from('playlists')
+        .select('*')
+        .eq('owner_id', ownerId);
+
+    if (error) {
+        console.error('Supabase error:', error);
+        const pgError = formatDbError(error);
+        throw new HTTPException(pgError.status, { message: pgError.message });
+    }
+
+    return data;
+}
+
 export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
   const { data, error } = await supabase.from('events')
 	.select('*')

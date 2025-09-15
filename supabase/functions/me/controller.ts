@@ -7,20 +7,15 @@ import {
   pausePlayback,
   skipToNextTrack
 } from './services/spotify.ts'
-import { getSupabaseEventByOwner } from './services/supabase.ts'
+import {
+  getSupabasePlaylistByOwner,
+  getSupabaseEventByOwner
+} from './services/supabase.ts'
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const res = await getCurrentUserPlaylists(spotify_token)
-
-    if (!res) {
-      throw new HTTPException(500, { message: 'Failed to fetch Spotify playlists' })
-    }
-
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-    }
+    const user = c.get('user')
+    console.log('Fetching playlists for user:', user)
+    const res = await getSupabasePlaylistByOwner(user.id)
 
     c.status(200)
     return c.json(res)
