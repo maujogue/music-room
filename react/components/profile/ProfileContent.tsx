@@ -2,7 +2,6 @@ import React from 'react';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonText } from '@/components/ui/button';
 import { Divider } from '@/components/ui/divider';
 import { useRouter } from 'expo-router';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
@@ -10,6 +9,7 @@ import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import PrivacySettings from '@/components/profile/PrivacySettings';
 import FollowingSection from '@/components/profile/FollowingSection';
 import { PrivacySetting } from '@/types/user';
+import ProfileAvatarSection from '@/components/profile/ProfileAvatarSection';
 
 interface ProfileContentProps {
   profile: any;
@@ -44,21 +44,33 @@ export default function ProfileContent({
 
   return (
     <VStack className='gap-4'>
-      {/* Username */}
-      <EditProfileTextFeature
-        type='username'
-        currentText={profile?.username || ''}
-        size='4xl'
-        isEdit={permissions.canEdit && editProfile}
-      />
-
-      {/* Music Genre */}
-      {permissions.canViewMusicGenre && (
-        <EditMusicTastes
-          currentText={profile?.music_genre || []}
-          isEdit={permissions.canEdit && editProfile}
+      <HStack className='items-center'>
+        {/* Avatar */}
+        <ProfileAvatarSection
+          profile={profile}
+          canEdit={permissions.canEdit}
+          editProfile={editProfile}
+          actions={actions}
         />
-      )}
+
+        {/* Username */}
+        <VStack className='flex-1 self-start pt-6'>
+          <EditProfileTextFeature
+            type='username'
+            currentText={profile?.username || 'toto'}
+            size='3xl'
+            isEdit={permissions.canEdit && editProfile}
+          />
+          {/* Music Genre */}
+          {permissions.canViewMusicGenre && (
+            <EditMusicTastes
+              currentText={profile?.music_genre || []}
+              isEdit={permissions.canEdit && editProfile}
+            />
+          )}
+        </VStack>
+      </HStack>
+
       <Divider />
 
       {/* Bio */}
@@ -118,17 +130,6 @@ export default function ProfileContent({
               onPress={() => router.push(`/profile/${userId}/following`)}
             />
           </HStack>
-
-          {/* Find People Button - Only for own profile */}
-          {permissions.canEdit && (
-            <Button
-              variant='outline'
-              className='mx-3 mt-2'
-              onPress={() => router.push('/profile/search')}
-            >
-              <ButtonText>Find People to Follow</ButtonText>
-            </Button>
-          )}
         </>
       )}
 

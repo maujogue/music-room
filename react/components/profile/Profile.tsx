@@ -5,7 +5,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useRouter } from 'expo-router';
 import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfileAvatarSection from '@/components/profile/ProfileAvatarSection';
+import ProfileActions from '@/components/profile/ProfileActions';
 import ProfileContent from '@/components/profile/ProfileContent';
 import { useProfileData } from '@/hooks/useProfileData';
 import { Spinner } from '../ui/spinner';
@@ -79,7 +79,7 @@ export default function Profile({
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >
-        <ProfileAvatarSection
+        <ProfileActions
           profile={profile}
           canEdit={permissions.canEdit}
           editProfile={editProfile}
