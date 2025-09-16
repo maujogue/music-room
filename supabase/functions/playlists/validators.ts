@@ -36,3 +36,12 @@ export function validateCreatePlaylistPayload(body: any): CreatePlaylistPayload 
     is_collaborative: body.is_collaborative ?? true,
   };
 }
+
+export function validateDeleteTracksPayload(body: any): { uris: string[] } {
+  console.log('Validating delete tracks payload:', body);
+  if (!body.uris || !Array.isArray(body.uris) || body.uris.some((uri: any) => typeof uri !== 'string')) {
+    throw new HTTPException(400, { message: 'uris is required and must be an array of strings' });
+  }
+
+  return { uris: body.uris };
+}

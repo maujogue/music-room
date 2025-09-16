@@ -14,35 +14,27 @@ import {
   createPlaylistInSupabase,
   getSupabasePlaylistById,
   deletePlaylistInSupabase,
-  addTracksToPlaylistInSupabase
+  addTracksToPlaylistInSupabase,
+  deleteTracksFromPlaylistInSupabase
 } from './services/supabase.ts'
-import { validateCreatePlaylistPayload } from './validators.ts';
+import {
+  validateCreatePlaylistPayload,
+  validateDeleteTracksPayload
+} from './validators.ts';
 
 
 export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
   const body = await c.req.json()
+  const { uris } = validateDeleteTracksPayload(body)
 
-  const res = await deleteItemsFromSpotifyPlaylist(
-    spotify_access_token,
+  await deleteTracksFromPlaylistInSupabase(
     id,
-    body
+    uris
   )
-  if (!res) {
-    const errorResponse = new Response('Failed to remove items from Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
-  if (res.error) {
-    console.error('Error deleting items from playlist:', res.error)
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
-
-  console.log('Deleted items from playlist:', res)
 
   c.status(200)
-  return c.json(res)
+  return c.json({ message: 'Tracks deleted successfully' })
 }
 
 export async function addItemsToPlaylist(c: Context): Promise<any> {
@@ -67,22 +59,25 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
     c.status(500)
     return c.text('Failed to fetch Spotify playlists')
   }
-  const spotify_token = c.get('spotify_token')
-  const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
-  const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
 
-  if (spotifyTracksData.error) {
-    c.status(spotifyTracksData.error.status || 500)
-    return c.json({ error: spotifyTracksData.error.message || 'Unknown error from Spotify API' })
+  if (playlist.tracks.length !== 0) {
+    const spotify_token = c.get('spotify_token')
+    const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
+    const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
+
+    if (spotifyTracksData.error) {
+      c.status(spotifyTracksData.error.status || 500)
+      return c.json({ error: spotifyTracksData.error.message || 'Unknown error from Spotify API' })
+    }
+
+    playlist.tracks = playlist.tracks.map((track: any) => {
+      const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id);
+      return {
+        ...track,
+        details: spotifyTrack || null
+      };
+    });
   }
-
-  playlist.tracks = playlist.tracks.map((track: any) => {
-    const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id);
-    return {
-      ...track,
-      details: spotifyTrack || null
-    };
-  });
 
   c.status(200)
   return c.json(playlist)
@@ -102,4 +97,13 @@ export async function createPlaylist(c: Context): Promise<any> {
 
   c.status(201);
   return c.json(res);
+}
+
+export async function deletePlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+
+  await deletePlaylistInSupabase(id)
+
+  c.status(200)
+  return c.json({ message: 'Playlist deleted successfully' })
 }

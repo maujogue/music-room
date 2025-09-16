@@ -83,8 +83,6 @@ export default function PlaylistDetail() {
     );
   }
 
-  console.log(`PlaylistDetailScreen(${playlistId}) render playlist:`, playlist);
-
   const imageUri = playlist.cover_url ?? 'https://picsum.photos/300';
   const playlistDescription = playlist.description ?? 'No description available';
 

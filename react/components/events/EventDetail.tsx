@@ -52,7 +52,6 @@ export default function EventDetail() {
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
-    console.log(`PlaylistDetailScreen(${eventId}) Playlist delelete call`);
 
     await deleteEvent();
     if (!error && !loading) {

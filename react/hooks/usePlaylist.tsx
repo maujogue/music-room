@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { getPlaylistById } from '@/services/playlist';
+import { getPlaylistById, deletePlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
 // Hook for new playlist system
@@ -45,11 +45,8 @@ export function usePlaylist(id: string | null) {
     setError(null);
 
     try {
-      // await deletePlaylistService(id);
-      // setPlaylist(null);
-      console.log(
-        'Delete playlist service not implemented. Remove this button ?'
-      );
+      await deletePlaylistById(id);
+      setPlaylist(null);
     } catch (e: any) {
       setError(`delete playlist error: ${e.message ?? e}`);
       console.error('Delete playlist error:', e);

@@ -60,7 +60,7 @@ export async function deleteItemFromPlaylist(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/tracks`,
     {
       method: 'DELETE',
-      body: { tracks: uris.map(uri => ({ uri })) },
+      body: { uris: uris.map(uri => (uri)) },
     }
   );
   if (!res.success) {
@@ -68,5 +68,20 @@ export async function deleteItemFromPlaylist(
     throw res.error;
   }
   console.log('Items deleted successfully from playlist');
+  return res.success;
+}
+
+export async function deletePlaylistById(playlistId: string) {
+  const res = await apiFetch<void>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}`,
+    {
+      method: 'DELETE',
+    }
+  );
+  if (!res.success) {
+    console.error('Error deleting playlist:', res.error);
+    throw res.error;
+  }
+  console.log('Playlist deleted successfully');
   return res.success;
 }
