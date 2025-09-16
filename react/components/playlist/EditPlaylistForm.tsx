@@ -15,23 +15,24 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
   ApiError: string;
-  initialValues?: Partial<PlaylistPayload>;
+  initialValues?: Playlist;
 };
 
 export default function EditPlayListForm({
-  initialValues = {},
+  initialValues,
   ApiError,
   onSubmit,
 }: Props) {
-  const [name, setName] = useState(initialValues.name ?? '');
+  console.log('EditPlayListForm initialValues:', initialValues);
+  const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(
-    initialValues.description ?? ''
+    initialValues?.description ?? ''
   );
-  const [isPublic, setIsPublic] = useState<boolean>(
-    initialValues.public ?? true
+  const [isPrivate, setIsPrivate] = useState<boolean>(
+    initialValues?.is_private ?? true
   );
   const [isCollaborative, setIsCollaborative] = useState<boolean>(
-    initialValues.collaborative ?? false
+    initialValues?.is_collaborative ?? false
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +41,6 @@ export default function EditPlayListForm({
   const validate = (): boolean => {
     if (!name.trim()) {
       setError('Required name.');
-      return false;
-    }
-
-    if (isCollaborative && isPublic) {
-      setError('A collaborative playlist must be private.');
       return false;
     }
 
@@ -57,8 +53,8 @@ export default function EditPlayListForm({
 
     const payload: PlaylistPayload = {
       name: name.trim(),
-      public: isPublic,
-      collaborative: isCollaborative,
+      is_private: isPrivate,
+      is_collaborative: isCollaborative,
       description: description.trim() || undefined,
     };
 
@@ -101,34 +97,28 @@ export default function EditPlayListForm({
           </Textarea>
         </Box>
 
-        <HStack className='items-center'>
+        <VStack className='items-start'>
           <HStack className='items-center'>
-            <Text>Public</Text>
             <Switch
-              value={isPublic}
+              value={isPrivate}
               onToggle={() => {
-                if (!isPublic && isCollaborative) {
-                  setIsCollaborative(false);
-                }
-                setIsPublic(prev => !prev);
+                setIsPrivate(prev => !prev);
               }}
             />
+            <Text>Private</Text>
           </HStack>
 
-          {!isPublic && (
-            <HStack className='items-center'>
-              <Text>Collaborative</Text>
-              <Switch
-                value={isCollaborative}
-                onToggle={() => {
-                  if (!isCollaborative) setIsPublic(false);
-                  setIsCollaborative(prev => !prev);
-                }}
-                isDisabled={isPublic && !isCollaborative}
-              />
-            </HStack>
-          )}
-        </HStack>
+
+          <HStack className='items-center'>
+            <Switch
+              value={isCollaborative}
+              onToggle={() => {
+                setIsCollaborative(prev => !prev);
+              }}
+            />
+            <Text>Collaborative</Text>
+          </HStack>
+        </VStack>
 
         {error ? (
           <Center>

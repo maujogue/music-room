@@ -5,8 +5,8 @@ type PlaylistSection = {
 
 type PlaylistPayload = {
   name: string;
-  public?: boolean;
-  collaborative?: boolean;
+  is_private?: boolean;
+  is_collaborative?: boolean;
   description?: string;
 };
 

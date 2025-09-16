@@ -4,13 +4,13 @@ import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts
 
 const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
-  Deno.env.get('EXPO_PUBLIC_SUPABASE_ANON_KEY')!
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-export async function getSupabasePlaylistByOwner(ownerId: string): Promise<any[]> {
+export async function getCurrentUserPlaylistSupabase(userId: string): Promise<any[]> {
     const { data, error } = await supabase.from('playlists')
         .select('*')
-        .eq('owner_id', ownerId);
+        .eq('owner_id', userId);
 
     if (error) {
         console.error('Supabase error:', error);

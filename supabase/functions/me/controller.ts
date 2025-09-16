@@ -9,14 +9,14 @@ import {
 } from './services/spotify.ts'
 import {
   getSupabasePlaylistByOwner,
-  getSupabaseEventByOwner
+  getCurrentUserPlaylistSupabase
 } from './services/supabase.ts'
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const user = c.get('user')
-    console.log('Fetching playlists for user:', user)
-    const res = await getSupabasePlaylistByOwner(user.id)
+    const res = await getCurrentUserPlaylistSupabase(user.id)
 
+    console.log('Playlists fetched from Supabase:', res);
     c.status(200)
     return c.json(res)
 }

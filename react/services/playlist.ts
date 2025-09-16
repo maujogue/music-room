@@ -85,3 +85,23 @@ export async function deletePlaylistById(playlistId: string) {
   console.log('Playlist deleted successfully');
   return res.success;
 }
+
+export async function editPlaylistById(
+  playlistId: string,
+  payload: PlaylistPayload
+) {
+  console.log(`Updating playlist ${playlistId} with payload:`, payload);
+  const res = await apiFetch<SpotifyPlaylist>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}`,
+    {
+      method: 'PUT',
+      body: { ...payload },
+    }
+  );
+  if (!res.success) {
+    console.error('Error updating playlist:', res.error);
+    throw res.error;
+  }
+  console.log('Playlist updated successfully:', res.data);
+  return res.data;
+}

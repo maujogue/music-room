@@ -5,7 +5,8 @@ import {
   addItemsToPlaylist,
   fetchPlaylistItems,
   createPlaylist,
-  deletePlaylist
+  deletePlaylist,
+  updatePlaylist
 } from './controller.ts'
 
 const playlistRoutes = new Hono()
@@ -15,6 +16,8 @@ playlistRoutes.post('/', createPlaylist)
 playlistRoutes.get('/:id', fetchPlaylistItems)
 
 playlistRoutes.delete('/:id', deletePlaylist)
+
+playlistRoutes.put('/:id', updatePlaylist)
 
 playlistRoutes.post('/:id/tracks', addItemsToPlaylist)
 

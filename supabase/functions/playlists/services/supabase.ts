@@ -104,3 +104,24 @@ export async function deleteTracksFromPlaylistInSupabase(playlist_id: string, tr
         throw new HTTPException(pgError.status, { message: pgError.message });
     }
 }
+
+export async function editPlaylistSupabaseById(
+  id: string,
+  payload: Partial<CreatePlaylistPayload>
+): Promise<any> {
+    console.log('Editing playlist in Supabase for ID:', id, 'with payload:', payload);
+  const { error } = await supabase.from('playlists')
+    .update({
+      name: payload.name,
+      description: payload.description,
+      is_private: payload.is_private,
+      is_collaborative: payload.is_collaborative
+    })
+    .eq('id', id)
+
+  if (error) {
+      console.error('Supabase error:', error);
+      const pgError = formatDbError(error);
+      throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}

@@ -15,11 +15,13 @@ import {
   getSupabasePlaylistById,
   deletePlaylistInSupabase,
   addTracksToPlaylistInSupabase,
-  deleteTracksFromPlaylistInSupabase
+  deleteTracksFromPlaylistInSupabase,
+  editPlaylistSupabaseById
 } from './services/supabase.ts'
 import {
   validateCreatePlaylistPayload,
-  validateDeleteTracksPayload
+  validateDeleteTracksPayload,
+  validateEditPlaylistPayload
 } from './validators.ts';
 
 
@@ -107,3 +109,15 @@ export async function deletePlaylist(c: Context): Promise<any> {
   c.status(200)
   return c.json({ message: 'Playlist deleted successfully' })
 }
+
+export async function updatePlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+
+  const validatedPayload = validateEditPlaylistPayload(body);
+
+  await editPlaylistSupabaseById(id, validatedPayload);
+  c.status(200)
+  return c.json({ message: 'Playlist updated successfully' })
+}
+

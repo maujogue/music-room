@@ -37,6 +37,43 @@ export function validateCreatePlaylistPayload(body: any): CreatePlaylistPayload 
   };
 }
 
+export function validateEditPlaylistPayload(body: any): Partial<CreatePlaylistPayload> {
+  const payload: Partial<CreatePlaylistPayload> = {};
+
+  if (body.name !== undefined) {
+    if (typeof body.name !== 'string' || body.name.length < 3 || body.name.length > 255) {
+      throw new HTTPException(400, { message: 'Name must be a string between 3 and 255 characters' });
+    }
+    payload.name = body.name;
+  }
+  if (body.description !== undefined) {
+    if (typeof body.description !== 'string') {
+      throw new HTTPException(400, { message: 'Description must be a string' });
+    }
+    payload.description = body.description;
+  }
+  if (body.cover_url !== undefined) {
+    if (typeof body.cover_url !== 'string') {
+      throw new HTTPException(400, { message: 'Cover URL must be a string' });
+    }
+    payload.cover_url = body.cover_url;
+  }
+  if (body.is_private !== undefined) {
+    if (typeof body.is_private !== 'boolean') {
+      throw new HTTPException(400, { message: 'is_private must be a boolean' });
+    }
+    payload.is_private = body.is_private;
+  }
+  if (body.is_collaborative !== undefined) {
+    if (typeof body.is_collaborative !== 'boolean') {
+      throw new HTTPException(400, { message: 'is_collaborative must be a boolean' });
+    }
+    payload.is_collaborative = body.is_collaborative;
+  }
+
+  return payload;
+}
+
 export function validateDeleteTracksPayload(body: any): { uris: string[] } {
   console.log('Validating delete tracks payload:', body);
   if (!body.uris || !Array.isArray(body.uris) || body.uris.some((uri: any) => typeof uri !== 'string')) {

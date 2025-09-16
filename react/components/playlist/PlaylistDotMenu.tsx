@@ -60,9 +60,6 @@ export default function Playlist3DotMenu({ callDelete, callEdit }: Props) {
             edit
           </MenuItemLabel>
         </HStack>
-        <Badge action='warning' className='rounded-full'>
-          <BadgeText className='text-2xs capitalize'>Not impl.</BadgeText>
-        </Badge>
       </MenuItem>
 
       {/* MOCK MENU */}

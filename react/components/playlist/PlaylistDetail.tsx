@@ -61,10 +61,9 @@ export default function PlaylistDetail() {
   };
 
   const onCallEdit = () => {
-    console.log(`Edit call for playlist ${playlistId} | Not implemented yet`);
-    // [!] Implement this later (issue #54)
-    // Can't retrieve playlist from usePlaylist() in edit.tsx
-    // router.push(`(main)/playlists/${playlistId}/edit`)
+    console.log(`Edit call for playlist ${playlistId}`);
+    // Navigation simple vers la page edit avec seulement l'ID
+    router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
   if (loading || !playlist) {
