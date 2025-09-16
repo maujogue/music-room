@@ -11,6 +11,20 @@ export async function fetchSpotifyUserProfile(spotify_token: string): Promise<an
 	return response.json();
 }
 
+export async function fetchSpotifyTracks(spotify_token: string, track_ids: string[]): Promise<any> {
+  const idsParam = track_ids
+    .map(id => id.trim().replace(/^spotify:track:/i, ''))
+    .join(',');
+  const url = `https://api.spotify.com/v1/tracks?ids=${idsParam}`;
+  console.log('Fetching tracks from URL:', url);
+  const response = await fetch(`https://api.spotify.com/v1/tracks?ids=${idsParam}`, {
+    headers: {
+      Authorization: `Bearer ${spotify_token}`,
+    },
+  });
+  return await response.json();
+}
+
 export async function createSpotifyPlaylist(
 	spotify_token: string,
 	user_id: string,

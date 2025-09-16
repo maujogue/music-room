@@ -14,7 +14,7 @@ export function useUserPlaylists() {
       const session = await getSession();
       if (!session) throw new Error('Session retrieve error');
       const data = await getCurrentUserPlaylists();
-      setPlaylists(data.items || []);
+      setPlaylists(data || []);
     } catch (e) {
       console.error('Error fetching playlists:', e);
       setError('fetch playlists error');

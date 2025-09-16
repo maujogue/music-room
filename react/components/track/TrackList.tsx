@@ -15,7 +15,7 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 interface Props {
   playlistId: string;
   playlistTitle?: string;
-  playlistTracks: SpotifyTracksArray;
+  playlistTracks: PlaylistTrack[];
   onTrackDeleted?: () => void;
 }
 
@@ -33,7 +33,10 @@ export default function TrackList({
     });
   };
 
-  if (!playlistTracks) { return (<LoadingSpinner text='Loading playlist...' />); }
+  if (!playlistTracks) {
+    console.log('No playlistTracks provided');
+    return (<LoadingSpinner text='Loading playlist...' />);
+  }
 
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
@@ -42,7 +45,7 @@ export default function TrackList({
 
   const handleSwipeableOpen = async (trackId: string) => {
     try {
-      await deleteItemFromPlaylist(playlistId, [`spotify:track:${trackId}`]);
+      await deleteItemFromPlaylist(playlistId, [trackId]);
 
       if (onTrackDeleted) {
         onTrackDeleted();
@@ -53,7 +56,10 @@ export default function TrackList({
     }
   };
 
-  if (loading) { return (<LoadingSpinner text='Loading tracks...' />); }
+  if (loading) {
+    return <LoadingSpinner text='Loading tracks...' />;
+  }
+
   if (error) { return (<ErrorScreen error={error} />); }
   if (!tracks) { return (<ErrorScreen error={"no tracks to load"} />); }
 
@@ -78,8 +84,8 @@ export default function TrackList({
 
       {tracks.map((item, index) => (
         <TrackListItem
-          key={item.__key || item.id || `track-${index}`} // ✅ Ajouter la key ici
-          track={item}
+          key={item.spotify_id || `track-${index}`}
+          track={item.details}
           renderRightAction={() => (
             <Reanimated.View style={[styles.deleteAction]}>
               <View className='flex-1 justify-center items-end w-full p-4'>
@@ -87,7 +93,7 @@ export default function TrackList({
               </View>
             </Reanimated.View>
           )}
-          onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+          onSwipeableOpen={() => handleSwipeableOpen(item.spotify_id)}
         />
       ))}
     </GestureHandlerRootView>

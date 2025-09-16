@@ -17,7 +17,7 @@ export async function getCurrentUserPlaylists() {
 
 export async function getPlaylistById(id: string) {
   console.log(`Fetching playlist with id: ${id}`);
-  const res = await apiFetch<SpotifyPlaylistWithTracks>(
+  const res = await apiFetch<Playlist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
     {
       method: 'GET',

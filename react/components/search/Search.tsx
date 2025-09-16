@@ -44,6 +44,8 @@ export default function Search({
 
   const limit = filter === 'all' ? 3 : undefined;
 
+  console.log('Search results:', tracks);
+
   return (
     <GestureHandlerRootView>
       <ScrollView keyboardShouldPersistTaps='handled'>

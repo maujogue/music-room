@@ -20,6 +20,7 @@ import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { ScrollView } from 'react-native';
 import { CircleIcon } from '@/components/ui/icon';
+import { Avatar, AvatarImage, AvatarFallbackText } from '@/components/ui/avatar';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -29,7 +30,6 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
-  console.log(`PlaylistDetailScreen(${playlistId}) render`);
 
   useFocusEffect(
     useCallback(() => {
@@ -83,14 +83,10 @@ export default function PlaylistDetail() {
     );
   }
 
-  const playlistTracks: SpotifyTracksArray = playlist.tracks;
-  const imageUri = playlist?.images?.[0]?.url ?? 'https://picsum.photos/300';
-  const playlistTitle = playlist?.name ?? 'Playlist';
-  const playlistDescription =
-    playlist?.description ?? 'No description available';
-  const playlistOwner = playlist?.owner?.display_name ?? 'Unknown';
-  const ispublic = playlist?.public ?? false;
-  const isCollaborative = playlist?.collaborative ?? false;
+  console.log(`PlaylistDetailScreen(${playlistId}) render playlist:`, playlist);
+
+  const imageUri = playlist.cover_url ?? 'https://picsum.photos/300';
+  const playlistDescription = playlist.description ?? 'No description available';
 
   return (
     <>
@@ -103,14 +99,14 @@ export default function PlaylistDetail() {
           />
           <VStack className='px-4 pt-2'>
             <HStack className='justify-between'>
-              <Heading size='xl'>{playlistTitle}</Heading>
+              <Heading size='xl'>{playlist.name}</Heading>
               <HStack className='gap-2'>
-                {isCollaborative && (
+                {playlist.is_collaborative && (
                   <Badge action='info' className='rounded-full'>
                     <BadgeIcon as={CircleIcon} className='' />
                   </Badge>
                 )}
-                {ispublic ? (
+                {!playlist.is_private ? (
                   <Badge action='success' className='rounded-full'>
                     <BadgeText>Public</BadgeText>
                   </Badge>
@@ -126,15 +122,23 @@ export default function PlaylistDetail() {
                 {playlistDescription}
               </Text>
             ) : null}
-            <Text size='md' className='color-secondary-700'>
-              By {playlistOwner}
-            </Text>
+            <HStack className='pt-2'>
+              <Avatar size='sm'>
+                <AvatarFallbackText>
+                  {playlist.owner.username.charAt(0).toUpperCase()}
+                </AvatarFallbackText>
+                {playlist.owner.avatar_url && <AvatarImage source={{ uri: playlist.owner.avatar_url }} />}
+              </Avatar>
+              <Text size='md' className='color-secondary-700 pl-2 pt-1'>
+                {playlist.owner.username}
+              </Text>
+            </HStack>
           </VStack>
         </Card>
         <TrackList
           playlistId={playlistId}
-          playlistTracks={playlistTracks}
-          playlistTitle={playlistTitle}
+          playlistTracks={playlist.tracks}
+          playlistTitle={playlist.name}
           onTrackDeleted={refetch}
         />
         {/* </Box> */}

@@ -49,10 +49,9 @@ export async function createPlaylistInSupabase(
 }
 
 export async function getSupabasePlaylistById(id: string): Promise<any> {
-    const { data, error } = await supabase.from('playlists')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const { data, error } = await supabase.rpc('get_playlist_complete', {
+          p_playlist_id: id
+      });
 
     if (error) {
         console.error('Supabase error:', error);
@@ -76,4 +75,19 @@ export async function deletePlaylistInSupabase(id: string): Promise<any> {
     }
 
     return data;
+}
+
+export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks: string[], added_by: string): Promise<any> {
+    const { data, error } = await supabase.from('playlist_tracks')
+        .insert(tracks.map(track_id => ({
+            playlist_id,
+            track_id,
+            added_by
+        })));
+
+    if (error) {
+        console.error('Supabase error:', error);
+        const pgError = formatDbError(error);
+        throw new HTTPException(pgError.status, { message: pgError.message });
+    }
 }

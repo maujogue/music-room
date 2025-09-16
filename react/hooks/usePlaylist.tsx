@@ -3,11 +3,11 @@ import { getErrorMsg } from '@/utils/getErrorMsg';
 import { getPlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
-// Hook with mock-datas (TODO : connect fetch backend when ready)
+// Hook for new playlist system
 // -------------------------------------------------------------------
 
 export function usePlaylist(id: string | null) {
-  const [playlist, setPlaylist] = useState<SpotifyPlaylistWithTracks | null>(null);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

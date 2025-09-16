@@ -6,15 +6,16 @@ import {
   postItemsToSpotifyPlaylist,
   deleteItemsFromSpotifyPlaylist,
   fetchSpotifyPlaylist,
-  fetchSpotifyUserProfile
+  fetchSpotifyUserProfile,
+  fetchSpotifyTracks
 } from './services/spotify.ts'
 import {
   getSupabasePlaylistByOwner,
   createPlaylistInSupabase,
   getSupabasePlaylistById,
-  deletePlaylistInSupabase
+  deletePlaylistInSupabase,
+  addTracksToPlaylistInSupabase
 } from './services/supabase.ts'
-//import { PlaylistPayload } from '../types/playlist.d.ts'
 import { validateCreatePlaylistPayload } from './validators.ts';
 
 
@@ -46,40 +47,45 @@ export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
 
 export async function addItemsToPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
+  const user = c.get('user')
   const body = await c.req.json()
   const uris = body.uris
   const position = body.position || 0
 
-  const res = await postItemsToSpotifyPlaylist(spotify_access_token, id, { uris, position })
-  if (!res) {
-    console.error('Failed to add items to Spotify playlist')
-    const errorResponse = new Response('Failed to add items to Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
-  if (res.error) {
-    console.error('Error adding items to playlist:', res.error)
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
+  await addTracksToPlaylistInSupabase(id, uris, user.id)
 
-  console.log('Added items to playlist:', res)
   c.status(201)
-  return c.json(res)
+  return c.json({ message: 'Tracks added successfully' })
 }
 
 export async function fetchPlaylistItems(c: Context): Promise<any> {
   const id = c.req.param('id')
 
-  const playlist_items = await getSupabasePlaylistById(id)
+  const playlist = await getSupabasePlaylistById(id)
 
-  if (!playlist_items) {
+  if (!playlist) {
     c.status(500)
     return c.text('Failed to fetch Spotify playlists')
   }
+  const spotify_token = c.get('spotify_token')
+  const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
+  const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
+
+  if (spotifyTracksData.error) {
+    c.status(spotifyTracksData.error.status || 500)
+    return c.json({ error: spotifyTracksData.error.message || 'Unknown error from Spotify API' })
+  }
+
+  playlist.tracks = playlist.tracks.map((track: any) => {
+    const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id);
+    return {
+      ...track,
+      details: spotifyTrack || null
+    };
+  });
 
   c.status(200)
-  return c.json(playlist_items)
+  return c.json(playlist)
 }
 
 
