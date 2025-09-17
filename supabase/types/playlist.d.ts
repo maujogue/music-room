@@ -19,4 +19,6 @@ export type PlaylistResponse = {
   is_collaborative: boolean;
   created_at: string;
   updated_at: string;
+  is_spotify_sync: boolean;
+  spotify_id: string;
 };

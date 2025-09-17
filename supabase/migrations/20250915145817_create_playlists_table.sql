@@ -19,7 +19,9 @@ WITH TIME ZONE DEFAULT NOW
 (),
     updated_at TIMESTAMP
 WITH TIME ZONE DEFAULT NOW
-()
+(),
+    is_spotify_sync BOOLEAN DEFAULT FALSE,
+    spotify_id TEXT UNIQUE
 );
 
 -- Create playlist_collaborators table (many-to-many relationship)
@@ -108,6 +110,12 @@ IF NOT EXISTS idx_playlist_tracks_position ON playlist_tracks
 
 CREATE INDEX IF NOT EXISTS idx_playlist_members_playlist_id ON playlist_members(playlist_id);
 CREATE INDEX IF NOT EXISTS idx_playlist_members_user_id ON playlist_members(user_id);
+
+-- Create index for spotify_id for better performance on sync operations
+CREATE INDEX IF NOT EXISTS idx_playlists_spotify_id ON playlists(spotify_id);
+
+-- Create unique constraint on spotify_id for upsert operations
+ALTER TABLE playlists ADD CONSTRAINT unique_spotify_id UNIQUE (spotify_id);
 
 -- Create function to automatically update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column
@@ -353,6 +361,8 @@ BEGIN
         'cover_url', p.cover_url,
         'created_at', p.created_at,
         'updated_at', p.updated_at,
+        'is_spotify_sync', p.is_spotify_sync,
+        'spotify_id', p.spotify_id,
         'owner', json_build_object(
             'id', p.owner_id,
             'username', pr.username,

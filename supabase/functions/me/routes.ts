@@ -5,7 +5,8 @@ import {
     startUserPlayback,
     pauseUserPlayback,
     skipToNextUserTrack,
-    fetchCurrentUserEvents
+    fetchCurrentUserEvents,
+    syncSpotifyPlaylists
 } from './controller.ts'
 
 const router = new Hono()
@@ -16,5 +17,6 @@ router.get('/player/currently-playing', fetchCurrentUserPlayingTrack)
 router.put('/player/play', startUserPlayback)
 router.put('/player/pause', pauseUserPlayback)
 router.post('/player/next', skipToNextUserTrack)
+router.post('/playlists/sync', syncSpotifyPlaylists)
 
 export default router

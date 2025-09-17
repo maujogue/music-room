@@ -1,7 +1,7 @@
 import { apiFetch } from '@/utils/apiFetch';
 
 export async function getCurrentUserPlaylists() {
-  const res = await apiFetch<SpotifyPlaylist[]>(
+  const res = await apiFetch<Playlist[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`,
     {
       method: 'GET',
@@ -103,5 +103,20 @@ export async function editPlaylistById(
     throw res.error;
   }
   console.log('Playlist updated successfully:', res.data);
+  return res.data;
+}
+
+export async function syncSpotifyPlaylists() {
+  const res = await apiFetch<{ message: string; insertedCount: number }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists/sync`,
+    {
+      method: 'POST',
+    }
+  );
+  if (!res.success) {
+    console.error('Error syncing Spotify playlists:', res.error);
+    throw res.error;
+  }
+  console.log('Spotify playlists synchronized successfully:', res.data);
   return res.data;
 }

@@ -16,14 +16,9 @@ type Props = {
 export default function PlaylistListItem({ playlist }: Props) {
   const router = useRouter();
   const getImage = () => {
-    const hasValidImage =
-      Array.isArray(playlist.images) &&
-      playlist.images.length > 0 &&
-      playlist.images[0]?.url;
-
     return {
-      uri: hasValidImage
-        ? playlist.images[0]!.url
+      uri: playlist.cover_url
+        ? playlist.cover_url
         : 'https://picsum.photos/205',
     };
   };

@@ -120,4 +120,3 @@ export async function updatePlaylist(c: Context): Promise<any> {
   c.status(200)
   return c.json({ message: 'Playlist updated successfully' })
 }
-
