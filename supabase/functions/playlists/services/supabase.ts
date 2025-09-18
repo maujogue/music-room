@@ -63,10 +63,11 @@ export async function getSupabasePlaylistById(id: string): Promise<any> {
     return data;
 }
 
-export async function deletePlaylistInSupabase(id: string): Promise<any> {
+export async function deletePlaylistInSupabase(id: string, user_id: string): Promise<any> {
     const { error } = await supabase.from('playlists')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('owner_id', user_id);
 
     if (error) {
         console.error('Supabase error:', error);

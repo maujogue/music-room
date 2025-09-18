@@ -55,6 +55,7 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
 
 export async function fetchPlaylistItems(c: Context): Promise<any> {
   const id = c.req.param('id')
+  const user = c.get('user')
 
   let playlist = await getSupabasePlaylistById(id)
 
@@ -90,6 +91,10 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
       };
     });
   }
+  playlist.can_edit = false
+  if (playlist.collaborators.find((collab: any) => collab.id === user.id)) {
+    playlist.can_edit = true
+  }
 
   c.status(200)
   return c.json(playlist)
@@ -113,8 +118,9 @@ export async function createPlaylist(c: Context): Promise<any> {
 
 export async function deletePlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
+  const user = c.get('user')
 
-  await deletePlaylistInSupabase(id)
+  await deletePlaylistInSupabase(id, user.id)
 
   c.status(200)
   return c.json({ message: 'Playlist deleted successfully' })

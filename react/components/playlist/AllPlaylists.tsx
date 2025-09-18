@@ -5,6 +5,8 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import { Button } from '@/components/ui/button';
+import CreatePlaylistItem from '@/components/playlist/CreatePlaylistItem';
 
 export default function AllPlaylists() {
   const { playlists, refetch, loading, error } = useUserPlaylists();
@@ -20,7 +22,12 @@ export default function AllPlaylists() {
   if (!playlists) return (<ErrorScreen error={"No playlist found"} />);;
 
   if (playlists.length === 0) {
-    return <Text>no playlist found</Text>;
+    return (
+      <>
+        <CreatePlaylistItem />
+        <Text>no playlist found</Text>
+      </>
+    );
   }
 
   const sections: PlaylistSection[] = [

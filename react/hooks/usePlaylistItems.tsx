@@ -5,7 +5,6 @@ export function usePlaylistItems(id: string, data: PlaylistTrack[]) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log('usePlaylistItems playlistTracks data:', data);
   useEffect(() => {
     const run = async () => {
       setLoading(true);

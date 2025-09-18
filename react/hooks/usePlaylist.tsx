@@ -10,6 +10,7 @@ export function usePlaylist(id: string | null) {
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canEdit, setCanEdit] = useState(false);
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
@@ -21,6 +22,7 @@ export function usePlaylist(id: string | null) {
       setError(null);
       const data = await getPlaylistById(id);
       setPlaylist(data);
+      setCanEdit(data.can_edit ?? false);
     } catch (err) {
       console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
@@ -55,5 +57,5 @@ export function usePlaylist(id: string | null) {
     }
   }, [id]);
 
-  return { playlist, loading, error, refetch, deletePlaylist };
+  return { playlist, loading, error, refetch, deletePlaylist, canEdit };
 }

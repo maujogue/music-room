@@ -18,6 +18,7 @@ interface Props {
   playlistTracks: PlaylistTrack[];
   isSpotifySync?: boolean;
   onTrackDeleted?: () => void;
+  canEdit?: boolean;
 }
 
 export default function TrackList({
@@ -26,6 +27,7 @@ export default function TrackList({
   playlistTracks,
   isSpotifySync = false,
   onTrackDeleted,
+  canEdit,
 }: Props) {
   const router = useRouter();
   const handlePress = () => {
@@ -70,7 +72,7 @@ export default function TrackList({
     return (
       <View style={styles.center}>
         <Text>No tracks in this playlist</Text>
-        {!isSpotifySync && (
+        {!isSpotifySync && canEdit && (
           <Button variant='solid' className='mt-4' onPress={handlePress}>
             <ButtonText>Add First Track</ButtonText>
             <ButtonIcon as={AddIcon} className='ml-2' />
@@ -82,7 +84,7 @@ export default function TrackList({
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {!isSpotifySync && (
+      {!isSpotifySync && canEdit && (
         <Button variant='solid' className='mt-2' onPress={handlePress}>
           <ButtonText>Add Track</ButtonText>
           <ButtonIcon as={AddIcon} className='ml-2' />

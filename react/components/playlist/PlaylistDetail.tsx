@@ -24,8 +24,14 @@ import { Avatar, AvatarImage, AvatarFallbackText } from '@/components/ui/avatar'
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const { playlist, loading, error, refetch, deletePlaylist } =
-    usePlaylist(playlistId);
+  const {
+    playlist,
+    loading,
+    error,
+    refetch,
+    deletePlaylist,
+    canEdit
+  } = usePlaylist(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
@@ -136,6 +142,7 @@ export default function PlaylistDetail() {
           playlistTitle={playlist.name}
           isSpotifySync={playlist.is_spotify_sync}
           onTrackDeleted={refetch}
+          canEdit={canEdit}
         />
         {/* </Box> */}
       </ScrollView>

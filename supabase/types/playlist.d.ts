@@ -21,4 +21,5 @@ export type PlaylistResponse = {
   updated_at: string;
   is_spotify_sync: boolean;
   spotify_id: string;
+  can_edit?: boolean;
 };
