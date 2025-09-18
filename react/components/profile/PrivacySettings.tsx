@@ -14,7 +14,6 @@ import {
   ModalFooter,
 } from '@/components/ui/modal';
 import { Icon, CloseIcon, EditIcon } from '@/components/ui/icon';
-import { PrivacySetting } from '@/types/user';
 
 interface PrivacySettingsProps {
   currentSetting: PrivacySetting;

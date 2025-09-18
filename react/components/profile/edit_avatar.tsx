@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/services/supabase';
-import { Alert, Image, ImageSourcePropType } from 'react-native';
+import { Alert, ImageSourcePropType } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
 import { EditIcon, Icon } from '@/components/ui/icon';
+import { Image } from '@/components/ui/image';
 
 interface Props {
   url: string | ImageSourcePropType;
@@ -73,7 +74,8 @@ export default function EditAvatar({ url, onUpload, isEdit }: Props) {
     <HStack className='relative'>
       <Image
         source={url}
-        className='h-40 w-40 rounded-full self-start'
+        className='rounded-full self-start'
+        size='lg'
         alt='profile image'
         resizeMode='cover'
       />

@@ -1,13 +1,16 @@
 import React from 'react';
-import UserList from '@/components/profile/UserList';
+import Search from '@/components/search/Search';
+import UserListItem from '@/components/profile/UserListItem';
 
 export default function ProfileSearchPage() {
   return (
-    <UserList
-      type='all'
-      title='Find People'
-      showFollowButtons={true}
-      initialUsers={[]}
+    <Search
+      placeholder='Search for users...'
+      showFilters={false}
+      defaultType='Users'
+      renderItemUser={item => (
+        <UserListItem user={item} key={item.id} showFollowButtons={true} />
+      )}
     />
   );
 }

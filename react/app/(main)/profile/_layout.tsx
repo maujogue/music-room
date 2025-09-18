@@ -21,7 +21,7 @@ export default function ProfileLayout() {
         name='search'
         options={{
           title: 'Find People',
-          headerShown: false,
+          headerShown: true,
         }}
       />
       <Stack.Screen

@@ -3,18 +3,19 @@ import { SearchIcon } from '@/components/ui/icon';
 
 type Props = {
   value: string;
+  placeholder?: string;
   onChange: (text: string) => void;
   onSubmit?: () => void;
 };
 
-export function SearchBar({ value, onChange, onSubmit }: Props) {
+export function SearchBar({ value, onChange, onSubmit, placeholder }: Props) {
   return (
     <Input>
       <InputSlot className='pl-3'>
         <InputIcon as={SearchIcon} />
       </InputSlot>
       <InputField
-        placeholder='Search...'
+        placeholder={placeholder || 'Search...'}
         value={value}
         onChangeText={onChange}
         onSubmitEditing={onSubmit}

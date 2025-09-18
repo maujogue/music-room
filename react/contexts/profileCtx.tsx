@@ -119,9 +119,9 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const { data, error } = await getUserProfile('me');
+      const data = await getUserProfile('me');
 
-      if (error) {
+      if (!data) {
         console.error('Error fetching profile:', error);
         setProfile(null);
         setFollowers([]);

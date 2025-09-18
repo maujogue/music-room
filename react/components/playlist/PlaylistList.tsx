@@ -1,7 +1,6 @@
-import { SectionList, Pressable } from 'react-native';
+import { SectionList } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
-import { Link } from 'expo-router';
 
 type Props = {
   sections: PlaylistSection[];
@@ -12,19 +11,7 @@ export default function PlaylistList({ sections }: Props) {
     <SectionList
       sections={sections}
       keyExtractor={item => item.id}
-      renderItem={({ item }) => (
-        <Link
-          href={{
-            pathname: '/(main)/playlists/[playlistId]',
-            params: { playlistId: item.id },
-          }}
-          asChild
-        >
-          <Pressable>
-            <PlaylistListItem playlist={item} />
-          </Pressable>
-        </Link>
-      )}
+      renderItem={({ item }) => <PlaylistListItem playlist={item} />}
       renderSectionHeader={({ section }) => (
         <Heading className='mt-8 mb-2'>{section.title}</Heading>
       )}

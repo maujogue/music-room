@@ -1,5 +1,7 @@
 // Privacy settings for profile visibility
-type PrivacySetting = 'public' | 'friends' | 'private';
+type PrivacySetting = 'own' |'public' | 'friends' | 'private';
+
+type FollowType = 'followers' | 'following';
 
 // UserInfo is a dictionary containing user info
 type UserInfo = {

@@ -29,6 +29,7 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
+  console.log(`PlaylistDetailScreen(${playlistId}) render`);
 
   useFocusEffect(
     useCallback(() => {
@@ -133,6 +134,7 @@ export default function PlaylistDetail() {
         <TrackList
           playlistId={playlistId}
           playlistTracks={playlistTracks}
+          playlistTitle={playlistTitle}
           onTrackDeleted={refetch}
         />
         {/* </Box> */}
