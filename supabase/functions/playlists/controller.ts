@@ -7,7 +7,8 @@ import {
   deleteItemsFromSpotifyPlaylist,
   fetchSpotifyPlaylist,
   fetchSpotifyUserProfile,
-  fetchSpotifyTracks
+  fetchSpotifyTracks,
+  fetchSpotifyPlaylistTracksIds
 } from './services/spotify.ts'
 import {
   getSupabasePlaylistByOwner,
@@ -55,17 +56,26 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
 export async function fetchPlaylistItems(c: Context): Promise<any> {
   const id = c.req.param('id')
 
-  const playlist = await getSupabasePlaylistById(id)
+  let playlist = await getSupabasePlaylistById(id)
 
   if (!playlist) {
     c.status(500)
     return c.text('Failed to fetch Spotify playlists')
   }
 
-  if (playlist.tracks.length !== 0) {
+  if (playlist.is_spotify_sync && playlist.spotify_id) {
+    const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, c.get('spotify_token'))
+    if (tracksIds) {
+      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, playlist.owner_id)
+      playlist = await getSupabasePlaylistById(playlist.id)
+    }
+  }
+
+  if (playlist.tracks && playlist.tracks.length !== 0) {
     const spotify_token = c.get('spotify_token')
     const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
     const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
+
 
     if (spotifyTracksData.error) {
       c.status(spotifyTracksData.error.status || 500)
@@ -73,7 +83,7 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
     }
 
     playlist.tracks = playlist.tracks.map((track: any) => {
-      const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id);
+      const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id || t.id === track.spotify_id);
       return {
         ...track,
         details: spotifyTrack || null

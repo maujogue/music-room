@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import NewItemButton from '@/components/generics/NewItemButton';
 import CancelButton from '@/components/generics/CancelButton';
+import PlaylistMenu from '@/components/playlist/PlaylistMenu';
 
 export default function PlaylistLayout() {
   return (
@@ -9,8 +10,9 @@ export default function PlaylistLayout() {
         name='index'
         options={{
           title: 'My Playlists',
+          headerShadowVisible: false,
           headerRight: () => (
-            <NewItemButton routePath='(main)/playlists/add/' />
+              <PlaylistMenu />
           ),
         }}
       />

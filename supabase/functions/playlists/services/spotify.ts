@@ -68,11 +68,27 @@ export async function postItemsToSpotifyPlaylist(
     return response.json();
   }
 
-  export async function fetchSpotifyPlaylist(spotify_token: string, id: string): Promise<any> {
+export async function fetchSpotifyPlaylist(spotify_token: string, id: string): Promise<any> {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
       headers: {
         Authorization: `Bearer ${spotify_token}`,
       },
     });
     return response.json();
+}
+
+export async function fetchSpotifyPlaylistTracksIds(playlist: any, spotify_token: string): Promise<void> {
+  const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.spotify_id}/tracks`, {
+    headers: {
+      Authorization: `Bearer ${spotify_token}`,
+    },
+  });
+  if (!response.ok) {
+    console.error('Error fetching Spotify playlist tracks:', await response.text());
+    return;
+  }
+  const data = await response.json();
+  const spotifyTrackIds = data.items.map((item: any) => item.track.id);
+
+  return spotifyTrackIds;
 }

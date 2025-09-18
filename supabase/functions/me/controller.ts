@@ -171,13 +171,3 @@ export async function syncSpotifyPlaylists(c: Context): Promise<any> {
   c.status(200)
   return c.json({ message: 'No playlists to synchronize', syncedCount: 0 })
 }
-unction fetchCurrentUserEvents(c: Context): Promise<any> {
-  const user = c.get('user')
-
-  const events = await getSupabaseEventByOwner(user.id)
-  if (!events) {
-    throw new HTTPException(500, { message: 'Failed to fetch events' })
-  }
-
-  return c.json(events)
-}

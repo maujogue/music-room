@@ -7,9 +7,7 @@ IF NOT EXISTS playlists
     name VARCHAR
 (255) NOT NULL,
     description TEXT,
-    owner_id UUID NOT NULL REFERENCES auth.users
-(id) ON
-DELETE CASCADE,
+    owner_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     is_private BOOLEAN
 DEFAULT FALSE,
     is_collaborative BOOLEAN DEFAULT TRUE,
@@ -418,8 +416,8 @@ BEGIN
         )
     ) INTO result
     FROM playlists p
-    JOIN auth.users au ON p.owner_id = au.id
     JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
     WHERE p.id = p_playlist_id;
 
     RETURN result;
@@ -469,8 +467,8 @@ SELECT
     pr.avatar_url as owner_avatar_url,
     pr.bio as owner_bio
 FROM playlists p
-    JOIN auth.users au ON p.owner_id = au.id
     JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
 WHERE p.owner_id = p_user_id
 ORDER BY p.created_at DESC;
 $$;

@@ -57,4 +57,6 @@ export interface Playlist {
   collaborators: PlaylistCollaborator[];
   members: PlaylistMember[];
   tracks: PlaylistTrack[];
+  is_spotify_sync: boolean;
+  spotify_id: string | null;
 }

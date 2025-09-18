@@ -103,3 +103,62 @@ export async function searchEventsByQuery(
 	}
 	return events;
 }
+
+export async function searchPlaylistsByQuery(
+	params: { query: string, limit: number, offset: number }
+): Promise<PlaylistResponse[]> {
+	try {
+		// Fetch playlists without embedding owner to avoid relying on schema relationships
+		const { data: playlists, error: playlistsError } = await supabase
+			.from('playlists')
+			.select(
+				`id, name, description, is_private, is_collaborative, cover_url, created_at, updated_at, owner_id`
+			)
+			.eq('is_private', false)
+			.ilike('name', `%${params.query}%`)
+			.range(params.offset, params.offset + params.limit - 1);
+
+		if (playlistsError) {
+			console.error('Error searching playlists:', playlistsError);
+			const pgError = formatDbError(playlistsError);
+			throw new HTTPException(pgError.status, { message: pgError.message });
+		}
+
+		if (!playlists || playlists.length === 0) return [];
+
+		// Collect owner ids and fetch profiles in batch
+		const ownerIds = Array.from(new Set(playlists.map((p: any) => p.owner_id).filter(Boolean)));
+
+		const { data: profiles, error: profilesError } = await supabase
+			.from('profiles')
+			.select('id, username, email, avatar_url, bio')
+			.in('id', ownerIds);
+
+		if (profilesError) {
+			console.error('Error fetching owner profiles:', profilesError);
+			const pgError = formatDbError(profilesError);
+			throw new HTTPException(pgError.status, { message: pgError.message });
+		}
+
+		const profileMap = new Map<string, any>();
+		profiles?.forEach((pr: any) => profileMap.set(pr.id, pr));
+
+		// Attach owner object to playlists
+		const results: PlaylistResponse[] = playlists.map((p: any) => ({
+			id: p.id,
+			name: p.name,
+			description: p.description,
+			is_private: p.is_private,
+			is_collaborative: p.is_collaborative,
+			cover_url: p.cover_url,
+			created_at: p.created_at,
+			updated_at: p.updated_at,
+			owner: profileMap.get(p.owner_id) || null,
+		}));
+
+		return results;
+	} catch (err) {
+		console.error('searchPlaylistsByQuery error:', err);
+		throw err;
+	}
+}

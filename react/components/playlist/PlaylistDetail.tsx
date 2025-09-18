@@ -49,8 +49,6 @@ export default function PlaylistDetail() {
   }, [navigation]);
 
   const onDeletePlaylist = async () => {
-    // [note] -> Clément :
-    // Ici vérifier que la suppression produit bien une goBack dans la navigation
     setShowAlertDialog(false);
     console.log(`PlaylistDetailScreen(${playlistId}) Playlist delelete call`);
 
@@ -136,6 +134,7 @@ export default function PlaylistDetail() {
           playlistId={playlistId}
           playlistTracks={playlist.tracks}
           playlistTitle={playlist.name}
+          isSpotifySync={playlist.is_spotify_sync}
           onTrackDeleted={refetch}
         />
         {/* </Box> */}

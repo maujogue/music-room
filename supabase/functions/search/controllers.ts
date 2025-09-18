@@ -1,5 +1,9 @@
 import { fetchSpotifySearch } from './services/spotify.ts'
-import { searchUsersByQuery, searchEventsByQuery } from './services/supabase.ts'
+import {
+	searchUsersByQuery,
+	searchEventsByQuery,
+	searchPlaylistsByQuery
+ } from './services/supabase.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 
 export async function search(c: Context) {
@@ -26,7 +30,7 @@ export async function search(c: Context) {
 		trackResults = await searchTracks(spotify_token, { query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
 	}
 	if (type === 'playlist' || type === 'all') {
-		playlistResults = await searchPlaylists(spotify_token, { query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
+		playlistResults = await searchPlaylistsByQuery({ query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
 	}
 	if (type === 'user' || type === 'all') {
 		userResults = await searchUsersByQuery(user.id, { query: q, limit: Number(limit) || 20 })
@@ -52,12 +56,4 @@ async function searchTracks(spotify_token: string, params: { query: string, limi
 		throw new HTTPException(trackResults.error.status || 500, { message: trackResults.error.message || 'Unknown error from Spotify API' })
 	}
 	return trackResults
-}
-
-async function searchPlaylists(spotify_token: string, params: { query: string, limit: number, offset: number }) {
-	const playlistResults = await fetchSpotifySearch(spotify_token, { ...params, type: 'playlist' })
-	if (playlistResults.error) {
-		throw new HTTPException(playlistResults.error.status || 500, { message: playlistResults.error.message || 'Unknown error from Spotify API' })
-	}
-	return playlistResults
 }
