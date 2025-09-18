@@ -1,7 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-//import { CreatePlaylistPayload } from '../../../types/playlist.d.ts';
 
 const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
@@ -94,7 +93,6 @@ export async function isPlaylistCollaborator(playlist_id: string, user_id: strin
 }
 
 export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks: string[], added_by: string): Promise<any> {
-  // Vérifier que la playlist existe et récupérer le propriétaire
   const { data: playlist, error: playlistError } = await supabase
     .from('playlists')
     .select('owner_id')

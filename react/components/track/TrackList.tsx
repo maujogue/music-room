@@ -70,7 +70,7 @@ export default function TrackList({
 
   if (tracks.length === 0) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, styles.emptyBackground]}>
         <Text>No tracks in this playlist</Text>
         {!isSpotifySync && canEdit && (
           <Button variant='solid' className='mt-4' onPress={handlePress}>
@@ -83,39 +83,48 @@ export default function TrackList({
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      {!isSpotifySync && canEdit && (
-        <Button variant='solid' className='mt-2' onPress={handlePress}>
-          <ButtonText>Add Track</ButtonText>
-          <ButtonIcon as={AddIcon} className='ml-2' />
-        </Button>
-      )}
+    <View style={styles.container}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {!isSpotifySync && canEdit && (
+          <Button variant='solid' className='mt-2' onPress={handlePress}>
+            <ButtonText>Add Track</ButtonText>
+            <ButtonIcon as={AddIcon} className='ml-2' />
+          </Button>
+        )}
 
-      {tracks.map((item, index) => (
-        <TrackListItem
-          key={item.spotify_id || `track-${index}`}
-          track={item.details}
-          renderRightAction={isSpotifySync ? undefined : () => (
-            <Reanimated.View style={[styles.deleteAction]}>
-              <View className='flex-1 justify-center items-end w-full p-4'>
-                <Icon as={TrashIcon} color='white' size={6} />
-              </View>
-            </Reanimated.View>
-          )}
-          onSwipeableOpen={isSpotifySync ? undefined : () => handleSwipeableOpen(item.spotify_id)}
-        />
-      ))}
-    </GestureHandlerRootView>
+        {tracks.map((item, index) => (
+          <TrackListItem
+            key={item.spotify_id || `track-${index}`}
+            track={item.details}
+            renderRightAction={isSpotifySync ? undefined : () => (
+              <Reanimated.View style={[styles.deleteAction]}>
+                <View className='flex-1 justify-center items-end w-full p-4'>
+                  <Icon as={TrashIcon} color='white' size={6} />
+                </View>
+              </Reanimated.View>
+            )}
+            onSwipeableOpen={isSpotifySync ? undefined : () => handleSwipeableOpen(item.spotify_id)}
+          />
+        ))}
+      </GestureHandlerRootView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  cover: { width: '100%', height: 200, borderRadius: 8, marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  description: { fontSize: 16, marginBottom: 12 },
-  owner: { fontSize: 14, color: '#555' },
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffffff',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyBackground: {
+    backgroundColor: '#ffffffff',
+    minHeight: 200,
+  },
   deleteAction: {
     flex: 1,
     backgroundColor: 'red',

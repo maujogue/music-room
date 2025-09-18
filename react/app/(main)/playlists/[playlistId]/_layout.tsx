@@ -1,4 +1,3 @@
-import CancelButton from '@/components/generics/CancelButton';
 import { Stack } from 'expo-router';
 
 export default function PlaylistDetailLayout() {
@@ -7,9 +6,9 @@ export default function PlaylistDetailLayout() {
       <Stack.Screen
         name='index'
         options={{
-          title: 'Playlist',
+          title: '',
           headerShown: true,
-          headerRight: () => <CancelButton />,
+          headerTransparent: true,
         }}
       />
       <Stack.Screen

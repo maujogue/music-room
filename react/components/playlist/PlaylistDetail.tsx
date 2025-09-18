@@ -44,15 +44,18 @@ export default function PlaylistDetail() {
   );
 
   useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Playlist3DotMenu
-          callDelete={() => setShowAlertDialog(true)}
-          callEdit={onCallEdit}
-        />
-      ),
-    });
-  }, [navigation]);
+      navigation.setOptions({
+        headerRight: () => (
+          playlist && (
+            <Playlist3DotMenu
+              playlist={playlist}
+              callDelete={() => setShowAlertDialog(true)}
+              callEdit={onCallEdit}
+            />
+          )
+        ),
+      });
+  }, [navigation, playlist]);
 
   const onDeletePlaylist = async () => {
     setShowAlertDialog(false);
@@ -86,21 +89,21 @@ export default function PlaylistDetail() {
     );
   }
 
-  const imageUri = playlist.cover_url ?? 'https://picsum.photos/300';
+  const imageUri = playlist.cover_url ?? 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
   const playlistDescription = playlist.description ?? 'No description available';
 
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <Image
+          source={{ uri: imageUri }}
+          className="w-full aspect-square h-100"
+          alt='Playlist image'
+        />
         <Card>
-          <Image
-            source={{ uri: imageUri }}
-            className='w-full h-80'
-            alt='Playlist image'
-          />
-          <VStack className='px-4 pt-2'>
+          <VStack>
             <HStack className='justify-between'>
-              <Heading size='xl'>{playlist.name}</Heading>
+              <Heading size='4xl'>{playlist.name}</Heading>
               <HStack className='gap-2'>
                 {playlist.is_collaborative && (
                   <Badge action='info' className='rounded-full'>
