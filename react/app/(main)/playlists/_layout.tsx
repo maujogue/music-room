@@ -11,9 +11,7 @@ export default function PlaylistLayout() {
         options={{
           title: 'My Playlists',
           headerShadowVisible: false,
-          headerRight: () => (
-              <PlaylistMenu />
-          ),
+          headerRight: () => <PlaylistMenu />,
         }}
       />
 

@@ -39,7 +39,7 @@ export default function TrackList({
 
   if (!playlistTracks) {
     console.log('No playlistTracks provided');
-    return (<LoadingSpinner text='Loading playlist...' />);
+    return <LoadingSpinner text='Loading playlist...' />;
   }
 
   const { tracks, loading, error } = usePlaylistItems(
@@ -65,8 +65,12 @@ export default function TrackList({
     return <LoadingSpinner text='Loading tracks...' />;
   }
 
-  if (error) { return (<ErrorScreen error={error} />); }
-  if (!tracks) { return (<ErrorScreen error={"no tracks to load"} />); }
+  if (error) {
+    return <ErrorScreen error={error} />;
+  }
+  if (!tracks) {
+    return <ErrorScreen error={'no tracks to load'} />;
+  }
 
   if (tracks.length === 0) {
     return (
@@ -96,14 +100,22 @@ export default function TrackList({
           <TrackListItem
             key={item.spotify_id || `track-${index}`}
             track={item.details}
-            renderRightAction={isSpotifySync ? undefined : () => (
-              <Reanimated.View style={[styles.deleteAction]}>
-                <View className='flex-1 justify-center items-end w-full p-4'>
-                  <Icon as={TrashIcon} color='white' size={6} />
-                </View>
-              </Reanimated.View>
-            )}
-            onSwipeableOpen={isSpotifySync ? undefined : () => handleSwipeableOpen(item.spotify_id)}
+            renderRightAction={
+              isSpotifySync
+                ? undefined
+                : () => (
+                    <Reanimated.View style={[styles.deleteAction]}>
+                      <View className='flex-1 justify-center items-end w-full p-4'>
+                        <Icon as={TrashIcon} color='white' size={6} />
+                      </View>
+                    </Reanimated.View>
+                  )
+            }
+            onSwipeableOpen={
+              isSpotifySync
+                ? undefined
+                : () => handleSwipeableOpen(item.spotify_id)
+            }
           />
         ))}
       </GestureHandlerRootView>

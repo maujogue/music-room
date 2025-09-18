@@ -1,11 +1,11 @@
-import { Box } from "@/components/ui/box";
-import { Card } from "@/components/ui/card";
-import { Text } from "@/components/ui/text";
-import { HStack } from "@/components/ui/hstack";
-import { Image } from "@/components/ui/image";
-import { Center } from "@/components/ui/center";
-import { VStack } from "@/components/ui/vstack";
-import NumBadge from "@/components/generics/NumBadge";
+import { Box } from '@/components/ui/box';
+import { Card } from '@/components/ui/card';
+import { Text } from '@/components/ui/text';
+import { HStack } from '@/components/ui/hstack';
+import { Image } from '@/components/ui/image';
+import { Center } from '@/components/ui/center';
+import { VStack } from '@/components/ui/vstack';
+import NumBadge from '@/components/generics/NumBadge';
 
 interface Props {
   rank: Rank;
@@ -27,19 +27,19 @@ export default function TopVoteItem({ rank, track }: Props) {
   const size = sizeByRank[rank];
 
   return (
-    <VStack className="overflow-hidden" style={{ width: size }}>
-      <Box className="overflow-hidden" style={{ width: size, height: size }}>
-        <Card className="w-full h-full p-1 rounded overflow-hidden">
+    <VStack className='overflow-hidden' style={{ width: size }}>
+      <Box className='overflow-hidden' style={{ width: size, height: size }}>
+        <Card className='w-full h-full p-1 rounded overflow-hidden'>
           {cover ? (
             <Image
-              alt={`cover-${track?.name ?? "track"}`}
+              alt={`cover-${track?.name ?? 'track'}`}
               source={{ uri: cover }}
-              className="w-full h-full"
-              resizeMode="cover"
+              className='w-full h-full'
+              resizeMode='cover'
             />
           ) : (
-            <Center className="w-full h-full bg-secondary-500">
-              <Text className="font-semibold text-gray-600 text-2xl">
+            <Center className='w-full h-full bg-secondary-500'>
+              <Text className='font-semibold text-gray-600 text-2xl'>
                 {rank}
               </Text>
             </Center>
@@ -48,12 +48,11 @@ export default function TopVoteItem({ rank, track }: Props) {
       </Box>
 
       {track && (
-        <HStack className="justify-betwee items-center">
+        <HStack className='justify-betwee items-center'>
           <NumBadge num={rank} />
-          <Text size="2xs">{track?.name}</Text>
+          <Text size='2xs'>{track?.name}</Text>
         </HStack>
       )}
     </VStack>
   );
-
 }

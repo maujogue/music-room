@@ -5,10 +5,5 @@ import Profile from '@/components/profile/Profile';
 export default function UserProfilePage() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
-  return (
-    <Profile
-      userId={userId || ''}
-      showBackButton={true}
-    />
-  );
+  return <Profile userId={userId || ''} showBackButton={true} />;
 }

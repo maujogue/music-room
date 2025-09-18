@@ -9,9 +9,9 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import InfoScreen from '@/components/generics/screens/InfoScreen';
 import { Pressable } from '@/components/ui/pressable';
 import { Box } from '@/components/ui/box';
-import colors from "tailwindcss/colors"
+import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
-import { Heading } from "@/components/ui/heading";
+import { Heading } from '@/components/ui/heading';
 import { voteForTrack } from '@/services/events';
 import { VStack } from '@/components/ui/vstack';
 import TopVotesTracks from '@/components/track/votes/TopVotes';
@@ -24,13 +24,30 @@ interface Props {
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
 
-export default function TrackListVotes({ eventId, playlistId, playlistTitle, playlistTracks, onTrackSwiping }: Props) {
-  const { tracks, loading, error } = usePlaylistItems(playlistId, playlistTracks);
-  const { getVoteCount, getTopTracksFrom, getTrackId, loading: loadingV, error: errorV } = useVoteCountIndex(eventId);
+export default function TrackListVotes({
+  eventId,
+  playlistId,
+  playlistTitle,
+  playlistTracks,
+  onTrackSwiping,
+}: Props) {
+  const { tracks, loading, error } = usePlaylistItems(
+    playlistId,
+    playlistTracks
+  );
+  const {
+    getVoteCount,
+    getTopTracksFrom,
+    getTrackId,
+    loading: loadingV,
+    error: errorV,
+  } = useVoteCountIndex(eventId);
 
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
-      console.log(`Implement vote for track(${trackId}) in playlist(${playlistId}) and direction(${dir})`)
+      console.log(
+        `Implement vote for track(${trackId}) in playlist(${playlistId}) and direction(${dir})`
+      );
       // await voteForTrack(eventId, trackId);
 
       if (onTrackSwiping) {
@@ -41,15 +58,24 @@ export default function TrackListVotes({ eventId, playlistId, playlistTitle, pla
     }
   };
 
-  if (!playlistTracks) { return (<LoadingSpinner text='Loading playlist...' />); }
-  if (loading || loadingV) { return (<LoadingSpinner text='Loading tracks...' />); }
-  if (error || errorV) { return (<ErrorScreen error={error} />); }
-  if (!tracks) { return (<ErrorScreen error={"no tracks to load"} />); }
-  if (tracks.length === 0) { return (<InfoScreen text={"Playlist chosen for event is empty"} />); }
+  if (!playlistTracks) {
+    return <LoadingSpinner text='Loading playlist...' />;
+  }
+  if (loading || loadingV) {
+    return <LoadingSpinner text='Loading tracks...' />;
+  }
+  if (error || errorV) {
+    return <ErrorScreen error={error} />;
+  }
+  if (!tracks) {
+    return <ErrorScreen error={'no tracks to load'} />;
+  }
+  if (tracks.length === 0) {
+    return <InfoScreen text={'Playlist chosen for event is empty'} />;
+  }
 
   return (
     <VStack className='flex-1'>
-
       <TopVotesTracks topTracks={getTopTracksFrom(tracks)} />
 
       <Heading className='mt-2'>Votes-room</Heading>
@@ -79,8 +105,8 @@ export default function TrackListVotes({ eventId, playlistId, playlistTitle, pla
                         width: 80,
                       }}
                     >
-                      <Box className="flex-1 justify-center items-end w-full p-4">
-                        <Icon as={PlusCircleIcon} color="white" size={'lg'} />
+                      <Box className='flex-1 justify-center items-end w-full p-4'>
+                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
                       </Box>
                     </Reanimated.View>
                   )}
@@ -94,12 +120,14 @@ export default function TrackListVotes({ eventId, playlistId, playlistTitle, pla
                         width: 80,
                       }}
                     >
-                      <Box className="flex-1 justify-center items-start w-full p-4">
-                        <Icon as={PlusCircleIcon} color="white" size={'lg'} />
+                      <Box className='flex-1 justify-center items-start w-full p-4'>
+                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
                       </Box>
                     </Reanimated.View>
                   )}
-                  onSwipeableOpen={(dir) => handleSwipeableOpen(dir, getTrackId(track))}
+                  onSwipeableOpen={dir =>
+                    handleSwipeableOpen(dir, getTrackId(track))
+                  }
                 />
               </Pressable>
             );

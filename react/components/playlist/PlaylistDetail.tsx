@@ -20,18 +20,16 @@ import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { ScrollView } from 'react-native';
 import { CircleIcon } from '@/components/ui/icon';
-import { Avatar, AvatarImage, AvatarFallbackText } from '@/components/ui/avatar';
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallbackText,
+} from '@/components/ui/avatar';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const {
-    playlist,
-    loading,
-    error,
-    refetch,
-    deletePlaylist,
-    canEdit
-  } = usePlaylist(playlistId);
+  const { playlist, loading, error, refetch, deletePlaylist, canEdit } =
+    usePlaylist(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
@@ -45,17 +43,16 @@ export default function PlaylistDetail() {
   );
 
   useEffect(() => {
-      navigation.setOptions({
-        headerRight: () => (
-          playlist && (
-            <Playlist3DotMenu
-              playlist={playlist}
-              callDelete={() => setShowAlertDialog(true)}
-              callEdit={onCallEdit}
-            />
-          )
+    navigation.setOptions({
+      headerRight: () =>
+        playlist && (
+          <Playlist3DotMenu
+            playlist={playlist}
+            callDelete={() => setShowAlertDialog(true)}
+            callEdit={onCallEdit}
+          />
         ),
-      });
+    });
   }, [navigation, playlist]);
 
   const onDeletePlaylist = async () => {
@@ -90,15 +87,18 @@ export default function PlaylistDetail() {
     );
   }
 
-  const imageUri = playlist.cover_url ?? 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
-  const playlistDescription = playlist.description ?? 'No description available';
+  const imageUri =
+    playlist.cover_url ??
+    'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
+  const playlistDescription =
+    playlist.description ?? 'No description available';
 
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Image
           source={{ uri: imageUri }}
-          className="w-full aspect-square h-100"
+          className='w-full aspect-square h-100'
           alt='Playlist image'
         />
         <Card>
@@ -132,7 +132,9 @@ export default function PlaylistDetail() {
                 <AvatarFallbackText>
                   {playlist.owner.username.charAt(0).toUpperCase()}
                 </AvatarFallbackText>
-                {playlist.owner.avatar_url && <AvatarImage source={{ uri: playlist.owner.avatar_url }} />}
+                {playlist.owner.avatar_url && (
+                  <AvatarImage source={{ uri: playlist.owner.avatar_url }} />
+                )}
               </Avatar>
               <Text size='md' className='color-secondary-700 pl-2 pt-1'>
                 {playlist.owner.username}

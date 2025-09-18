@@ -8,7 +8,10 @@ type Props = {
 
 export default function PlaylistList({ sections }: Props) {
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 32 }}
+    >
       <CreatePlaylistItem />
       <SectionList
         sections={sections}

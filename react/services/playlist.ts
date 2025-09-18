@@ -60,7 +60,7 @@ export async function deleteItemFromPlaylist(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/tracks`,
     {
       method: 'DELETE',
-      body: { uris: uris.map(uri => (uri)) },
+      body: { uris: uris.map(uri => uri) },
     }
   );
   if (!res.success) {

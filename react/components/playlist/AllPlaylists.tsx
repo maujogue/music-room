@@ -17,9 +17,9 @@ export default function AllPlaylists() {
     }, [refetch])
   );
 
-  if (loading) return (<LoadingSpinner text={"Playlists loading..."} />);
-  if (error) return (<ErrorScreen error={error} />);
-  if (!playlists) return (<ErrorScreen error={"No playlist found"} />);;
+  if (loading) return <LoadingSpinner text={'Playlists loading...'} />;
+  if (error) return <ErrorScreen error={error} />;
+  if (!playlists) return <ErrorScreen error={'No playlist found'} />;
 
   if (playlists.length === 0) {
     return (

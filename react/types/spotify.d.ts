@@ -44,10 +44,10 @@ type SpotifyPlaylistWithTracks = {
   primary_color: string | null;
   public: boolean | null;
   snapshot_id: string;
-  tracks: SpotifyTracksArray
+  tracks: SpotifyTracksArray;
   type: 'playlist';
   uri: string;
-}
+};
 
 type SpotifyTracksArray = {
   items: Array<{
@@ -102,7 +102,7 @@ type SpotifyTracksArray = {
       is_local: boolean;
     };
   }>;
-}
+};
 
 type SpotifyAlbum = {
   album_type: string;
@@ -116,10 +116,10 @@ type SpotifyAlbum = {
   total_tracks: number;
   type: string;
   uri: string;
-}
+};
 
 type SpotifyTrack = {
-  album: SpotifyAlbum
+  album: SpotifyAlbum;
   artists: { name: string; id: string; uri: string }[];
   available_markets?: string[];
   disc_number: number;

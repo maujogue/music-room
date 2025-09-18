@@ -22,7 +22,7 @@ export default function EditPlaylist() {
       .then(() => {
         router.push(`(main)/playlists/${playlistId}`);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Error editing playlist:', err);
         setError('Failed to edit playlist. Please try again.');
       });
@@ -52,9 +52,11 @@ export default function EditPlaylist() {
     );
   }
 
-  return <EditPlaylistForm
-    initialValues={playlist}
-    onSubmit={onSubmit}
-    ApiError={error}
-  />;
+  return (
+    <EditPlaylistForm
+      initialValues={playlist}
+      onSubmit={onSubmit}
+      ApiError={error}
+    />
+  );
 }

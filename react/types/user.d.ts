@@ -1,5 +1,5 @@
 // Privacy settings for profile visibility
-type PrivacySetting = 'own' |'public' | 'friends' | 'private';
+type PrivacySetting = 'own' | 'public' | 'friends' | 'private';
 
 type FollowType = 'followers' | 'following';
 

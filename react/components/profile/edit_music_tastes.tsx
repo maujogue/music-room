@@ -73,35 +73,39 @@ export default function EditMusicTastes({
   return (
     <VStack className='px-6'>
       <HStack className='gap-2 items-center min-h-10'>
-      {isEdit && (
-        <Select
-          onValueChange={async (value: string) => {
-            await handleSelect(value);
-          }}
-        >
-            <SelectTrigger variant='rounded' size='md' className='flex-1 justify-center items-center'>
-            <SelectIcon as={AddIcon} />
+        {isEdit && (
+          <Select
+            onValueChange={async (value: string) => {
+              await handleSelect(value);
+            }}
+          >
+            <SelectTrigger
+              variant='rounded'
+              size='md'
+              className='flex-1 justify-center items-center'
+            >
+              <SelectIcon as={AddIcon} />
             </SelectTrigger>
-          <SelectPortal>
-            <SelectBackdrop />
-            <SelectContent>
-              <SelectDragIndicatorWrapper>
-                <SelectDragIndicator />
-              </SelectDragIndicatorWrapper>
-              {MUSIC_GENRES.filter(
-                genre => !selectedGenres.includes(genre.value)
-              ).map(genre => (
-                <SelectItem
-                  key={genre.value}
-                  label={genre.label}
-                  value={genre.value}
-                  isSelected={false}
-                />
-              ))}
-            </SelectContent>
-          </SelectPortal>
-        </Select>
-      )}
+            <SelectPortal>
+              <SelectBackdrop />
+              <SelectContent>
+                <SelectDragIndicatorWrapper>
+                  <SelectDragIndicator />
+                </SelectDragIndicatorWrapper>
+                {MUSIC_GENRES.filter(
+                  genre => !selectedGenres.includes(genre.value)
+                ).map(genre => (
+                  <SelectItem
+                    key={genre.value}
+                    label={genre.label}
+                    value={genre.value}
+                    isSelected={false}
+                  />
+                ))}
+              </SelectContent>
+            </SelectPortal>
+          </Select>
+        )}
         <HStack>
           {selectedGenres.length === 0 ? (
             <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>

@@ -9,7 +9,10 @@ interface UseUserFollowsReturn {
   refetch: () => Promise<void>;
 }
 
-export function useUserFollows(userId: string, type: FollowType): UseUserFollowsReturn {
+export function useUserFollows(
+  userId: string,
+  type: FollowType
+): UseUserFollowsReturn {
   const [users, setUsers] = useState<UserWithFollowStatus[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,8 @@ export function useUserFollows(userId: string, type: FollowType): UseUserFollows
       const data = await getUserProfile(userId);
 
       if (data) {
-        const followData = type === 'followers' ? data.followers || [] : data.following || [];
+        const followData =
+          type === 'followers' ? data.followers || [] : data.following || [];
         setUsers(followData);
       }
     } catch (err) {

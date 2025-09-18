@@ -10,7 +10,13 @@ export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
 export function useProfileData(userId: string) {
   const { user: currentUser, signOut } = useAuth();
-  const { profile: ownProfile, updateProfile, followers, following, refreshProfile } = useProfile();
+  const {
+    profile: ownProfile,
+    updateProfile,
+    followers,
+    following,
+    refreshProfile,
+  } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
   const [otherUserData, setOtherUserData] = useState<any>(null);
@@ -19,20 +25,32 @@ export function useProfileData(userId: string) {
 
   // Determine variant and if it's own profile
   const isOwnProfile = userId === currentUser?.id;
-  const variant: ProfileVariant = isOwnProfile ? 'own' :
-    !otherUserData ? 'public' :
-    otherUserData.profile?.privacy_setting === 'public' ? 'public' :
-    otherUserData.profile?.privacy_setting === 'friends' && otherUserData.is_friend ? 'friends' : 'private';
+  const variant: ProfileVariant = isOwnProfile
+    ? 'own'
+    : !otherUserData
+      ? 'public'
+      : otherUserData.profile?.privacy_setting === 'public'
+        ? 'public'
+        : otherUserData.profile?.privacy_setting === 'friends' &&
+            otherUserData.is_friend
+          ? 'friends'
+          : 'private';
 
   // Use appropriate data source
   const profile = isOwnProfile ? ownProfile : otherUserData?.profile;
-  const profileFollowers = isOwnProfile ? followers : otherUserData?.followers || [];
-  const profileFollowing = isOwnProfile ? following : otherUserData?.following || [];
+  const profileFollowers = isOwnProfile
+    ? followers
+    : otherUserData?.followers || [];
+  const profileFollowing = isOwnProfile
+    ? following
+    : otherUserData?.following || [];
 
   // Permissions based on variant
   const permissions = {
     canViewProfile: variant !== 'private',
-    canViewEmail: variant === 'own' || (variant === 'public' && profile?.privacy_setting !== 'private'),
+    canViewEmail:
+      variant === 'own' ||
+      (variant === 'public' && profile?.privacy_setting !== 'private'),
     canViewBio: variant !== 'private',
     canViewMusicGenre: variant !== 'private',
     canViewFollowers: variant !== 'private',
@@ -89,11 +107,14 @@ export function useProfileData(userId: string) {
       }
     }, []),
 
-    handlePrivacyChange: useCallback(async (privacy: PrivacySetting) => {
-      if (isOwnProfile) {
-        await updateProfile({ privacy_setting: privacy });
-      }
-    }, [isOwnProfile, updateProfile]),
+    handlePrivacyChange: useCallback(
+      async (privacy: PrivacySetting) => {
+        if (isOwnProfile) {
+          await updateProfile({ privacy_setting: privacy });
+        }
+      },
+      [isOwnProfile, updateProfile]
+    ),
 
     handleFollowAction: useCallback(async () => {
       if (!profile || isOwnProfile) return;
@@ -114,11 +135,14 @@ export function useProfileData(userId: string) {
       setEditProfile(!editProfile);
     }, [editProfile]),
 
-    handleAvatarUpload: useCallback((url: string) => {
-      if (isOwnProfile) {
-        updateProfile({ avatar_url: url });
-      }
-    }, [isOwnProfile, updateProfile]),
+    handleAvatarUpload: useCallback(
+      (url: string) => {
+        if (isOwnProfile) {
+          updateProfile({ avatar_url: url });
+        }
+      },
+      [isOwnProfile, updateProfile]
+    ),
 
     signOut,
   };

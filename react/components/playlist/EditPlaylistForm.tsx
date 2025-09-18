@@ -108,7 +108,6 @@ export default function EditPlayListForm({
             <Text>Private</Text>
           </HStack>
 
-
           <HStack className='items-center'>
             <Switch
               value={isCollaborative}

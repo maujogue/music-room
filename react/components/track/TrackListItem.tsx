@@ -51,19 +51,21 @@ export default function TrackListItem({
     };
   };
 
-  if (!track) { return null }
+  if (!track) {
+    return null;
+  }
 
   return (
     <ReanimatedSwipeable
       ref={swipeableRef}
-      renderLeftActions={
-        (prog, drag) => renderLeftAction ? renderLeftAction(prog, drag, track) : <></>
+      renderLeftActions={(prog, drag) =>
+        renderLeftAction ? renderLeftAction(prog, drag, track) : <></>
       }
-      renderRightActions={
-        (prog, drag) => renderRightAction ? renderRightAction(prog, drag, track) : <></>
+      renderRightActions={(prog, drag) =>
+        renderRightAction ? renderRightAction(prog, drag, track) : <></>
       }
       leftThreshold={75}
-      onSwipeableOpen={(direction) => {
+      onSwipeableOpen={direction => {
         if (onSwipeableOpen) {
           onSwipeableOpen(direction);
         }
@@ -72,13 +74,21 @@ export default function TrackListItem({
         }, 500);
       }}
     >
-      <Card className="flex-row gap-2 p-2">
-        <Image source={getImage()} className="rounded-md h-[60px] w-[60px]" alt="Playlist avatar" />
+      <Card className='flex-row gap-2 p-2'>
+        <Image
+          source={getImage()}
+          className='rounded-md h-[60px] w-[60px]'
+          alt='Playlist avatar'
+        />
         <HStack className='justify-between items-center flex-1'>
-          <VStack className="pt-1">
-            <Heading size='md' className='text-typography-800'>{track.name}</Heading>
+          <VStack className='pt-1'>
+            <Heading size='md' className='text-typography-800'>
+              {track.name}
+            </Heading>
             {track.artists && (
-              <Text size='sm' className="text-typography-400">{track.artists[0].name}</Text>
+              <Text size='sm' className='text-typography-400'>
+                {track.artists[0].name}
+              </Text>
             )}
           </VStack>
           <NumBadge num={voteCount ?? 0} hideIfZero={true} />

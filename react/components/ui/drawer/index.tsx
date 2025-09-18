@@ -1,12 +1,6 @@
 'use client';
 import React from 'react';
-import {
-  Pressable,
-  View,
-  Dimensions,
-  ViewStyle,
-  Modal,
-} from 'react-native';
+import { Pressable, View, Dimensions, ViewStyle, Modal } from 'react-native';
 import {
   Motion,
   AnimatePresence,
@@ -52,29 +46,28 @@ interface DrawerProps {
   children: React.ReactNode;
 }
 
-const Drawer = React.forwardRef<View, DrawerProps>(
-  function Drawer({ isOpen, onClose, size = 'sm', anchor = 'bottom', className, children }, _ref) {
-    return (
-      <DrawerContext.Provider value={{ size, anchor, isOpen, onClose }}>
-        <Modal
-          visible={isOpen}
-          transparent
-          animationType="none"
-          onRequestClose={onClose}
+const Drawer = React.forwardRef<View, DrawerProps>(function Drawer(
+  { isOpen, onClose, size = 'sm', anchor = 'bottom', className, children },
+  _ref
+) {
+  return (
+    <DrawerContext.Provider value={{ size, anchor, isOpen, onClose }}>
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType='none'
+        onRequestClose={onClose}
+      >
+        <View
+          className={`w-full h-full relative ${className || ''}`}
+          style={{ flex: 1 }}
         >
-          <View
-            className={`w-full h-full relative ${className || ''}`}
-            style={{ flex: 1 }}
-          >
-            <AnimatePresence>
-              {isOpen && children}
-            </AnimatePresence>
-          </View>
-        </Modal>
-      </DrawerContext.Provider>
-    );
-  }
-);
+          <AnimatePresence>{isOpen && children}</AnimatePresence>
+        </View>
+      </Modal>
+    </DrawerContext.Provider>
+  );
+});
 
 interface DrawerBackdropProps {
   className?: string;
@@ -132,7 +125,14 @@ const DrawerContent = React.forwardRef<View, DrawerContentProps>(
 
     if (isHorizontal) {
       positionClasses = `top-0 h-full ${anchor === 'left' ? 'left-0' : 'right-0'}`;
-      sizeClasses = size === 'sm' ? 'w-1/4' : size === 'md' ? 'w-1/2' : size === 'lg' ? 'w-3/4' : 'w-full';
+      sizeClasses =
+        size === 'sm'
+          ? 'w-1/4'
+          : size === 'md'
+            ? 'w-1/2'
+            : size === 'lg'
+              ? 'w-3/4'
+              : 'w-full';
     } else {
       positionClasses = `left-0 w-full ${anchor === 'top' ? 'top-0' : 'bottom-0'}`;
       // Pour les drawers verticaux, on ne fixe pas la hauteur pour qu'elle s'adapte au contenu
@@ -182,18 +182,19 @@ interface DrawerBodyProps {
   contentContainerClassName?: string;
 }
 
-const DrawerBody = React.forwardRef<View, DrawerBodyProps>(
-  function DrawerBody({ className, contentContainerClassName, children }, ref) {
-    return (
-      <View
-        ref={ref}
-        className={`mt-4 mb-6 ${className || ''} ${contentContainerClassName || ''}`}
-      >
-        {children}
-      </View>
-    );
-  }
-);
+const DrawerBody = React.forwardRef<View, DrawerBodyProps>(function DrawerBody(
+  { className, contentContainerClassName, children },
+  ref
+) {
+  return (
+    <View
+      ref={ref}
+      className={`mt-4 mb-6 ${className || ''} ${contentContainerClassName || ''}`}
+    >
+      {children}
+    </View>
+  );
+});
 
 interface DrawerFooterProps {
   className?: string;
