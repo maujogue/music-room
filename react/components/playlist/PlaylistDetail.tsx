@@ -36,6 +36,7 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
+  console.log(`PlaylistDetailScreen(${playlistId}) render`);
 
   useFocusEffect(
     useCallback(() => {
