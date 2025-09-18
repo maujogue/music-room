@@ -25,13 +25,7 @@ export default function EventDetail() {
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    deleteEvent
-  } = useEvent(eventId);
+  const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,7 +46,6 @@ export default function EventDetail() {
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
-    console.log(`PlaylistDetailScreen(${eventId}) Playlist delelete call`);
 
     await deleteEvent();
     if (!error && !loading) {
@@ -72,20 +65,21 @@ export default function EventDetail() {
   };
 
   if (!data || loading) {
-    return (
-      <LoadingSpinner text='Loading Events' />
-    )
+    return <LoadingSpinner text='Loading Events' />;
   }
 
   if (error) {
-      return ( <ErrorScreen error={error}/> )
+    return <ErrorScreen error={error} />;
   }
 
   return (
     <>
       <VStack className='flex-1'>
-
-        <EventHeader eventData={data} expanded={expanded} onToggle={onToggleHeader} />
+        <EventHeader
+          eventData={data}
+          expanded={expanded}
+          onToggle={onToggleHeader}
+        />
 
         {/* Votes / Guests tabs */}
         <Center className='flex-1'>
@@ -117,7 +111,8 @@ export default function EventDetail() {
         setShowAlertDialog={setShowAlertDialog}
         onDelete={onDeleteEvent}
         itemName={data.event.name ?? 'event'}
-        itemType='event' />
+        itemType='event'
+      />
     </>
   );
 }

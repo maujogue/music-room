@@ -18,9 +18,11 @@ export async function createEvent(payload: MusicEventPayload) {
 
 export async function getEventById(id: string) {
   const res = await apiFetch<MusicEventFetchResult>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`, {
-    method: 'GET',
-  })
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`,
+    {
+      method: 'GET',
+    }
+  );
 
   if (!res.success) {
     console.error('Error fetching Event:', res.error);
@@ -31,23 +33,26 @@ export async function getEventById(id: string) {
 
 export async function getVotesEventById(id: string) {
   const res = await apiFetch<EventVote[]>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}/votes`, {
-    method: 'GET',
-  })
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}/votes`,
+    {
+      method: 'GET',
+    }
+  );
 
   if (!res.success) {
     console.error("Error fetching Event's votes:", res.error);
     throw res.error;
   }
   return res.data;
-
 }
 
 export async function voteForTrack(eventId: string, trackId: string) {
   const res = await apiFetch<void>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/votes/${trackId}`, {
-    method: 'PUT',
-  })
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/votes/${trackId}`,
+    {
+      method: 'PUT',
+    }
+  );
 
   if (!res.success) {
     console.error('Error voting track:', res.error);
@@ -57,9 +62,11 @@ export async function voteForTrack(eventId: string, trackId: string) {
 
 export async function deleteEventById(id: string) {
   const res = await apiFetch<void>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`, {
-    method: 'DELETE',
-  })
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`,
+    {
+      method: 'DELETE',
+    }
+  );
 
   console.log('deleteEventById', { id, res });
   if (!res.success) {

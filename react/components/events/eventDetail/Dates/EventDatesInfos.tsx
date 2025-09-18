@@ -14,9 +14,14 @@ export default function EventDatesInfos({ event }: Props) {
     return null;
   }
 
-  if (!event.beginning_at || !event.ending_at) { return null; }
+  if (!event.beginning_at || !event.ending_at) {
+    return null;
+  }
 
-  const { start, end, rangeLabel, duration } = useEventDate(event.beginning_at, event.ending_at);
+  const { start, end, rangeLabel, duration } = useEventDate(
+    event.beginning_at,
+    event.ending_at
+  );
 
   return (
     <VStack space='xs'>

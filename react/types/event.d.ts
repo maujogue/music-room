@@ -3,7 +3,7 @@ type MusicEventFetchResult = {
   location: MusicEventLocation;
   members: UserInfo[];
   owner: UserInfo;
-}
+};
 
 type MusicEvent = {
   id: string;
@@ -24,9 +24,9 @@ type EventVote = {
   trackId: string;
   users: Guest[];
   number: number;
-}
+};
 
-type Guest = Omit<UserInfo, "email" | "bio" | "music_genre">;
+type Guest = Omit<UserInfo, 'email' | 'bio' | 'music_genre'>;
 
 type Coordinates = {
   lat: number;
@@ -54,8 +54,8 @@ type MusicEventPayload = {
 };
 
 type EventDateLabels = {
-  start: { date: string; time?: string, full: string };
-  end: { date: string; time?: string, full: string };
+  start: { date: string; time?: string; full: string };
+  end: { date: string; time?: string; full: string };
   rangeLabel: string;
   duration: { ms: number; minutes: number; hours: number; human: string };
   isSameDay: boolean;

@@ -1,5 +1,5 @@
-import { SectionList } from 'react-native';
-import { Heading } from '@/components/ui/heading';
+import { SectionList, ScrollView } from 'react-native';
+import CreatePlaylistItem from '@/components/playlist/CreatePlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 
 type Props = {
@@ -8,15 +8,19 @@ type Props = {
 
 export default function PlaylistList({ sections }: Props) {
   return (
-    <SectionList
-      sections={sections}
-      keyExtractor={item => item.id}
-      renderItem={({ item }) => <PlaylistListItem playlist={item} />}
-      renderSectionHeader={({ section }) => (
-        <Heading className='mt-8 mb-2'>{section.title}</Heading>
-      )}
-      stickySectionHeadersEnabled={false}
+    <ScrollView
       showsVerticalScrollIndicator={false}
-    />
+      contentContainerStyle={{ paddingBottom: 32 }}
+    >
+      <CreatePlaylistItem />
+      <SectionList
+        sections={sections}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <PlaylistListItem playlist={item} />}
+        stickySectionHeadersEnabled={false}
+        scrollEnabled={false}
+        showsVerticalScrollIndicator={false}
+      />
+    </ScrollView>
   );
 }

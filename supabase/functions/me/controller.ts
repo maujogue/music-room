@@ -7,21 +7,22 @@ import {
   pausePlayback,
   skipToNextTrack
 } from './services/spotify.ts'
-import { getSupabaseEventByOwner } from './services/supabase.ts'
+import {
+  getSupabaseEventByOwner,
+  getCurrentUserPlaylistSupabase
+} from './services/supabase.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const res = await getCurrentUserPlaylists(spotify_token)
+    const user = c.get('user')
+    const res = await getCurrentUserPlaylistSupabase(user.id)
 
-    if (!res) {
-      throw new HTTPException(500, { message: 'Failed to fetch Spotify playlists' })
-    }
-
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-    }
-
+    console.log('Playlists fetched from Supabase:', res);
     c.status(200)
     return c.json(res)
 }
@@ -121,4 +122,52 @@ export async function fetchCurrentUserEvents(c: Context): Promise<any> {
   }
 
   return c.json(events)
+}
+
+export async function syncSpotifyPlaylists(c: Context): Promise<any> {
+  const user = c.get('user')
+  const spotify_token = c.get('spotify_token')
+
+  const playlists = await getCurrentUserPlaylists(spotify_token)
+  if (!playlists) {
+    throw new HTTPException(500, { message: 'Failed to fetch Spotify playlists' })
+  }
+  if (playlists.error) {
+    c.status(playlists.error.status || 500)
+    return c.json({ error: playlists.error.message || 'Unknown error from Spotify API' })
+  }
+
+  const now = new Date().toISOString()
+  const playlistsPayload: any[] = playlists.items.map((p: any) => ({
+    name: p.name,
+    description: p.description,
+    owner_id: user.id,
+    cover_url: p.images && p.images.length > 0 ? p.images[0].url : null,
+    is_collaborative: p.collaborative,
+    is_spotify_sync: true,
+    spotify_id: p.id,
+    updated_at: now
+  }))
+
+  if (playlistsPayload.length > 0) {
+    const { error, data } = await supabase
+      .from('playlists')
+      .upsert(playlistsPayload, { onConflict: 'spotify_id' })
+      .select()
+
+    if (error) {
+      console.error('Error upserting playlists into Supabase:', error)
+      throw new HTTPException(500, { message: 'Failed to upsert playlists into Supabase' })
+    }
+
+    c.status(200)
+    return c.json({
+      message: 'Playlists synchronized successfully (upsert)',
+      syncedCount: playlistsPayload.length,
+      returnedRows: Array.isArray(data) ? data.length : 0
+    })
+  }
+
+  c.status(200)
+  return c.json({ message: 'No playlists to synchronize', syncedCount: 0 })
 }

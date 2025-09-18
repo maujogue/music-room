@@ -30,7 +30,6 @@ export default function ProfileUserList({
           console.error(`Error loading ${type}:`, result.error);
           return;
         }
-
       } catch (error) {
         console.error(`Error loading ${type}:`, error);
       }

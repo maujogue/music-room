@@ -3,7 +3,6 @@ import { getErrorMsg } from '@/utils/getErrorMsg';
 import { getVotesEventById } from '@/services/events';
 import { MOCK_VOTES } from '@/mocks/mockEvents';
 
-
 export function useEventVotes(eventId: string) {
   const [votes, setEventVotes] = useState<EventVote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +18,7 @@ export function useEventVotes(eventId: string) {
       setLoading(true);
       setError(null);
 
-      const data = MOCK_VOTES
+      const data = MOCK_VOTES;
       // [!] TODO : Remove Mock data + uncomment above to link backend
       // const data = await getVotesEventById(eventId);
       setEventVotes(data);
@@ -38,7 +37,5 @@ export function useEventVotes(eventId: string) {
     fetchVotes();
   }, [fetchVotes]);
 
-
   return { votes, loading, error, refetch };
-
 }

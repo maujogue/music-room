@@ -5,8 +5,8 @@ type ApiError = {
 
 type ApiResponse<T> =
   | { success: true; data: T }
-  | { success: false; error: ApiError }
+  | { success: false; error: ApiError };
 
-type SwipeDirection = 'right' | 'left'
+type SwipeDirection = 'right' | 'left';
 
 type Rank = 1 | 2 | 3;

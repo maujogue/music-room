@@ -2,7 +2,12 @@ import React from 'react';
 import { View } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Icon, SettingsIcon, CloseIcon } from '@/components/ui/icon';
-import { Menu, MenuItem, MenuItemLabel, MenuSeparator } from '@/components/ui/menu';
+import {
+  Menu,
+  MenuItem,
+  MenuItemLabel,
+  MenuSeparator,
+} from '@/components/ui/menu';
 
 interface ProfileActionsProps {
   canEdit: boolean;
@@ -40,7 +45,10 @@ export default function ProfileActions({
                 </Button>
               )}
             >
-              <MenuItem textValue='Connect Spotify Account' onPress={actions.handleSpotifyConnect}>
+              <MenuItem
+                textValue='Connect Spotify Account'
+                onPress={actions.handleSpotifyConnect}
+              >
                 <Icon as={SettingsIcon} size='sm' className='mr-3' />
                 <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
               </MenuItem>
@@ -73,7 +81,9 @@ export default function ProfileActions({
           onPress={actions.handleFollowAction}
           className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
         >
-          <ButtonText className={isFollowing ? 'text-primary-500' : 'text-white'}>
+          <ButtonText
+            className={isFollowing ? 'text-primary-500' : 'text-white'}
+          >
             {isFollowing ? 'Unfollow' : 'Follow'}
           </ButtonText>
         </Button>

@@ -25,7 +25,6 @@ export default function ProfileAvatarSection({
 }: ProfileAvatarSectionProps) {
   return (
     <VStack className='justify-center items-center py-6 pl-2'>
-
       {/* Avatar */}
       <Center>
         <EditAvatar

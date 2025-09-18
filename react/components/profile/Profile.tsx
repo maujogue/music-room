@@ -39,7 +39,6 @@ export default function Profile({
 
   const isOwnProfile = variant === 'own';
 
-
   if (isLoading && !isOwnProfile) {
     return (
       <View className='flex-1 pt-safe bg-background-0'>
@@ -75,7 +74,7 @@ export default function Profile({
         onBack={onBack || (() => router.back())}
       />
 
-            <ScrollView
+      <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >

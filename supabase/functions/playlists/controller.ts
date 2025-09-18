@@ -6,96 +6,133 @@ import {
   postItemsToSpotifyPlaylist,
   deleteItemsFromSpotifyPlaylist,
   fetchSpotifyPlaylist,
-  fetchSpotifyUserProfile
-} from './service.ts'
+  fetchSpotifyUserProfile,
+  fetchSpotifyTracks,
+  fetchSpotifyPlaylistTracksIds
+} from './services/spotify.ts'
+import {
+  getSupabasePlaylistByOwner,
+  createPlaylistInSupabase,
+  getSupabasePlaylistById,
+  deletePlaylistInSupabase,
+  addTracksToPlaylistInSupabase,
+  deleteTracksFromPlaylistInSupabase,
+  editPlaylistSupabaseById
+} from './services/supabase.ts'
+import {
+  validateCreatePlaylistPayload,
+  validateDeleteTracksPayload,
+  validateEditPlaylistPayload
+} from './validators.ts';
 
 
 export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
   const body = await c.req.json()
+  const { uris } = validateDeleteTracksPayload(body)
 
-  const res = await deleteItemsFromSpotifyPlaylist(
-    spotify_access_token,
+  await deleteTracksFromPlaylistInSupabase(
     id,
-    body
+    uris
   )
-  if (!res) {
-    const errorResponse = new Response('Failed to remove items from Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
-  if (res.error) {
-    console.error('Error deleting items from playlist:', res.error)
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
-
-  console.log('Deleted items from playlist:', res)
 
   c.status(200)
-  return c.json(res)
+  return c.json({ message: 'Tracks deleted successfully' })
 }
 
 export async function addItemsToPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
+  const user = c.get('user')
   const body = await c.req.json()
   const uris = body.uris
   const position = body.position || 0
 
-  const res = await postItemsToSpotifyPlaylist(spotify_access_token, id, { uris, position })
-  if (!res) {
-    console.error('Failed to add items to Spotify playlist')
-    const errorResponse = new Response('Failed to add items to Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
-  if (res.error) {
-    console.error('Error adding items to playlist:', res.error)
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
+  await addTracksToPlaylistInSupabase(id, uris, user.id)
 
-  console.log('Added items to playlist:', res)
   c.status(201)
-  return c.json(res)
+  return c.json({ message: 'Tracks added successfully' })
 }
 
 export async function fetchPlaylistItems(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const spotify_access_token = c.get('spotify_token')
+  const user = c.get('user')
 
-  const playlist_items = await fetchSpotifyPlaylist(spotify_access_token, id)
+  let playlist = await getSupabasePlaylistById(id)
 
-  if (!playlist_items) {
+  if (!playlist) {
     c.status(500)
     return c.text('Failed to fetch Spotify playlists')
   }
 
+  if (playlist.is_spotify_sync && playlist.spotify_id) {
+    const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, c.get('spotify_token'))
+    if (tracksIds) {
+      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, playlist.owner_id)
+      playlist = await getSupabasePlaylistById(playlist.id)
+    }
+  }
+
+  if (playlist.tracks && playlist.tracks.length !== 0) {
+    const spotify_token = c.get('spotify_token')
+    const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
+    const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
+
+
+    if (spotifyTracksData.error) {
+      c.status(spotifyTracksData.error.status || 500)
+      return c.json({ error: spotifyTracksData.error.message || 'Unknown error from Spotify API' })
+    }
+
+    playlist.tracks = playlist.tracks.map((track: any) => {
+      const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id || t.id === track.spotify_id);
+      return {
+        ...track,
+        details: spotifyTrack || null
+      };
+    });
+  }
+  playlist.can_edit = false
+  if (playlist.collaborators.find((collab: any) => collab.id === user.id)) {
+    playlist.can_edit = true
+  }
+
   c.status(200)
-  return c.json(playlist_items)
+  return c.json(playlist)
 }
+
 
 export async function createPlaylist(c: Context): Promise<any> {
-  const spotify_access_token = c.get('spotify_token')
-  const body = await c.req.json()
-  const user = await fetchSpotifyUserProfile(spotify_access_token)
-  if (!user) {
-    const errorResponse = new Response('Failed to fetch Spotify user profile', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
-  }
+  const user = c.get('user');
+  const body = await c.req.json();
 
-  const res = await createSpotifyPlaylist(spotify_access_token, user.id, body)
+  const validatedPayload = validateCreatePlaylistPayload(body);
+
+  const res = await createPlaylistInSupabase(user.id, validatedPayload);
   if (!res) {
-    const errorResponse = new Response('Failed to delete Spotify playlist', { status: 500 });
-    throw new HTTPException(500, { res: errorResponse });
+    throw new HTTPException(500, { message: 'Failed to create playlist in Supabase' });
   }
 
-  if (res.error) {
-    c.status(res.error.status || 500)
-    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-  }
-
-  c.status(201)
-  return c.json(res)
+  c.status(201);
+  return c.json(res);
 }
 
+export async function deletePlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const user = c.get('user')
+
+  await deletePlaylistInSupabase(id, user.id)
+
+  c.status(200)
+  return c.json({ message: 'Playlist deleted successfully' })
+}
+
+export async function updatePlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+
+  const validatedPayload = validateEditPlaylistPayload(body);
+
+  await editPlaylistSupabaseById(id, validatedPayload);
+  c.status(200)
+  return c.json({ message: 'Playlist updated successfully' })
+}

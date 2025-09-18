@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { getPlaylistById } from '@/services/playlist';
+import { getPlaylistById, deletePlaylistById } from '@/services/playlist';
 
 // -------------------------------------------------------------------
-// Hook with mock-datas (TODO : connect fetch backend when ready)
+// Hook for new playlist system
 // -------------------------------------------------------------------
 
 export function usePlaylist(id: string | null) {
-  const [playlist, setPlaylist] = useState<SpotifyPlaylistWithTracks | null>(null);
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canEdit, setCanEdit] = useState(false);
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
@@ -21,6 +22,7 @@ export function usePlaylist(id: string | null) {
       setError(null);
       const data = await getPlaylistById(id);
       setPlaylist(data);
+      setCanEdit(data.can_edit ?? false);
     } catch (err) {
       console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
@@ -45,11 +47,8 @@ export function usePlaylist(id: string | null) {
     setError(null);
 
     try {
-      // await deletePlaylistService(id);
-      // setPlaylist(null);
-      console.log(
-        'Delete playlist service not implemented. Remove this button ?'
-      );
+      await deletePlaylistById(id);
+      setPlaylist(null);
     } catch (e: any) {
       setError(`delete playlist error: ${e.message ?? e}`);
       console.error('Delete playlist error:', e);
@@ -58,5 +57,5 @@ export function usePlaylist(id: string | null) {
     }
   }, [id]);
 
-  return { playlist, loading, error, refetch, deletePlaylist };
+  return { playlist, loading, error, refetch, deletePlaylist, canEdit };
 }

@@ -38,6 +38,7 @@
     ]
   },
   "dependencies": {
+    "@legendapp/motion": "^2.4.0",
     "expo-router": "~5.1.6"
   }
 }

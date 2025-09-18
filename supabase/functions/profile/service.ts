@@ -12,7 +12,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   },
 });
 
-
 export async function getUserProfile(
   userId: string
 ): Promise<{ data: any; error: any }> {

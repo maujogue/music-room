@@ -1,7 +1,7 @@
 import { apiFetch } from '@/utils/apiFetch';
 
 export async function getCurrentUserPlaylists() {
-  const res = await apiFetch<SpotifyPlaylist[]>(
+  const res = await apiFetch<Playlist[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists`,
     {
       method: 'GET',
@@ -17,7 +17,7 @@ export async function getCurrentUserPlaylists() {
 
 export async function getPlaylistById(id: string) {
   console.log(`Fetching playlist with id: ${id}`);
-  const res = await apiFetch<SpotifyPlaylistWithTracks>(
+  const res = await apiFetch<Playlist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
     {
       method: 'GET',
@@ -60,7 +60,7 @@ export async function deleteItemFromPlaylist(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/tracks`,
     {
       method: 'DELETE',
-      body: { tracks: uris.map(uri => ({ uri })) },
+      body: { uris: uris.map(uri => uri) },
     }
   );
   if (!res.success) {
@@ -69,4 +69,54 @@ export async function deleteItemFromPlaylist(
   }
   console.log('Items deleted successfully from playlist');
   return res.success;
+}
+
+export async function deletePlaylistById(playlistId: string) {
+  const res = await apiFetch<void>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}`,
+    {
+      method: 'DELETE',
+    }
+  );
+  if (!res.success) {
+    console.error('Error deleting playlist:', res.error);
+    throw res.error;
+  }
+  console.log('Playlist deleted successfully');
+  return res.success;
+}
+
+export async function editPlaylistById(
+  playlistId: string,
+  payload: PlaylistPayload
+) {
+  console.log(`Updating playlist ${playlistId} with payload:`, payload);
+  const res = await apiFetch<SpotifyPlaylist>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}`,
+    {
+      method: 'PUT',
+      body: { ...payload },
+    }
+  );
+  if (!res.success) {
+    console.error('Error updating playlist:', res.error);
+    throw res.error;
+  }
+  console.log('Playlist updated successfully:', res.data);
+  return res.data;
+}
+
+export async function syncSpotifyPlaylists() {
+  const res = await apiFetch<{ message: string; insertedCount: number }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/playlists/sync`,
+    {
+      method: 'POST',
+    }
+  );
+  if (!res.success) {
+    console.error('Error syncing Spotify playlists:', res.error);
+    throw res.error;
+  }
+  console.log('Spotify playlists synchronized successfully:', res.data);
+  return res.data;
 }
