@@ -17,7 +17,8 @@ import {
   deletePlaylistInSupabase,
   addTracksToPlaylistInSupabase,
   deleteTracksFromPlaylistInSupabase,
-  editPlaylistSupabaseById
+  editPlaylistSupabaseById,
+  addMemberToPlaylistInSupabase
 } from './services/supabase.ts'
 import {
   validateCreatePlaylistPayload,
@@ -136,3 +137,19 @@ export async function updatePlaylist(c: Context): Promise<any> {
   c.status(200)
   return c.json({ message: 'Playlist updated successfully' })
 }
+
+export async function addMemberToPlaylist(c: Context): Promise<any> {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  const user = c.get('user')
+  const { user_id } = body
+
+  if (!user_id || typeof user_id !== 'string') {
+    throw new HTTPException(400, { message: 'user_id is required and must be a string' });
+  }
+  await addMemberToPlaylistInSupabase(id, user_id, user.id);
+  c.status(200)
+  return c.json({ message: 'Member added successfully' })
+}
+
+

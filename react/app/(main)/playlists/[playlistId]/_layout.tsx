@@ -12,6 +12,13 @@ export default function PlaylistDetailLayout() {
         }}
       />
       <Stack.Screen
+        name='invite'
+        options={{
+          title: 'Invite',
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
         name='tracks/[trackId]'
         options={{
           title: 'Track',

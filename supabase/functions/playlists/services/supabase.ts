@@ -170,3 +170,15 @@ export async function editPlaylistSupabaseById(
       throw new HTTPException(pgError.status, { message: pgError.message });
   }
 }
+
+export async function addMemberToPlaylistInSupabase(playlist_id: string, user_id: string): Promise<any> {
+  const { error } = await supabase.from('playlist_members')
+    .insert([{ playlist_id, user_id }])
+
+  if (error) {
+    console.error('Supabase error (add member):', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+

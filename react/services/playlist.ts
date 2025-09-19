@@ -120,3 +120,23 @@ export async function syncSpotifyPlaylists() {
   console.log('Spotify playlists synchronized successfully:', res.data);
   return res.data;
 }
+
+export async function inviteMemberToPlaylist(
+  playlistId: string,
+  userId: string
+) {
+  console.log(`Inviting user ${userId} to playlist ${playlistId}`);
+  const res = await apiFetch<{ message: string }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/invite`,
+    {
+      method: 'POST',
+      body: { user_id: userId },
+    }
+  );
+  if (!res.success) {
+    console.error('Error inviting member to playlist:', res.error);
+    throw res.error;
+  }
+  console.log('Member invited successfully:', res.data);
+  return res.data;
+}

@@ -14,22 +14,22 @@ import { followUser, unfollowUser } from '@/services/profile';
 
 interface UserListItemProps {
   user: UserInfo;
-  showFollowButtons?: boolean;
+  showActionButtons?: boolean;
   onUserPress?: (user: UserWithFollowStatus) => void;
-  handleFollowAction?: (user: UserWithFollowStatus) => void;
+  handleActionButton?: (user: UserWithFollowStatus) => void;
 }
 
 const UserListItem: React.FC<UserListItemProps> = ({
   user,
-  showFollowButtons = false,
+  showActionButtons = false,
   onUserPress,
-  handleFollowAction,
+  handleActionButton,
 }) => {
   const router = useRouter();
   const [isFollowing, setIsFollowing] = useState(user.is_following);
   const [isLoading, setIsLoading] = useState(false);
   const isCurrentUser = false;
-  const canFollow = showFollowButtons && !isCurrentUser;
+  const canFollow = showActionButtons && !isCurrentUser;
 
   if (!onUserPress) {
     onUserPress = (userItem: UserWithFollowStatus) => {
@@ -37,8 +37,8 @@ const UserListItem: React.FC<UserListItemProps> = ({
     };
   }
 
-  if (!handleFollowAction) {
-    handleFollowAction = async (userItem: UserWithFollowStatus) => {
+  if (!handleActionButton) {
+    handleActionButton = async (userItem: UserWithFollowStatus) => {
       setIsLoading(true);
       try {
         if (isFollowing) {
@@ -91,7 +91,7 @@ const UserListItem: React.FC<UserListItemProps> = ({
           disabled={isLoading}
           onPress={e => {
             e.stopPropagation();
-            handleFollowAction(user);
+            handleActionButton(user);
           }}
           className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
         >
