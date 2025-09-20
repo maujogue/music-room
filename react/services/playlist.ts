@@ -121,16 +121,17 @@ export async function syncSpotifyPlaylists() {
   return res.data;
 }
 
-export async function inviteMemberToPlaylist(
+export async function addUserToPlaylist(
   playlistId: string,
-  userId: string
+  userId: string,
+  role: 'member' | 'collaborator'
 ) {
-  console.log(`Inviting user ${userId} to playlist ${playlistId}`);
+  console.log(`Inviting user ${userId} to playlist ${playlistId} with role ${role}`);
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/invite`,
     {
       method: 'POST',
-      body: { user_id: userId },
+      body: { user_id: userId, role },
     }
   );
   if (!res.success) {

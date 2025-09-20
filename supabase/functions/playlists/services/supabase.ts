@@ -171,14 +171,35 @@ export async function editPlaylistSupabaseById(
   }
 }
 
-export async function addMemberToPlaylistInSupabase(playlist_id: string, user_id: string): Promise<any> {
-  const { error } = await supabase.from('playlist_members')
-    .insert([{ playlist_id, user_id }])
+export async function addUserToPlaylistInSupabase(
+  playlist_id: string,
+  user_id: string,
+  role: string
+): Promise<any> {
+  console.log('Adding user to playlist in Supabase:', playlist_id, user_id, role);
+
+  let result;
+
+  if (role === 'member') {
+    result = await supabase.from('playlist_members')
+      .upsert([{ playlist_id, user_id }])
+      .select();
+  } else if (role === 'collaborator') {
+    result = await supabase.from('playlist_collaborators')
+      .upsert([{ playlist_id, user_id, role }])
+      .select();
+  } else {
+    throw new HTTPException(400, { message: 'Invalid role. Must be "member" or "collaborator"' });
+  }
+
+  const { data, error } = result;
 
   if (error) {
-    console.error('Supabase error (add member):', error);
+    console.error('Supabase error (add user to playlist):', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
+
+  return data;
 }
 

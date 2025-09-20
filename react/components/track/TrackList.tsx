@@ -11,10 +11,7 @@ import { deleteItemFromPlaylist } from '@/services/playlist';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
-import { HStack } from '@/components/ui/hstack';
-import { Card } from '@/components/ui/card';
-import { Pressable } from 'react-native';
-import { Box } from '@/components/ui/box';
+import AddTrackItem from '@/components/track/AddTrackItem';
 
 interface Props {
   playlistId: string;
@@ -34,12 +31,6 @@ export default function TrackList({
   canEdit,
 }: Props) {
   const router = useRouter();
-  const handleAddTrackPress = () => {
-    router.push({
-      pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId, playlistTitle },
-    });
-  };
 
   if (!playlistTracks) {
     console.log('No playlistTracks provided');
@@ -50,6 +41,13 @@ export default function TrackList({
     playlistId,
     playlistTracks
   );
+
+  const handleAddTrackPress = () => {
+    router.push({
+      pathname: '/(main)/playlists/[playlistId]/tracks/add',
+      params: { playlistId, playlistTitle },
+    });
+  };
 
   const handleSwipeableOpen = async (trackId: string) => {
     if (isSpotifySync) return; // disable editing when synced from Spotify
@@ -94,26 +92,10 @@ export default function TrackList({
     <View style={styles.container}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {!isSpotifySync && canEdit && (
-          <Pressable onPress={handleAddTrackPress} className='px-2'>
-            <Card
-              size="sm"
-              className="rounded-xl h-[60px] mb-2"
-              variant="filled"
-              style={{ backgroundColor: '#111827' }} // dark background
-            >
-              <HStack className="py-1 flex-1 justify-start items-center gap-4">
-                <Box
-                  className="rounded-md h-[60px] w-[60px] justify-center items-center"
-                  style={{ backgroundColor: '#0f172a' }} // slightly different dark tone
-                >
-                  <Icon as={AddIcon} size="2xl" color="white" />
-                </Box>
-                <Text size="sm" className="text-white font-medium">
-                  Add Track
-                </Text>
-              </HStack>
-            </Card>
-          </Pressable>
+          <AddTrackItem
+            playlistId={playlistId}
+            playlistTitle={playlistTitle}
+          />
         )}
 
         {tracks.map((item, index) => (

@@ -4,6 +4,7 @@ import {
   AvatarGroup as UIAvatarGroup,
 } from '@/components/ui/avatar';
 import { Pressable } from '@/components/ui/pressable';
+import { Text } from '@/components/ui/text';
 import { PlaylistMember } from '@/types/playlist';
 
 type Props = {
@@ -36,9 +37,8 @@ export function AvatarGroup({ users, onPress }: Props) {
     <UIAvatarGroup>
         {avatars.slice(0, 3).map((avatar, index) => {
           return (
-            <Pressable onPress={onPress}>
+            <Pressable key={index} onPress={onPress}>
               <Avatar
-                key={index}
                 size="md"
                 className={'border-2 border-outline-0 ' + avatar.color}
               >
@@ -50,7 +50,7 @@ export function AvatarGroup({ users, onPress }: Props) {
           );
         })}
         {remainingCount > 0 && (
-          <Pressable onPress={onPress}>
+          <Pressable key="remaining" onPress={onPress}>
             <Avatar size="md">
               <AvatarFallbackText>{'+ ' + remainingCount}</AvatarFallbackText>
             </Avatar>

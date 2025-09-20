@@ -82,3 +82,13 @@ export function validateDeleteTracksPayload(body: any): { uris: string[] } {
 
   return { uris: body.uris };
 }
+
+export function validateAddUserPayload(body: any): { user_id: string, role: string } {
+  if (!body.user_id || typeof body.user_id !== 'string') {
+    throw new HTTPException(400, { message: 'user_id is required and must be a string' });
+  }
+  if (!body.role || (body.role !== 'member' && body.role !== 'collaborator')) {
+    throw new HTTPException(400, { message: 'role must be either "member" or "collaborator"' });
+  }
+  return { user_id: body.user_id, role: body.role};
+}
