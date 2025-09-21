@@ -4,7 +4,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 
 interface Props {
-  topTracks: SpotifyTrackWithKey[];
+  topTracks: PlaylistTrack[];
 }
 
 export default function TopVotesTracks({ topTracks }: Props) {

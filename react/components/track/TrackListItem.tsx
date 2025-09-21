@@ -12,18 +12,18 @@ import { HStack } from '@/components/ui/hstack';
 import NumBadge from '@/components/generics/NumBadge';
 
 type TrackListItemProps = {
-  track?: SpotifyTrack;
+  track?: PlaylistTrack;
   voteCount?: number;
   onSwipeableOpen?: (dir: SwipeDirection) => void;
   renderLeftAction?: (
     prog: SharedValue<number>,
     drag: SharedValue<number>,
-    item: SpotifyTrack
+    item: PlaylistTrack
   ) => React.JSX.Element;
   renderRightAction?: (
     prog: SharedValue<number>,
     drag: SharedValue<number>,
-    item: SpotifyTrack
+    item: PlaylistTrack
   ) => React.JSX.Element;
 };
 
@@ -39,14 +39,14 @@ export default function TrackListItem({
   const getImage = () => {
     const hasValidImage =
       track &&
-      track.album &&
-      Array.isArray(track.album.images) &&
-      track.album.images.length > 0 &&
-      track.album.images[0]?.url;
+      track.details.album &&
+      Array.isArray(track.details.album.images) &&
+      track.details.album.images.length > 0 &&
+      track.details.album.images[0]?.url;
 
     return {
       uri: hasValidImage
-        ? track.album.images[0]!.url
+        ? track.details.album.images[0]!.url
         : 'https://picsum.photos/144',
     };
   };
@@ -83,11 +83,11 @@ export default function TrackListItem({
         <HStack className='justify-between items-center flex-1'>
           <VStack className='pt-1'>
             <Heading size='md' className='text-typography-800'>
-              {track.name}
+              {track.details.name}
             </Heading>
-            {track.artists && (
+            {track.details.artists && (
               <Text size='sm' className='text-typography-400'>
-                {track.artists[0].name}
+                {track.details.artists[0].name}
               </Text>
             )}
           </VStack>

@@ -18,6 +18,7 @@ export function useEventVotes(eventId: string) {
       setLoading(true);
       setError(null);
 
+      // const data = [] as EventVote[];
       const data = MOCK_VOTES;
       // [!] TODO : Remove Mock data + uncomment above to link backend
       // const data = await getVotesEventById(eventId);
