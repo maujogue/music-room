@@ -472,3 +472,205 @@ FROM playlists p
 WHERE p.owner_id = p_user_id
 ORDER BY p.created_at DESC;
 $$;
+
+-- Function to get all playlists where user is owner or member
+CREATE OR REPLACE FUNCTION get_user_all_playlists_with_owner
+(p_user_id UUID)
+RETURNS TABLE
+(
+    id UUID,
+    name VARCHAR(255),
+    description TEXT,
+    owner_id UUID,
+    is_private BOOLEAN,
+    is_collaborative BOOLEAN,
+    cover_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    owner_username VARCHAR(255),
+    owner_email VARCHAR(255),
+    owner_avatar_url TEXT,
+    owner_bio TEXT,
+    user_role VARCHAR(50) -- 'owner', 'member', 'collaborator'
+)
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+AS $$
+-- Playlists owned by user
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    'owner'::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+WHERE p.owner_id = p_user_id
+
+UNION
+
+-- Playlists where user is a member
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    'member'::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+    JOIN playlist_members pm ON p.id = pm.playlist_id
+WHERE pm.user_id = p_user_id
+
+UNION
+
+-- Playlists where user is a collaborator
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    pc.role::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+    JOIN playlist_collaborators pc ON p.id = pc.playlist_id
+WHERE pc.user_id = p_user_id
+    AND pc.role != 'owner' -- Avoid duplicate with owned playlists
+
+ORDER BY created_at DESC;
+$$;
+
+-- Function to get all playlists where user is owner or member (including playlist_members)
+CREATE OR REPLACE FUNCTION get_user_all_playlists_complete
+(p_user_id UUID)
+RETURNS TABLE
+(
+    id UUID,
+    name VARCHAR(255),
+    description TEXT,
+    owner_id UUID,
+    is_private BOOLEAN,
+    is_collaborative BOOLEAN,
+    cover_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    is_spotify_sync BOOLEAN,
+    spotify_id TEXT,
+    owner_username VARCHAR(255),
+    owner_email VARCHAR(255),
+    owner_avatar_url TEXT,
+    owner_bio TEXT,
+    user_role VARCHAR(50) -- 'owner', 'member', 'collaborator'
+)
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+AS $$
+-- Playlists owned by user
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    p.is_spotify_sync,
+    p.spotify_id,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    'owner'::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+WHERE p.owner_id = p_user_id
+
+UNION
+
+-- Playlists where user is a member
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    p.is_spotify_sync,
+    p.spotify_id,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    'member'::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+    JOIN playlist_members pm ON p.id = pm.playlist_id
+WHERE pm.user_id = p_user_id
+
+UNION
+
+-- Playlists where user is a collaborator (excluding owner role to avoid duplicates)
+SELECT
+    p.id,
+    p.name,
+    p.description,
+    p.owner_id,
+    p.is_private,
+    p.is_collaborative,
+    p.cover_url,
+    p.created_at,
+    p.updated_at,
+    p.is_spotify_sync,
+    p.spotify_id,
+    pr.username as owner_username,
+    au.email as owner_email,
+    pr.avatar_url as owner_avatar_url,
+    pr.bio as owner_bio,
+    pc.role::VARCHAR(50) as user_role
+FROM playlists p
+    JOIN profiles pr ON p.owner_id = pr.id
+    JOIN auth.users au ON p.owner_id = au.id
+    JOIN playlist_collaborators pc ON p.id = pc.playlist_id
+WHERE pc.user_id = p_user_id
+    AND pc.role != 'owner' -- Avoid duplicate with owned playlists
+
+ORDER BY created_at DESC;
+$$;

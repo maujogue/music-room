@@ -19,8 +19,22 @@ import {
   DrawerBody,
 } from '@/components/ui/drawer';
 import { Divider } from '@/components/ui/divider';
-import { ScrollView } from 'react-native';
-import UserListItem from '@/components/profile/UserListItem';
+import { ScrollView, View } from 'react-native';
+import { Key } from 'lucide-react-native';
+import { addUserToPlaylist, removeUserFromPlaylist } from '@/services/playlist';
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  runOnJS,
+  withSpring,
+} from 'react-native-reanimated';
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
+import { useState } from 'react';
+
 
 type Props = {
     playlist: Playlist;
@@ -35,6 +49,14 @@ export default function PlaylistMembersDrawer({
     onClose,
     onInvitePress
 }: Props) {
+
+    const handleAddToCollaboratorsPress = async (userId: string) => {
+        try {
+            await addUserToPlaylist(playlist.id, userId, 'collaborator');
+        } catch (error) {
+            console.error('Failed to add user to collaborators:', error);
+        }
+    }
     const filteredCollaborators = playlist.collaborators?.filter(collab =>
         collab.id !== playlist.owner.id
     ) || [];
@@ -122,11 +144,25 @@ export default function PlaylistMembersDrawer({
                                         Members ({filteredMembers.length})
                                     </Text>
                                     {filteredMembers.map((member, index) => (
-                                        <UserListItem
-                                            key={index}
-                                            user={member}
-                                            canFollow={false}
-                                        />
+                                        <HStack key={index} className="items-center gap-3 p-2 bg-blue-50 rounded-lg justify-between">
+                                            <HStack className="items-center gap-3">
+                                            <Avatar size="md">
+                                                <AvatarFallbackText>
+                                                    {member.username.charAt(0).toUpperCase()}
+                                                </AvatarFallbackText>
+                                                {member.avatar_url && (
+                                                    <AvatarImage source={{ uri: member.avatar_url }} />
+                                                )}
+                                            </Avatar>
+                                            <VStack>
+                                                <Text size="md" className="font-medium">{member.username}</Text>
+                                                <Text size="sm" className="text-blue-600">Member</Text>
+                                            </VStack>
+                                            </HStack>
+                                            <Button size="sm" className="rounded-full" onPress={() => handleAddToCollaboratorsPress(member.id)}>
+                                                <ButtonIcon as={Key} />
+                                            </Button>
+                                        </HStack>
                                     ))}
                                 </VStack>
                             </>

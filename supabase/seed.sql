@@ -1,13 +1,11 @@
 -- Activer pgcrypto pour gen_random_uuid()
-CREATE EXTENSION
-IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Désactiver temporairement le RLS sur profiles
 ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
 
 -- Création de 50 users dans auth.users
-INSERT INTO auth.users
-  (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
 VALUES
   (gen_random_uuid(), 'alice@example.com', 'fakehash', now(), '{"username":"alice"}'),
   (gen_random_uuid(), 'bob@example.com', 'fakehash', now(), '{"username":"bob"}'),
@@ -90,33 +88,6 @@ FROM (
     ('Latin Rhythms', 'Salsa, reggaeton, and Latin pop hits', (SELECT id FROM auth.users WHERE email = 'ivan@example.com' LIMIT 1), false, true, 'https://picsum.photos/300/300?random=9'),
     ('Chill & Relax', 'Peaceful music for meditation and relaxation', (SELECT id FROM auth.users WHERE email = 'judy@example.com' LIMIT 1), false, false, 'https://picsum.photos/300/300?random=10')
 ) AS playlist_data(name, description, owner_id, is_private, is_collaborative, cover_url);
-
--- Création de 10 événements avec des utilisateurs comme owners
-INSERT INTO public.events
-  (name, description, playlist_id, owner_id, beginning_at, ending_at, image_url)
-SELECT
-  event_data.name,
-  event_data.description,
-  pl.id as playlist_id,
-  p.id as owner_id,
-  event_data.beginning_at::timestamp with time zone,
-  event_data.ending_at::timestamp with time zone,
-  event_data.image_url
-FROM (
-    VALUES
-    ('Summer Music Festival', 'A vibrant outdoor music festival featuring various genres', 'Summer Vibes 2024', (SELECT id FROM public.profiles WHERE username = 'alice' LIMIT 1), '2024-07-15 14:00:00+00', '2024-07-15 23:00:00+00', 'https://example.com/summer-fest.jpg'),
-    ('Jazz Night at the Blue Note', 'Intimate jazz session with local musicians', 'Jazz Classics', (SELECT id FROM public.profiles WHERE username = 'bob' LIMIT 1), '2024-06-20 19:00:00+00', '2024-06-20 23:30:00+00', 'https://example.com/jazz-night.jpg'),
-    ('Electronic Dance Party', 'High-energy electronic music event', 'Electronic Dreams', (SELECT id FROM public.profiles WHERE username = 'carol' LIMIT 1), '2024-08-10 21:00:00+00', '2024-08-11 03:00:00+00', 'https://example.com/edm-party.jpg'),
-    ('Acoustic Coffee House', 'Cozy acoustic performances with coffee and pastries', 'Acoustic Sessions', (SELECT id FROM public.profiles WHERE username = 'dave' LIMIT 1), '2024-05-25 16:00:00+00', '2024-05-25 20:00:00+00', 'https://example.com/acoustic-cafe.jpg'),
-    ('Rock Revival Concert', 'Classic and modern rock hits all night long', 'Rock Anthems', (SELECT id FROM public.profiles WHERE username = 'eve' LIMIT 1), '2024-09-05 18:00:00+00', '2024-09-05 22:30:00+00', 'https://example.com/rock-revival.jpg'),
-    ('Hip-Hop Block Party', 'Street culture celebration with hip-hop beats', 'Hip-Hop Heat', (SELECT id FROM public.profiles WHERE username = 'frank' LIMIT 1), '2024-07-30 15:00:00+00', '2024-07-30 21:00:00+00', 'https://example.com/hiphop-block.jpg'),
-    ('Classical Symphony Evening', 'Beautiful classical music performances', 'My Secret Playlist', (SELECT id FROM public.profiles WHERE username = 'grace' LIMIT 1), '2024-06-12 19:30:00+00', '2024-06-12 22:00:00+00', 'https://example.com/classical-symphony.jpg'),
-    ('Indie Music Showcase', 'Discover new independent artists and bands', 'Indie Discoveries', (SELECT id FROM public.profiles WHERE username = 'heidi' LIMIT 1), '2024-08-22 20:00:00+00', '2024-08-23 01:00:00+00', 'https://example.com/indie-showcase.jpg'),
-    ('Latin Fiesta', 'Salsa, reggaeton, and Latin pop celebration', 'Latin Rhythms', (SELECT id FROM public.profiles WHERE username = 'ivan' LIMIT 1), '2024-09-15 17:00:00+00', '2024-09-15 23:00:00+00', 'https://example.com/latin-fiesta.jpg'),
-    ('Chill Lounge Session', 'Relaxing ambient and lounge music experience', 'Chill & Relax', (SELECT id FROM public.profiles WHERE username = 'judy' LIMIT 1), '2024-10-01 18:30:00+00', '2024-10-01 22:00:00+00', 'https://example.com/chill-lounge.jpg')
-) AS event_data(name, description, playlist_name, owner_id, beginning_at, ending_at, image_url)
-JOIN public.profiles p ON p.id = event_data.owner_id
-JOIN public.playlists pl ON pl.name = event_data.playlist_name;
 
 -- Réactiver le RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
