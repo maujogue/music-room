@@ -11,6 +11,7 @@ IF NOT EXISTS playlists
     is_private BOOLEAN
 DEFAULT FALSE,
     is_collaborative BOOLEAN DEFAULT TRUE,
+    can_invite BOOLEAN DEFAULT TRUE,
     cover_url TEXT,
     created_at TIMESTAMP
 WITH TIME ZONE DEFAULT NOW
@@ -356,6 +357,7 @@ BEGIN
         'description', p.description,
         'is_private', p.is_private,
         'is_collaborative', p.is_collaborative,
+        'can_invite', p.can_invite,
         'cover_url', p.cover_url,
         'created_at', p.created_at,
         'updated_at', p.updated_at,
@@ -436,6 +438,7 @@ RETURNS TABLE
     owner_id UUID,
     is_private BOOLEAN,
     is_collaborative BOOLEAN,
+    can_invite BOOLEAN,
     cover_url TEXT,
     created_at TIMESTAMP
 WITH TIME ZONE,
@@ -459,6 +462,7 @@ SELECT
     p.owner_id,
     p.is_private,
     p.is_collaborative,
+    p.can_invite,
     p.cover_url,
     p.created_at,
     p.updated_at,
@@ -473,7 +477,7 @@ WHERE p.owner_id = p_user_id
 ORDER BY p.created_at DESC;
 $$;
 
--- Function to get all playlists where user is owner or member
+-- Function to get all playlists where user is owner or member (avoiding duplicates)
 CREATE OR REPLACE FUNCTION get_user_all_playlists_with_owner
 (p_user_id UUID)
 RETURNS TABLE
@@ -484,6 +488,7 @@ RETURNS TABLE
     owner_id UUID,
     is_private BOOLEAN,
     is_collaborative BOOLEAN,
+    can_invite BOOLEAN,
     cover_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
@@ -497,14 +502,14 @@ LANGUAGE SQL
 STABLE
 SECURITY DEFINER
 AS $$
--- Playlists owned by user
-SELECT
+SELECT DISTINCT ON (p.id)
     p.id,
     p.name,
     p.description,
     p.owner_id,
     p.is_private,
     p.is_collaborative,
+    p.can_invite,
     p.cover_url,
     p.created_at,
     p.updated_at,
@@ -512,62 +517,30 @@ SELECT
     au.email as owner_email,
     pr.avatar_url as owner_avatar_url,
     pr.bio as owner_bio,
-    'owner'::VARCHAR(50) as user_role
+    CASE
+        WHEN p.owner_id = p_user_id THEN 'owner'
+        WHEN pc.user_id = p_user_id AND pc.role != 'owner' THEN pc.role
+        WHEN pm.user_id = p_user_id THEN 'member'
+        ELSE 'unknown'
+    END::VARCHAR(50) as user_role
 FROM playlists p
     JOIN profiles pr ON p.owner_id = pr.id
     JOIN auth.users au ON p.owner_id = au.id
-WHERE p.owner_id = p_user_id
-
-UNION
-
--- Playlists where user is a member
-SELECT
-    p.id,
-    p.name,
-    p.description,
-    p.owner_id,
-    p.is_private,
-    p.is_collaborative,
-    p.cover_url,
-    p.created_at,
-    p.updated_at,
-    pr.username as owner_username,
-    au.email as owner_email,
-    pr.avatar_url as owner_avatar_url,
-    pr.bio as owner_bio,
-    'member'::VARCHAR(50) as user_role
-FROM playlists p
-    JOIN profiles pr ON p.owner_id = pr.id
-    JOIN auth.users au ON p.owner_id = au.id
-    JOIN playlist_members pm ON p.id = pm.playlist_id
-WHERE pm.user_id = p_user_id
-
-UNION
-
--- Playlists where user is a collaborator
-SELECT
-    p.id,
-    p.name,
-    p.description,
-    p.owner_id,
-    p.is_private,
-    p.is_collaborative,
-    p.cover_url,
-    p.created_at,
-    p.updated_at,
-    pr.username as owner_username,
-    au.email as owner_email,
-    pr.avatar_url as owner_avatar_url,
-    pr.bio as owner_bio,
-    pc.role::VARCHAR(50) as user_role
-FROM playlists p
-    JOIN profiles pr ON p.owner_id = pr.id
-    JOIN auth.users au ON p.owner_id = au.id
-    JOIN playlist_collaborators pc ON p.id = pc.playlist_id
-WHERE pc.user_id = p_user_id
-    AND pc.role != 'owner' -- Avoid duplicate with owned playlists
-
-ORDER BY created_at DESC;
+    LEFT JOIN playlist_collaborators pc ON p.id = pc.playlist_id AND pc.user_id = p_user_id
+    LEFT JOIN playlist_members pm ON p.id = pm.playlist_id AND pm.user_id = p_user_id
+WHERE (
+    p.owner_id = p_user_id
+    OR pc.user_id = p_user_id
+    OR pm.user_id = p_user_id
+)
+ORDER BY p.id,
+    CASE
+        WHEN p.owner_id = p_user_id THEN 1
+        WHEN pc.user_id = p_user_id AND pc.role != 'owner' THEN 2
+        WHEN pm.user_id = p_user_id THEN 3
+        ELSE 4
+    END,
+    p.created_at DESC;
 $$;
 
 -- Function to get all playlists where user is owner or member (including playlist_members)

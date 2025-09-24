@@ -92,3 +92,13 @@ export function validateAddUserPayload(body: any): { user_id: string, role: stri
   }
   return { user_id: body.user_id, role: body.role};
 }
+
+export function validateRemoveUserPayload(body: any): { user_id: string, role?: string } {
+  if (!body.user_id || typeof body.user_id !== 'string') {
+    throw new HTTPException(400, { message: 'user_id is required and must be a string' });
+  }
+  if (body.role && body.role !== 'member' && body.role !== 'collaborator') {
+    throw new HTTPException(400, { message: 'role must be either "member" or "collaborator" if provided' });
+  }
+  return { user_id: body.user_id, role: body.role };
+}

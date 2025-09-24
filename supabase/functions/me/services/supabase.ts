@@ -8,9 +8,9 @@ const supabase = createClient(
 );
 
 export async function getCurrentUserPlaylistSupabase(userId: string): Promise<any[]> {
-    const { data, error } = await supabase.from('playlists')
-        .select('*')
-        .eq('owner_id', userId);
+    const { data, error } = await supabase.rpc('get_user_all_playlists_with_owner', {
+        p_user_id: userId
+    });
 
     if (error) {
         console.error('Supabase error:', error);

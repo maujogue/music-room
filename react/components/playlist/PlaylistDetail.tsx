@@ -23,7 +23,6 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
-  console.log(`PlaylistDetailScreen(${playlistId}) render`);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,8 +54,6 @@ export default function PlaylistDetail() {
   };
 
   const onCallEdit = () => {
-    console.log(`Edit call for playlist ${playlistId}`);
-    // Navigation simple vers la page edit avec seulement l'ID
     router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
@@ -79,7 +76,10 @@ export default function PlaylistDetail() {
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <PlaylistHeader playlist={playlist} />
+        <PlaylistHeader
+          playlist={playlist}
+          onRefresh={refetch}
+        />
         <TrackList
           playlistId={playlistId}
           playlistTracks={playlist.tracks}

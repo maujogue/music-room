@@ -203,3 +203,35 @@ export async function addUserToPlaylistInSupabase(
   return data;
 }
 
+export async function removeUserFromPlaylistInSupabase(
+  playlist_id: string,
+  user_id: string,
+  role: string | undefined
+): Promise<any> {
+
+  if (role === 'member' || !role) {
+    const { error: memberError } = await supabase.from('playlist_members')
+    .delete()
+    .eq('playlist_id', playlist_id)
+    .eq('user_id', user_id);
+
+    if (memberError) {
+      console.error('Supabase error (remove from playlist_members):', memberError);
+      const pgError = formatDbError(memberError);
+      throw new HTTPException(pgError.status, { message: pgError.message });
+    }
+  }
+
+  // Remove from playlist_collaborators
+  const { error: collaboratorError } = await supabase.from('playlist_collaborators')
+    .delete()
+    .eq('playlist_id', playlist_id)
+    .eq('user_id', user_id);
+
+  if (collaboratorError) {
+    console.error('Supabase error (remove from playlist_collaborators):', collaboratorError);
+    const pgError = formatDbError(collaboratorError);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+

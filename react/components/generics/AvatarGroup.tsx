@@ -15,16 +15,11 @@ type Props = {
 export function AvatarGroup({ users, onPress }: Props) {
   console.log('AvatarGroup users:', users);
 
-  // Vérification de sécurité
-  if (!users || !Array.isArray(users) || users.length === 0) {
-    return (
-      <Pressable onPress={onPress} className="p-2">
-        <Text className="text-gray-500">No members yet</Text>
-      </Pressable>
-    );
-  }
-
-  const avatars = users.map(user => ({
+  // Filtrer les doublons et exclure les utilisateurs avec role "owner"
+  const uniqueUsers = users.filter((user, index, self) =>
+    index === self.findIndex(u => u.id === user.id) &&
+    user.role !== 'owner'
+  );  const avatars = uniqueUsers.map(user => ({
     src: user.avatar_url,
     alt: user.username,
     color: 'bg-gray-600',

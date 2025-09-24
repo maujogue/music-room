@@ -8,9 +8,12 @@ import {
 import { Text } from '@/components/ui/text';
 import { Playlist } from '@/types/playlist';
 import {
-  UserRoundPlus
+  UserRoundPlus,
+  MoreVertical,
+  Key,
+  UserMinus
 } from 'lucide-react-native';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   Drawer,
   DrawerBackdrop,
@@ -19,44 +22,74 @@ import {
   DrawerBody,
 } from '@/components/ui/drawer';
 import { Divider } from '@/components/ui/divider';
-import { ScrollView, View } from 'react-native';
-import { Key } from 'lucide-react-native';
-import { addUserToPlaylist, removeUserFromPlaylist } from '@/services/playlist';
-import Animated, {
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  runOnJS,
-  withSpring,
-} from 'react-native-reanimated';
-import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler';
+import { ScrollView, Modal, View } from 'react-native';
+import { addUserToPlaylist } from '@/services/playlist';
+import { removeUserFromPlaylist } from '@/services/playlist';
 import { useState } from 'react';
-
+import { Heading } from '@/components/ui/heading';
 
 type Props = {
     playlist: Playlist;
     isOpen: boolean;
     onClose: () => void;
     onInvitePress: () => void;
+    onUpdated?: () => void;
 };
 
 export default function PlaylistMembersDrawer({
     playlist,
     isOpen,
     onClose,
-    onInvitePress
+    onInvitePress,
+    onUpdated,
 }: Props) {
+    const [selectedUser, setSelectedUser] = useState<{ id: string, username: string, role: 'member' | 'collaborator' } | null>(null);
+    const [showActionDialog, setShowActionDialog] = useState(false);
 
     const handleAddToCollaboratorsPress = async (userId: string) => {
         try {
             await addUserToPlaylist(playlist.id, userId, 'collaborator');
+            onUpdated?.();
         } catch (error) {
             console.error('Failed to add user to collaborators:', error);
         }
     }
+
+    const handleUserActionPress = (user: { id: string, username: string }, role: 'member' | 'collaborator') => {
+        setSelectedUser({ ...user, role });
+        setShowActionDialog(true);
+    }
+
+    const handleRemoveFromPlaylist = async () => {
+        if (!selectedUser) return;
+        try {
+            await removeUserFromPlaylist(playlist.id, selectedUser.id);
+            onUpdated?.();
+            setShowActionDialog(false);
+            setSelectedUser(null);
+        } catch (error) {
+            console.error('Failed to remove user from playlist:', error);
+        }
+    }
+
+    const handleDemoteToMember = async () => {
+        if (!selectedUser) return;
+        try {
+            await removeUserFromPlaylist(playlist.id, selectedUser.id);
+            await addUserToPlaylist(playlist.id, selectedUser.id, 'member');
+            onUpdated?.();
+            setShowActionDialog(false);
+            setSelectedUser(null);
+        } catch (error) {
+            console.error('Failed to demote user to member:', error);
+        }
+    }
+
+    const handleCloseActionDialog = () => {
+        setShowActionDialog(false);
+        setSelectedUser(null);
+    }
+
     const filteredCollaborators = playlist.collaborators?.filter(collab =>
         collab.id !== playlist.owner.id
     ) || [];
@@ -66,26 +99,31 @@ export default function PlaylistMembersDrawer({
         !collaboratorIds.includes(member.id) && member.id !== playlist.owner.id
     ) || [];
 
+    console.log('Playlist.user:', playlist.user);
+
     return (
-        <Drawer isOpen={isOpen} onClose={onClose}>
-            <DrawerBackdrop />
-            <DrawerContent className="w-full max-h-[70vh]">
-                <ScrollView className="flex-1">
-                    <DrawerHeader>
-                        <HStack className="items-center">
-                            <Text size="lg" className="font-semibold flex-1 text-left">
-                                Playlist Members
-                            </Text>
-                            <Button
-                                size="lg"
-                                className="rounded-full p-3.5 w-10"
-                                variant="outline"
-                                onPress={onInvitePress}
-                            >
-                                <ButtonIcon as={UserRoundPlus} size="sm" />
-                            </Button>
-                        </HStack>
-                    </DrawerHeader>
+        <>
+            <Drawer isOpen={isOpen} onClose={onClose}>
+                <DrawerBackdrop />
+                <DrawerContent className="w-full max-h-[70vh]">
+                    <ScrollView className="flex-1">
+                        <DrawerHeader>
+                            <HStack className="items-center">
+                                <Text size="lg" className="font-semibold flex-1 text-left">
+                                    Playlist Members
+                                </Text>
+                                {playlist.user.can_invite && (
+                                <Button
+                                    size="lg"
+                                    className="rounded-full p-3.5 w-10"
+                                    variant="outline"
+                                    onPress={onInvitePress}
+                                >
+                                    <ButtonIcon as={UserRoundPlus} size="sm" />
+                                </Button>
+                                )}
+                            </HStack>
+                        </DrawerHeader>
 
                     <DrawerBody contentContainerClassName="gap-3" className="flex-1 overflow-y-auto">
                         {/* Owner */}
@@ -102,7 +140,6 @@ export default function PlaylistMembersDrawer({
                                 </Avatar>
                                 <VStack>
                                     <Text size="md" className="font-medium">{playlist.owner.username}</Text>
-                                    <Text size="sm" className="text-gray-500">Owner</Text>
                                 </VStack>
                             </HStack>
                         </VStack>
@@ -116,7 +153,7 @@ export default function PlaylistMembersDrawer({
                                         Collaborators ({filteredCollaborators.length})
                                     </Text>
                                     {filteredCollaborators.map((collaborator, index) => (
-                                        <HStack key={index} className="items-center gap-3 p-2 bg-blue-50 rounded-lg">
+                                        <HStack key={index} className="items-center gap-3 p-2 rounded-lg">
                                             <Avatar size="md">
                                                 <AvatarFallbackText>
                                                     {collaborator.username.charAt(0).toUpperCase()}
@@ -127,8 +164,17 @@ export default function PlaylistMembersDrawer({
                                             </Avatar>
                                             <VStack>
                                                 <Text size="md" className="font-medium">{collaborator.username}</Text>
-                                                <Text size="sm" className="text-blue-600">Collaborator</Text>
                                             </VStack>
+                                            {playlist.user.role === 'owner' && (
+                                                <Button
+                                                    size="sm"
+                                                    className="rounded-full ml-auto"
+                                                    variant="outline"
+                                                    onPress={() => handleUserActionPress(collaborator, 'collaborator')}
+                                                >
+                                                    <ButtonIcon as={MoreVertical} />
+                                                </Button>
+                                            )}
                                         </HStack>
                                     ))}
                                 </VStack>
@@ -144,7 +190,7 @@ export default function PlaylistMembersDrawer({
                                         Members ({filteredMembers.length})
                                     </Text>
                                     {filteredMembers.map((member, index) => (
-                                        <HStack key={index} className="items-center gap-3 p-2 bg-blue-50 rounded-lg justify-between">
+                                        <HStack key={index} className="items-center gap-3 p-2 rounded-lg justify-between">
                                             <HStack className="items-center gap-3">
                                             <Avatar size="md">
                                                 <AvatarFallbackText>
@@ -156,12 +202,20 @@ export default function PlaylistMembersDrawer({
                                             </Avatar>
                                             <VStack>
                                                 <Text size="md" className="font-medium">{member.username}</Text>
-                                                <Text size="sm" className="text-blue-600">Member</Text>
                                             </VStack>
                                             </HStack>
-                                            <Button size="sm" className="rounded-full" onPress={() => handleAddToCollaboratorsPress(member.id)}>
-                                                <ButtonIcon as={Key} />
-                                            </Button>
+                                            {playlist.user.role === 'owner' && (
+                                                <HStack className="ml-auto gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        className="rounded-full"
+                                                        variant="outline"
+                                                        onPress={() => handleUserActionPress(member, 'member')}
+                                                    >
+                                                        <ButtonIcon as={MoreVertical} />
+                                                    </Button>
+                                                </HStack>
+                                            )}
                                         </HStack>
                                     ))}
                                 </VStack>
@@ -181,6 +235,68 @@ export default function PlaylistMembersDrawer({
                     </DrawerBody>
                 </ScrollView>
             </DrawerContent>
-        </Drawer>
+            </Drawer>
+
+            {showActionDialog && (
+                <Modal
+                    transparent
+                    visible={showActionDialog}
+                    animationType="slide"
+                >
+                    <View className="flex-1 justify-center items-center p-4">
+                        <View className="bg-white rounded-lg overflow-hidden shadow-lg w-11/12 max-w-md">
+                            <View className="p-4 border-b">
+                                <Heading className="text-typography-950 font-semibold" size="md">
+                                    Actions for {selectedUser?.username}
+                                </Heading>
+                            </View>
+                            <View className="p-4">
+                                <Text size="sm" className="mb-4">
+                                    What action would you like to perform?
+                                </Text>
+                            </View>
+                            <View className="p-4 border-t flex flex-col gap-3">
+                                {selectedUser?.role === 'collaborator' && (
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        onPress={handleDemoteToMember}
+                                    >
+                                        <ButtonIcon as={UserMinus} />
+                                        <ButtonText className="ml-2">Demote to Member</ButtonText>
+                                    </Button>
+                                )}
+                                {selectedUser?.role === 'member' && (
+                                    <Button size="sm"
+                                        variant="filled"
+                                        className="w-full" onPress={() => handleAddToCollaboratorsPress(selectedUser.id)}>
+                                        <ButtonIcon as={Key} color="white" />
+                                        <ButtonText className="ml-2 text-white">Add to Collaborators</ButtonText>
+                                    </Button>
+                                )}
+
+                                <Button
+                                    variant="solid"
+                                    action="negative"
+                                    className="w-full"
+                                    onPress={handleRemoveFromPlaylist}
+                                >
+                                    <ButtonIcon as={UserMinus} />
+                                    <ButtonText className="ml-2">Remove from Playlist</ButtonText>
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full"
+                                    onPress={handleCloseActionDialog}
+                                >
+                                    <ButtonText>Cancel</ButtonText>
+                                </Button>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+        </>
     );
 }
