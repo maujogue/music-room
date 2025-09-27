@@ -28,7 +28,7 @@ export async function getCurrentUser(req: Request): Promise<any> {
   return data.user;
 }
 
-export async function getUserToken(user_id: string): Promise<string | null> {
+export async function getUserSpotifyToken(user_id: string): Promise<string | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')

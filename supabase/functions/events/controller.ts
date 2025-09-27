@@ -1,6 +1,6 @@
 import { Hono } from 'jsr:@hono/hono'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getCurrentUser, getUserToken } from '../auth.ts'
+import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
 import {
   createSupabaseEvent,
   getSupabaseEventById,

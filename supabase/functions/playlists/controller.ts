@@ -6,7 +6,7 @@ import {
   PERMISSIONS,
   getUserRoleInPlaylist
 } from './permissions.ts'
-import { getCurrentUser, getUserToken } from '../auth.ts'
+import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
 import {
   createSpotifyPlaylist,
   postItemsToSpotifyPlaylist,
