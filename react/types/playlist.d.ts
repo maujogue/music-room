@@ -53,6 +53,12 @@ export interface Playlist {
   cover_url: string | null;
   created_at: string;
   updated_at: string;
+  user: {
+    role: string | null;
+    can_edit: boolean;
+    can_invite: boolean;
+    is_following: boolean;
+  }
   owner: PlaylistOwner;
   collaborators: PlaylistCollaborator[];
   members: PlaylistMember[];

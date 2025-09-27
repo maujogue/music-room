@@ -11,6 +11,7 @@ import { deleteItemFromPlaylist } from '@/services/playlist';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import AddTrackItem from '@/components/track/AddTrackItem';
 
 interface Props {
   playlistId: string;
@@ -30,12 +31,6 @@ export default function TrackList({
   canEdit,
 }: Props) {
   const router = useRouter();
-  const handlePress = () => {
-    router.push({
-      pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId, playlistTitle },
-    });
-  };
 
   if (!playlistTracks) {
     console.log('No playlistTracks provided');
@@ -46,6 +41,13 @@ export default function TrackList({
     playlistId,
     playlistTracks
   );
+
+  const handleAddTrackPress = () => {
+    router.push({
+      pathname: '/(main)/playlists/[playlistId]/tracks/add',
+      params: { playlistId, playlistTitle },
+    });
+  };
 
   const handleSwipeableOpen = async (trackId: string) => {
     if (isSpotifySync) return; // disable editing when synced from Spotify
@@ -77,7 +79,7 @@ export default function TrackList({
       <View style={[styles.center, styles.emptyBackground]}>
         <Text>No tracks in this playlist</Text>
         {!isSpotifySync && canEdit && (
-          <Button variant='solid' className='mt-4' onPress={handlePress}>
+          <Button variant='solid' className='mt-4' onPress={handleAddTrackPress}>
             <ButtonText>Add First Track</ButtonText>
             <ButtonIcon as={AddIcon} className='ml-2' />
           </Button>
@@ -90,10 +92,10 @@ export default function TrackList({
     <View style={styles.container}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {!isSpotifySync && canEdit && (
-          <Button variant='solid' className='mt-2' onPress={handlePress}>
-            <ButtonText>Add Track</ButtonText>
-            <ButtonIcon as={AddIcon} className='ml-2' />
-          </Button>
+          <AddTrackItem
+            playlistId={playlistId}
+            playlistTitle={playlistTitle}
+          />
         )}
 
         {tracks.map((item, index) => (

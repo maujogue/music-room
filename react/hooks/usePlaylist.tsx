@@ -22,7 +22,7 @@ export function usePlaylist(id: string | null) {
       setError(null);
       const data = await getPlaylistById(id);
       setPlaylist(data);
-      setCanEdit(data.can_edit ?? false);
+      setCanEdit(data.user.can_edit ?? false);
     } catch (err) {
       console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));

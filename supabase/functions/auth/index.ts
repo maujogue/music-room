@@ -19,6 +19,7 @@ const client_secret = Deno.env.get('SPOTIFY_CLIENT_SECRET')!;
 
 Deno.serve(async (req, res) => {
   const url = req.url;
+  console.log('Received request URL:', url);
 
   try {
     if (url.includes('/spotify/callback')) {

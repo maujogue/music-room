@@ -170,3 +170,68 @@ export async function editPlaylistSupabaseById(
       throw new HTTPException(pgError.status, { message: pgError.message });
   }
 }
+
+export async function addUserToPlaylistInSupabase(
+  playlist_id: string,
+  user_id: string,
+  role: string
+): Promise<any> {
+  console.log('Adding user to playlist in Supabase:', playlist_id, user_id, role);
+
+  let result;
+
+  if (role === 'member') {
+    result = await supabase.from('playlist_members')
+      .upsert([{ playlist_id, user_id }])
+      .select();
+  } else if (role === 'collaborator') {
+    result = await supabase.from('playlist_collaborators')
+      .upsert([{ playlist_id, user_id, role }])
+      .select();
+  } else {
+    throw new HTTPException(400, { message: 'Invalid role. Must be "member" or "collaborator"' });
+  }
+
+  const { data, error } = result;
+
+  if (error) {
+    console.error('Supabase error (add user to playlist):', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}
+
+export async function removeUserFromPlaylistInSupabase(
+  playlist_id: string,
+  user_id: string,
+  role: string | undefined
+): Promise<any> {
+
+  if (role === 'member' || !role) {
+    const { error: memberError } = await supabase.from('playlist_members')
+    .delete()
+    .eq('playlist_id', playlist_id)
+    .eq('user_id', user_id);
+
+    if (memberError) {
+      console.error('Supabase error (remove from playlist_members):', memberError);
+      const pgError = formatDbError(memberError);
+      throw new HTTPException(pgError.status, { message: pgError.message });
+    }
+  }
+
+  // Remove from playlist_collaborators
+  const { error: collaboratorError } = await supabase.from('playlist_collaborators')
+    .delete()
+    .eq('playlist_id', playlist_id)
+    .eq('user_id', user_id);
+
+  if (collaboratorError) {
+    console.error('Supabase error (remove from playlist_collaborators):', collaboratorError);
+    const pgError = formatDbError(collaboratorError);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+

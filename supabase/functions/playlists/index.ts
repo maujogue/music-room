@@ -32,6 +32,8 @@ app.onError((err, c) => {
     return c.json({ message: err.message }, err.status);
   }
 
+
+  console.error('Error occurred:', err);
   return c.json({
     message: 'Internal Server Error'
   }, 500);
