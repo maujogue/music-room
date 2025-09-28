@@ -16,6 +16,10 @@ serve(app.fetch)
 
 app.use('*', async (c, next) => {
   try {
+    if (c.req.url.includes('/spotify/callback')) {
+      return await next()
+    }
+    console.log(`Authenticating request to ${c.req.url}`)
     const user = await getCurrentUser(c.req)
     c.set('user', user)
     await next()

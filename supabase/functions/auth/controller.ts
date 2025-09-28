@@ -1,8 +1,16 @@
 import { Context } from 'https://deno.land/x/hono@v3.12.11/mod.ts';
 import { generateRandomString } from './utils.ts';
 import { SupabaseError } from './supabase_error.ts';
-import { insertOauthStateToSupabase } from './services/supabase.ts';
-import { fetchSpotifyUserTokenData } from './services/spotify.ts';
+import {
+  insertOauthStateToSupabase,
+  getAndDeleteOauthState,
+  updateSpotifyUserTokens,
+  createUserWithSpotifyData
+} from './services/supabase.ts';
+import {
+  fetchSpotifyUserTokenData,
+  fetchSpotifyUserProfile
+} from './services/spotify.ts';
 
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
@@ -20,8 +28,9 @@ export async function handleSpotifyAuth(c: Context) {
     'playlist-read-private',
     'playlist-modify-private',
   ].join(' ');
+  const user = c.get('user') || null;
 
-  await insertOauthStateToSupabase(state);
+  await insertOauthStateToSupabase(state, user?.id || null);
 
   const params = new URLSearchParams({
     response_type: 'code',
@@ -45,39 +54,29 @@ export async function handleSpotifyCallback(c: Context) {
 
   if (spotifyError) {
     if (spotifyError === 'access_denied') {
-      return c.text('Access denied', 403);
+      c.status(403);
+      return c.json({ message: 'Access denied by user' });
     }
     console.error('Spotify error:', spotifyError);
-    return c.text('Error handling request: ' + spotifyError, 500);
+    c.status(500);
+    return c.json({ message: 'Spotify error: ' + spotifyError });
   }
 
-  const { data, error } = await supabase
-    .from('oauth_state')
-    .select('*')
-    .eq('state', state);
-  if (error) {
-    throw new SupabaseError('Error fetching OAuth state: ' + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    return c.text('Invalid state', 400);
-  }
+  const user_id = await getAndDeleteOauthState(state);
 
   if (!code) {
-    return c.text('Missing code', 400);
+    c.status(400);
+    return c.json({ message: 'Missing code' });
   }
 
-  const { error: deleteError } = await supabase
-    .from('oauth_state')
-    .delete()
-    .eq('state', state);
-
-  if (deleteError) {
-    throw new SupabaseError(
-      'Error deleting OAuth state: ' + deleteError.message
-    );
+  const token = await fetchSpotifyUserTokenData(code);
+  if (!token || !token.access_token) {
+    c.status(500);
+    return c.json({ message: 'Failed to obtain access token from Spotify' });
   }
 
-  await fetchSpotifyUserTokenData(code);
+  if (user_id) {
+    await updateSpotifyUserTokens(user_id, token);
+  }
   return c.json({ message: 'User authenticated successfully' });
 }

@@ -11,9 +11,7 @@ import { handleSpotifyAuth, handleSpotifyCallback } from './controller.ts';
 
 const routes = new Hono();
 
-
-// Routes
-routes.get('/spotify', handleSpotifyAuth);
+routes.post('/spotify', handleSpotifyAuth);
 routes.get('/spotify/callback', handleSpotifyCallback);
 
 export default routes;

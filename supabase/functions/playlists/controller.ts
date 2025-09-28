@@ -6,7 +6,7 @@ import {
   PERMISSIONS,
   getUserRoleInPlaylist
 } from './permissions.ts'
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
+import { getCurrentUser, getUserToken } from '../auth.ts'
 import {
   createSpotifyPlaylist,
   postItemsToSpotifyPlaylist,
@@ -41,9 +41,11 @@ export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const body = await c.req.json()
   const { uris } = validateDeleteTracksPayload(body)
 
-  const user = c.get('user')
+  // Récupérer l'ID utilisateur depuis le token JWT
+  const userId = c.get('userId') // Supposant que l'userId est dans le context après auth middleware
 
-  await checkPermission(id, user.id, PERMISSIONS.DELETE_SONG)
+  // Vérifier les permissions
+  await checkPermission(id, userId, PERMISSIONS.DELETE_SONG)
 
   await deleteTracksFromPlaylistInSupabase(
     id,
@@ -57,9 +59,10 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
   const body = await c.req.json()
   const { uris } = validateAddTracksPayload(body)
-  const user = c.get('user')
 
-  await checkPermission(id, user.id, PERMISSIONS.ADD_SONG)
+  // Vérifier les permissions pour ajouter des chansons
+  const userId = c.get('userId')
+  await checkPermission(id, userId, PERMISSIONS.ADD_SONG)
 
   await addTracksToPlaylistInSupabase(
     id,
@@ -109,19 +112,12 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
       };
     });
   }
-  playlist = setPlaylistUserPermissions(playlist, user)
-
-  console.log('Playlist user permissions:', playlist)
-  c.status(200)
-  return c.json(playlist)
-}
-
-function setPlaylistUserPermissions(playlist: any, user: any) {
   playlist.user = {}
   playlist.user.can_edit = false
   playlist.user.can_invite = false
   playlist.user.is_following = true
   playlist.user.role = getUserRoleInPlaylist(playlist, user.id)
+
 
   if (playlist.is_collaborative || playlist.collaborators.find((collab: any) => collab.id === user.id)) {
     playlist.user.can_edit = true
@@ -138,7 +134,10 @@ function setPlaylistUserPermissions(playlist: any, user: any) {
     playlist.user.can_edit = false
     playlist.user.can_invite = false
   }
-  return playlist
+
+  console.log('Playlist user permissions:', playlist)
+  c.status(200)
+  return c.json(playlist)
 }
 
 
@@ -170,11 +169,10 @@ export async function deletePlaylist(c: Context): Promise<any> {
 
 export async function updatePlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const user = c.get('user')
   const body = await c.req.json()
 
   const validatedPayload = validateEditPlaylistPayload(body);
-  await checkPermission(id, user.id, PERMISSIONS.EDIT_PLAYLIST)
+  await checkPermission(id, c.get('userId'), PERMISSIONS.EDIT_PLAYLIST)
 
   await editPlaylistSupabaseById(id, validatedPayload);
   c.status(200)
@@ -200,9 +198,7 @@ export async function removeUserFromPlaylist(c: Context): Promise<any> {
   const user = c.get('user')
   const { user_id, role } = validateRemoveUserPayload(body)
 
-  if (user.id !== user_id) {
-    await checkPermission(id, user.id, PERMISSIONS.REMOVE_USER)
-  }
+  await checkPermission(id, user.id, PERMISSIONS.REMOVE_USER)
 
   await removeUserFromPlaylistInSupabase(id, user_id, role)
 
