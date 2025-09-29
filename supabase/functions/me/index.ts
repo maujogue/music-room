@@ -8,7 +8,7 @@ import { Hono } from 'jsr:@hono/hono';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
-import { getCurrentUser, getUserToken } from '../auth.ts';
+import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
 import meRoutes from './routes.ts';
 
 const app = new Hono();
@@ -18,7 +18,7 @@ serve(app.fetch);
 app.use('*', async (c, next) => {
   try {
     const user = await getCurrentUser(c.req);
-    const token = await getUserToken(user.id);
+    const token = await getUserSpotifyToken(user.id);
     c.set('user', user);
     c.set('spotify_token', token);
     await next();

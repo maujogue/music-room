@@ -5,6 +5,7 @@ import {
 	searchPlaylistsByQuery
  } from './services/supabase.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { refreshSpotifyToken } from '../auth.ts';
 
 export async function search(c: Context) {
 	const user = c.get('user')
@@ -27,6 +28,7 @@ export async function search(c: Context) {
 		return c.json({ error: 'Query parameter "type" is required' })
 	}
 	if (type === 'track') {
+		await refreshSpotifyToken(user.id);
 		trackResults = await searchTracks(spotify_token, { query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
 	}
 	if (type === 'playlist' || type === 'all') {

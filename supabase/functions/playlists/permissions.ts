@@ -43,11 +43,12 @@ export function canUserPerformAction(role: string | null, permission: string, pl
         return true;
       }
       return role === ROLES.OWNER || role === ROLES.COLLABORATOR || role === ROLES.MEMBER;
+
     case PERMISSIONS.ADD_SONG:
       if (playlist.is_collaborative) {
-        return role === ROLES.OWNER || role === ROLES.COLLABORATOR;
+        return true;
       }
-      return role === ROLES.OWNER;
+      return role === ROLES.OWNER || role === ROLES.COLLABORATOR;
 
     case PERMISSIONS.DELETE_SONG:
       if (playlist.is_collaborative) {

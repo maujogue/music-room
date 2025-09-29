@@ -102,3 +102,12 @@ export function validateRemoveUserPayload(body: any): { user_id: string, role?: 
   }
   return { user_id: body.user_id, role: body.role };
 }
+
+export function validateAddTracksPayload(body: any): { uris: string[] } {
+  console.log('Validating add tracks payload:', body);
+  if (!body.uris || !Array.isArray(body.uris) || body.uris.some((uri: any) => typeof uri !== 'string')) {
+    throw new HTTPException(400, { message: 'uris is required and must be an array of strings' });
+  }
+
+  return { uris: body.uris };
+}

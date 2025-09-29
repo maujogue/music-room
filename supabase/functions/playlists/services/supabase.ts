@@ -93,30 +93,6 @@ export async function isPlaylistCollaborator(playlist_id: string, user_id: strin
 }
 
 export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks: string[], added_by: string): Promise<any> {
-  const { data: playlist, error: playlistError } = await supabase
-    .from('playlists')
-    .select('owner_id')
-    .eq('id', playlist_id)
-    .maybeSingle();
-
-  if (playlistError) {
-    console.error('Supabase error (fetch playlist):', playlistError);
-    const pgError = formatDbError(playlistError);
-    throw new HTTPException(pgError.status, { message: pgError.message });
-  }
-
-  if (!playlist) {
-    throw new HTTPException(404, { message: 'Playlist not found' });
-  }
-
-  if (playlist.owner_id !== added_by) {
-    const isCollab = await isPlaylistCollaborator(playlist_id, added_by);
-    if (!isCollab) {
-      console.error('User is not a collaborator of the playlist');
-      throw new HTTPException(403, { message: 'User is not a collaborator of the playlist' });
-    }
-  }
-
   const payload = tracks.map(track_id => ({
     playlist_id,
     track_id,

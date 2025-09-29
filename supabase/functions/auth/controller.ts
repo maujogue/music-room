@@ -1,0 +1,82 @@
+import { Context } from 'https://deno.land/x/hono@v3.12.11/mod.ts';
+import { generateRandomString } from './utils.ts';
+import { SupabaseError } from './supabase_error.ts';
+import {
+  insertOauthStateToSupabase,
+  getAndDeleteOauthState,
+  updateSpotifyUserTokens,
+  createUserWithSpotifyData
+} from './services/supabase.ts';
+import {
+  fetchSpotifyUserTokenData,
+  fetchSpotifyUserProfile
+} from './services/spotify.ts';
+
+const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
+const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
+
+export async function handleSpotifyAuth(c: Context) {
+  const redirect_uri = `${base_url}/functions/v1/auth/spotify/callback`;
+  const state = generateRandomString(16);
+  const scope = [
+    'user-read-private',
+    'user-read-email',
+    'user-read-playback-state',
+    'user-modify-playback-state',
+    'user-read-currently-playing',
+    'playlist-modify-public',
+    'playlist-read-private',
+    'playlist-modify-private',
+  ].join(' ');
+  const user = c.get('user') || null;
+
+  await insertOauthStateToSupabase(state, user?.id || null);
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: client_id,
+    scope: scope,
+    redirect_uri: redirect_uri,
+    state: state,
+  });
+
+  const spotifyAuthUrl =
+    'https://accounts.spotify.com/authorize?' + params.toString();
+
+  c.status(200);
+  return c.json({ url: spotifyAuthUrl });
+}
+
+export async function handleSpotifyCallback(c: Context) {
+  const code = c.req.query('code');
+  const state = c.req.query('state');
+  const spotifyError = c.req.query('error');
+
+  if (spotifyError) {
+    if (spotifyError === 'access_denied') {
+      c.status(403);
+      return c.json({ message: 'Access denied by user' });
+    }
+    console.error('Spotify error:', spotifyError);
+    c.status(500);
+    return c.json({ message: 'Spotify error: ' + spotifyError });
+  }
+
+  const user_id = await getAndDeleteOauthState(state);
+
+  if (!code) {
+    c.status(400);
+    return c.json({ message: 'Missing code' });
+  }
+
+  const token = await fetchSpotifyUserTokenData(code);
+  if (!token || !token.access_token) {
+    c.status(500);
+    return c.json({ message: 'Failed to obtain access token from Spotify' });
+  }
+
+  if (user_id) {
+    await updateSpotifyUserTokens(user_id, token);
+  }
+  return c.json({ message: 'User authenticated successfully' });
+}
