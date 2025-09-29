@@ -10,7 +10,7 @@ import { Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 
 type Props = {
-  event: MusicEvent;
+  event: Event;
 };
 
 export default function EventListItem({ event }: Props) {

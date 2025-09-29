@@ -76,7 +76,7 @@ export async function deleteEventById(id: string) {
 }
 
 export async function getCurrentUserEvents() {
-  const res = await apiFetch<MusicEvent[]>(
+  const res = await apiFetch<Event[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`,
     {
       method: 'GET',
@@ -91,13 +91,34 @@ export async function getCurrentUserEvents() {
 }
 
 export async function updateEvent(id: string, payload: MusicEventPayload) {
-  const res = await apiFetch<Event>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`,
-    {
-      method: 'PUT',
-      body: payload,
-    }
-  );
+  console.log('Updating event with ID:', id, 'Payload:', payload);
+
+  const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`;
+
+  const imageUri = (payload as any).image_url;
+  const form = new FormData();
+
+  form.append('name', payload.name ?? '');
+  form.append('description', payload.description ?? '');
+  form.append('playlist_id', payload.playlist_id ?? '');
+  form.append('beginning_at', payload.beginning_at ?? '');
+  form.append('ending_at', payload.ending_at ?? '');
+  form.append('location', JSON.stringify((payload as any).location ?? {}));
+
+  if (imageUri) {
+    const uri = imageUri as string;
+    const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+    const fileName = `${Date.now()}.${ext}`;
+    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+
+    form.append('image', { uri, name: fileName, type: mime } as any);
+  }
+
+  console.log('Form data prepared for update:', form);
+  const res = await apiFetch<Event>(url, {
+    method: 'PUT',
+    body: form,
+  });
 
   if (!res.success) {
     console.error('Error updating Event:', res.error);

@@ -12,7 +12,6 @@ import { Box } from '@/components/ui/box';
 import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
 import { Heading } from '@/components/ui/heading';
-import { voteForTrack } from '@/services/events';
 import { VStack } from '@/components/ui/vstack';
 import TopVotesTracks from '@/components/track/votes/TopVotes';
 import { useEffect } from 'react';

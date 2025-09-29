@@ -46,13 +46,32 @@ BEGIN
     -- Construction du JSON avec toutes les relations
     SELECT json_build_object(
         'event', row_to_json(e.*),
-        'owner', row_to_json(p.*),
+        'owner', json_build_object(
+            'id', p.id,
+            'username', p.username,
+            'email', p.email,
+            'avatar_url', p.avatar_url,
+            'bio', p.bio,
+            'music_genre', p.music_genre
+        ),
         'location', row_to_json(a.*),
+        'playlist', (
+            SELECT get_playlist_complete(e.playlist_id::UUID)
+            FROM events
+            WHERE e.id = $1 AND e.playlist_id IS NOT NULL
+        ),
         'members', (
             SELECT COALESCE(json_agg(
                 json_build_object(
                     'joined_at', em.joined_at,
-                    'profile', row_to_json(mp.*)
+                    'profile', json_build_object(
+                        'id', mp.id,
+                        'username', mp.username,
+                        'email', mp.email,
+                        'avatar_url', mp.avatar_url,
+                        'bio', mp.bio,
+                        'music_genre', mp.music_genre
+                    )
                 )
             ), '[]'::json)
             FROM event_members em

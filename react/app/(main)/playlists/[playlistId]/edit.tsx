@@ -14,7 +14,6 @@ export default function EditPlaylist() {
   const [error, setError] = useState<string>('');
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
 
-  // Re-fetch the playlist data in the edit page
   const { playlist, loading, error: fetchError } = usePlaylist(playlistId);
 
   const onSubmit = async (payload: PlaylistPayload) => {

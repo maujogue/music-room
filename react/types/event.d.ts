@@ -1,18 +1,18 @@
 type MusicEventFetchResult = {
-  event: MusicEvent;
+  event: Event;
   location: MusicEventLocation;
   members: UserInfo[];
   owner: UserInfo;
 };
 
-type MusicEvent = {
+type Event = {
   id: string;
   name: string;
   images: SpotifyImage[];
   owner_id: string;
   owner: SpotifyOwner;
   isPublic: boolean;
-  playlist_id: string;
+  playlist: Playlist;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
@@ -46,7 +46,7 @@ type MusicEventLocation = {
 
 type MusicEventSection = {
   title: string;
-  data: MusicEvent[];
+  data: Event[];
 };
 
 type MusicEventPayload = {

@@ -39,11 +39,11 @@ export async function getSupabaseEventById(eventId: string): Promise<any> {
   const { data, error } = await supabaseClient.rpc('get_complete_event', { event_id: eventId });
 
   if (error) {
+    console.error('Raw Supabase error:', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  console.log('Fetched event data:', data);
   return data;
 }
 
@@ -78,8 +78,6 @@ export async function updateSupabaseEventById(
   eventData?: Record<string, any>,
   locationData?: Record<string, any>
 ): Promise<{ event: any; location: any }> {
-  console.log('Updating event:', eventId, eventData, locationData);
-
   let eventResult = null;
   let locationResult = null;
 
@@ -91,8 +89,8 @@ export async function updateSupabaseEventById(
       .select();
 
     if (error) {
+      console.error('Raw Supabase error:', error);
       const pgError = formatDbError(error);
-      console.error('Supabase event update error:', pgError.message);
       throw new HTTPException(pgError.status, { message: pgError.message });
     }
     eventResult = data;
@@ -114,6 +112,36 @@ export async function updateSupabaseEventById(
   }
 
   return { event: eventResult, location: locationResult };
+}
+
+export async function uploadEventImage(uploadedFile: File): Promise<string> {
+  const arrayBuffer = await uploadedFile.arrayBuffer();
+  const buffer = new Uint8Array(arrayBuffer);
+  const ext = (uploadedFile.name || 'jpg').split('.').pop() || 'jpg';
+  const path = `events/${Date.now()}.${ext}`;
+
+  console.log('Uploading file to path:', path);
+  const { data, error: uploadError } = await supabaseClient.storage
+    .from('avatars')
+    .upload(path, buffer, { contentType: uploadedFile.type || 'image/jpeg', upsert: true });
+
+  if (uploadError) {
+    console.error('Supabase upload error:', uploadError);
+    throw uploadError;
+  }
+
+  return data?.path || path;
+}
+
+export async function getPublicUrlForPath(path: string): string {
+  console.log('Generating public URL for path:', path);
+  const { data, error } = await supabaseClient.storage.from('avatars').createSignedUrl(path, 60);
+  if (error) {
+    console.error('createSignedUrl error', error);
+    throw error;
+  }
+  console.log('Public URL data:', data);
+  return data?.signedUrl || path;
 }
 
 

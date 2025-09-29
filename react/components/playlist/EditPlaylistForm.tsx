@@ -23,7 +23,6 @@ export default function EditPlayListForm({
   ApiError,
   onSubmit,
 }: Props) {
-  console.log('EditPlayListForm initialValues:', initialValues);
   const [name, setName] = useState(initialValues?.name ?? '');
   const [description, setDescription] = useState(
     initialValues?.description ?? ''

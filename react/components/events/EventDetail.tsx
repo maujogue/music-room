@@ -28,6 +28,8 @@ export default function EventDetail() {
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
 
+  console.log('Data:', data, 'Loading:', loading, 'Error:', error);
+
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -55,10 +57,7 @@ export default function EventDetail() {
   };
 
   const onEditEvent = () => {
-    router.push({
-      pathname: '/(main)/events/[eventId]/edit',
-      params: { eventId },
-    });
+    router.push(`(main)/events/${eventId}/edit`);
   };
 
   const onToggleHeader = () => {

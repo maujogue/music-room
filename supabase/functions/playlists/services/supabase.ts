@@ -52,8 +52,6 @@ export async function getSupabasePlaylistById(id: string): Promise<any> {
           p_playlist_id: id
       });
 
-    console.log('Fetched playlist by ID from Supabase:', data);
-    console.log('Supabase error (if any):', error);
     if (error) {
         console.error('Supabase error:', error);
         const pgError = formatDbError(error);

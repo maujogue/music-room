@@ -33,15 +33,10 @@ const COMPACT_H = 80;
 const EXPANDED_H = 210;
 
 export default function EventHeader({ eventData, expanded, onToggle }: Props) {
-  const getImage = () => {
-    const hasValidImage =
-      Array.isArray(eventData.event.images) &&
-      eventData.event.images.length > 0 &&
-      eventData.event.images[0]?.url;
-
+  const getImage = () => {;
     return {
-      uri: hasValidImage
-        ? eventData.event.images[0]!.url
+      uri: eventData.event.image_url
+        ? eventData.event.image_url
         : 'https://picsum.photos/111',
     };
   };

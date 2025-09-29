@@ -6,7 +6,9 @@ import {
   getSupabaseEventById,
   getSupabaseEventByOwner,
   deleteSupabaseEventById,
-  updateSupabaseEventById
+  updateSupabaseEventById,
+  uploadEventImage,
+  getPublicUrlForPath
 } from './service.ts'
 
 
@@ -34,6 +36,19 @@ export async function fetchEvent(c: Context): Promise<any> {
     throw new HTTPException(404, { message: 'Event not found' })
   }
 
+  try {
+    const imagePath = event.event?.image_url;
+    if (imagePath) {
+      const publicUrl = await getPublicUrlForPath(imagePath);
+      console.log('Resolved public URL for image:', publicUrl);
+      event.event.image_url = publicUrl;
+    }
+  } catch (err) {
+    console.error('Error resolving public url for image:', err);
+  }
+
+  // console.log('Fetched event:', event)
+  c.status(200)
   return c.json(event)
 }
 
@@ -58,21 +73,57 @@ export async function deleteEventById(c: Context): Promise<any> {
 
 export async function updateEventById(c: Context): Promise<any> {
   const id = c.req.param('id')
-  const body = await c.req.json()
-  const user = c.get('user')
-  const { locationData, ...eventData } = body;
 
+  const contentTypeHeader = c.req.header('content-type') || ''
+  let body: any = {}
+  let uploadedFile: File | null = null
+
+  if (contentTypeHeader.includes('multipart/form-data')) {
+    const form = await c.req.raw.formData()
+    for (const [key, value] of form.entries()) {
+      if (key === 'image') {
+        uploadedFile = value as File
+      } else if (key === 'location') {
+        try {
+          body.location = JSON.parse(value as string)
+        } catch (e) {
+          body.location = value === '' ? null : value
+        }
+      } else {
+        body[key] = value === '' ? null : value
+      }
+    }
+  } else {
+    body = await c.req.json()
+  }
+
+  const user = c.get('user')
+  const { location, ...eventData } = body;
+
+  console.log('Updating event with data:', body);
   const data = await getSupabaseEventById(id)
   if (!data) {
     c.status(404)
     return c.json({ error: 'Event not found' })
   }
-  console.log('Fetched event for update:', data.event.owner_id, user.id);
+
   if (data.event.owner_id !== user.id) {
     c.status(403)
     return c.json({ error: 'You do not have permission to update this event' })
   }
-  const updated = await updateSupabaseEventById(id, eventData, locationData)
+
+  if (uploadedFile) {
+    try {
+      const publicUrl = await uploadEventImage(uploadedFile as File);
+      eventData.image_url = publicUrl;
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      c.status(500);
+      return c.json({ error: 'Failed to process uploaded image' });
+    }
+  }
+
+  const updated = await updateSupabaseEventById(id, eventData, location)
   if (!updated) {
     c.status(500)
     return c.json({ error: 'Failed to update event' })

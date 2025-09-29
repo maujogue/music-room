@@ -110,7 +110,6 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   }
   playlist = setUserPlaylistPermissions(playlist, user)
 
-  console.log('Playlist user permissions:', playlist)
   c.status(200)
   return c.json(playlist)
 }
