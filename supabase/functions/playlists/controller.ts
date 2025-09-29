@@ -8,11 +8,6 @@ import {
 } from './permissions.ts'
 import { getCurrentUser, getUserToken } from '../auth.ts'
 import {
-  createSpotifyPlaylist,
-  postItemsToSpotifyPlaylist,
-  deleteItemsFromSpotifyPlaylist,
-  fetchSpotifyPlaylist,
-  fetchSpotifyUserProfile,
   fetchSpotifyTracks,
   fetchSpotifyPlaylistTracksIds
 } from './services/spotify.ts'
@@ -32,20 +27,19 @@ import {
   validateDeleteTracksPayload,
   validateEditPlaylistPayload,
   validateAddUserPayload,
-  validateRemoveUserPayload
+  validateRemoveUserPayload,
+  validateAddTracksPayload
 } from './validators.ts';
+import { refreshSpotifyToken } from '../auth.ts';
 
 
 export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
   const body = await c.req.json()
   const { uris } = validateDeleteTracksPayload(body)
+  const user = c.get('user')
 
-  // Récupérer l'ID utilisateur depuis le token JWT
-  const userId = c.get('userId') // Supposant que l'userId est dans le context après auth middleware
-
-  // Vérifier les permissions
-  await checkPermission(id, userId, PERMISSIONS.DELETE_SONG)
+  await checkPermission(id, user.id, PERMISSIONS.DELETE_SONG)
 
   await deleteTracksFromPlaylistInSupabase(
     id,
@@ -59,10 +53,9 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
   const body = await c.req.json()
   const { uris } = validateAddTracksPayload(body)
+  const user = c.get('user')
 
-  // Vérifier les permissions pour ajouter des chansons
-  const userId = c.get('userId')
-  await checkPermission(id, userId, PERMISSIONS.ADD_SONG)
+  await checkPermission(id, user.id, PERMISSIONS.ADD_SONG)
 
   await addTracksToPlaylistInSupabase(
     id,
@@ -70,6 +63,7 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
   )
 
   c.status(201)
+  return c.json({ message: 'Tracks added successfully' })
 }
 
 export async function fetchPlaylistItems(c: Context): Promise<any> {
@@ -86,6 +80,7 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   }
 
   if (playlist.is_spotify_sync && playlist.spotify_id) {
+    await refreshSpotifyToken(playlist.owner_id)
     const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, c.get('spotify_token'))
     if (tracksIds) {
       await addTracksToPlaylistInSupabase(playlist.id, tracksIds, playlist.owner_id)
@@ -96,6 +91,7 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   if (playlist.tracks && playlist.tracks.length !== 0) {
     const spotify_token = c.get('spotify_token')
     const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
+    await refreshSpotifyToken(user.id)
     const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
 
 
@@ -112,12 +108,19 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
       };
     });
   }
+  playlist = setUserPlaylistPermissions(playlist, user)
+
+  console.log('Playlist user permissions:', playlist)
+  c.status(200)
+  return c.json(playlist)
+}
+
+function setUserPlaylistPermissions(playlist: any, user: any) {
   playlist.user = {}
   playlist.user.can_edit = false
   playlist.user.can_invite = false
   playlist.user.is_following = true
   playlist.user.role = getUserRoleInPlaylist(playlist, user.id)
-
 
   if (playlist.is_collaborative || playlist.collaborators.find((collab: any) => collab.id === user.id)) {
     playlist.user.can_edit = true
@@ -134,12 +137,8 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
     playlist.user.can_edit = false
     playlist.user.can_invite = false
   }
-
-  console.log('Playlist user permissions:', playlist)
-  c.status(200)
-  return c.json(playlist)
+  return playlist
 }
-
 
 export async function createPlaylist(c: Context): Promise<any> {
   const user = c.get('user');
@@ -170,9 +169,10 @@ export async function deletePlaylist(c: Context): Promise<any> {
 export async function updatePlaylist(c: Context): Promise<any> {
   const id = c.req.param('id')
   const body = await c.req.json()
+  const user = c.get('user')
 
   const validatedPayload = validateEditPlaylistPayload(body);
-  await checkPermission(id, c.get('userId'), PERMISSIONS.EDIT_PLAYLIST)
+  await checkPermission(id, user.id, PERMISSIONS.EDIT_PLAYLIST)
 
   await editPlaylistSupabaseById(id, validatedPayload);
   c.status(200)

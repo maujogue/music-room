@@ -126,7 +126,9 @@ export async function addUserToPlaylist(
   userId: string,
   role: 'member' | 'collaborator'
 ) {
-  console.log(`Inviting user ${userId} to playlist ${playlistId} with role ${role}`);
+  console.log(
+    `Inviting user ${userId} to playlist ${playlistId} with role ${role}`
+  );
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/users`,
     {

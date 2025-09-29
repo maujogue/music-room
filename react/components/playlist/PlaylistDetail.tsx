@@ -76,10 +76,7 @@ export default function PlaylistDetail() {
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <PlaylistHeader
-          playlist={playlist}
-          onRefresh={refetch}
-        />
+        <PlaylistHeader playlist={playlist} onRefresh={refetch} />
         <TrackList
           playlistId={playlistId}
           playlistTracks={playlist.tracks}

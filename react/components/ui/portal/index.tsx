@@ -15,4 +15,3 @@ const Portal = React.forwardRef<
 Portal.displayName = 'Portal';
 
 export { Portal };
-

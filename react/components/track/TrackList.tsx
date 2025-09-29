@@ -79,7 +79,11 @@ export default function TrackList({
       <View style={[styles.center, styles.emptyBackground]}>
         <Text>No tracks in this playlist</Text>
         {!isSpotifySync && canEdit && (
-          <Button variant='solid' className='mt-4' onPress={handleAddTrackPress}>
+          <Button
+            variant='solid'
+            className='mt-4'
+            onPress={handleAddTrackPress}
+          >
             <ButtonText>Add First Track</ButtonText>
             <ButtonIcon as={AddIcon} className='ml-2' />
           </Button>
@@ -92,10 +96,7 @@ export default function TrackList({
     <View style={styles.container}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {!isSpotifySync && canEdit && (
-          <AddTrackItem
-            playlistId={playlistId}
-            playlistTitle={playlistTitle}
-          />
+          <AddTrackItem playlistId={playlistId} playlistTitle={playlistTitle} />
         )}
 
         {tracks.map((item, index) => (

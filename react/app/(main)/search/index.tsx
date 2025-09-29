@@ -12,7 +12,7 @@ export default function SearchPage() {
 
   return (
     <Box className='flex-1 pt-8'>
-      <Search defaultType='All'/>
+      <Search defaultType='All' />
     </Box>
   );
 }

@@ -58,7 +58,7 @@ export interface Playlist {
     can_edit: boolean;
     can_invite: boolean;
     is_following: boolean;
-  }
+  };
   owner: PlaylistOwner;
   collaborators: PlaylistCollaborator[];
   members: PlaylistMember[];
