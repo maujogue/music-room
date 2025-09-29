@@ -12,18 +12,18 @@ import { HStack } from '@/components/ui/hstack';
 import NumBadge from '@/components/generics/NumBadge';
 
 type TrackListItemProps = {
-  track?: PlaylistTrack;
+  track?: SpotifyTrack;
   voteCount?: number;
   onSwipeableOpen?: (dir: SwipeDirection) => void;
   renderLeftAction?: (
     prog: SharedValue<number>,
     drag: SharedValue<number>,
-    item: PlaylistTrack
+    item: SpotifyTrack
   ) => React.JSX.Element;
   renderRightAction?: (
     prog: SharedValue<number>,
     drag: SharedValue<number>,
-    item: PlaylistTrack
+    item: SpotifyTrack
   ) => React.JSX.Element;
 };
 
@@ -34,19 +34,20 @@ export default function TrackListItem({
   renderLeftAction,
   renderRightAction,
 }: TrackListItemProps) {
+  console.log('Rendering TrackListItem for track:', track);
   const swipeableRef = useRef<SwipeableMethods>(null);
 
   const getImage = () => {
     const hasValidImage =
       track &&
-      track.details.album &&
-      Array.isArray(track.details.album.images) &&
-      track.details.album.images.length > 0 &&
-      track.details.album.images[0]?.url;
+      track.album &&
+      Array.isArray(track.album.images) &&
+      track.album.images.length > 0 &&
+      track.album.images[0]?.url;
 
     return {
       uri: hasValidImage
-        ? track.details.album.images[0]!.url
+        ? track.album.images[0]!.url
         : 'https://picsum.photos/144',
     };
   };
@@ -83,11 +84,11 @@ export default function TrackListItem({
         <HStack className='justify-between items-center flex-1'>
           <VStack className='pt-1'>
             <Heading size='md' className='text-typography-800'>
-              {track.details.name}
+              {track.name}
             </Heading>
-            {track.details.artists && (
+            {track.artists && (
               <Text size='sm' className='text-typography-400'>
-                {track.details.artists[0].name}
+                {track.artists[0].name}
               </Text>
             )}
           </VStack>

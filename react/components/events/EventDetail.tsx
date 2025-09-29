@@ -17,6 +17,7 @@ import { useEvent } from '@/hooks/useEvent';
 import EventHeader from './eventDetail/EventHeader';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import { ScrollView } from 'react-native';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -73,7 +74,7 @@ export default function EventDetail() {
   }
 
   return (
-    <>
+    <ScrollView>
       <VStack className='flex-1'>
         <EventHeader
           eventData={data}
@@ -113,6 +114,6 @@ export default function EventDetail() {
         itemName={data.event.name ?? 'event'}
         itemType='event'
       />
-    </>
+    </ScrollView>
   );
 }

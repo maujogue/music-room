@@ -120,7 +120,7 @@ export default function TrackListVotes({
             return (
               <Pressable key={track.added_at}>
                 <TrackListItem
-                  track={track}
+                  track={track.details}
                   voteCount={voteCount}
                   renderRightAction={() => (
                     <Reanimated.View

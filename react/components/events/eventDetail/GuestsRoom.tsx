@@ -13,7 +13,6 @@ import DeleteAlert from '@/components/generics/DeleteAlert';
 
 interface Props {
   data: MusicEventFetchResult;
-
 }
 
 export default function GuestsRoom({ data }: Props) {
@@ -41,52 +40,40 @@ export default function GuestsRoom({ data }: Props) {
 
       {/* Owner */}
       <VStack space="sm" className="mb-6">
-        <Heading size="md">Owner</Heading>
-        <HStack space="md" className="items-center pl-4">
-          <Avatar size="lg">
-            <AvatarFallbackText>{data.owner.username}</AvatarFallbackText>
-            <AvatarImage source={{ uri: data.owner.avatar_url }} />
-          </Avatar>
-          <Text>{data.owner.username}</Text>
-        </HStack>
+      <Heading size="md">Owner</Heading>
+      <HStack space="md" className="items-center pl-4">
+        <Avatar size="lg">
+        <AvatarFallbackText>{data.owner.username}</AvatarFallbackText>
+        <AvatarImage source={{ uri: data.owner.avatar_url }} />
+        </Avatar>
+        <Text>{data.owner.username}</Text>
+      </HStack>
       </VStack>
 
       {/* Guests */}
       <Heading size="md" className="mb-2">Guests</Heading>
-      {/* <FlatList
-        data={members}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <HStack space="md" className="items-center pl-4 mb-2">
-            <Avatar size="sm">
-              <AvatarFallbackText>{item.username}</AvatarFallbackText>
-              <AvatarImage source={{ uri: item.avatar_url }} />
-            </Avatar>
-            <Text>{item.username}</Text>
-          </HStack>
-        )}
-      /> */}
       <FlatList
-        data={members}
-        keyExtractor={(user: UserInfo) => user.id}
-        renderItem={({ item }) => (
-          <GuestsRoomListItem guest={item} onRemove={onPressRemove} showRemove={showRemove()} />
-        )}
-        ItemSeparatorComponent={() => <VStack className="h-[1px] bg-outline-200" />}
-        ListEmptyComponent={
-          <Text size={"sm"} className="pl-4 py-2 text-secondary-700">No guest yet.</Text>
-        }
+      data={members}
+      keyExtractor={(user: UserInfo) => user.id}
+      renderItem={({ item }) => (
+        <GuestsRoomListItem guest={item} onRemove={onPressRemove} showRemove={showRemove()} />
+      )}
+      ItemSeparatorComponent={() => <VStack className="h-[1px] bg-outline-200" />}
+      ListEmptyComponent={
+        <Text size={"sm"} className="pl-4 py-2 text-secondary-700">No guest yet.</Text>
+      }
+      scrollEnabled={false}
       />
 
     </VStack>
 
-    <DeleteAlert
+    {/* <DeleteAlert
       showAlertDialog={showAlertDialog}
       setShowAlertDialog={setShowAlertDialog}
       onDelete={handleRemove}
       itemName={playlist?.name ?? 'playlist'}
       itemType='playlist'
-    />
+    /> */}
     </>
   );
 }
