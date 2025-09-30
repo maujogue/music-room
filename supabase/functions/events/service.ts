@@ -134,14 +134,35 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
 }
 
 export async function getPublicUrlForPath(path: string): string {
-  console.log('Generating public URL for path:', path);
-  const { data, error } = await supabaseClient.storage.from('avatars').createSignedUrl(path, 60);
+  const localUrl = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL');
+
+  const { data } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+
+  if (data?.publicUrl) {
+    const publicUrl = data.publicUrl.replace(
+      'http://kong:8000/storage/v1',
+      localUrl + '/storage/v1'
+    );
+    console.log('Public URL:', publicUrl);
+    return publicUrl;
+  }
+
+  const { data: signedData, error } = await supabaseClient.storage
+    .from('avatars')
+    .createSignedUrl(path, 3600);
+
   if (error) {
     console.error('createSignedUrl error', error);
     throw error;
   }
-  console.log('Public URL data:', data);
-  return data?.signedUrl || path;
+
+  const correctedUrl = signedData?.signedUrl?.replace(
+    'http://kong:8000/storage/v1',
+    localUrl + '/storage/v1'
+  ) || path;
+
+  console.log('Corrected signed URL:', correctedUrl);
+  return correctedUrl;
 }
 
 

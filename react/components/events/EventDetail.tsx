@@ -21,7 +21,6 @@ import { ScrollView } from 'react-native';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const [activeTab, setActiveTab] = useState<'votes' | 'guests'>('votes');
   const [expanded, setIsExpanded] = useState<boolean>(false);
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
@@ -83,25 +82,7 @@ export default function EventDetail() {
 
         {/* Votes / Guests tabs */}
         <Center className='flex-1'>
-          <VStack className='px-2 pb-2'>
-            <HStack className='w-full bg-primary-500 rounded-xl p-2 justify-between'>
-              <TabButton
-                label={'Votes'}
-                isActive={activeTab == 'votes'}
-                onPress={() => setActiveTab('votes')}
-              />
-              <TabButton
-                label={'Guests'}
-                isActive={activeTab == 'guests'}
-                onPress={() => setActiveTab('guests')}
-              />
-            </HStack>
-          </VStack>
-          {activeTab == 'votes' ? (
-            <VotesRoom eventId={eventId} />
-          ) : (
-            <GuestsRoom data={data} />
-          )}
+          <VotesRoom eventId={eventId} />
         </Center>
         {/* ------------------ */}
       </VStack>

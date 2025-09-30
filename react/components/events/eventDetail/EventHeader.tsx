@@ -22,23 +22,42 @@ import Animated, {
 import { useEffect } from 'react';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
+import { AvatarGroup } from '@/components/generics/AvatarGroup';
+import EventMembersDrawer from '@/components/events/EventMembersDrawer';
+import { useState } from 'react';
 
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
   onToggle: () => void;
+  onRefresh?: () => void;
 }
 
-const COMPACT_H = 80;
-const EXPANDED_H = 210;
+const COMPACT_H = 200;
+const EXPANDED_H = 330;
 
-export default function EventHeader({ eventData, expanded, onToggle }: Props) {
+export default function EventHeader({ eventData, expanded, onToggle, onRefresh }: Props) {
+  const [showMembersDrawer, setShowMembersDrawer] = useState(false);
+
   const getImage = () => {;
     return {
       uri: eventData.event.image_url
         ? eventData.event.image_url
         : 'https://picsum.photos/111',
     };
+  };
+
+  const handleMemberAvatarGroupPress = () => {
+    setShowMembersDrawer(true);
+  };
+
+  const handleCloseMembersDrawer = () => {
+    setShowMembersDrawer(false);
+  };
+
+  const handleInviteUserPress = () => {
+    // TODO: Navigate to invite page or open invite modal
+    console.log('Invite user pressed');
   };
 
   useEffect(() => {
@@ -69,65 +88,90 @@ export default function EventHeader({ eventData, expanded, onToggle }: Props) {
     };
   });
 
+  console.log('Event data:', eventData);
+
   return (
     <Animated.View style={containerStyle} className='bg-indigo-100'>
-      <Card className='rounded-lg bg-transparent gap-2' variant='elevated'>
-        <HStack className='gap-2 items-top'>
+      <Card className='p-0 rounded-lg bg-transparent' variant='elevated'>
+        <VStack className='relative'>
           <Image
             source={getImage()}
-            className='rounded-md h-[60px] w-[60px]'
-            alt='Playlist avatar'
+            className='w-full h-[200px]'
+            alt='Event image'
           />
-          <VStack className='flex-1'>
-            <HStack className='justify-between items-center'>
-              <Heading size='md' className='text-typography-800'>
-                {eventData.event.name}
-              </Heading>
-              <Badge
-                size='sm'
-                action={eventData.event.isPublic ? 'info' : 'warning'}
-                className='rounded-full h-6'
-              >
-                <BadgeIcon
-                  size='md'
-                  as={eventData.event.isPublic ? CircleIcon : CloseCircleIcon}
-                />
-                <BadgeText className='ml-1'>
-                  {eventData.event.isPublic ? 'Public' : 'Private'}
-                </BadgeText>
-              </Badge>
-              <Button
-                variant='link'
-                onPress={onToggle}
-                accessibilityRole='button'
-              >
-                <Animated.View style={chevronStyle}>
-                  <Badge size='md' className='rounded-xl bg-indigo-200'>
-                    <BadgeIcon
-                      size='md'
-                      as={expanded ? ChevronDownIcon : ChevronUpIcon}
-                    />
-                  </Badge>
-                  {/* <Icon as={expanded ? ChevronDownIcon : ChevronUpIcon} size="sm" /> */}
-                </Animated.View>
-              </Button>
+
+          {/* Overlay avec gradient pour lisibilité */}
+          <VStack
+            className='absolute bottom-0 left-0 right-0 p-4'
+          >
+            <HStack className='justify-between items-end mb-2'>
+              <VStack className='flex-1'>
+                <Heading size='4xl' className='font-bold'>
+                  {eventData.event.name}
+                </Heading>
+                {eventData.event.owner?.display_name && (
+                  <Text size='sm' className='text-gray-200'>
+                    By {eventData.event.owner.display_name}
+                  </Text>
+                )}
+              </VStack>
+
+              <HStack className='gap-2 items-center'>
+                <Button
+                  variant='link'
+                  onPress={onToggle}
+                  accessibilityRole='button'
+                >
+                  <Animated.View style={chevronStyle}>
+                    <Badge size='md' className='rounded-xl bg-white/20 backdrop-blur-sm'>
+                      <BadgeIcon
+                        size='md'
+                        as={expanded ? ChevronDownIcon : ChevronUpIcon}
+                        className='text-white'
+                      />
+                    </Badge>
+                  </Animated.View>
+                </Button>
+              </HStack>
             </HStack>
-            {eventData.event.owner?.display_name && (
-              <Text size='sm' className='text-typography-400'>
-                By {eventData.event.owner.display_name}
-              </Text>
-            )}
           </VStack>
-        </HStack>
+        </VStack>
 
         {/* Expanded CONTENT */}
         <Animated.View style={extraStyle} className='mt-2'>
-          <HStack className='justify-between items-top'>
+            <HStack className='justify-between items-top px-2'>
             <EventLocationInfo location={eventData.location} />
             <EventDatesInfos event={eventData.event} />
-          </HStack>
+             <Badge
+              size='sm'
+              action={eventData.event.isPublic ? 'info' : 'warning'}
+              className='rounded-full h-6 bg-black/20 backdrop-blur-sm'
+              >
+              <BadgeIcon
+                size='md'
+                as={eventData.event.isPublic ? CircleIcon : CloseCircleIcon}
+              />
+              <BadgeText className='ml-1 text-white'>
+                {eventData.event.isPublic ? 'Public' : 'Private'}
+              </BadgeText>
+              </Badge>
+              <AvatarGroup
+                users={eventData.members.map(member => member.profile)}
+                onPress={handleMemberAvatarGroupPress}
+              />
+            </HStack>
         </Animated.View>
       </Card>
+
+
+      {/* Event Members Drawer */}
+      <EventMembersDrawer
+        eventData={eventData}
+        isOpen={showMembersDrawer}
+        onClose={handleCloseMembersDrawer}
+        onInvitePress={handleInviteUserPress}
+        onUpdated={onRefresh}
+      />
     </Animated.View>
   );
 }

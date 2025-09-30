@@ -1,7 +1,6 @@
-import { Button } from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   ThreeDotsIcon,
-  Icon,
   GlobeIcon,
   PaperclipIcon,
   SettingsIcon,
@@ -9,13 +8,18 @@ import {
   EditIcon,
 } from '@/components/ui/icon';
 import {
-  Menu,
-  MenuItem,
-  MenuItemLabel,
-  MenuSeparator,
-} from '@/components/ui/menu';
+  Drawer,
+  DrawerBackdrop,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+} from '@/components/ui/drawer';
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { HStack } from '@/components/ui/hstack';
+import { VStack } from '@/components/ui/vstack';
+import { Text } from '@/components/ui/text';
+import { Divider } from '@/components/ui/divider';
+import { useState } from 'react';
 
 interface Props {
   callDelete: () => void;
@@ -23,86 +27,130 @@ interface Props {
 }
 
 export default function Event3DotMenu({ callDelete, callEdit }: Props) {
-  return (
-    <Menu
-      placement='bottom right'
-      offset={5}
-      disabledKeys={['Settings']}
-      trigger={({ ...triggerProps }) => {
-        return (
-          <Button
-            size='sm'
-            action='secondary'
-            variant='solid'
-            className='rounded-2xl'
-            {...triggerProps}
-          >
-            <Icon as={ThreeDotsIcon} size='md' />
-          </Button>
-        );
-      }}
-    >
-      <MenuItem key='delete' textValue='delete' onPress={callDelete}>
-        <Icon as={TrashIcon} size='sm' className='mr-2 color-red-500' />
-        <MenuItemLabel className=' color-red-500' size='sm'>
-          delete
-        </MenuItemLabel>
-      </MenuItem>
-      <MenuItem
-        key='edit'
-        textValue='edit'
-        onPress={callEdit}
-        className='p-2 justify-between'
-      >
-        <HStack>
-          <Icon as={EditIcon} size='sm' className='mr-2' />
-          <MenuItemLabel className='mr-2' size='sm'>
-            edit
-          </MenuItemLabel>
-        </HStack>
-        <Badge action='warning' className='rounded-full'>
-          <BadgeText className='text-2xs capitalize'>Not impl.</BadgeText>
-        </Badge>
-      </MenuItem>
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-      {/* MOCK MENU */}
-      <MenuSeparator />
-      <MenuItem
-        key='share'
-        disabled={true}
-        textValue='Share'
-        className='p-2 justify-between'
+  const handleOpenDrawer = () => {
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const handleDelete = () => {
+    callDelete();
+    handleCloseDrawer();
+  };
+
+  const handleEdit = () => {
+    callEdit();
+    handleCloseDrawer();
+  };
+
+  return (
+    <>
+      <Button
+        size='sm'
+        action='secondary'
+        variant='solid'
+        className='rounded-2xl'
+        onPress={handleOpenDrawer}
       >
-        <HStack>
-          <Icon as={GlobeIcon} size='sm' className='mr-2 color-secondary-700' />
-          <MenuItemLabel size='sm' className='color-secondary-700'>
-            Share
-          </MenuItemLabel>
-        </HStack>
-        <Badge action='success' className='rounded-full'>
-          <BadgeText className='text-2xs capitalize'>Coming soon</BadgeText>
-        </Badge>
-      </MenuItem>
-      <MenuItem key='pin' disabled={true} textValue='Pin'>
-        <Icon
-          as={PaperclipIcon}
-          size='sm'
-          className='mr-2 color-secondary-700'
-        />
-        <MenuItemLabel size='sm' className='color-secondary-700'>
-          Pin
-        </MenuItemLabel>
-      </MenuItem>
-      <MenuItem key='settings' disabled={true} textValue='Settings'>
-        <Icon
-          as={SettingsIcon}
-          size='sm'
-          className='mr-2 color-secondary-700'
-        />
-        <MenuItemLabel size='sm' className='color-secondary-700'>
-          Settings
-        </MenuItemLabel>
-      </MenuItem>
-    </Menu>
+        <ButtonIcon as={ThreeDotsIcon} size='md' />
+      </Button>
+
+      <Drawer isOpen={isDrawerOpen} onClose={handleCloseDrawer}>
+        <DrawerBackdrop />
+        <DrawerContent className='w-full max-h-[50vh]'>
+          <DrawerHeader>
+            <Text size='lg' className='font-semibold text-center'>
+              Event Options
+            </Text>
+          </DrawerHeader>
+
+          <DrawerBody className='gap-2'>
+            <VStack className='gap-2'>
+              {/* Delete Button */}
+              <Button
+                variant='link'
+                action='negative'
+                className='w-full justify-start'
+                onPress={handleDelete}
+              >
+                <HStack className='items-center gap-3'>
+                  <ButtonIcon as={TrashIcon} />
+                  <ButtonText>Delete Event</ButtonText>
+                </HStack>
+              </Button>
+
+              {/* Edit Button */}
+              <Button
+                variant='link'
+                className='w-full justify-start'
+                onPress={handleEdit}
+              >
+                <HStack className='items-center justify-between w-full'>
+                  <HStack className='items-center gap-3'>
+                    <ButtonIcon as={EditIcon} />
+                    <ButtonText>Edit Event</ButtonText>
+                  </HStack>
+                </HStack>
+              </Button>
+
+              <Divider className='my-2' />
+
+              {/* Disabled Options */}
+              <Button
+                variant='link'
+                className='w-full justify-start opacity-50'
+                disabled={true}
+              >
+                <HStack className='items-center justify-between w-full'>
+                  <HStack className='items-center gap-3'>
+                    <ButtonIcon as={GlobeIcon} />
+                    <ButtonText>Share Event</ButtonText>
+                  </HStack>
+                  <Badge action='success' className='rounded-full'>
+                    <BadgeText className='text-2xs'>Coming soon</BadgeText>
+                  </Badge>
+                </HStack>
+              </Button>
+
+              <Button
+                variant='link'
+                className='w-full justify-start opacity-50'
+                disabled={true}
+              >
+                <HStack className='items-center gap-3'>
+                  <ButtonIcon as={PaperclipIcon} />
+                  <ButtonText>Pin Event</ButtonText>
+                </HStack>
+              </Button>
+
+              <Button
+                variant='link'
+                className='w-full justify-start opacity-50'
+                disabled={true}
+              >
+                <HStack className='items-center gap-3'>
+                  <ButtonIcon as={SettingsIcon} />
+                  <ButtonText>Event Settings</ButtonText>
+                </HStack>
+              </Button>
+
+              {/* Cancel Button */}
+              <Button
+                variant='solid'
+                action='secondary'
+                className='w-full mt-4'
+                onPress={handleCloseDrawer}
+              >
+                <ButtonText>Cancel</ButtonText>
+              </Button>
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }

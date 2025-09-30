@@ -126,3 +126,14 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
   }
   return res.data;
 }
+
+export async function addUserToEvent(eventId: string, userId: string)
+{
+  console.log('Implement addUserToEvent', { eventId, userId });
+}
+
+export async function removeUserFromEvent(eventId: string, userId: string)
+{
+  console.log('Implement removeUserFromEvent', { eventId, userId });
+}
+

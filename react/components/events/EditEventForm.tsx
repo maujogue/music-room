@@ -15,6 +15,7 @@ import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Props = {
   onSubmit: (payload: EventPayload) => Promise<void> | void;
@@ -34,12 +35,16 @@ export default function EditEventForm({
   const [imageUrl, setImageUrl] = useState(initialValues.event?.image_url ?? '');
   const [playlist, setPlaylist] = useState<Playlist | null>(initialValues.playlist ?? null);
   const [beginningAt, setBeginningAt] = useState(
-    // store as ISO string or empty
-    initialValues.event?.beginning_at ? String(initialValues.event.beginning_at) : ''
+    initialValues.event?.beginning_at ? new Date(initialValues.event.beginning_at) : new Date()
   );
   const [endingAt, setEndingAt] = useState(
-    initialValues.event?.ending_at ? String(initialValues.event.ending_at) : ''
+    initialValues.event?.ending_at ? new Date(initialValues.event.ending_at) : new Date()
   );
+
+  // DateTimePicker states
+  const [showBeginning, setShowBeginning] = useState(false);
+  const [showEnding, setShowEnding] = useState(false);
+  const [mode, setMode] = useState<'date' | 'time'>('date');
 
   // location fields
   const initialLocation = (initialValues as any).location ?? {};
@@ -55,6 +60,45 @@ export default function EditEventForm({
   const [loading, setLoading] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // DateTimePicker handlers
+  const onBeginningChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || beginningAt;
+    setShowBeginning(false);
+    setBeginningAt(currentDate);
+  };
+
+  const onEndingChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || endingAt;
+    setShowEnding(false);
+    setEndingAt(currentDate);
+  };
+
+  const showBeginningMode = (currentMode: 'date' | 'time') => {
+    setShowBeginning(true);
+    setMode(currentMode);
+  };
+
+  const showEndingMode = (currentMode: 'date' | 'time') => {
+    setShowEnding(true);
+    setMode(currentMode);
+  };
+
+  const showBeginningDatepicker = () => {
+    showBeginningMode('date');
+  };
+
+  const showBeginningTimepicker = () => {
+    showBeginningMode('time');
+  };
+
+  const showEndingDatepicker = () => {
+    showEndingMode('date');
+  };
+
+  const showEndingTimepicker = () => {
+    showEndingMode('time');
+  };
 
   async function uploadAvatar() {
     try {
@@ -130,8 +174,8 @@ export default function EditEventForm({
       description: description.trim() || null,
       image_url: imageUrl.trim() || null,
       playlist_id: playlist?.id || null,
-      beginning_at: beginningAt ? beginningAt : null,
-      ending_at: endingAt ? endingAt : null,
+      beginning_at: beginningAt ? beginningAt.toISOString() : null,
+      ending_at: endingAt ? endingAt.toISOString() : null,
       // include location as nested object to match get_complete_event structure
       location: {
         venuename: venueName.trim() || null,
@@ -219,25 +263,45 @@ export default function EditEventForm({
                 </VStack>
               )}
 
-              <Text className='mt-2'>Beginning (ISO string)</Text>
-              <Input>
-                <InputField
-                  placeholder='2025-09-09T18:00:00Z'
+              <Text className='mt-2'>Beginning Date & Time</Text>
+              <HStack className="gap-2 mb-2">
+                <Button size="sm" variant="outline" onPress={showBeginningDatepicker}>
+                  <ButtonText>Select Date</ButtonText>
+                </Button>
+                <Button size="sm" variant="outline" onPress={showBeginningTimepicker}>
+                  <ButtonText>Select Time</ButtonText>
+                </Button>
+              </HStack>
+              <Text>Selected: {beginningAt.toLocaleString()}</Text>
+              {showBeginning && (
+                <DateTimePicker
+                  testID="beginningDateTimePicker"
                   value={beginningAt}
-                  onChangeText={setBeginningAt}
-                  autoCapitalize='none'
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onBeginningChange}
                 />
-              </Input>
+              )}
 
-              <Text className='mt-2'>Ending (ISO string)</Text>
-              <Input>
-                <InputField
-                  placeholder='2025-09-09T20:00:00Z'
+              <Text className='mt-4'>Ending Date & Time</Text>
+              <HStack className="gap-2 mb-2">
+                <Button size="sm" variant="outline" onPress={showEndingDatepicker}>
+                  <ButtonText>Select Date</ButtonText>
+                </Button>
+                <Button size="sm" variant="outline" onPress={showEndingTimepicker}>
+                  <ButtonText>Select Time</ButtonText>
+                </Button>
+              </HStack>
+              <Text>Selected: {endingAt.toLocaleString()}</Text>
+              {showEnding && (
+                <DateTimePicker
+                  testID="endingDateTimePicker"
                   value={endingAt}
-                  onChangeText={setEndingAt}
-                  autoCapitalize='none'
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onEndingChange}
                 />
-              </Input>
+              )}
 
               <Text className='mt-4 font-medium'>Location</Text>
 
