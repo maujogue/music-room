@@ -7,8 +7,18 @@ export default function PlaylistDetailLayout() {
       <Stack.Screen
         name='index'
         options={{
-          title: 'Event',
+          title: '',
           headerShown: true,
+          headerTransparent: true,
+          headerRight: () => <CancelButton />,
+        }}
+      />
+      <Stack.Screen
+        name='edit'
+        options={{
+          presentation: 'modal',
+          title: '',
+          headerShadowVisible: false,
           headerRight: () => <CancelButton />,
         }}
       />

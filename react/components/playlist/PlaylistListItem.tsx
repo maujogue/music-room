@@ -11,9 +11,10 @@ import { Pressable } from 'react-native';
 
 type Props = {
   playlist: SpotifyPlaylist;
+  onPress?: () => void;
 };
 
-export default function PlaylistListItem({ playlist }: Props) {
+export default function PlaylistListItem({ playlist, onPress }: Props) {
   const router = useRouter();
   const getImage = () => {
     return {
@@ -31,7 +32,7 @@ export default function PlaylistListItem({ playlist }: Props) {
   };
 
   return (
-    <Pressable onPress={() => onPlaylistPress()}>
+    <Pressable onPress={onPress || onPlaylistPress}>
       <Card
         size='md'
         className='rounded-lg flex-row gap-2 mb-2 p-2'

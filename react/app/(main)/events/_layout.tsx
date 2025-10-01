@@ -1,5 +1,4 @@
 import { Stack } from 'expo-router';
-import NewItemButton from '@/components/generics/NewItemButton';
 
 export default function EventLayout() {
   return (
@@ -7,8 +6,9 @@ export default function EventLayout() {
       <Stack.Screen
         name='index'
         options={{
-          title: 'My Events',
-          headerRight: () => <NewItemButton routePath='(main)/events/add/' />,
+          title: 'Events',
+          headerShown: true,
+          headerShadowVisible: false,
         }}
       />
 

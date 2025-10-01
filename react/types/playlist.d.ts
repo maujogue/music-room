@@ -11,40 +11,40 @@ type PlaylistPayload = {
 };
 
 // Playlist types for the new playlist system
-export interface PlaylistOwner {
+type PlaylistOwner = {
   id: string;
   username: string;
   email: string;
   avatar_url: string | null;
   bio: string | null;
-}
+};
 
-export interface PlaylistCollaborator {
+type PlaylistCollaborator = {
   id: string;
   username: string;
   email: string;
   avatar_url: string | null;
   role: 'owner' | 'collaborator' | 'viewer';
   added_at: string;
-}
+};
 
-export interface PlaylistMember {
+type PlaylistMember = {
   id: string;
   username: string;
   email: string;
   avatar_url: string | null;
   added_at: string;
-}
+};
 
-export interface PlaylistTrack {
+type PlaylistTrack = {
   spotify_id: string;
   position: number;
   added_by: string;
   added_at: string;
   details: SpotifyTrack;
-}
+};
 
-export interface Playlist {
+type Playlist = {
   id: string;
   name: string;
   description: string | null;
@@ -65,4 +65,4 @@ export interface Playlist {
   tracks: PlaylistTrack[];
   is_spotify_sync: boolean;
   spotify_id: string | null;
-}
+};

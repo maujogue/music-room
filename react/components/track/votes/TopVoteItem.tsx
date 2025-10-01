@@ -9,12 +9,12 @@ import NumBadge from '@/components/generics/NumBadge';
 
 interface Props {
   rank: Rank;
-  track?: SpotifyTrackWithKey;
+  track?: PlaylistTrack;
 }
 
 export default function TopVoteItem({ rank, track }: Props) {
   const cover =
-    track?.album?.images?.[0]?.url ??
+    track?.details.album?.images?.[0]?.url ??
     (track as any)?.images?.[0]?.url ??
     undefined;
 
@@ -32,7 +32,7 @@ export default function TopVoteItem({ rank, track }: Props) {
         <Card className='w-full h-full p-1 rounded overflow-hidden'>
           {cover ? (
             <Image
-              alt={`cover-${track?.name ?? 'track'}`}
+              alt={`cover-${track?.details.name ?? 'track'}`}
               source={{ uri: cover }}
               className='w-full h-full'
               resizeMode='cover'
@@ -50,7 +50,7 @@ export default function TopVoteItem({ rank, track }: Props) {
       {track && (
         <HStack className='justify-betwee items-center'>
           <NumBadge num={rank} />
-          <Text size='2xs'>{track?.name}</Text>
+          <Text size='2xs'>{track?.details.name}</Text>
         </HStack>
       )}
     </VStack>

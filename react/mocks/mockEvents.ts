@@ -3,26 +3,26 @@ const my_playlist_id: string = '388NOl9u5ZDAZRBlQXrX5c';
 
 export const MOCK_VOTES: EventVote[] = [
   {
-    eventId: '0',
-    trackId: '3bKeShmrQ2u9VJoJRVGUvJ',
+    eventId: 'db3d381c-154e-4111-944a-cc168af14c22',
+    trackId: '226f576d-8f33-4159-8fff-34b26fcce742',
     users: [],
     number: 5,
   },
   {
-    eventId: '0',
-    trackId: '54iSPXKuDKAp4jvCBq2MjE',
+    eventId: 'db3d381c-154e-4111-944a-cc168af14c22',
+    trackId: '346a14ab-820a-45f0-83de-c980ee203d4e',
     users: [],
     number: 2,
   },
   {
-    eventId: '0',
-    trackId: '76xQksu4irwgEKw9F5OaL7',
+    eventId: 'db3d381c-154e-4111-944a-cc168af14c22',
+    trackId: '7943555b-ec3d-450e-98f2-831a866ac9fa',
     users: [],
     number: 1,
   },
 ];
 
-export const MOCK_EVENTS: MusicEvent[] = [
+export const MOCK_EVENTS: Event[] = [
   {
     id: '0',
     name: 'Super Event MachinChose',

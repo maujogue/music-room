@@ -17,15 +17,17 @@ import { useEvent } from '@/hooks/useEvent';
 import EventHeader from './eventDetail/EventHeader';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import { ScrollView } from 'react-native';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const [activeTab, setActiveTab] = useState<'votes' | 'guests'>('votes');
   const [expanded, setIsExpanded] = useState<boolean>(false);
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
+
+  console.log('Data:', data, 'Loading:', loading, 'Error:', error);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,10 +56,7 @@ export default function EventDetail() {
   };
 
   const onEditEvent = () => {
-    router.push({
-      pathname: '/(main)/events/[eventId]/edit',
-      params: { eventId },
-    });
+    router.push(`(main)/events/${eventId}/edit`);
   };
 
   const onToggleHeader = () => {
@@ -73,7 +72,7 @@ export default function EventDetail() {
   }
 
   return (
-    <>
+    <ScrollView>
       <VStack className='flex-1'>
         <EventHeader
           eventData={data}
@@ -83,25 +82,7 @@ export default function EventDetail() {
 
         {/* Votes / Guests tabs */}
         <Center className='flex-1'>
-          <VStack className='px-2 pb-2'>
-            <HStack className='w-full bg-primary-500 rounded-xl p-2 justify-between'>
-              <TabButton
-                label={'Votes'}
-                isActive={activeTab == 'votes'}
-                onPress={() => setActiveTab('votes')}
-              />
-              <TabButton
-                label={'Guests'}
-                isActive={activeTab == 'guests'}
-                onPress={() => setActiveTab('guests')}
-              />
-            </HStack>
-          </VStack>
-          {activeTab == 'votes' ? (
-            <VotesRoom eventId={eventId} />
-          ) : (
-            <GuestsRoom eventId={eventId} />
-          )}
+          <VotesRoom eventId={eventId} />
         </Center>
         {/* ------------------ */}
       </VStack>
@@ -113,6 +94,6 @@ export default function EventDetail() {
         itemName={data.event.name ?? 'event'}
         itemType='event'
       />
-    </>
+    </ScrollView>
   );
 }

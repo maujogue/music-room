@@ -1,11 +1,11 @@
-type MusicEvent = {
+type Event = {
   id: string;
   name: string;
   images: SpotifyImage[];
   owner: SpotifyOwner;
   isPublic: boolean;
-  location: MusicEventLocation
-  // playlistId: string;
+  location: MusicEventLocation;
+  playlistId: string;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
@@ -26,6 +26,6 @@ type MusicEventLocation = {
 }
 
 type EventPayload = {
-	event?: MusicEvent;
+	event?: Event;
 	location?: MusicEventLocation;
 }

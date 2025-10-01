@@ -12,15 +12,15 @@ import { Box } from '@/components/ui/box';
 import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
 import { Heading } from '@/components/ui/heading';
-import { voteForTrack } from '@/services/events';
 import { VStack } from '@/components/ui/vstack';
 import TopVotesTracks from '@/components/track/votes/TopVotes';
+import { useEffect } from 'react';
 
 interface Props {
   eventId: string;
   playlistId: string;
   playlistTitle?: string;
-  playlistTracks: SpotifyTracksArray;
+  playlistTracks: PlaylistTrack[];
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
 
@@ -42,6 +42,32 @@ export default function TrackListVotes({
     loading: loadingV,
     error: errorV,
   } = useVoteCountIndex(eventId);
+
+  // --------------------------------------------------
+  // CONTINUE DEBUG HERE TO GET WHAT IS WITH VOTES RETREIVED
+  useEffect(() => {
+    if (!playlistTracks) return;
+
+    playlistTracks?.forEach(t => {
+      console.log('playlistTracks', t.details.name);
+      console.log('ID :', t.spotify_id);
+    });
+
+    console.log('tracks changed:', playlistTracks.length);
+  }, [tracks]);
+
+  useEffect(() => {
+    if (!tracks) return;
+
+    tracks?.forEach(t => {
+      console.log('Track in PL:', t.details.name);
+      console.log('ID :', t.spotify_id, 'Votes:', getVoteCount(t.spotify_id));
+    });
+
+    console.log('tracks changed:', playlistTracks.length);
+  }, [tracks]);
+  // --------------------------------------------------
+  // --------------------------------------------------
 
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
@@ -85,15 +111,15 @@ export default function TrackListVotes({
             const va = getVoteCount(getTrackId(a));
             const vb = getVoteCount(getTrackId(b));
             if (vb !== va) return vb - va;
-            return a.name.localeCompare(b.name);
+            return a.details.name.localeCompare(b.details.name);
           })
-          .map((track: SpotifyTrackWithKey) => {
+          .map((track: PlaylistTrack) => {
             const voteCount = getVoteCount(getTrackId(track));
 
             return (
-              <Pressable key={track.__key}>
+              <Pressable key={track.added_at}>
                 <TrackListItem
-                  track={track}
+                  track={track.details}
                   voteCount={voteCount}
                   renderRightAction={() => (
                     <Reanimated.View

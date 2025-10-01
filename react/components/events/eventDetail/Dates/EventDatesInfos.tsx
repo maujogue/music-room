@@ -6,7 +6,7 @@ import { Calendar1Icon, TimerIcon } from 'lucide-react-native';
 import { useEventDate } from '@/hooks/useEventDate';
 
 interface Props {
-  event: Pick<MusicEvent, 'beginning_at' | 'ending_at'>;
+  event: Pick<Event, 'beginning_at' | 'ending_at'>;
 }
 
 export default function EventDatesInfos({ event }: Props) {

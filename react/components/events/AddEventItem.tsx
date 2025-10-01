@@ -4,27 +4,26 @@ import { Text } from '@/components/ui/text';
 import { Icon, AddIcon } from '@/components/ui/icon';
 import { Pressable } from 'react-native';
 import { Box } from '@/components/ui/box';
-import { useRouter } from 'expo-router';
 
-export default function CreatePlaylistItem() {
-  const router = useRouter();
-  const onPlaylistPress = () => {
-    router.push('(main)/playlists/add/');
-  };
+type Props = {
+  onPress: () => void;
+  title: string;
+};
 
+export default function AddEventItem({ onPress, title }: Props) {
   return (
-    <Pressable onPress={() => onPlaylistPress()}>
+    <Pressable onPress={onPress}>
       <Card
         size='md'
-        className='rounded-lg h-[70px] w-100 mb-4 p-2'
+        className='rounded-xl h-[100px] w-100 bg-background-800'
         variant='elevated'
       >
         <HStack className='py-1 flex-1 justify-start items-center gap-4'>
           <Box className='rounded-md h-[60px] w-[60px] justify-center items-center'>
-            <Icon as={AddIcon} size='2xl' />
+            <Icon as={AddIcon} size='2xl' color='white' />
           </Box>
-          <Text size='sm' className='text-typography-800'>
-            Create playlist
+          <Text size='2xl' className='text-white'>
+            {title}
           </Text>
         </HStack>
       </Card>

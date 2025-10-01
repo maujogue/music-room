@@ -26,14 +26,14 @@ export function useVoteCountIndex(eventId: string) {
   //     .slice(0, limit);
   // };
 
-  const getTrackId = (track: SpotifyTrackWithKey) => {
-    return track?.id ?? 'localTrackId';
+  const getTrackId = (track: PlaylistTrack) => {
+    return track.spotify_id;
   };
 
   const getTopTracksFrom = (
-    tracks: SpotifyTrackWithKey[],
+    tracks: PlaylistTrack[],
     limit: number = 3
-  ): SpotifyTrackWithKey[] => {
+  ): PlaylistTrack[] => {
     if (!Array.isArray(tracks) || tracks.length === 0) return [];
 
     const orderIndex = new Map<string, number>(
@@ -44,7 +44,7 @@ export function useVoteCountIndex(eventId: string) {
       const va = getVoteCount(getTrackId(a));
       const vb = getVoteCount(getTrackId(b));
       if (vb !== va) return vb - va;
-      const byName = (a.name ?? '').localeCompare(b.name ?? '');
+      const byName = (a.details.name ?? '').localeCompare(b.details.name ?? '');
       if (byName !== 0) return byName;
       return (
         (orderIndex.get(getTrackId(a)) ?? 0) -

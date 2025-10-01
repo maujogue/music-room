@@ -22,15 +22,17 @@ export async function getCurrentUserPlaylistSupabase(userId: string): Promise<an
 }
 
 export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
-  const { data, error } = await supabase.from('events')
-	.select('*')
-	.eq('owner_id', ownerId);
+  const { data, error } = await supabase
+    .from('events')
+    .select('*, owner:profiles!events_owner_id_fkey(*)')
+    .eq('owner_id', ownerId);
 
   if (error) {
-	console.error('Supabase error:', error);
-  const pgError = formatDbError(error);
-	throw new HTTPException(pgError.status, { message: pgError.message });
+    console.error('Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
+  console.log('Events fetched for owner:', data);
   return data;
 }

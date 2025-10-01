@@ -6,6 +6,7 @@ import {
  } from './services/supabase.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { refreshSpotifyToken } from '../auth.ts';
+import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 
 export async function search(c: Context) {
 	const user = c.get('user')
@@ -39,7 +40,13 @@ export async function search(c: Context) {
 	}
 	if (type === 'event' || type === 'all') {
 		eventResults = await searchEventsByQuery({ query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
-		console.log('eventResults', eventResults);
+		eventResults = await Promise.all(eventResults.map(async event => {
+			if (event.image_url) {
+				event.image_url = await getPublicUrlForPath(event.image_url)
+			}
+			return event
+		}))
+		console.log('Event results after processing:', eventResults);
 	}
 
 	c.status(200)

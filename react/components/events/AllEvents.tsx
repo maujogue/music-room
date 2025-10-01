@@ -12,14 +12,10 @@ export default function AllEvents() {
   if (error) return <Text style={{ color: 'red' }}>{error}</Text>;
   if (!events) return <Text>No event found</Text>;
 
-  const sections: MusicEventSection[] = [
+  const sections = [
     {
-      title: 'Subscribed events',
-      data: events.filter(e => e.owner_id !== profile.id),
-    },
-    {
-      title: 'My events',
-      data: events.filter(e => e.owner_id === profile.id),
+      title: '',
+      data: events,
     },
   ];
 

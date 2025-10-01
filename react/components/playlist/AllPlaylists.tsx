@@ -5,17 +5,22 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
-import { Button } from '@/components/ui/button';
-import CreatePlaylistItem from '@/components/playlist/CreatePlaylistItem';
+import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
+import { useRouter } from 'expo-router';
 
 export default function AllPlaylists() {
   const { playlists, refetch, loading, error } = useUserPlaylists();
+  const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
+
+  const onPlaylistPress = () => {
+    router.push('(main)/playlists/add/');
+  };
 
   if (loading) return <LoadingSpinner text={'Playlists loading...'} />;
   if (error) return <ErrorScreen error={error} />;
@@ -24,7 +29,7 @@ export default function AllPlaylists() {
   if (playlists.length === 0) {
     return (
       <>
-        <CreatePlaylistItem />
+        <AddPlaylistItem onPress={onPlaylistPress} title='Create playlist' />
         <Text>no playlist found</Text>
       </>
     );

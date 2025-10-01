@@ -3,7 +3,7 @@ import { getSession } from '@/services/session';
 import { getCurrentUserEvents } from '@/services/events';
 
 export function useUserEvents() {
-  const [events, setEvents] = useState<MusicEvent[] | null>(null);
+  const [events, setEvents] = useState<Event[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

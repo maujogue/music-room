@@ -84,15 +84,7 @@ export async function searchEventsByQuery(
 ): Promise<{ data: any[]; error: any }> {
 	const { data: events, error: eventsError } = await supabase
 	.from('events')
-	.select(
-	  `
-	  id,
-	  name,
-	  description,
-	  beginning_at,
-	  image_url
-	`
-	)
+	.select('*, owner:profiles!events_owner_id_fkey(id, username, email, avatar_url, bio)')
 	.ilike('name', `%${params.query}%`)
 	.limit(params.limit || 20);
 

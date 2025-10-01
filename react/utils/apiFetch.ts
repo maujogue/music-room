@@ -9,8 +9,10 @@ export type RequestOptions = {
 
 export async function apiFetch<T>(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
+  contentType?: string
 ): Promise<ApiResponse<T>> {
+  console.log('apiFetch options:', options);
   const { method = 'GET', headers = {}, body, cache = 'default' } = options;
 
   console.log('apiFetch called with:', { url, method, headers, body, cache });
@@ -24,7 +26,7 @@ export async function apiFetch<T>(
     const finalHeaders = isFormData
       ? sessionHeaders
       : {
-          'Content-Type': 'application/json',
+          'Content-Type': contentType || 'application/json',
           ...sessionHeaders,
         };
 
