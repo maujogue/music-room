@@ -22,7 +22,6 @@ export default function AllPlaylists() {
     router.push('(main)/playlists/add/');
   };
 
-
   if (loading) return <LoadingSpinner text={'Playlists loading...'} />;
   if (error) return <ErrorScreen error={error} />;
   if (!playlists) return <ErrorScreen error={'No playlist found'} />;
@@ -30,7 +29,7 @@ export default function AllPlaylists() {
   if (playlists.length === 0) {
     return (
       <>
-        <AddPlaylistItem onPress={onPlaylistPress} title="Create playlist" />
+        <AddPlaylistItem onPress={onPlaylistPress} title='Create playlist' />
         <Text>no playlist found</Text>
       </>
     );

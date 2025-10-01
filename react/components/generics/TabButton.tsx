@@ -9,17 +9,20 @@ interface Props {
   className?: string;
 }
 
-export default function TabButton({ label, isActive, onPress, className }: Props) {
+export default function TabButton({
+  label,
+  isActive,
+  onPress,
+  className,
+}: Props) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole='tab'
       accessibilityState={{ selected: isActive }}
-      className="w-full"
+      className='w-full'
     >
-      <Center
-        className={className}
-      >
+      <Center className={className}>
         <Text className={'text-typography-900'}>{label}</Text>
       </Center>
     </Pressable>

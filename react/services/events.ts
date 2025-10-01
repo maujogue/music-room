@@ -1,11 +1,13 @@
 import { apiFetch } from '@/utils/apiFetch';
 
 export async function createEvent(payload: MusicEventPayload) {
+  const form = createEventFormData(payload);
+
   const res = await apiFetch<Event>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
     {
       method: 'POST',
-      body: payload,
+      body: form,
     }
   );
 
@@ -91,10 +93,23 @@ export async function getCurrentUserEvents() {
 }
 
 export async function updateEvent(id: string, payload: MusicEventPayload) {
-  console.log('Updating event with ID:', id, 'Payload:', payload);
-
   const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`;
 
+  const form = createEventFormData(payload);
+
+  const res = await apiFetch<Event>(url, {
+    method: 'PUT',
+    body: form,
+  });
+
+  if (!res.success) {
+    console.error('Error updating Event:', res.error);
+    throw res.error;
+  }
+  return res.data;
+}
+
+function createEventFormData(payload: MusicEventPayload) {
   const imageUri = (payload as any).image_url;
   const form = new FormData();
 
@@ -114,26 +129,13 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
     form.append('image', { uri, name: fileName, type: mime } as any);
   }
 
-  console.log('Form data prepared for update:', form);
-  const res = await apiFetch<Event>(url, {
-    method: 'PUT',
-    body: form,
-  });
-
-  if (!res.success) {
-    console.error('Error updating Event:', res.error);
-    throw res.error;
-  }
-  return res.data;
+  return form;
 }
 
-export async function addUserToEvent(eventId: string, userId: string)
-{
+export async function addUserToEvent(eventId: string, userId: string) {
   console.log('Implement addUserToEvent', { eventId, userId });
 }
 
-export async function removeUserFromEvent(eventId: string, userId: string)
-{
+export async function removeUserFromEvent(eventId: string, userId: string) {
   console.log('Implement removeUserFromEvent', { eventId, userId });
 }
-

@@ -18,7 +18,7 @@ export default function PlaylistList({ sections }: Props) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 32 }}
     >
-      <AddPlaylistItem onPress={onPlaylistPress} title="Add Playlist" />
+      <AddPlaylistItem onPress={onPlaylistPress} title='Add Playlist' />
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}

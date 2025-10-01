@@ -10,7 +10,7 @@ export type RequestOptions = {
 export async function apiFetch<T>(
   url: string,
   options: RequestOptions = {},
-  contentType?: string,
+  contentType?: string
 ): Promise<ApiResponse<T>> {
   console.log('apiFetch options:', options);
   const { method = 'GET', headers = {}, body, cache = 'default' } = options;

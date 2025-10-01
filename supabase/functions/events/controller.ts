@@ -1,23 +1,59 @@
 import { Hono } from 'jsr:@hono/hono'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
+import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import {
   createSupabaseEvent,
   getSupabaseEventById,
   getSupabaseEventByOwner,
   deleteSupabaseEventById,
   updateSupabaseEventById,
-  uploadEventImage,
-  getPublicUrlForPath
+  uploadEventImage
 } from './service.ts'
+import {
+  validateEventPayload
+} from './validators.ts'
 
 
 export async function createEvent(c: Context): Promise<any> {
-  const body: EventPayload = await c.req.json()
+  const contentTypeHeader = c.req.header('content-type') || ''
+  let body: any = {}
+  let uploadedFile: File | null = null
+
+  if (contentTypeHeader.includes('multipart/form-data')) {
+    const form = await c.req.raw.formData()
+    for (const [key, value] of form.entries()) {
+      if (key === 'image') {
+        uploadedFile = value as File
+      } else if (key === 'location') {
+        try {
+          body.location = JSON.parse(value as string)
+        } catch (e) {
+          body.location = value === '' ? null : value
+        }
+      } else {
+        body[key] = value === '' ? null : value
+      }
+    }
+  } else {
+    body = await c.req.json()
+  }
+
   body.owner_id = c.get('user').id
 
-  if (!body.name || body.name.length < 3) {
-    throw new HTTPException(400, { message: 'Event name must be at least 3 characters long' })
+  const validation = validateEventPayload(body, { requireName: true })
+  if (!validation.valid) {
+    throw new HTTPException(400, { message: validation.message })
+  }
+
+  if (uploadedFile) {
+    try {
+      const publicUrl = await uploadEventImage(uploadedFile as File)
+      body.image_url = publicUrl
+    } catch (err) {
+      console.error('Error uploading file in createEvent:', err)
+      throw new HTTPException(500, { message: 'Failed to upload image' })
+    }
   }
 
   const event = await createSupabaseEvent(body)
@@ -97,10 +133,15 @@ export async function updateEventById(c: Context): Promise<any> {
     body = await c.req.json()
   }
 
+  const validation = validateEventPayload(body, { requireName: false })
+  if (!validation.valid) {
+    c.status(400)
+    return c.json({ error: validation.message })
+  }
+
   const user = c.get('user')
   const { location, ...eventData } = body;
 
-  console.log('Updating event with data:', body);
   const data = await getSupabaseEventById(id)
   if (!data) {
     c.status(404)

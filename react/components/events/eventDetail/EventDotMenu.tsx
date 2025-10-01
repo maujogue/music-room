@@ -53,7 +53,7 @@ export default function Event3DotMenu({ callDelete, callEdit }: Props) {
         size='sm'
         action='secondary'
         variant='solid'
-        className='rounded-2xl'
+        className='rounded-2xl opacity-80'
         onPress={handleOpenDrawer}
       >
         <ButtonIcon as={ThreeDotsIcon} size='md' />

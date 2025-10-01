@@ -58,10 +58,11 @@ export default function EditEvent() {
     );
   }
 
-
-  return <EditEventForm
-    initialValues={data ?? {}}
-    onSubmit={onSubmit}
-    ApiError={error}
-  />;
+  return (
+    <EditEventForm
+      initialValues={data ?? {}}
+      onSubmit={onSubmit}
+      ApiError={error}
+    />
+  );
 }

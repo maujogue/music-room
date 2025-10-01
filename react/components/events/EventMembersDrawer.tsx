@@ -97,14 +97,16 @@ export default function EventMembersDrawer({
   };
 
   const filteredOrganizers =
-    eventData.organizers?.filter(organizer => organizer.id !== eventData.event.owner.id) ||
-    [];
+    eventData.organizers?.filter(
+      organizer => organizer.id !== eventData.event.owner.id
+    ) || [];
 
   const organizerIds = filteredOrganizers.map(organizer => organizer.id) || [];
   const filteredAttendees =
     eventData.members?.filter(
       member =>
-        !organizerIds.includes(member.profile.id) && member.profile.id !== eventData.event.owner_id
+        !organizerIds.includes(member.profile.id) &&
+        member.profile.id !== eventData.event.owner_id
     ) || [];
 
   return (
@@ -174,7 +176,9 @@ export default function EventMembersDrawer({
                       >
                         <Avatar size='md'>
                           <AvatarFallbackText>
-                            {organizer.profile.display_name?.charAt(0).toUpperCase() || 'U'}
+                            {organizer.profile.display_name
+                              ?.charAt(0)
+                              .toUpperCase() || 'U'}
                           </AvatarFallbackText>
                           {organizer.profile.avatar_url && (
                             <AvatarImage
@@ -194,7 +198,11 @@ export default function EventMembersDrawer({
                             variant='outline'
                             onPress={() =>
                               handleUserActionPress(
-                                { id: organizer.id, username: organizer.profile.display_name || 'Unknown' },
+                                {
+                                  id: organizer.id,
+                                  username:
+                                    organizer.profile.display_name || 'Unknown',
+                                },
                                 'organizer'
                               )
                             }
@@ -224,7 +232,9 @@ export default function EventMembersDrawer({
                         <HStack className='items-center gap-3'>
                           <Avatar size='md'>
                             <AvatarFallbackText>
-                              {member.profile.display_name?.charAt(0).toUpperCase() || 'U'}
+                              {member.profile.display_name
+                                ?.charAt(0)
+                                .toUpperCase() || 'U'}
                             </AvatarFallbackText>
                             {member.profile.avatar_url && (
                               <AvatarImage
@@ -246,7 +256,11 @@ export default function EventMembersDrawer({
                               variant='outline'
                               onPress={() =>
                                 handleUserActionPress(
-                                  { id: member.id, username: member.profile.display_name || 'Unknown' },
+                                  {
+                                    id: member.id,
+                                    username:
+                                      member.profile.display_name || 'Unknown',
+                                  },
                                   'attendee'
                                 )
                               }
@@ -309,9 +323,7 @@ export default function EventMembersDrawer({
                     size='sm'
                     variant='filled'
                     className='w-full'
-                    onPress={() =>
-                      handlePromoteToOrganizer(selectedUser.id)
-                    }
+                    onPress={() => handlePromoteToOrganizer(selectedUser.id)}
                   >
                     <ButtonIcon as={UserCheck} color='white' />
                     <ButtonText className='ml-2 text-white'>

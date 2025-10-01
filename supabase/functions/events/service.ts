@@ -36,7 +36,7 @@ export async function createSupabaseEvent(eventData: EventPayload): Promise<any>
 }
 
 export async function getSupabaseEventById(eventId: string): Promise<any> {
-  const { data, error } = await supabaseClient.rpc('get_complete_event', { event_id: eventId });
+  const { data, error } = await supabaseClient.rpc('get_complete_event', { p_event_id: eventId });
 
   if (error) {
     console.error('Raw Supabase error:', error);
@@ -136,7 +136,7 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
 export async function getPublicUrlForPath(path: string): string {
   const localUrl = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL');
 
-  const { data } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+  const { data } = supabaseClient.storage.from('avatars').createSignedUrl(path, 3600);
 
   if (data?.publicUrl) {
     const publicUrl = data.publicUrl.replace(
@@ -161,8 +161,5 @@ export async function getPublicUrlForPath(path: string): string {
     localUrl + '/storage/v1'
   ) || path;
 
-  console.log('Corrected signed URL:', correctedUrl);
   return correctedUrl;
 }
-
-

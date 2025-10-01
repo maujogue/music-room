@@ -13,6 +13,15 @@ export default function PlaylistDetailLayout() {
           headerRight: () => <CancelButton />,
         }}
       />
+      <Stack.Screen
+        name='edit'
+        options={{
+          presentation: 'modal',
+          title: '',
+          headerShadowVisible: false,
+          headerRight: () => <CancelButton />,
+        }}
+      />
       {/* <Stack.Screen
         name='tracks/[trackId]'
         options={{

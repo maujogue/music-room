@@ -11,7 +11,8 @@ import {
   getSupabaseEventByOwner,
   getCurrentUserPlaylistSupabase
 } from './services/supabase.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 
 const supabase = createClient(
   Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
@@ -119,6 +120,18 @@ export async function fetchCurrentUserEvents(c: Context): Promise<any> {
   const events = await getSupabaseEventByOwner(user.id)
   if (!events) {
     throw new HTTPException(500, { message: 'Failed to fetch events' })
+  }
+  for (const event of events) {
+    try {
+      const imagePath = event.image_url;
+      if (imagePath) {
+        const publicUrl = await getPublicUrlForPath(imagePath);
+        console.log('Resolved public URL for image:', publicUrl);
+        event.image_url = publicUrl;
+      }
+    } catch (error) {
+      console.error('Error fetching public URL for image:', error);
+    }
   }
 
   return c.json(events)

@@ -11,21 +11,25 @@ type Props = {
   onSelect: (playlist: Playlist) => void;
 };
 
-export default function PlaylistSelectionModal({ isOpen, onClose, onSelect }: Props) {
+export default function PlaylistSelectionModal({
+  isOpen,
+  onClose,
+  onSelect,
+}: Props) {
   return (
-    <Modal visible={isOpen} animationType="slide" onRequestClose={onClose}>
+    <Modal visible={isOpen} animationType='slide' onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Button variant="outline" size="sm" onPress={onClose}>
+          <Button variant='outline' size='sm' onPress={onClose}>
             <ButtonIcon as={CloseIcon} />
           </Button>
         </View>
 
         <Search
-          placeholder="Search for playlists..."
+          placeholder='Search for playlists...'
           showFilters={false}
-          defaultType="Playlists"
-          renderItemPlaylist={(item) => (
+          defaultType='Playlists'
+          renderItemPlaylist={item => (
             <PlaylistListItem
               playlist={item}
               onPress={() => {

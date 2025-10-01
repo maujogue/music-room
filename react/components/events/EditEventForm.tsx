@@ -5,12 +5,12 @@ import { Input, InputField } from '@/components/ui/input';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { Box } from '@/components/ui/box';
-import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
+import { Icon, AlertCircleIcon } from '@/components/ui/icon';
 import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ScrollView, Image } from 'react-native';
-import { ImagePlus } from 'lucide-react-native';
+import { Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
@@ -32,13 +32,21 @@ export default function EditEventForm({
   const [description, setDescription] = useState(
     initialValues.event?.description ?? ''
   );
-  const [imageUrl, setImageUrl] = useState(initialValues.event?.image_url ?? '');
-  const [playlist, setPlaylist] = useState<Playlist | null>(initialValues.playlist ?? null);
+  const [imageUrl, setImageUrl] = useState(
+    initialValues.event?.image_url ?? ''
+  );
+  const [playlist, setPlaylist] = useState<Playlist | null>(
+    initialValues.playlist ?? null
+  );
   const [beginningAt, setBeginningAt] = useState(
-    initialValues.event?.beginning_at ? new Date(initialValues.event.beginning_at) : new Date()
+    initialValues.event?.beginning_at
+      ? new Date(initialValues.event.beginning_at)
+      : new Date()
   );
   const [endingAt, setEndingAt] = useState(
-    initialValues.event?.ending_at ? new Date(initialValues.event.ending_at) : new Date()
+    initialValues.event?.ending_at
+      ? new Date(initialValues.event.ending_at)
+      : new Date()
   );
 
   // DateTimePicker states
@@ -134,7 +142,6 @@ export default function EditEventForm({
 
       // (optional) perform upload to Supabase here and update imageUrl to public URL when done
       // ...existing upload logic...
-
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -199,158 +206,192 @@ export default function EditEventForm({
 
   return (
     <>
-      <FormControl className='p-4 border rounded-lg border-outline-300'>
+      <FormControl className='p-0 m-0'>
         <ScrollView
-          contentContainerStyle={{ paddingVertical: 8 }}
           keyboardShouldPersistTaps='handled'
+          contentContainerStyle={{ paddingTop: 0 }}
         >
-          <VStack space='md'>
-            <Box>
-              <Button
-                size='sm'
-                variant='outline'
-                className='my-4'
-                onPress={uploadAvatar}
-                disabled={uploading}
-              >
-                <ButtonText>Upload Image</ButtonText>
-                <ButtonIcon as={ImagePlus} />
-              </Button>
-
+          <VStack className='p-0'>
+            <Box className='p-0 m-0'>
               {imageUrl ? (
                 <Image
                   source={{ uri: imageUrl }}
-                  style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 12 }}
-                  resizeMode='center'
+                  style={{
+                    width: '100%',
+                    height: 200,
+                    marginTop: 0,
+                    marginBottom: 10,
+                  }}
+                  resizeMode='cover'
                 />
-              ) : null}
-
-              <Text>Name</Text>
-              <Input>
-                <InputField
-                  placeholder='Supacool event'
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize='sentences'
-                />
-              </Input>
-
-              <Text className='mt-2'>Description</Text>
-              <Textarea>
-                <TextareaInput
-                  placeholder='Event description'
-                  value={description}
-                  onChangeText={setDescription}
-                  autoCapitalize='sentences'
-                />
-              </Textarea>
-
-
-              <Text className='mt-2'>Playlist</Text>
-              { !playlist ? (
-                <AddPlaylistItem onPress={handleSelectPlaylist} title="Add Playlist" />
               ) : (
-                <VStack>
-                  <PlaylistListItem playlist={playlist} />
-                  <Button
-                    size="sm"
-                    variant="outline"
+                <Box
+                  className='bg-gray-200 items-center justify-center'
+                  style={{ width: '100%', height: 200, marginTop: 0 }}
+                >
+                  <Text className='text-gray-500'>No image selected</Text>
+                </Box>
+              )}
+
+              <Button
+                size='sm'
+                variant='filled'
+                onPress={uploadAvatar}
+                disabled={uploading}
+                className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-white/70'
+              >
+                <ButtonIcon as={Pen} />
+              </Button>
+
+              <Box className='p-4 pt-0'>
+                <Text>Name</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Supacool event'
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize='sentences'
+                  />
+                </Input>
+
+                <Text className='mt-2'>Description</Text>
+                <Textarea className='bg-white'>
+                  <TextareaInput
+                    placeholder='Event description'
+                    value={description}
+                    onChangeText={setDescription}
+                    autoCapitalize='sentences'
+                  />
+                </Textarea>
+
+                <Text className='mt-2'>Playlist</Text>
+                {!playlist ? (
+                  <AddPlaylistItem
                     onPress={handleSelectPlaylist}
-                    className="mt-2"
+                    title='Add Playlist'
+                  />
+                ) : (
+                  <VStack>
+                    <PlaylistListItem playlist={playlist} />
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      onPress={handleSelectPlaylist}
+                      className='mt-2 rounded-full absolute right-4 top-9 z-10 bg-white/70'
+                    >
+                      <ButtonIcon as={Pen} />
+                    </Button>
+                  </VStack>
+                )}
+
+                <Text className='mt-2'>Beginning Date & Time</Text>
+                <HStack className='gap-2 mb-2'>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onPress={showBeginningDatepicker}
+                    className='bg-white'
                   >
-                    <Text>Change Playlist</Text>
+                    <ButtonText>Select Date</ButtonText>
                   </Button>
-                </VStack>
-              )}
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onPress={showBeginningTimepicker}
+                    className='bg-white'
+                  >
+                    <ButtonText>Select Time</ButtonText>
+                  </Button>
+                </HStack>
+                <Text>Selected: {beginningAt.toLocaleString()}</Text>
+                {showBeginning && (
+                  <DateTimePicker
+                    testID='beginningDateTimePicker'
+                    value={beginningAt}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onBeginningChange}
+                  />
+                )}
 
-              <Text className='mt-2'>Beginning Date & Time</Text>
-              <HStack className="gap-2 mb-2">
-                <Button size="sm" variant="outline" onPress={showBeginningDatepicker}>
-                  <ButtonText>Select Date</ButtonText>
-                </Button>
-                <Button size="sm" variant="outline" onPress={showBeginningTimepicker}>
-                  <ButtonText>Select Time</ButtonText>
-                </Button>
-              </HStack>
-              <Text>Selected: {beginningAt.toLocaleString()}</Text>
-              {showBeginning && (
-                <DateTimePicker
-                  testID="beginningDateTimePicker"
-                  value={beginningAt}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onBeginningChange}
-                />
-              )}
+                <Text className='mt-4'>Ending Date & Time</Text>
+                <HStack className='gap-2 mb-2'>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onPress={showEndingDatepicker}
+                    className='bg-white'
+                  >
+                    <ButtonText>Select Date</ButtonText>
+                  </Button>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    onPress={showEndingTimepicker}
+                    className='bg-white'
+                  >
+                    <ButtonText>Select Time</ButtonText>
+                  </Button>
+                </HStack>
+                <Text>Selected: {endingAt.toLocaleString()}</Text>
+                {showEnding && (
+                  <DateTimePicker
+                    testID='endingDateTimePicker'
+                    value={endingAt}
+                    mode={mode}
+                    is24Hour={true}
+                    onChange={onEndingChange}
+                  />
+                )}
 
-              <Text className='mt-4'>Ending Date & Time</Text>
-              <HStack className="gap-2 mb-2">
-                <Button size="sm" variant="outline" onPress={showEndingDatepicker}>
-                  <ButtonText>Select Date</ButtonText>
-                </Button>
-                <Button size="sm" variant="outline" onPress={showEndingTimepicker}>
-                  <ButtonText>Select Time</ButtonText>
-                </Button>
-              </HStack>
-              <Text>Selected: {endingAt.toLocaleString()}</Text>
-              {showEnding && (
-                <DateTimePicker
-                  testID="endingDateTimePicker"
-                  value={endingAt}
-                  mode={mode}
-                  is24Hour={true}
-                  onChange={onEndingChange}
-                />
-              )}
+                <Text className='mt-4 font-medium'>Location</Text>
 
-              <Text className='mt-4 font-medium'>Location</Text>
+                <Text className='mt-2'>Venue name</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Venue name'
+                    value={venueName}
+                    onChangeText={setVenueName}
+                  />
+                </Input>
 
-              <Text className='mt-2'>Venue name</Text>
-              <Input>
-                <InputField
-                  placeholder='Venue name'
-                  value={venueName}
-                  onChangeText={setVenueName}
-                />
-              </Input>
+                <Text className='mt-2'>Complement</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Suite, floor...'
+                    value={complement}
+                    onChangeText={setComplement}
+                  />
+                </Input>
 
-              <Text className='mt-2'>Complement</Text>
-              <Input>
-                <InputField
-                  placeholder='Suite, floor...'
-                  value={complement}
-                  onChangeText={setComplement}
-                />
-              </Input>
+                <Text className='mt-2'>Address</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Street address'
+                    value={address}
+                    onChangeText={setAddress}
+                  />
+                </Input>
 
-              <Text className='mt-2'>Address</Text>
-              <Input>
-                <InputField
-                  placeholder='Street address'
-                  value={address}
-                  onChangeText={setAddress}
-                />
-              </Input>
+                <Text className='mt-2'>City</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='City'
+                    value={city}
+                    onChangeText={setCity}
+                  />
+                </Input>
 
-              <Text className='mt-2'>City</Text>
-              <Input>
-                <InputField
-                  placeholder='City'
-                  value={city}
-                  onChangeText={setCity}
-                />
-              </Input>
-
-              <Text className='mt-2'>Country</Text>
-              <Input>
-                <InputField
-                  placeholder='Country'
-                  value={country}
-                  onChangeText={setCountry}
-                />
-              </Input>
+                <Text className='mt-2'>Country</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Country'
+                    value={country}
+                    onChangeText={setCountry}
+                  />
+                </Input>
+              </Box>
             </Box>
-
             {error ? (
               <Center>
                 <HStack space='xs' className='items-center'>
@@ -374,17 +415,18 @@ export default function EditEventForm({
             )}
 
             {/* Submit */}
-            <Button
-              size='md'
-              variant='solid'
-              disabled={loading}
-              onPress={handlePressValid}
-              action='positive'
-            >
-              <Icon as={CheckIcon} color='white' size='sm' />
-            </Button>
           </VStack>
         </ScrollView>
+
+        <Button
+          size='xl'
+          variant='solid'
+          disabled={loading}
+          onPress={handlePressValid}
+          className='absolute bottom-0 right-0 m-4 rounded-full'
+        >
+          <Icon as={Save} color='white' size='xl' />
+        </Button>
       </FormControl>
 
       <PlaylistSelectionModal

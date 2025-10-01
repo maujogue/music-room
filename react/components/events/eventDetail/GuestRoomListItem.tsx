@@ -1,9 +1,12 @@
 import { Text } from '@/components/ui/text';
 import { HStack } from '@/components/ui/hstack';
-import { Avatar, AvatarImage, AvatarFallbackText } from '@/components/ui/avatar';
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallbackText,
+} from '@/components/ui/avatar';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { CloseIcon } from '@/components/ui/icon';
-
 
 interface Props {
   guest: UserInfo;
@@ -11,11 +14,15 @@ interface Props {
   showRemove?: boolean;
 }
 
-export default function GuestsRoomListItem({ guest, onRemove, showRemove = false }: Props) {
+export default function GuestsRoomListItem({
+  guest,
+  onRemove,
+  showRemove = false,
+}: Props) {
   return (
-    <HStack space="md" className="justify-between items-center py-2 px-4">
-      <HStack space="md" className="items-center pl-4">
-        <Avatar size="md">
+    <HStack space='md' className='justify-between items-center py-2 px-4'>
+      <HStack space='md' className='items-center pl-4'>
+        <Avatar size='md'>
           <AvatarFallbackText>{guest.username}</AvatarFallbackText>
           <AvatarImage source={{ uri: guest.avatar_url }} />
         </Avatar>
@@ -23,13 +30,16 @@ export default function GuestsRoomListItem({ guest, onRemove, showRemove = false
       </HStack>
 
       {showRemove && onRemove ? (
-        <Button size='sm'
-            action='secondary'
-            variant='solid'
-            className='rounded-2xl' onPress={() => onRemove(guest)}>
+        <Button
+          size='sm'
+          action='secondary'
+          variant='solid'
+          className='rounded-2xl'
+          onPress={() => onRemove(guest)}
+        >
           <ButtonIcon as={CloseIcon} className='rounded-full' />
         </Button>
-      ) : null }
+      ) : null}
     </HStack>
-  )
+  );
 }

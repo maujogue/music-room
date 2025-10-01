@@ -8,7 +8,11 @@ type DateTimeInputProps = {
   placeholder?: string;
 };
 
-const DateTimeInput = ({ value, onChange, placeholder = 'Choose date/time' }: DateTimeInputProps) => {
+const DateTimeInput = ({
+  value,
+  onChange,
+  placeholder = 'Choose date/time',
+}: DateTimeInputProps) => {
   const [visible, setVisible] = React.useState(false);
 
   // Convert string to Date object, fallback to current date if empty
@@ -28,19 +32,21 @@ const DateTimeInput = ({ value, onChange, placeholder = 'Choose date/time' }: Da
           borderWidth: 1,
           borderColor: '#ccc',
           borderRadius: 4,
-          backgroundColor: '#fff'
+          backgroundColor: '#fff',
         }}
       >
         <Text>
-          {value && value !== '' ? new Date(value).toLocaleString() : placeholder}
+          {value && value !== ''
+            ? new Date(value).toLocaleString()
+            : placeholder}
         </Text>
       </TouchableOpacity>
 
       <DateTimePickerModal
         isVisible={visible}
-        mode="datetime"
+        mode='datetime'
         date={getDateValue()}
-        onConfirm={(date) => {
+        onConfirm={date => {
           onChange(date.toISOString());
           setVisible(false);
         }}
