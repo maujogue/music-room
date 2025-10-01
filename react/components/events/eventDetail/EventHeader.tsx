@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -20,11 +20,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { UserRoundPlus } from 'lucide-react-native';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
@@ -41,6 +43,7 @@ export default function EventHeader({
   onToggle,
   onRefresh,
 }: Props) {
+  const router = useRouter();
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [image] = useState(
     eventData.event.image_url || 'https://picsum.photos/111'
@@ -55,8 +58,7 @@ export default function EventHeader({
   };
 
   const handleInviteUserPress = () => {
-    // TODO: Navigate to invite page or open invite modal
-    console.log('Invite user pressed');
+    router.push(`(main)/events/${eventData.event.id}/invite`);
   };
 
   useEffect(() => {
@@ -153,6 +155,16 @@ export default function EventHeader({
                 {eventData.event.isPublic ? 'Public' : 'Private'}
               </BadgeText>
             </Badge>
+            {eventData?.user?.can_invite && (
+                <Button
+                  size='lg'
+                  className='rounded-full p-3.5 w-10'
+                  variant='outline'
+                  onPress={handleInviteUserPress}
+                >
+                  <ButtonIcon as={UserRoundPlus} size='sm' />
+                </Button>
+            )}
             <AvatarGroup
               users={eventData.members.map(member => member.profile)}
               onPress={handleMemberAvatarGroupPress}

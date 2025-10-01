@@ -163,3 +163,17 @@ export async function getPublicUrlForPath(path: string): string {
 
   return correctedUrl;
 }
+
+export async function addUserToEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
+  const { data, error } = await supabaseClient.from('event_members')
+    .insert([{ event_id: eventId, profile_id: userId, role }])
+    .select();
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}

@@ -3,6 +3,8 @@ import { Heading } from '@/components/ui/heading';
 import EventListItem from '@/components/events/EventListItem';
 import AddEventItem from '@/components/events/AddEventItem';
 import { useRouter } from 'expo-router';
+import { Plus } from 'lucide-react-native';
+import FloatButton from '@/components/generics/FloatButton';
 
 type Props = {
   sections: MusicEventSection[];
@@ -15,8 +17,8 @@ export default function EventList({ sections }: Props) {
   };
 
   return (
+    <>
     <ScrollView>
-      <AddEventItem onPress={handlePressCreateEvent} title='Create event' />
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}
@@ -29,5 +31,7 @@ export default function EventList({ sections }: Props) {
         scrollEnabled={false}
       />
     </ScrollView>
+    <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
+    </>
   );
 }

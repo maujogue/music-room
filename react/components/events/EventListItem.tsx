@@ -16,7 +16,6 @@ type Props = {
 
 export default function EventListItem({ event }: Props) {
   const router = useRouter();
-  console.log('Event in EventListItem:', event);
   const { start } = useEventDate(event.beginning_at, event.ending_at);
 
   const onEventPress = () => {

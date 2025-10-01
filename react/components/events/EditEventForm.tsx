@@ -16,6 +16,8 @@ import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import FloatButton from '@/components/generics/FloatButton';
+import { Switch } from '@/components/ui/switch';
 
 type Props = {
   onSubmit: (payload: EventPayload) => Promise<void> | void;
@@ -47,6 +49,12 @@ export default function EditEventForm({
     initialValues.event?.ending_at
       ? new Date(initialValues.event.ending_at)
       : new Date()
+    );
+  const [is_private, setIsPrivate] = useState(
+    initialValues.event?.is_private ?? false
+  );
+  const [everyone_can_vote, setEveryoneCanVote] = useState(
+    initialValues.event?.everyone_can_vote ?? true
   );
 
   // DateTimePicker states
@@ -183,6 +191,8 @@ export default function EditEventForm({
       playlist_id: playlist?.id || null,
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       ending_at: endingAt ? endingAt.toISOString() : null,
+      is_private,
+      everyone_can_vote,
       // include location as nested object to match get_complete_event structure
       location: {
         venuename: venueName.trim() || null,
@@ -283,6 +293,28 @@ export default function EditEventForm({
                     </Button>
                   </VStack>
                 )}
+
+                <VStack className='items-start'>
+                  <HStack className='items-center'>
+                    <Switch
+                      value={is_private}
+                      onToggle={() => {
+                        setIsPrivate(prev => !prev);
+                      }}
+                    />
+                    <Text>Private</Text>
+                  </HStack>
+
+                  <HStack className='items-center'>
+                    <Switch
+                      value={everyone_can_vote}
+                      onToggle={() => {
+                        setEveryoneCanVote(prev => !prev);
+                      }}
+                    />
+                    <Text>Everyone can vote</Text>
+                  </HStack>
+                </VStack>
 
                 <Text className='mt-2'>Beginning Date & Time</Text>
                 <HStack className='gap-2 mb-2'>
@@ -418,15 +450,7 @@ export default function EditEventForm({
           </VStack>
         </ScrollView>
 
-        <Button
-          size='xl'
-          variant='solid'
-          disabled={loading}
-          onPress={handlePressValid}
-          className='absolute bottom-0 right-0 m-4 rounded-full'
-        >
-          <Icon as={Save} color='white' size='xl' />
-        </Button>
+        <FloatButton onPress={handlePressValid} icon={Save} />
       </FormControl>
 
       <PlaylistSelectionModal

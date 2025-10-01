@@ -20,13 +20,16 @@ with time zone default timezone
     beginning_at timestamp
 with time zone,
     ending_at timestamp
-with time zone
+with time zone,
+    is_private boolean default false,
+    everyone_can_vote boolean default true
 );
 
 -- Junction table for event members
 create table
 if not exists public.event_members
 (
+    role text default 'member' check (role in ('member', 'voter', 'inviter', 'collaborator')),
     event_id uuid references events
 (id) on
 delete cascade,

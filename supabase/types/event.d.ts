@@ -1,9 +1,12 @@
 type Event = {
   id: string;
   name: string;
-  images: SpotifyImage[];
+  image_url?: string;
   owner: SpotifyOwner;
-  isPublic: boolean;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
   location: MusicEventLocation;
   playlistId: string;
 
