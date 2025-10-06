@@ -161,61 +161,6 @@ export default function EventMembersDrawer({
                 </HStack>
               </VStack>
 
-              {/* Organizers */}
-              {filteredOrganizers && filteredOrganizers.length > 0 && (
-                <>
-                  <Divider className='my-2' />
-                  <VStack className='gap-2'>
-                    <Text size='sm' className='font-medium text-gray-600'>
-                      Organizers ({filteredOrganizers.length})
-                    </Text>
-                    {filteredOrganizers.map((organizer, index) => (
-                      <HStack
-                        key={index}
-                        className='items-center gap-3 p-2 rounded-lg'
-                      >
-                        <Avatar size='md'>
-                          <AvatarFallbackText>
-                            {organizer.profile.display_name
-                              ?.charAt(0)
-                              .toUpperCase() || 'U'}
-                          </AvatarFallbackText>
-                          {organizer.profile.avatar_url && (
-                            <AvatarImage
-                              source={{ uri: organizer.profile.avatar_url }}
-                            />
-                          )}
-                        </Avatar>
-                        <VStack>
-                          <Text size='md' className='font-medium'>
-                            {organizer.profile.display_name || 'Unknown User'}
-                          </Text>
-                        </VStack>
-                        {eventData.event.user?.role === 'owner' && (
-                          <Button
-                            size='sm'
-                            className='rounded-full ml-auto'
-                            variant='outline'
-                            onPress={() =>
-                              handleUserActionPress(
-                                {
-                                  id: organizer.id,
-                                  username:
-                                    organizer.profile.display_name || 'Unknown',
-                                },
-                                'organizer'
-                              )
-                            }
-                          >
-                            <ButtonIcon as={MoreVertical} />
-                          </Button>
-                        )}
-                      </HStack>
-                    ))}
-                  </VStack>
-                </>
-              )}
-
               {/* Attendees */}
               {filteredAttendees && filteredAttendees.length > 0 && (
                 <>
@@ -232,7 +177,7 @@ export default function EventMembersDrawer({
                         <HStack className='items-center gap-3'>
                           <Avatar size='md'>
                             <AvatarFallbackText>
-                              {member.profile.display_name
+                              {member.profile.username
                                 ?.charAt(0)
                                 .toUpperCase() || 'U'}
                             </AvatarFallbackText>
@@ -244,7 +189,7 @@ export default function EventMembersDrawer({
                           </Avatar>
                           <VStack>
                             <Text size='md' className='font-medium'>
-                              {member.profile.display_name || 'Unknown User'}
+                              {member.profile.username || 'Unknown User'}
                             </Text>
                           </VStack>
                         </HStack>
@@ -259,7 +204,7 @@ export default function EventMembersDrawer({
                                   {
                                     id: member.id,
                                     username:
-                                      member.profile.display_name || 'Unknown',
+                                      member.profile.username || 'Unknown',
                                   },
                                   'attendee'
                                 )

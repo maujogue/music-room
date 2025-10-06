@@ -62,7 +62,7 @@ export const useEventDate = (
     const durMinutes = Math.max(0, Math.round(dur.as('minutes')));
     const durHoursFloat = dur.as('hours');
     const durHuman = (() => {
-      if (durMinutes < 1) return 'less than 1 min';
+      if (!durMinutes ||durMinutes < 1) return 'less than 1 min';
       const d = Duration.fromObject({ minutes: durMinutes }).shiftTo(
         'days',
         'hours',

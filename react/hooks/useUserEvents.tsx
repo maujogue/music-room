@@ -31,5 +31,6 @@ export function useUserEvents() {
     fetchEvents();
   }, []);
 
+  console.log('useUserEvents', { events, loading, error });
   return { events, refetch, loading, error };
 }

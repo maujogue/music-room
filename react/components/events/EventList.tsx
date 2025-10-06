@@ -1,7 +1,6 @@
 import { SectionList, ScrollView } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import EventListItem from '@/components/events/EventListItem';
-import AddEventItem from '@/components/events/AddEventItem';
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import FloatButton from '@/components/generics/FloatButton';
@@ -15,14 +14,13 @@ export default function EventList({ sections }: Props) {
   const handlePressCreateEvent = () => {
     router.push('/events/add');
   };
-
   return (
     <>
     <ScrollView>
       <SectionList
         sections={sections}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <EventListItem event={item} />}
+        keyExtractor={item => `item-${item.id}-${Math.random()}`}
+        renderItem={({ item }) => <EventListItem event={item.event} owner={item.owner} />}
         renderSectionHeader={({ section }) => (
           <Heading>{section.title}</Heading>
         )}

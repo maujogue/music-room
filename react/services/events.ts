@@ -138,6 +138,7 @@ function createEventFormData(payload: MusicEventPayload) {
 }
 
 export async function addUserToEvent(eventId: string, userId: string, role: string) {
+  console.log('Adding user to event', { eventId, userId, role });
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
     {

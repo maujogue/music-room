@@ -114,10 +114,12 @@ export async function fetchEvent(c: Context): Promise<any> {
 }
 
 function setUserPermissions(data: any, user: any) {
-  const memberEvent = data.members.find((m: any) => m.id === user.id)
+  console.log('Data in setUserPermissions:', data);
+  const memberEvent = data.members.find((m: any) => m.profile.id === user.id)
 
   if (data.event.owner_id === user.id) {
     data.user = {
+      role: 'owner',
       can_edit: true,
       can_delete: true,
       can_invite: true,
@@ -128,6 +130,17 @@ function setUserPermissions(data: any, user: any) {
 
   if (!memberEvent && data.event.is_private) {
     throw new HTTPException(403, { message: 'You do not have permission to view this private event' })
+  }
+
+  if (!memberEvent) {
+    data.user = {
+      role: null,
+      can_edit: false,
+      can_delete: false,
+      can_invite: data.event.is_private ? false : true,
+      can_vote: data.event.everyone_can_vote
+    }
+    return data
   }
 
   data.user = {
@@ -250,8 +263,11 @@ export async function addUserToEvent(c: Context): Promise<any> {
   const body = await c.req.json()
   const user = c.get('user')
 
-  // ensure caller has permission to add users
+  if (body.user_id === '') {
+    body.user_id = user.id
+  }
   await checkPermission(eventId, user.id, PERMISSIONS.ADD_USER)
+  console.log('Body in addUserToEvent:', body);
   const validation = validateAddUserPayload(body)
   if (!validation.valid) {
     throw new HTTPException(400, { message: validation.message })

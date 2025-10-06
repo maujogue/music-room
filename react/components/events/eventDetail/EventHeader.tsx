@@ -20,6 +20,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import LikeButton from '@/components/generics/LikeButton';
 import { UserRoundPlus } from 'lucide-react-native';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
@@ -27,6 +28,7 @@ import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { addUserToEvent, removeUserFromEvent } from '@/services/events';
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
@@ -43,7 +45,9 @@ export default function EventHeader({
   onToggle,
   onRefresh,
 }: Props) {
+  console.log('EventData in EventHeader:', eventData);
   const router = useRouter();
+  const [eventLiked, setEventLiked] = useState(!!eventData.user.role);
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [image] = useState(
     eventData.event.image_url || 'https://picsum.photos/111'
@@ -89,6 +93,18 @@ export default function EventHeader({
     };
   });
 
+  const handleLikePress = () => {
+    if (eventData.user.role) {
+      removeUserFromEvent(eventData.event.id).then(() => {
+        setEventLiked(false);
+      });
+    } else {
+      addUserToEvent(eventData.event.id, '', 'member').then(() => {
+        setEventLiked(true);
+      });
+    }
+  }
+
   return (
     <Animated.View style={containerStyle} className='bg-indigo-100'>
       <Card className='p-0 rounded-lg bg-transparent' variant='elevated'>
@@ -110,6 +126,9 @@ export default function EventHeader({
                   <Text size='sm' className='text-gray-200'>
                     By {eventData.event.owner.display_name}
                   </Text>
+                )}
+                {eventData.user.role != 'owner' && (
+                  <LikeButton isLiked={eventData.user.role !== null} onPress={handleLikePress} />
                 )}
               </VStack>
 

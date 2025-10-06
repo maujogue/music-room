@@ -30,7 +30,7 @@ export default function Search({
   renderItemUser = (item: any) => (
     <UserListItem user={item} key={item.id} showFollowButtons={false} />
   ),
-  renderItemEvent = (item: any) => <EventListItem event={item} key={item.id} />,
+  renderItemEvent = (item: any) => <EventListItem event={item} owner={item.owner} key={item.id} />,
 }: Props) {
   const { query, setQuery, filter, setFilter, onChangeFilter, results } =
     useSearchGlobal(defaultType);
@@ -42,6 +42,7 @@ export default function Search({
     results.trackResults?.tracks?.items ?? results.trackResults ?? [];
   const events = results.eventResults?.events ?? results.eventResults ?? [];
 
+  console.log('Search results events:', events);
   const limit = filter === 'all' ? 3 : undefined;
 
   return (

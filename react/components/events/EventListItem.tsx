@@ -12,9 +12,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = {
   event: Event;
+  owner: User;
 };
 
-export default function EventListItem({ event }: Props) {
+  export default function EventListItem({ event, owner }: Props) {
+    console.log('Rendering EventListItem', event);
   const router = useRouter();
   const { start } = useEventDate(event.beginning_at, event.ending_at);
 
@@ -63,14 +65,14 @@ export default function EventListItem({ event }: Props) {
               <Avatar size='sm'>
                 <AvatarImage
                   source={{
-                    uri: event.owner?.avatar_url
-                      ? event.owner.avatar_url
+                    uri: owner?.avatar_url
+                      ? owner.avatar_url
                       : 'https://picsum.photos/111',
                   }}
                 />
               </Avatar>
               <Text size='sm' className='text-typography-400 px-2'>
-                {event.owner.username}
+                {owner?.username}
               </Text>
             </VStack>
           </Box>

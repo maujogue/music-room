@@ -1,4 +1,4 @@
-export function validateEventPayload(payload: any, opts: { requireName: boolean }) {
+export function validateEventPayload(payload: any, opts: { requireName: boolean, requireDateTime?: boolean } = { requireName: true }): { valid: boolean, message?: string } {
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
   }
@@ -10,6 +10,12 @@ export function validateEventPayload(payload: any, opts: { requireName: boolean 
   } else if (payload.name !== undefined) {
     if (payload.name !== null && (typeof payload.name !== 'string' || payload.name.trim().length < 3)) {
       return { valid: false, message: 'If provided, name must be at least 3 characters long' }
+    }
+  }
+
+  if (opts.requireDateTime) {
+    if (!payload.beginning_at || !payload.ending_at) {
+      return { valid: false, message: 'beginning_at and ending_at are required' }
     }
   }
 
@@ -65,8 +71,8 @@ export function validateAddUserPayload(payload: any) {
     return { valid: false, message: 'user_id is required and must be a non-empty string' }
   }
 
-  if (!payload.role || typeof payload.role !== 'string' || !['inviter', 'voter', 'member'].includes(payload.role)) {
-    return { valid: false, message: "role is required and must be one of 'inviter', 'voter', or 'member'" }
+  if (!payload.role || typeof payload.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(payload.role)) {
+    return { valid: false, message: "role is required and must be one of 'inviter', 'voter', 'member', or 'collaborator'" }
   }
 
   return { valid: true }

@@ -121,13 +121,14 @@ export async function fetchCurrentUserEvents(c: Context): Promise<any> {
   if (!events) {
     throw new HTTPException(500, { message: 'Failed to fetch events' })
   }
-  for (const event of events) {
+  console.log('Events fetched from Supabase:', events);
+  for (const data of events) {
     try {
-      const imagePath = event.image_url;
+      const imagePath = data.event.image_url;
       if (imagePath) {
         const publicUrl = await getPublicUrlForPath(imagePath);
         console.log('Resolved public URL for image:', publicUrl);
-        event.image_url = publicUrl;
+        data.event.image_url = publicUrl;
       }
     } catch (error) {
       console.error('Error fetching public URL for image:', error);
