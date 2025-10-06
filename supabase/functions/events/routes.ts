@@ -8,7 +8,8 @@ import {
 	fetchEvent,
 	deleteEventById,
 	updateEventById,
-	addUserToEvent
+	addUserToEvent,
+	removeUserFromEvent
 } from './controller.ts'
 
 const router = new Hono()
@@ -22,5 +23,7 @@ router.delete('/:id', deleteEventById)
 router.put('/:id', updateEventById)
 
 router.post('/:id/invite', addUserToEvent)
+
+router.delete('/:id/invite', removeUserFromEvent)
 
 export default router

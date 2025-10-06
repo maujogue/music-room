@@ -9,11 +9,13 @@ import {
   deleteSupabaseEventById,
   updateSupabaseEventById,
   uploadEventImage,
-  addUserToEventSupabase
+  addUserToEventSupabase,
+  removeUserFromEventSupabase
 } from './service.ts'
 import {
   validateEventPayload,
-  validateAddUserPayload
+  validateAddUserPayload,
+  validateRemoveUserPayload
 } from './validators.ts'
 import {
   checkEventAccess,
@@ -281,4 +283,27 @@ export async function addUserToEvent(c: Context): Promise<any> {
   return c.json({ message: 'User added to event successfully', data: result })
 }
 
+export async function removeUserFromEvent(c: Context): Promise<any> {
+  const eventId = c.req.param('id')
+  const body = await c.req.json()
+  const user = c.get('user')
 
+  if (body.user_id === '') {
+    body.user_id = user.id
+  }
+  console.log('Body in removeUserFromEvent:', body);
+  const validation = validateRemoveUserPayload(body)
+  if (!validation.valid) {
+    throw new HTTPException(400, { message: validation.message })
+  }
+  if (body.user_id !== user.id) {
+    await checkPermission(eventId, user.id, PERMISSIONS.REMOVE_USER)
+  }
+
+  const { user_id } = body
+  const result = await removeUserFromEventSupabase(eventId, user_id)
+  if (!result) {
+    throw new HTTPException(500, { message: 'Failed to remove user from event' })
+  }
+  return c.json({ message: 'User removed from event successfully', data: result })
+}

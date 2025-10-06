@@ -95,7 +95,7 @@ export default function EventHeader({
 
   const handleLikePress = () => {
     if (eventData.user.role) {
-      removeUserFromEvent(eventData.event.id).then(() => {
+      removeUserFromEvent(eventData.event.id, '').then(() => {
         setEventLiked(false);
       });
     } else {

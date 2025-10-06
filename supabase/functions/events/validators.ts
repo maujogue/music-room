@@ -77,3 +77,15 @@ export function validateAddUserPayload(payload: any) {
 
   return { valid: true }
 }
+
+export function validateRemoveUserPayload(payload: any) {
+  if (!payload || typeof payload !== 'object') {
+    return { valid: false, message: 'Invalid payload' }
+  }
+
+  if (typeof payload.user_id !== 'string') {
+    return { valid: false, message: 'user_id must be a string' }
+  }
+
+  return { valid: true }
+}

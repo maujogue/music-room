@@ -158,5 +158,19 @@ export async function addUserToEvent(eventId: string, userId: string, role: stri
 }
 
 export async function removeUserFromEvent(eventId: string, userId: string) {
-  console.log('Implement removeUserFromEvent', { eventId, userId });
+  const res = await apiFetch<{ message: string }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
+    {
+      method: 'DELETE',
+      body: {
+        user_id: userId
+      },
+    }
+  );
+  if (!res.success) {
+    console.error('Error removing user from event:', res.error);
+    throw res.error;
+  }
+  console.log('User removed successfully from event:', res.data);
+  return res.data;
 }

@@ -44,7 +44,11 @@ export function getUserRoleInEvent(event: any, userId: string): string | null {
   return null;
 }
 
-export function canUserPerformAction(role: string | null, permission: string, event: any): boolean {
+export function canUserPerformAction(
+  role: string | null,
+  permission: string,
+  event: any
+): boolean {
   switch (permission) {
     case PERMISSIONS.READ_EVENT:
       if (!event.is_private) {
@@ -89,9 +93,6 @@ export function canUserPerformAction(role: string | null, permission: string, ev
       return role === ROLES.OWNER;
 
     case PERMISSIONS.REMOVE_USER:
-      if (event.owner_id === user_id) {
-        throw new HTTPException(403, { message: 'Owner cannot be removed from the event' });
-      }
       return role === ROLES.OWNER;
 
     case PERMISSIONS.EDIT_EVENT:
@@ -103,7 +104,11 @@ export function canUserPerformAction(role: string | null, permission: string, ev
 }
 
 // Middleware pour vérifier les permissions
-export async function checkPermission(eventId: string, userId: string, permission: string) {
+export async function checkPermission(
+  eventId: string,
+  userId: string,
+  permission: string
+) {
   const event = await getSupabaseEventById(eventId);
 
   if (!event) {
@@ -111,7 +116,7 @@ export async function checkPermission(eventId: string, userId: string, permissio
   }
 
   const userRole = getUserRoleInEvent(event, userId);
-  const hasPermission = canUserPerformAction(userRole, permission, event);
+  const hasPermission = canUserPerformAction(userRole, permission, event, targetUserId);
 
   if (!hasPermission) {
     throw new HTTPException(403, {

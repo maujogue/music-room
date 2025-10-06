@@ -177,3 +177,17 @@ export async function addUserToEventSupabase(eventId: string, userId: string, ro
 
   return data;
 }
+
+export async function removeUserFromEventSupabase(eventId: string): Promise<boolean> {
+  const { error } = await supabaseClient.from('event_members')
+    .delete()
+    .eq('event_id', eventId);
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return true;
+}
