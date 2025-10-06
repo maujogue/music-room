@@ -82,6 +82,10 @@ See music room application's first shapes [here](./project_documentation/app_scr
 - `make clean` - Clean up build files
 - `make help` - Show all commands
 
+### **Tests**
+
+- `make test` - Launch unit testing
+
 ## 🌐 Environment Configuration
 
 The Makefile automatically:
@@ -171,6 +175,10 @@ SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
 - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`: Credentials from your Spotify developer app.
 
 With these variables set, your application will be ready to securely authenticate and interact with the Spotify API.
+
+## Setup tests
+
+When installing dependencies for unit testing, there is no need to recreate the jest.config.js file. You must also select Babel from the available options.
 
 ## 📚 Additional Resources
 
