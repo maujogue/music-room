@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS public.events (
   constraint name_length CHECK (char_length(name) >= 3),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
   beginning_at timestamp with time zone NOT NULL,
-  ending_at timestamp with time zone NOT NULL,
   is_private boolean DEFAULT false,
   everyone_can_vote boolean DEFAULT true
 );

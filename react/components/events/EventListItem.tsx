@@ -15,10 +15,9 @@ type Props = {
   owner: User;
 };
 
-  export default function EventListItem({ event, owner }: Props) {
-    console.log('Rendering EventListItem', event);
+export default function EventListItem({ event, owner }: Props) {
   const router = useRouter();
-  const { start } = useEventDate(event.beginning_at, event.ending_at);
+  const { start } = useEventDate(event.beginning_at);
 
   const onEventPress = () => {
     router.push({
@@ -58,7 +57,12 @@ type Props = {
           />
           <Box className='absolute inset-0 rounded-xl items-start justify-center px-2'>
             <Text className='text-white px-2'>{start.full}</Text>
-            <Heading size='3xl' className='text-white text-start p-2'>
+            <Heading
+              size='3xl'
+              className='text-white text-start p-2'
+              numberOfLines={1}
+              ellipsizeMode='tail'
+            >
               {event.name}
             </Heading>
             <VStack className='flex-row items-center px-2'>

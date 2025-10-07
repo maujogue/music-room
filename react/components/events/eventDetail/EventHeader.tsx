@@ -103,7 +103,7 @@ export default function EventHeader({
         setEventLiked(true);
       });
     }
-  }
+  };
 
   return (
     <Animated.View style={containerStyle} className='bg-indigo-100'>
@@ -128,7 +128,7 @@ export default function EventHeader({
                   </Text>
                 )}
                 {eventData.user.role != 'owner' && (
-                  <LikeButton isLiked={eventData.user.role !== null} onPress={handleLikePress} />
+                  <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
                 )}
               </VStack>
 
@@ -175,14 +175,14 @@ export default function EventHeader({
               </BadgeText>
             </Badge>
             {eventData?.user?.can_invite && (
-                <Button
-                  size='lg'
-                  className='rounded-full p-3.5 w-10'
-                  variant='outline'
-                  onPress={handleInviteUserPress}
-                >
-                  <ButtonIcon as={UserRoundPlus} size='sm' />
-                </Button>
+              <Button
+                size='lg'
+                className='rounded-full p-3.5 w-10'
+                variant='outline'
+                onPress={handleInviteUserPress}
+              >
+                <ButtonIcon as={UserRoundPlus} size='sm' />
+              </Button>
             )}
             <AvatarGroup
               users={eventData.members.map(member => member.profile)}

@@ -1,8 +1,13 @@
 type MusicEventFetchResult = {
   event: Event;
   location: MusicEventLocation;
-  members: UserInfo[];
+  members: EventUser[];
   owner: UserInfo;
+};
+
+type EventUser = {
+  Info: UserInfo;
+  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
 };
 
 type Event = {
@@ -20,7 +25,6 @@ type Event = {
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
-  ending_at: string;
 };
 
 type EventVote = {

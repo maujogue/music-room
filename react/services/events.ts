@@ -117,7 +117,6 @@ function createEventFormData(payload: MusicEventPayload) {
   form.append('description', payload.description ?? '');
   form.append('playlist_id', payload.playlist_id ?? '');
   form.append('beginning_at', payload.beginning_at ?? '');
-  form.append('ending_at', payload.ending_at ?? '');
   form.append('location', JSON.stringify((payload as any).location ?? {}));
   form.append('is_private', String((payload as any).is_private ?? false));
   form.append(
@@ -137,7 +136,11 @@ function createEventFormData(payload: MusicEventPayload) {
   return form;
 }
 
-export async function addUserToEvent(eventId: string, userId: string, role: string) {
+export async function addUserToEvent(
+  eventId: string,
+  userId: string,
+  role: string
+) {
   console.log('Adding user to event', { eventId, userId, role });
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
@@ -145,7 +148,7 @@ export async function addUserToEvent(eventId: string, userId: string, role: stri
       method: 'POST',
       body: {
         user_id: userId,
-        role: role
+        role: role,
       },
     }
   );
@@ -163,7 +166,7 @@ export async function removeUserFromEvent(eventId: string, userId: string) {
     {
       method: 'DELETE',
       body: {
-        user_id: userId
+        user_id: userId,
       },
     }
   );
@@ -172,5 +175,29 @@ export async function removeUserFromEvent(eventId: string, userId: string) {
     throw res.error;
   }
   console.log('User removed successfully from event:', res.data);
+  return res.data;
+}
+
+export async function editUserInEvent(
+  eventId: string,
+  userId: string,
+  role: 'inviter' | 'voter' | 'member' | 'collaborator'
+) {
+  console.log('Editing user in event', { eventId, userId, role });
+  const res = await apiFetch<{ message: string }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
+    {
+      method: 'PUT',
+      body: {
+        user_id: userId,
+        role: role,
+      },
+    }
+  );
+  if (!res.success) {
+    console.error('Error editing user in event:', res.error);
+    throw res.error;
+  }
+  console.log('User edited successfully in event:', res.data);
   return res.data;
 }

@@ -10,12 +10,14 @@ import {
   updateSupabaseEventById,
   uploadEventImage,
   addUserToEventSupabase,
-  removeUserFromEventSupabase
+  removeUserFromEventSupabase,
+  editUserInEventSupabase
 } from './service.ts'
 import {
   validateEventPayload,
   validateAddUserPayload,
-  validateRemoveUserPayload
+  validateRemoveUserPayload,
+  validateEditUserPayload
 } from './validators.ts'
 import {
   checkEventAccess,
@@ -307,3 +309,25 @@ export async function removeUserFromEvent(c: Context): Promise<any> {
   }
   return c.json({ message: 'User removed from event successfully', data: result })
 }
+
+export async function editUserInEvent(c: Context): Promise<any> {
+  const eventId = c.req.param('id')
+  const body = await c.req.json()
+  const user = c.get('user')
+
+  const validation = validateEditUserPayload(body)
+  if (!validation.valid) {
+    throw new HTTPException(400, { message: validation.message })
+  }
+  await checkPermission(eventId, user.id, PERMISSIONS.UPDATE_USER_ROLE)
+
+  const { user_id, role } = body
+  const result = await editUserInEventSupabase(eventId, user_id, role)
+
+  if (!result) {
+    throw new HTTPException(500, { message: 'Failed to edit user in event' })
+  }
+  return c.json({ message: 'User edited in event successfully', data: result })
+}
+
+

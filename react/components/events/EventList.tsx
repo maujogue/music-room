@@ -16,20 +16,22 @@ export default function EventList({ sections }: Props) {
   };
   return (
     <>
-    <ScrollView>
-      <SectionList
-        sections={sections}
-        keyExtractor={item => `item-${item.id}-${Math.random()}`}
-        renderItem={({ item }) => <EventListItem event={item.event} owner={item.owner} />}
-        renderSectionHeader={({ section }) => (
-          <Heading>{section.title}</Heading>
-        )}
-        stickySectionHeadersEnabled={false}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
-      />
-    </ScrollView>
-    <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
+      <ScrollView>
+        <SectionList
+          sections={sections}
+          keyExtractor={item => `item-${item.id}-${Math.random()}`}
+          renderItem={({ item }) => (
+            <EventListItem event={item.event} owner={item.owner} />
+          )}
+          renderSectionHeader={({ section }) => (
+            <Heading>{section.title}</Heading>
+          )}
+          stickySectionHeadersEnabled={false}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+        />
+      </ScrollView>
+      <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
     </>
   );
 }

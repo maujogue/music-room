@@ -116,7 +116,7 @@ export async function checkPermission(
   }
 
   const userRole = getUserRoleInEvent(event, userId);
-  const hasPermission = canUserPerformAction(userRole, permission, event, targetUserId);
+  const hasPermission = canUserPerformAction(userRole, permission, event);
 
   if (!hasPermission) {
     throw new HTTPException(403, {

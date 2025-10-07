@@ -14,25 +14,15 @@ export function validateEventPayload(payload: any, opts: { requireName: boolean,
   }
 
   if (opts.requireDateTime) {
-    if (!payload.beginning_at || !payload.ending_at) {
-      return { valid: false, message: 'beginning_at and ending_at are required' }
+    if (!payload.beginning_at) {
+      return { valid: false, message: 'beginning_at is required' }
     }
   }
 
   const begin = payload.beginning_at
-  const end = payload.ending_at
   if (begin !== undefined && begin !== null && begin !== '') {
     const b = Date.parse(begin)
     if (isNaN(b)) return { valid: false, message: 'beginning_at must be a valid ISO date string' }
-  }
-  if (end !== undefined && end !== null && end !== '') {
-    const e = Date.parse(end)
-    if (isNaN(e)) return { valid: false, message: 'ending_at must be a valid ISO date string' }
-  }
-  if (begin && end) {
-    const b = Date.parse(begin)
-    const e = Date.parse(end)
-    if (!isNaN(b) && !isNaN(e) && e < b) return { valid: false, message: 'ending_at must be after beginning_at' }
   }
 
   if (payload.playlist_id !== undefined && payload.playlist_id !== null && payload.playlist_id !== '') {
@@ -85,6 +75,22 @@ export function validateRemoveUserPayload(payload: any) {
 
   if (typeof payload.user_id !== 'string') {
     return { valid: false, message: 'user_id must be a string' }
+  }
+
+  return { valid: true }
+}
+
+export function validateEditUserPayload(payload: any) {
+  if (!payload || typeof payload !== 'object') {
+    return { valid: false, message: 'Invalid payload' }
+  }
+
+  if (!payload.user_id || typeof payload.user_id !== 'string' || payload.user_id.trim().length === 0) {
+    return { valid: false, message: 'user_id is required and must be a non-empty string' }
+  }
+
+  if (!payload.role || typeof payload.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(payload.role)) {
+    return { valid: false, message: "role is required and must be one of 'inviter', 'voter', 'member', or 'collaborator'" }
   }
 
   return { valid: true }

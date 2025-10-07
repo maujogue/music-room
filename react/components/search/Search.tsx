@@ -30,7 +30,9 @@ export default function Search({
   renderItemUser = (item: any) => (
     <UserListItem user={item} key={item.id} showFollowButtons={false} />
   ),
-  renderItemEvent = (item: any) => <EventListItem event={item} owner={item.owner} key={item.id} />,
+  renderItemEvent = (item: any) => (
+    <EventListItem event={item} owner={item.owner} key={item.id} />
+  ),
 }: Props) {
   const { query, setQuery, filter, setFilter, onChangeFilter, results } =
     useSearchGlobal(defaultType);

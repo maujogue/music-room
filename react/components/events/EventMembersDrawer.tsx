@@ -7,12 +7,7 @@ import {
 } from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
 import { MusicEventFetchResult } from '@/types/event';
-import {
-  UserRoundPlus,
-  MoreVertical,
-  UserCheck,
-  UserMinus,
-} from 'lucide-react-native';
+import { UserRoundPlus, MoreVertical, UserMinus } from 'lucide-react-native';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   Drawer,
@@ -23,9 +18,10 @@ import {
 } from '@/components/ui/drawer';
 import { Divider } from '@/components/ui/divider';
 import { ScrollView, Modal, View } from 'react-native';
-import { addUserToEvent, removeUserFromEvent } from '@/services/events';
+import { removeUserFromEvent, editUserInEvent } from '@/services/events';
 import { useState } from 'react';
 import { Heading } from '@/components/ui/heading';
+import { Switch } from '@/components/ui/switch';
 
 type Props = {
   eventData: MusicEventFetchResult;
@@ -42,52 +38,56 @@ export default function EventMembersDrawer({
   onInvitePress,
   onUpdated,
 }: Props) {
-  const [selectedUser, setSelectedUser] = useState<{
-    id: string;
-    username: string;
-    role: 'attendee' | 'organizer';
-  } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<EventUser | null>(null);
+  const [selectedUserCanInvite, setSelectedUserCanInvite] = useState(true);
+  const [selectedUserCanVote, setSelectedUserCanVote] = useState(true);
   const [showActionDialog, setShowActionDialog] = useState(false);
 
-  const handlePromoteToOrganizer = async (userId: string) => {
+  const handleEditUser = async () => {
     try {
-      await addUserToEvent(eventData.event.id, userId, 'organizer');
-      onUpdated?.();
+      let role = 'member';
+      if (selectedUserCanInvite && selectedUserCanVote) {
+        role = 'collaborator';
+      } else if (selectedUserCanInvite) {
+        role = 'inviter';
+      } else if (selectedUserCanVote) {
+        role = 'voter';
+      }
+      await editUserInEvent(
+        eventData.event.id,
+        selectedUser.profile.id,
+        role
+      ).then(() => {
+        setShowActionDialog(false);
+        setSelectedUser(null);
+      });
     } catch (error) {
       console.error('Failed to promote user to organizer:', error);
     }
   };
 
-  const handleUserActionPress = (
-    user: { id: string; username: string },
-    role: 'attendee' | 'organizer'
-  ) => {
-    setSelectedUser({ ...user, role });
+  const handleUserActionPress = (user: EventUser) => {
+    setSelectedUser(user);
+    setSelectedUserCanInvite(
+      user.role === 'inviter' || user.role === 'collaborator'
+    );
+    setSelectedUserCanVote(
+      user.role === 'voter' || user.role === 'collaborator'
+    );
     setShowActionDialog(true);
   };
 
   const handleRemoveFromEvent = async () => {
     if (!selectedUser) return;
     try {
-      await removeUserFromEvent(eventData.event.id, selectedUser.id);
-      onUpdated?.();
+      await removeUserFromEvent(eventData.event.id, selectedUser.profile.id);
       setShowActionDialog(false);
       setSelectedUser(null);
+      if (onUpdated) {
+        onUpdated();
+      }
     } catch (error) {
       console.error('Failed to remove user from event:', error);
-    }
-  };
-
-  const handleDemoteToAttendee = async () => {
-    if (!selectedUser) return;
-    try {
-      await removeUserFromEvent(eventData.event.id, selectedUser.id);
-      await addUserToEvent(eventData.event.id, selectedUser.id, 'attendee');
-      onUpdated?.();
-      setShowActionDialog(false);
-      setSelectedUser(null);
-    } catch (error) {
-      console.error('Failed to demote user to attendee:', error);
     }
   };
 
@@ -193,22 +193,13 @@ export default function EventMembersDrawer({
                             </Text>
                           </VStack>
                         </HStack>
-                        {eventData.event.user?.role === 'owner' && (
+                        {eventData.user?.role === 'owner' && (
                           <HStack className='ml-auto gap-2'>
                             <Button
                               size='sm'
                               className='rounded-full'
                               variant='outline'
-                              onPress={() =>
-                                handleUserActionPress(
-                                  {
-                                    id: member.id,
-                                    username:
-                                      member.profile.username || 'Unknown',
-                                  },
-                                  'attendee'
-                                )
-                              }
+                              onPress={() => handleUserActionPress(member)}
                             >
                               <ButtonIcon as={MoreVertical} />
                             </Button>
@@ -253,30 +244,36 @@ export default function EventMembersDrawer({
                 </Text>
               </View>
               <View className='p-4 border-t flex flex-col gap-3'>
-                {selectedUser?.role === 'organizer' && (
-                  <Button
-                    variant='outline'
-                    className='w-full'
-                    onPress={handleDemoteToAttendee}
-                  >
-                    <ButtonIcon as={UserMinus} />
-                    <ButtonText className='ml-2'>Demote to Attendee</ButtonText>
-                  </Button>
-                )}
-                {selectedUser?.role === 'attendee' && (
-                  <Button
-                    size='sm'
-                    variant='filled'
-                    className='w-full'
-                    onPress={() => handlePromoteToOrganizer(selectedUser.id)}
-                  >
-                    <ButtonIcon as={UserCheck} color='white' />
-                    <ButtonText className='ml-2 text-white'>
-                      Promote to Organizer
-                    </ButtonText>
-                  </Button>
-                )}
+                <VStack>
+                  <HStack className='my-4 items-center'>
+                    <Switch
+                      className='mx-4'
+                      value={selectedUserCanInvite}
+                      onToggle={() =>
+                        setSelectedUserCanInvite(!selectedUserCanInvite)
+                      }
+                    />
+                    <Text>Can Invite</Text>
+                  </HStack>
+                  <HStack className='mb-4 items-center'>
+                    <Switch
+                      className='mx-4'
+                      value={selectedUserCanVote}
+                      onToggle={() =>
+                        setSelectedUserCanVote(!selectedUserCanVote)
+                      }
+                    />
+                    <Text>Can Vote</Text>
+                  </HStack>
+                </VStack>
 
+                <Button
+                  variant='solid'
+                  className='w-full'
+                  onPress={handleEditUser}
+                >
+                  <ButtonText className='ml-2'>Save Changes</ButtonText>
+                </Button>
                 <Button
                   variant='solid'
                   action='negative'

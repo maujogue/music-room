@@ -7,10 +7,7 @@ import {
 import { Center } from '@/components/ui/center';
 import { useCallback, useEffect, useState } from 'react';
 import VotesRoom from '@/components/events/eventDetail/VotesRoom';
-import GuestsRoom from '@/components/events/eventDetail/GuestsRoom';
-import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
-import TabButton from '@/components/generics/TabButton';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import Event3DotMenu from '@/components/events/eventDetail/EventDotMenu';
 import { useEvent } from '@/hooks/useEvent';
@@ -26,8 +23,6 @@ export default function EventDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
-
-  console.log('Data:', data, 'Loading:', loading, 'Error:', error);
 
   useFocusEffect(
     useCallback(() => {
@@ -78,6 +73,7 @@ export default function EventDetail() {
           eventData={data}
           expanded={expanded}
           onToggle={onToggleHeader}
+          onRefresh={refetch}
         />
 
         {/* Votes / Guests tabs */}

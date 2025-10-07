@@ -38,7 +38,14 @@ export default function Invite() {
   const handleConfirmInvite = async () => {
     if (selectedUser) {
       try {
-        const role = can_invite && can_vote ? 'collaborator' : can_invite ? 'inviter' : can_vote ? 'voter' : 'member';
+        const role =
+          can_invite && can_vote
+            ? 'collaborator'
+            : can_invite
+              ? 'inviter'
+              : can_vote
+                ? 'voter'
+                : 'member';
         await addUserToEvent(eventId, selectedUser.id, role);
         console.log('User invited successfully');
         handleClose();
@@ -78,14 +85,22 @@ export default function Invite() {
               collaborate on this event?
             </Text>
             <VStack>
-                <HStack className='my-4 items-center'>
-                    <Switch className='mx-4' value={can_invite} onToggle={() => setCanInvite(!can_invite)}/>
-                    <Text>Can Invite</Text>
-                </HStack>
-                <HStack className='mb-4 items-center'>
-                    <Switch className='mx-4' value={can_vote} onToggle={() => setCanVote(!can_vote)}/>
-                    <Text>Can Vote</Text>
-                </HStack>
+              <HStack className='my-4 items-center'>
+                <Switch
+                  className='mx-4'
+                  value={can_invite}
+                  onToggle={() => setCanInvite(!can_invite)}
+                />
+                <Text>Can Invite</Text>
+              </HStack>
+              <HStack className='mb-4 items-center'>
+                <Switch
+                  className='mx-4'
+                  value={can_vote}
+                  onToggle={() => setCanVote(!can_vote)}
+                />
+                <Text>Can Vote</Text>
+              </HStack>
             </VStack>
           </AlertDialogBody>
           <AlertDialogFooter>
@@ -97,10 +112,7 @@ export default function Invite() {
             >
               <ButtonText>Cancel</ButtonText>
             </Button>
-            <Button
-              size='sm'
-              onPress={() => handleConfirmInvite()}
-            >
+            <Button size='sm' onPress={() => handleConfirmInvite()}>
               <ButtonText>Invite</ButtonText>
             </Button>
           </AlertDialogFooter>
