@@ -121,7 +121,6 @@ export async function fetchCurrentUserEvents(c: Context): Promise<any> {
   if (!events) {
     throw new HTTPException(500, { message: 'Failed to fetch events' })
   }
-  console.log('Events fetched from Supabase:', events);
   for (const data of events) {
     try {
       const imagePath = data.event.image_url;
