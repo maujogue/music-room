@@ -45,15 +45,7 @@ help:
 install:
 	@echo "📦 Installing dependencies..."
 	cd ${REACT_APP_DIR} && npx expo install
-	cd ${REACT_APP_DIR} && npm install --save-dev \
-		jest \
-		jest-environment-jsdom \
-		react-test-renderer@19.0.0 \
-		@testing-library/react \
-		@testing-library/jest-dom \
-		@testing-library/dom \
-		@testing-library/react-native \
-		@testing-library/react-native jest
+	cd ${REACT_APP_DIR} && npm install --save-dev
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
