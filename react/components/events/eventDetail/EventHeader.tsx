@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -20,11 +20,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import LikeButton from '@/components/generics/LikeButton';
+import { UserRoundPlus } from 'lucide-react-native';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { addUserToEvent, removeUserFromEvent } from '@/services/events';
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
@@ -41,6 +45,9 @@ export default function EventHeader({
   onToggle,
   onRefresh,
 }: Props) {
+  console.log('EventData in EventHeader:', eventData);
+  const router = useRouter();
+  const [eventLiked, setEventLiked] = useState(!!eventData.user.role);
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [image] = useState(
     eventData.event.image_url || 'https://picsum.photos/111'
@@ -55,8 +62,7 @@ export default function EventHeader({
   };
 
   const handleInviteUserPress = () => {
-    // TODO: Navigate to invite page or open invite modal
-    console.log('Invite user pressed');
+    router.push(`(main)/events/${eventData.event.id}/invite`);
   };
 
   useEffect(() => {
@@ -87,6 +93,18 @@ export default function EventHeader({
     };
   });
 
+  const handleLikePress = () => {
+    if (eventData.user.role) {
+      removeUserFromEvent(eventData.event.id, '').then(() => {
+        setEventLiked(false);
+      });
+    } else {
+      addUserToEvent(eventData.event.id, '', 'member').then(() => {
+        setEventLiked(true);
+      });
+    }
+  };
+
   return (
     <Animated.View style={containerStyle} className='bg-indigo-100'>
       <Card className='p-0 rounded-lg bg-transparent' variant='elevated'>
@@ -108,6 +126,9 @@ export default function EventHeader({
                   <Text size='sm' className='text-gray-200'>
                     By {eventData.event.owner.display_name}
                   </Text>
+                )}
+                {eventData.user.role != 'owner' && (
+                  <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
                 )}
               </VStack>
 
@@ -153,6 +174,16 @@ export default function EventHeader({
                 {eventData.event.isPublic ? 'Public' : 'Private'}
               </BadgeText>
             </Badge>
+            {eventData?.user?.can_invite && (
+              <Button
+                size='lg'
+                className='rounded-full p-3.5 w-10'
+                variant='outline'
+                onPress={handleInviteUserPress}
+              >
+                <ButtonIcon as={UserRoundPlus} size='sm' />
+              </Button>
+            )}
             <AvatarGroup
               users={eventData.members.map(member => member.profile)}
               onPress={handleMemberAvatarGroupPress}

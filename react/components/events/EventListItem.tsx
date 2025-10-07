@@ -12,12 +12,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = {
   event: Event;
+  owner: User;
 };
 
-export default function EventListItem({ event }: Props) {
+export default function EventListItem({ event, owner }: Props) {
   const router = useRouter();
-  console.log('Event in EventListItem:', event);
-  const { start } = useEventDate(event.beginning_at, event.ending_at);
+  const { start } = useEventDate(event.beginning_at);
 
   const onEventPress = () => {
     router.push({
@@ -57,21 +57,26 @@ export default function EventListItem({ event }: Props) {
           />
           <Box className='absolute inset-0 rounded-xl items-start justify-center px-2'>
             <Text className='text-white px-2'>{start.full}</Text>
-            <Heading size='3xl' className='text-white text-start p-2'>
+            <Heading
+              size='3xl'
+              className='text-white text-start p-2'
+              numberOfLines={1}
+              ellipsizeMode='tail'
+            >
               {event.name}
             </Heading>
             <VStack className='flex-row items-center px-2'>
               <Avatar size='sm'>
                 <AvatarImage
                   source={{
-                    uri: event.owner?.avatar_url
-                      ? event.owner.avatar_url
+                    uri: owner?.avatar_url
+                      ? owner.avatar_url
                       : 'https://picsum.photos/111',
                   }}
                 />
               </Avatar>
               <Text size='sm' className='text-typography-400 px-2'>
-                {event.owner.username}
+                {owner?.username}
               </Text>
             </VStack>
           </Box>

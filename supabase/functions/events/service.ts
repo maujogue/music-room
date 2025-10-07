@@ -163,3 +163,47 @@ export async function getPublicUrlForPath(path: string): string {
 
   return correctedUrl;
 }
+
+export async function addUserToEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
+  const { data, error } = await supabaseClient.from('event_members')
+    .insert([{ event_id: eventId, profile_id: userId, role }])
+    .select();
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}
+
+export async function removeUserFromEventSupabase(eventId: string): Promise<boolean> {
+  const { error } = await supabaseClient.from('event_members')
+    .delete()
+    .eq('event_id', eventId);
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return true;
+}
+
+export async function editUserInEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
+  const { data, error } = await supabaseClient.from('event_members')
+    .update({ role })
+    .eq('event_id', eventId)
+    .eq('profile_id', userId)
+    .select();
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}
