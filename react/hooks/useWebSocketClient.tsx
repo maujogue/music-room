@@ -37,7 +37,36 @@ export default function useWebSocketClient(): WebSocketActions {
       };
 
       ws.onmessage = (event) => {
-        console.log('ws: message received', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          console.log('ws: message received', data.type);
+
+          // Gérer les différents types de messages
+          switch (data.type) {
+            case 'connected':
+              console.log('✅ WebSocket authenticated for user:', data.userId);
+              break;
+            case 'pong':
+              console.log('🏓 Pong received from server');
+              break;
+            case 'vote:received':
+              console.log('🗳️ Vote received:', data);
+              break;
+            case 'vote:confirmed':
+              console.log('✅ Vote confirmed:', data);
+              break;
+            case 'subscribed':
+              console.log('📋 Subscribed to event:', data.eventId);
+              break;
+            case 'error':
+              console.error('❌ Server error:', data.message);
+              break;
+            default:
+              console.log('ws: unhandled message type:', data.type);
+          }
+        } catch (error) {
+          console.warn('ws: failed to parse message:', error);
+        }
       };
 
       setWebSocket(ws);
@@ -56,5 +85,28 @@ export default function useWebSocketClient(): WebSocketActions {
     return false;
   };
 
-  return { connected, sendPing}
+  const sendVote = (eventId: string, trackId: string): boolean => {
+    if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+      console.warn('ws: cannot send vote, socket not open');
+      return false;
+    }
+
+    try {
+      const message = {
+        type: 'vote',
+        eventId,
+        trackId,
+        timestamp: Date.now()
+      };
+
+      webSocket.send(JSON.stringify(message));
+      console.log(`📤 Vote sent: ${vote} for track ${trackId} in event ${eventId}`);
+      return true;
+    } catch (error) {
+      console.error('ws: error sending vote:', error);
+      return false;
+    }
+  };
+
+  return { connected, sendPing, sendVote }
 }

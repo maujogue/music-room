@@ -113,15 +113,16 @@ app.get('/ws', async (c) => {
               socket.send(JSON.stringify({
                 type: 'pong',
                 timestamp: Date.now(),
-                serverTime: new Date().toISOString()
+                serverTime: new Date().toISOString(),
+                email: userEmail
               }));
             } catch (error) {
               console.error('ws: error sending pong:', error);
             }
             break;
 
-          case 'subscribe_event':
-            handleEventSubscription(userId, msg.eventId, socket);
+          case 'vote':
+            handleVote(userId, msg, socket);
             break;
 
           default:
@@ -157,28 +158,29 @@ app.get('/ws', async (c) => {
   return response;
 });
 
-// Handle event subscription with permission checks
-async function handleEventSubscription(userId: string, eventId: string, socket: DenoteWebSocket) {
+// Handle vote from client
+async function handleVote(userId: string, msg: any, socket: DenoteWebSocket) {
   try {
-    console.log('ws: handling event subscription:', { userId, eventId });
+    const { eventId, trackId, vote } = msg;
 
-    if (!eventId) {
+    if (!eventId || !trackId || !vote) {
       socket.send(JSON.stringify({
         type: 'error',
-        message: 'Event ID is required for subscription'
+        message: 'Missing required vote parameters (eventId, trackId, vote)'
       }));
       return;
     }
 
-    // Check if event exists and user has permission
-    const { data: event, error: eventError } = await supabase
+    console.log('ws: processing vote', { userId, eventId, trackId, vote });
+
+    // Vérifier les permissions de l'utilisateur pour cet événement
+    const { data: event } = await supabase
       .from('events')
-      .select('id, name, owner_id, is_private')
+      .select('owner_id, everyone_can_vote, name')
       .eq('id', eventId)
       .single();
 
-    if (eventError || !event) {
-      console.log('ws: event not found:', { eventId, error: eventError });
+    if (!event) {
       socket.send(JSON.stringify({
         type: 'error',
         message: 'Event not found'
@@ -186,85 +188,112 @@ async function handleEventSubscription(userId: string, eventId: string, socket: 
       return;
     }
 
-    // Check if user is owner
+    // Vérifier si l'utilisateur peut voter
     const isOwner = event.owner_id === userId;
+    let isMember = false;
 
-    // Check if user is a member
-    const { data: membership } = await supabase
-      .from('event_members')
-      .select('profile_id')
-      .eq('event_id', eventId)
-      .eq('profile_id', userId)
-      .single();
+    if (!isOwner) {
+      const { data: membership } = await supabase
+        .from('event_members')
+        .select('profile_id')
+        .eq('event_id', eventId)
+        .eq('profile_id', userId)
+        .single();
+      isMember = !!membership;
+    }
 
-    const isMember = !!membership;
+    const canVote = isOwner || isMember || event.everyone_can_vote;
 
-    // For private events, user must be owner or member
-    if (event.is_private && !isOwner && !isMember) {
-      console.log('ws: access denied to private event:', { userId, eventId });
+    if (!canVote) {
       socket.send(JSON.stringify({
         type: 'error',
-        message: 'Access denied: You are not authorized to access this private event'
+        message: 'You do not have permission to vote in this event'
       }));
       return;
     }
 
-    // Subscription successful
-    console.log('ws: event subscription successful:', {
-      userId,
-      eventId,
-      eventName: event.name,
-      isOwner,
-      isMember
+    // Enregistrer le vote dans la table track_votes
+    const { error: upsertError } = await supabase.rpc('vote_for_track', {
+      p_event_id: eventId,
+      p_track_id: trackId,
+      p_user_id: userId
     });
 
-    socket.send(JSON.stringify({
-      type: 'subscribed',
-      eventId,
-      eventName: event.name,
-      role: isOwner ? 'owner' : (isMember ? 'member' : 'public'),
-      message: `Successfully subscribed to event: ${event.name}`,
-      timestamp: new Date().toISOString()
-    }));
-
-  } catch (error) {
-    console.error('ws: event subscription error:', { userId, eventId, error });
-    try {
+    if (upsertError) {
+      console.error('Vote save error:', upsertError);
       socket.send(JSON.stringify({
         type: 'error',
-        message: 'Failed to process event subscription'
+        message: 'Failed to save vote'
       }));
-    } catch (sendError) {
-      console.error('ws: error sending subscription error:', sendError);
+      return;
     }
+
+    // Confirmer le vote à l'utilisateur
+    socket.send(JSON.stringify({
+      type: 'vote:confirmed',
+      eventId,
+      trackId,
+      vote,
+      message: `Your vote has been recorded for track ${trackId}`
+    }));
+
+    console.log(`✅ Vote processed: ${userId} voted for track ${trackId} in event ${eventId}`);
+
+  } catch (error) {
+    console.error('Vote handling error:', error);
+    socket.send(JSON.stringify({
+      type: 'error',
+      message: 'Internal server error while processing vote'
+    }));
   }
 }
 
-async function startRealtime() {
-  const eventsChannel = supabase.channel('realtime-events');
-  eventsChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, async (payload: any) => {
+async function startVoteRealtime() {
+  const trackVotesChannel = supabase.channel('realtime-track-votes');
+  trackVotesChannel.on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'track_votes'
+  }, async (payload: any) => {
     try {
-      const ev = payload.new ?? payload.old;
-      const eventId = ev?.id;
-      if (!eventId) return;
+      const trackVote = payload.new ?? payload.old;
+      if (!trackVote) return;
 
-      const ownerId = ev?.owner_id;
-      const { data: members } = await supabase.from('event_members').select('profile_id').eq('event_id', eventId);
+      const eventId = trackVote.event_id;
+      const trackId = trackVote.track_id;
+      const voteCount = trackVote.vote_count;
+      const voters = trackVote.voters || [];
+
+      // Récupérer les participants à notifier
+      const { data: event } = await supabase
+        .from('events')
+        .select('owner_id, name')
+        .eq('id', eventId)
+        .single();
+
+      const { data: members } = await supabase
+        .from('event_members')
+        .select('profile_id')
+        .eq('event_id', eventId);
 
       const recipients = new Set<string>();
-      if (ownerId) recipients.add(ownerId);
+      if (event?.owner_id) recipients.add(event.owner_id);
       for (const m of members ?? []) if (m.profile_id) recipients.add(m.profile_id);
 
       const message = JSON.stringify({
-        type: 'event:changed',
+        type: 'track_vote:update',
         op: payload.eventType,
         eventId,
-        payload: ev,
+        eventName: event?.name,
+        trackId,
+        voteCount,
+        voters,
         timestamp: new Date().toISOString()
       });
 
-      console.log('ws: broadcasting event change to', recipients.size, 'users');
+      console.log(`📡 Broadcasting track vote update for ${trackId} (${voteCount} votes) to ${recipients.size} users`);
 
+      // Diffuser à tous les participants
       for (const uid of recipients) {
         const userSockets = clientsByUser.get(uid);
         if (!userSockets) continue;
@@ -272,60 +301,21 @@ async function startRealtime() {
           try {
             socket.send(message);
           } catch (error) {
-            console.error('ws: error sending event update:', error);
+            console.error('Error sending track vote update:', error);
           }
         }
       }
     } catch (err) {
-      console.warn('realtime events handler error', err);
+      console.warn('realtime track votes handler error', err);
     }
   });
 
-  const membersChannel = supabase.channel('realtime-event-members');
-  membersChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'event_members' }, async (payload: any) => {
-    try {
-      const row = payload.new ?? payload.old;
-      if (!row) return;
-      const userId = row.profile_id;
-      const eventId = row.event_id;
-      const { data: ev } = await supabase.from('events').select('id, name, owner_id').eq('id', eventId).single();
-      const recipients = new Set<string>();
-      if (userId) recipients.add(userId);
-      if (ev?.owner_id) recipients.add(ev.owner_id);
-
-      const message = JSON.stringify({
-        type: 'event_members:changed',
-        op: payload.eventType,
-        eventId,
-        eventName: ev?.name,
-        payload: row,
-        timestamp: new Date().toISOString()
-      });
-
-      console.log('ws: broadcasting member change to', recipients.size, 'users');
-
-      for (const uid of recipients) {
-        const userSockets = clientsByUser.get(uid);
-        if (!userSockets) continue;
-        for (const socket of userSockets) {
-          try {
-            socket.send(message);
-          } catch (error) {
-            console.error('ws: error sending member update:', error);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('realtime event_members handler error', err);
-    }
-  });
-
-  await eventsChannel.subscribe();
-  await membersChannel.subscribe();
-  console.log('✅ Realtime subscriptions started for events and event_members');
+  await trackVotesChannel.subscribe();
+  console.log('✅ Realtime track votes subscription started');
 }
 
-startRealtime().catch(console.error);
+// Start only vote realtime subscriptions
+startVoteRealtime().catch(console.error);
 
 console.log('🚀 Hono WS server (Deno) listening on port', PORT);
 

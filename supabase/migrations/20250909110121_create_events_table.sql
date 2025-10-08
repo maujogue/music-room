@@ -137,3 +137,132 @@ BEGIN
   RETURN res;
 END;
 $$;
+
+-- Table for track votes in events
+CREATE TABLE IF NOT EXISTS public.track_votes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  track_id text NOT NULL,
+  vote_count integer DEFAULT 0 NOT NULL,
+  voters uuid[] DEFAULT '{}' NOT NULL, -- Array of user IDs who voted for this track
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  UNIQUE(event_id, track_id) -- Une entrée par track par event
+);
+
+-- Index for performance on track_votes
+CREATE INDEX IF NOT EXISTS idx_track_votes_event_id ON track_votes(event_id);
+CREATE INDEX IF NOT EXISTS idx_track_votes_track_id ON track_votes(track_id);
+CREATE INDEX IF NOT EXISTS idx_track_votes_vote_count ON track_votes(vote_count DESC);
+
+-- Function to handle track vote changes and broadcast to realtime
+CREATE OR REPLACE FUNCTION public.handle_track_vote_changes()
+RETURNS trigger
+SECURITY DEFINER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  event_record RECORD;
+  owner_id UUID;
+  member_ids UUID[];
+  recipient_id UUID;
+  old_voters UUID[];
+  new_voters UUID[];
+  voter_id UUID;
+BEGIN
+  -- Get the event record
+  SELECT e.* INTO event_record
+  FROM events e
+  WHERE e.id = COALESCE(NEW.event_id, OLD.event_id);
+
+  IF NOT FOUND THEN
+    RETURN COALESCE(NEW, OLD);
+  END IF;
+
+  -- Get the owner_id from the event record
+  owner_id := event_record.owner_id;
+
+  -- Get all members of the event
+  SELECT ARRAY_AGG(em.profile_id) INTO member_ids
+  FROM event_members em
+  WHERE em.event_id = event_record.id;
+
+  -- Determine who voted (for new votes, find the difference in voters arrays)
+  old_voters := COALESCE(OLD.voters, '{}');
+  new_voters := COALESCE(NEW.voters, '{}');
+
+  -- For INSERT or UPDATE, find the voter who was added
+  IF TG_OP = 'INSERT' THEN
+    -- On insert, the last voter in the array is the new one
+    IF array_length(new_voters, 1) > 0 THEN
+      voter_id := new_voters[array_length(new_voters, 1)];
+    END IF;
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- On update, find the voter that was added (difference between arrays)
+    SELECT unnest INTO voter_id
+    FROM unnest(new_voters)
+    WHERE unnest != ALL(old_voters)
+    LIMIT 1;
+  END IF;
+
+  -- Broadcast to owner
+  IF owner_id IS NOT NULL THEN
+    PERFORM pg_notify(
+      'track_vote_changes:' || owner_id::text,
+      json_build_object(
+        'type', 'track_vote:' || TG_OP,
+        'event_id', event_record.id,
+        'event_name', event_record.name,
+        'track_id', COALESCE(NEW.track_id, OLD.track_id),
+        'vote_count', COALESCE(NEW.vote_count, OLD.vote_count, 0),
+        'voters', COALESCE(NEW.voters, OLD.voters, '{}'),
+        'voter_id', voter_id,
+        'timestamp', now()
+      )::text
+    );
+  END IF;
+
+  -- Broadcast to all members
+  IF member_ids IS NOT NULL THEN
+    FOREACH recipient_id IN ARRAY member_ids
+    LOOP
+      PERFORM pg_notify(
+        'track_vote_changes:' || recipient_id::text,
+        json_build_object(
+          'type', 'track_vote:' || TG_OP,
+          'event_id', event_record.id,
+          'event_name', event_record.name,
+          'track_id', COALESCE(NEW.track_id, OLD.track_id),
+          'vote_count', COALESCE(NEW.vote_count, OLD.vote_count, 0),
+          'voters', COALESCE(NEW.voters, OLD.voters, '{}'),
+          'voter_id', voter_id,
+          'timestamp', now()
+        )::text
+      );
+    END LOOP;
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+-- Trigger for track vote changes
+CREATE TRIGGER track_votes_changes_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON public.track_votes
+  FOR EACH ROW EXECUTE FUNCTION handle_track_vote_changes();
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER track_votes_updated_at_trigger
+  BEFORE UPDATE ON public.track_votes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
