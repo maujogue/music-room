@@ -103,7 +103,6 @@ export async function fetchEvent(c: Context): Promise<any> {
     const imagePath = data.event?.image_url;
     if (imagePath) {
       const publicUrl = await getPublicUrlForPath(imagePath);
-      console.log('Resolved public URL for image:', publicUrl);
       data.event.image_url = publicUrl;
     }
   } catch (err) {
@@ -112,13 +111,11 @@ export async function fetchEvent(c: Context): Promise<any> {
 
   data = setUserPermissions(data, user)
 
-  console.log('Fetched event:', data)
   c.status(200)
   return c.json(data)
 }
 
 function setUserPermissions(data: any, user: any) {
-  console.log('Data in setUserPermissions:', data);
   const memberEvent = data.members.find((m: any) => m.profile.id === user.id)
 
   if (data.event.owner_id === user.id) {

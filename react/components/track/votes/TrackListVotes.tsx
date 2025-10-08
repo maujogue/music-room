@@ -48,21 +48,11 @@ export default function TrackListVotes({
   useEffect(() => {
     if (!playlistTracks) return;
 
-    playlistTracks?.forEach(t => {
-      console.log('playlistTracks', t.details.name);
-      console.log('ID :', t.spotify_id);
-    });
-
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
 
   useEffect(() => {
     if (!tracks) return;
-
-    tracks?.forEach(t => {
-      console.log('Track in PL:', t.details.name);
-      console.log('ID :', t.spotify_id, 'Votes:', getVoteCount(t.spotify_id));
-    });
 
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);

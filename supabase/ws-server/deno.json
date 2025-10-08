@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.58.0",
+    "hono": "npm:hono@^4.9.10"
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env --allow-read --env src/server.ts",
+    "dev": "deno run --allow-net --allow-env --allow-read --env --watch src/server.ts",
+    "dev:debug": "deno run --allow-net --allow-env --allow-read --env --watch --inspect src/server.ts"
+  }
+}
