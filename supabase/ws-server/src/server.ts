@@ -161,9 +161,9 @@ app.get('/ws', async (c) => {
 // Handle vote from client
 async function handleVote(userId: string, msg: any, socket: DenoteWebSocket) {
   try {
-    const { eventId, trackId, vote } = msg;
+    const { eventId, trackId } = msg;
 
-    if (!eventId || !trackId || !vote) {
+    if (!eventId || !trackId) {
       socket.send(JSON.stringify({
         type: 'error',
         message: 'Missing required vote parameters (eventId, trackId, vote)'
@@ -171,7 +171,7 @@ async function handleVote(userId: string, msg: any, socket: DenoteWebSocket) {
       return;
     }
 
-    console.log('ws: processing vote', { userId, eventId, trackId, vote });
+    console.log('ws: processing vote', { userId, eventId, trackId });
 
     // Vérifier les permissions de l'utilisateur pour cet événement
     const { data: event } = await supabase
@@ -211,13 +211,34 @@ async function handleVote(userId: string, msg: any, socket: DenoteWebSocket) {
       }));
       return;
     }
+    
+    const { data: existingVote, error: fetchError } = await supabase
+      .from('track_votes')
+      .select('voters, vote_count')
+      .eq('event_id', eventId)
+      .eq('track_id', trackId)
+      .single();
 
-    // Enregistrer le vote dans la table track_votes
-    const { error: upsertError } = await supabase.rpc('vote_for_track', {
-      p_event_id: eventId,
-      p_track_id: trackId,
-      p_user_id: userId
-    });
+    let voters: string[] = [];
+    let voteCount = 0;
+    if (existingVote) {
+      if (Array.isArray(existingVote.voters)) {
+        voters = existingVote.voters;
+      }
+      voteCount = existingVote.vote_count;
+    }
+
+    if (!voters.includes(userId)) {
+      voters.push(userId);
+    }
+    voteCount += 1;
+
+    const { error: upsertError } = await supabase.from('track_votes').upsert({
+      event_id: eventId,
+      track_id: trackId,
+      voters,
+      vote_count: voteCount,
+    }, { onConflict: 'event_id,track_id' });
 
     if (upsertError) {
       console.error('Vote save error:', upsertError);
@@ -233,7 +254,6 @@ async function handleVote(userId: string, msg: any, socket: DenoteWebSocket) {
       type: 'vote:confirmed',
       eventId,
       trackId,
-      vote,
       message: `Your vote has been recorded for track ${trackId}`
     }));
 

@@ -3,9 +3,7 @@ import { getSession } from '@/services/session';
 
 export interface WebSocketActions {
   connected: boolean;
-  sendVote: (eventId: string, trackId: string, vote: 'like' | 'dislike') => boolean;
-  subscribeToEvent: (eventId: string) => boolean;
-  unsubscribeFromEvent: (eventId: string) => boolean;
+  sendVote: (eventId: string, trackId: string) => boolean;
   sendPing: () => boolean;
 }
 
@@ -100,7 +98,7 @@ export default function useWebSocketClient(): WebSocketActions {
       };
 
       webSocket.send(JSON.stringify(message));
-      console.log(`📤 Vote sent: ${vote} for track ${trackId} in event ${eventId}`);
+      console.log(`📤 Vote sent for track ${trackId} in event ${eventId}`);
       return true;
     } catch (error) {
       console.error('ws: error sending vote:', error);

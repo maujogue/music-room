@@ -12,7 +12,7 @@ interface Props {
 
 export default function VotesRoom({ eventId }: Props) {
   const { data, loading, error } = useEvent(eventId);
-  const { connected, sendPing } = useWebSocketClient();
+  const { connected, sendPing, sendVote } = useWebSocketClient();
 
   const {
     playlist,
@@ -65,12 +65,10 @@ export default function VotesRoom({ eventId }: Props) {
     console.log(`SWIPE to ${dir} for track(${trackId})!`);
     console.log('Connected:', connected, 'Event ID:', data?.event?.id);
     if (connected && data?.event?.id) {
-      // Convert swipe direction to vote
-      const vote = dir === 'right' ? 'like' : 'dislike';
-      const success = sendPing();
+      const success = sendVote(data.event.id, trackId);
 
       if (success) {
-        console.log(`✅ Vote sent: ${vote} for track ${trackId}`);
+        console.log(`✅ Vote sent for track ${trackId} in event ${data.event.id}`);
       } else {
         console.error('❌ Failed to send vote');
       }
