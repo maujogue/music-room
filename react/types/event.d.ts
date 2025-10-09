@@ -1,22 +1,30 @@
 type MusicEventFetchResult = {
   event: Event;
   location: MusicEventLocation;
-  members: UserInfo[];
+  members: EventUser[];
   owner: UserInfo;
+};
+
+type EventUser = {
+  Info: UserInfo;
+  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
 };
 
 type Event = {
   id: string;
   name: string;
-  images: SpotifyImage[];
   owner_id: string;
   owner: SpotifyOwner;
   isPublic: boolean;
   playlist: Playlist;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  image_url?: string;
+  created_at: string;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
-  ending_at: string;
 };
 
 type EventVote = {

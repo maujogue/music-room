@@ -197,7 +197,9 @@ export async function removeUserFromPlaylist(c: Context): Promise<any> {
   const user = c.get('user')
   const { user_id, role } = validateRemoveUserPayload(body)
 
-  await checkPermission(id, user.id, PERMISSIONS.REMOVE_USER)
+  if (body.user_id !== user.id) {
+    await checkPermission(id, user.id, PERMISSIONS.REMOVE_USER)
+  }
 
   await removeUserFromPlaylistInSupabase(id, user_id, role)
 

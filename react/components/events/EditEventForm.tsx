@@ -16,6 +16,8 @@ import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import FloatButton from '@/components/generics/FloatButton';
+import { Switch } from '@/components/ui/switch';
 
 type Props = {
   onSubmit: (payload: EventPayload) => Promise<void> | void;
@@ -43,15 +45,15 @@ export default function EditEventForm({
       ? new Date(initialValues.event.beginning_at)
       : new Date()
   );
-  const [endingAt, setEndingAt] = useState(
-    initialValues.event?.ending_at
-      ? new Date(initialValues.event.ending_at)
-      : new Date()
+  const [is_private, setIsPrivate] = useState(
+    initialValues.event?.is_private ?? false
+  );
+  const [everyone_can_vote, setEveryoneCanVote] = useState(
+    initialValues.event?.everyone_can_vote ?? true
   );
 
   // DateTimePicker states
   const [showBeginning, setShowBeginning] = useState(false);
-  const [showEnding, setShowEnding] = useState(false);
   const [mode, setMode] = useState<'date' | 'time'>('date');
 
   // location fields
@@ -76,19 +78,8 @@ export default function EditEventForm({
     setBeginningAt(currentDate);
   };
 
-  const onEndingChange = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || endingAt;
-    setShowEnding(false);
-    setEndingAt(currentDate);
-  };
-
   const showBeginningMode = (currentMode: 'date' | 'time') => {
     setShowBeginning(true);
-    setMode(currentMode);
-  };
-
-  const showEndingMode = (currentMode: 'date' | 'time') => {
-    setShowEnding(true);
     setMode(currentMode);
   };
 
@@ -98,14 +89,6 @@ export default function EditEventForm({
 
   const showBeginningTimepicker = () => {
     showBeginningMode('time');
-  };
-
-  const showEndingDatepicker = () => {
-    showEndingMode('date');
-  };
-
-  const showEndingTimepicker = () => {
-    showEndingMode('time');
   };
 
   async function uploadAvatar() {
@@ -132,8 +115,6 @@ export default function EditEventForm({
 
       // Preview immediately using local uri
       setImageUrl(image.uri);
-
-      const arraybuffer = await fetch(image.uri).then(res => res.arrayBuffer());
 
       const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
       const path = `${Date.now()}.${fileExt}`;
@@ -182,7 +163,8 @@ export default function EditEventForm({
       image_url: imageUrl.trim() || null,
       playlist_id: playlist?.id || null,
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
-      ending_at: endingAt ? endingAt.toISOString() : null,
+      is_private,
+      everyone_can_vote,
       // include location as nested object to match get_complete_event structure
       location: {
         venuename: venueName.trim() || null,
@@ -284,6 +266,28 @@ export default function EditEventForm({
                   </VStack>
                 )}
 
+                <VStack className='items-start'>
+                  <HStack className='items-center'>
+                    <Switch
+                      value={is_private}
+                      onToggle={() => {
+                        setIsPrivate(prev => !prev);
+                      }}
+                    />
+                    <Text>Private</Text>
+                  </HStack>
+
+                  <HStack className='items-center'>
+                    <Switch
+                      value={everyone_can_vote}
+                      onToggle={() => {
+                        setEveryoneCanVote(prev => !prev);
+                      }}
+                    />
+                    <Text>Everyone can vote</Text>
+                  </HStack>
+                </VStack>
+
                 <Text className='mt-2'>Beginning Date & Time</Text>
                 <HStack className='gap-2 mb-2'>
                   <Button
@@ -311,36 +315,6 @@ export default function EditEventForm({
                     mode={mode}
                     is24Hour={true}
                     onChange={onBeginningChange}
-                  />
-                )}
-
-                <Text className='mt-4'>Ending Date & Time</Text>
-                <HStack className='gap-2 mb-2'>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    onPress={showEndingDatepicker}
-                    className='bg-white'
-                  >
-                    <ButtonText>Select Date</ButtonText>
-                  </Button>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    onPress={showEndingTimepicker}
-                    className='bg-white'
-                  >
-                    <ButtonText>Select Time</ButtonText>
-                  </Button>
-                </HStack>
-                <Text>Selected: {endingAt.toLocaleString()}</Text>
-                {showEnding && (
-                  <DateTimePicker
-                    testID='endingDateTimePicker'
-                    value={endingAt}
-                    mode={mode}
-                    is24Hour={true}
-                    onChange={onEndingChange}
                   />
                 )}
 
@@ -418,15 +392,7 @@ export default function EditEventForm({
           </VStack>
         </ScrollView>
 
-        <Button
-          size='xl'
-          variant='solid'
-          disabled={loading}
-          onPress={handlePressValid}
-          className='absolute bottom-0 right-0 m-4 rounded-full'
-        >
-          <Icon as={Save} color='white' size='xl' />
-        </Button>
+        <FloatButton onPress={handlePressValid} icon={Save} />
       </FormControl>
 
       <PlaylistSelectionModal

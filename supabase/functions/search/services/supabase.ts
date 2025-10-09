@@ -86,6 +86,7 @@ export async function searchEventsByQuery(
 	.from('events')
 	.select('*, owner:profiles!events_owner_id_fkey(id, username, email, avatar_url, bio)')
 	.ilike('name', `%${params.query}%`)
+	.eq('is_private', false)
 	.limit(params.limit || 20);
 
 	if (eventsError) {

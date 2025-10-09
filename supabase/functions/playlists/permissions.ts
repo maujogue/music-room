@@ -70,9 +70,6 @@ export function canUserPerformAction(role: string | null, permission: string, pl
       return role === ROLES.OWNER;
 
     case PERMISSIONS.REMOVE_USER:
-      if (playlist.owner_id === user_id) {
-        throw new HTTPException(403, { message: 'Owner cannot be removed from the playlist' });
-      }
       return role === ROLES.OWNER;
 
     case PERMISSIONS.EDIT_PLAYLIST:
