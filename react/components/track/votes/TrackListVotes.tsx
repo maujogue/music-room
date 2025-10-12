@@ -16,10 +16,19 @@ import { VStack } from '@/components/ui/vstack';
 import TopVotesTracks from '@/components/track/votes/TopVotes';
 import { useEffect } from 'react';
 
+interface TrackVote {
+  eventId: string;
+  eventName?: string;
+  trackId: string;
+  voteCount: number;
+  voters: string[];
+}
+
 interface Props {
   eventId: string;
   playlistId: string;
   playlistTitle?: string;
+  realtimeVotes?: Map<string, TrackVote>; // ✅ Interface mise à jour
   playlistTracks: PlaylistTrack[];
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
@@ -27,9 +36,10 @@ interface Props {
 export default function TrackListVotes({
   eventId,
   playlistId,
-  playlistTitle,
+  playlistTitle: _playlistTitle,
   playlistTracks,
   onTrackSwiping,
+  realtimeVotes,
 }: Props) {
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
@@ -52,12 +62,26 @@ export default function TrackListVotes({
   }, [tracks]);
 
   useEffect(() => {
+    console.log('Realtime votes updated:', realtimeVotes);
+  }, [realtimeVotes]);
+
+  useEffect(() => {
     if (!tracks) return;
 
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
   // --------------------------------------------------
   // --------------------------------------------------
+
+  const getRealtimeVoteCount = (trackId: string): number => {
+    const realtimeVote = realtimeVotes?.get(trackId);
+    if (realtimeVote) {
+      return realtimeVote.voteCount;
+    }
+
+    const fallbackVotes = getVoteCount(trackId);
+    return fallbackVotes;
+  };
 
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
@@ -93,18 +117,22 @@ export default function TrackListVotes({
   return (
     <VStack className='flex-1'>
       <TopVotesTracks topTracks={getTopTracksFrom(tracks)} />
-
       <Heading className='mt-2'>Votes-room</Heading>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {
-            const va = getVoteCount(getTrackId(a));
-            const vb = getVoteCount(getTrackId(b));
+            // ✅ Trier par votes temps réel
+            const va = getRealtimeVoteCount(getTrackId(a));
+            const vb = getRealtimeVoteCount(getTrackId(b));
             if (vb !== va) return vb - va;
             return a.details.name.localeCompare(b.details.name);
           })
           .map((track: PlaylistTrack) => {
-            const voteCount = getVoteCount(getTrackId(track));
+            const trackId = getTrackId(track);
+            const voteCount = getRealtimeVoteCount(trackId); // ✅ Utiliser les votes temps réel
+            const realtimeVote = realtimeVotes?.get(trackId);
+
+            console.log(`🎵 Track: ${track.details.name} | ID: ${trackId} | Votes: ${voteCount}`);
 
             return (
               <Pressable key={track.added_at}>

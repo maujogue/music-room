@@ -1,0 +1,163 @@
+import {
+  handleVote,
+  handleUnvote,
+  getVotesForEvent
+} from '../services/votes.ts';
+import { sendErrorMessage, sendSuccessMessage } from './error.ts';
+
+export interface WebSocketMessage {
+  type: string;
+  [key: string]: unknown;
+}
+
+export interface VoteMessage extends WebSocketMessage {
+  type: 'vote';
+  eventId: string;
+  trackId: string;
+}
+
+// Handle incoming WebSocket messages
+export async function handleMessage(
+  userId: string,
+  userEmail: string,
+  message: WebSocketMessage,
+  socket: WebSocket
+): Promise<void> {
+  try {
+    console.log('ws: message from user', { userId, msgType: message.type });
+
+    switch (message.type) {
+      case 'ping':
+        handlePing(userEmail, socket);
+        break;
+
+      case 'vote':
+        await handleVoteMessage(userId, message, socket);
+        break;
+
+      case 'unvote':
+        await handleUnvoteMessage(userId, message, socket);
+        break;
+
+      case 'vote:get':
+        await handleGetVoteMessage(userId, message, socket);
+        break;
+
+      default:
+        console.log('ws: unhandled message type:', message.type);
+        sendErrorMessage(socket, 'Unknown message type');
+    }
+  } catch (error) {
+    console.error('ws: error processing message:', error);
+    sendErrorMessage(socket, 'Error processing message');
+  }
+}
+
+// Handle ping message
+function handlePing(userEmail: string, socket: WebSocket): void {
+  try {
+    socket.send(JSON.stringify({
+      type: 'pong',
+      timestamp: Date.now(),
+      serverTime: new Date().toISOString(),
+      email: userEmail
+    }));
+  } catch (error) {
+    console.error('ws: error sending pong:', error);
+  }
+}
+
+async function handleUnvoteMessage(
+  userId: string,
+  message: WebSocketMessage,
+  socket: WebSocket
+): Promise<void> {
+  if (!isUnvoteMessage(message)) {
+    sendErrorMessage(socket, 'Invalid unvote message format');
+    return;
+  }
+
+  const result = await handleUnvote(userId, message.trackId, message.eventId);
+
+  if (result.success) {
+    sendSuccessMessage(socket, {
+      type: 'unvote:confirmed',
+      eventId: result.data!.eventId,
+      trackId: result.data!.trackId,
+      voteCount: result.data!.voteCount,
+      voters: result.data!.voters,
+      message: result.message
+    });
+  } else {
+    sendErrorMessage(socket, result.message);
+  }
+}
+
+async function handleGetVoteMessage(
+  userId: string,
+  message: WebSocketMessage,
+  socket: WebSocket
+): Promise<void> {
+  if (!isGetVoteMessage(message)) {
+    sendErrorMessage(socket, 'Invalid get vote message format');
+    return;
+  }
+
+  const result = await getVotesForEvent(userId, message.eventId);
+
+  if (result.success) {
+    sendSuccessMessage(socket, {
+      type: 'vote:list',
+      eventId: message.eventId,
+      votes: result.data,
+      message: result.message
+    });
+  } else {
+    sendErrorMessage(socket, result.message);
+  }
+}
+
+
+// Handle vote message
+async function handleVoteMessage(
+  userId: string,
+  message: WebSocketMessage,
+  socket: WebSocket
+): Promise<void> {
+  // Validate vote message structure
+  if (!isVoteMessage(message)) {
+    sendErrorMessage(socket, 'Invalid vote message format');
+    return;
+  }
+
+  const result = await handleVote(userId, message);
+
+  if (result.success) {
+    sendSuccessMessage(socket, {
+      type: 'vote:confirmed',
+      eventId: result.data!.eventId,
+      trackId: result.data!.trackId,
+      message: result.message
+    });
+  } else {
+    sendErrorMessage(socket, result.message);
+  }
+}
+
+// Type guard for vote messages
+function isVoteMessage(message: WebSocketMessage): message is VoteMessage {
+  return message.type === 'vote' &&
+         typeof message.eventId === 'string' &&
+         typeof message.trackId === 'string';
+}
+
+function isUnvoteMessage(message: WebSocketMessage): message is { type: 'unvote'; eventId: string; trackId: string; } {
+  return message.type === 'unvote' &&
+         typeof message.eventId === 'string' &&
+         typeof message.trackId === 'string';
+}
+
+function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string;} {
+  return message.type === 'vote:get' &&
+         typeof message.eventId === 'string';
+}

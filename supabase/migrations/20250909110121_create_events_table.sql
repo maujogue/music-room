@@ -155,6 +155,8 @@ CREATE INDEX IF NOT EXISTS idx_track_votes_event_id ON track_votes(event_id);
 CREATE INDEX IF NOT EXISTS idx_track_votes_track_id ON track_votes(track_id);
 CREATE INDEX IF NOT EXISTS idx_track_votes_vote_count ON track_votes(vote_count DESC);
 
+ALTER PUBLICATION supabase_realtime ADD TABLE public.track_votes;
+
 -- Function to handle track vote changes and broadcast to realtime
 CREATE OR REPLACE FUNCTION public.handle_track_vote_changes()
 RETURNS trigger
