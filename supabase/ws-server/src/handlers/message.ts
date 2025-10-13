@@ -73,6 +73,7 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
         vote_remaining: vote_remaining,
         voteCount: userDataRes.data.vote_count,
         voteMax: userDataRes.data.max_votes,
+        voted_tracks: userDataRes.data.voted_tracks,
         message: 'User info retrieved successfully'
       });
     }

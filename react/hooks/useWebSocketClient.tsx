@@ -14,6 +14,7 @@ export interface eventUserData {
   vote_remaining: number;
   voteCount: number;
   voteMax: number;
+  voted_tracks: Record<string, number>;
 }
 
 export interface WebSocketActions {
@@ -254,6 +255,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     vote_remaining: number;
     voteCount: number;
     voteMax: number;
+    voted_tracks: Record<string, number>;
   }) => {
     console.log('📊 Received user info:', data);
 
@@ -261,7 +263,8 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       userId: data.userId,
       vote_remaining: data.vote_remaining,
       voteCount: data.voteCount,
-      voteMax: data.voteMax
+      voteMax: data.voteMax,
+      voted_tracks: data.voted_tracks
     };
 
     console.log('📊 Setting eventUserData to:', newUserData);

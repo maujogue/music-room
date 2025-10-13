@@ -37,16 +37,18 @@ export async function getEventMemberDetails(eventId: string, userId: string): Pr
         profile_id: string;
         max_votes: number;
         vote_count: number;
+        voted_tracks: Record<string, number>;
     };
     message?: string
 }> {
     try {
+        // Fetch member details
         const { data, error } = await supabase
-        .from('event_members')
-        .select('profile_id, max_votes, vote_count')
-        .eq('event_id', eventId)
-        .eq('profile_id', userId)
-        .single();
+            .from('event_members')
+            .select('profile_id, max_votes, vote_count')
+            .eq('event_id', eventId)
+            .eq('profile_id', userId)
+            .single();
 
         if (error) {
             console.error('Error fetching event member details:', error);
@@ -55,7 +57,26 @@ export async function getEventMemberDetails(eventId: string, userId: string): Pr
         if (!data) {
             return { success: false, message: 'Event member not found' };
         }
-        return { success: true, data };
+
+        // Fetch voted tracks
+        const { data: votesData, error: votesError } = await supabase
+            .from('track_votes')
+            .select('track_id, voters')
+            .eq('event_id', eventId);
+
+        if (votesError) {
+            console.error('Error fetching voted tracks:', votesError);
+            return { success: false, message: formatDbError(votesError).message };
+        }
+
+        const voted_tracks: Record<string, number> = {};
+        if (votesData) {
+            for (const vote of votesData) {
+                voted_tracks[vote.track_id] = vote.voters.map((v: any) => v.id == userId).length;
+            }
+        }
+
+        return { success: true, data: { ...data, voted_tracks } };
     } catch (error) {
         console.error('Unexpected error fetching event member details:', error);
         return { success: false, message: 'An unexpected error occurred.' };
