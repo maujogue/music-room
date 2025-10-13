@@ -82,7 +82,7 @@ export default function VotesRoom({ eventId }: Props) {
     }
 
 
-    if (dir !== 'right') {
+    if (dir !== 'left') {
       sendVote(data.event.id, trackId);
     } else {
       sendUnvote(data.event.id, trackId);

@@ -27,6 +27,11 @@ export interface VoteMessage {
   [key: string]: unknown;
 }
 
+export interface Response {
+  success: boolean;
+  message: string;
+}
+
 export interface VoteResponse {
   success: boolean;
   message: string;
@@ -52,7 +57,6 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
 
     console.log('ws: processing vote', { userId, eventId, trackId });
 
-    // Vérifier les permissions de l'utilisateur pour cet événement
     const { data: event } = await supabase
       .from('events')
       .select('owner_id, everyone_can_vote, name')
@@ -66,26 +70,24 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       };
     }
 
-    // Vérifier si l'utilisateur peut voter
-    const isOwner = event.owner_id === userId;
-    let isMember = false;
+    const { data: canVoteResult, error: canVoteError } = await supabase
+      .rpc('can_user_vote', {
+        p_event_id: eventId,
+        p_user_id: userId
+      });
 
-    if (!isOwner) {
-      const { data: membership } = await supabase
-        .from('event_members')
-        .select('profile_id')
-        .eq('event_id', eventId)
-        .eq('profile_id', userId)
-        .single();
-      isMember = !!membership;
-    }
-
-    const canVote = isOwner || isMember || event.everyone_can_vote;
-
-    if (!canVote) {
+    if (canVoteError) {
+      console.error('Error checking vote permission:', canVoteError);
       return {
         success: false,
-        message: 'You do not have permission to vote in this event'
+        message: 'Error checking vote permission'
+      };
+    }
+
+    if (!canVoteResult) {
+      return {
+        success: false,
+        message: 'You do not have permission to vote in this event or have reached your vote limit'
       };
     }
 
@@ -105,9 +107,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       voteCount = existingVote.vote_count;
     }
 
-    if (!voters.includes(userId)) {
-      voters.push(userId);
-    }
+    voters.push(userId);
     voteCount += 1;
 
     const { error: upsertError } = await supabase.from('track_votes').upsert({
@@ -228,8 +228,7 @@ export async function handleUnvote(
   userId: string,
   trackId: string,
   eventId: string,
-  socket: WebSocket
-): Promise<void> {
+): Promise<VoteResponse> {
   try {
     const { data: existingVote, error: fetchError } = await supabase
       .from('track_votes')
@@ -240,11 +239,16 @@ export async function handleUnvote(
 
     if (fetchError || !existingVote) {
       console.error('Unvote fetch error:', fetchError);
-      sendErrorMessage(socket, 'Failed to fetch vote record');
-      return;
+      return {
+        success: false,
+        message: 'Failed to fetch vote record'
+      };
     }
 
-    const updatedVoters = (existingVote.voters as string[]).filter((v: string) => v !== userId);
+    const votersArr = Array.isArray(existingVote.voters) ? [...existingVote.voters] : [];
+    const idx = votersArr.indexOf(userId);
+    if (idx !== -1) votersArr.splice(idx, 1);
+    const updatedVoters = votersArr;
     const updatedVoteCount = Math.max(0, (existingVote.vote_count ?? 1) - 1);
 
     const { error: updateError } = await supabase
