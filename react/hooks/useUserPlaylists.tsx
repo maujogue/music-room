@@ -24,6 +24,7 @@ export function useUserPlaylists() {
   }, []);
 
   const refetch = useCallback(() => {
+    console.log('*********************** refetching playlists');
     fetchPlaylists();
   }, [fetchPlaylists]);
 
