@@ -137,6 +137,67 @@ describe('Register Component', () => {
     expect(mockSignUp).not.toHaveBeenCalled();
   });
 
+  it('displays error message when username is empty', async () => {
+    render(<Register />);
+
+    // Remplir seulement email et password
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+
+    fireEvent.changeText(emailInput, 'test@example.com');
+    fireEvent.changeText(passwordInput, 'password123');
+
+    // Cliquer sur le bouton Sign Up
+    const signUpButton = screen.getByText('Sign Up');
+    fireEvent.press(signUpButton);
+
+    // Vérifier que le message d'erreur apparaît
+    await waitFor(() => {
+      expect(screen.getByText('Please enter all fields')).toBeTruthy();
+    });
+
+    // Vérifier que signUp n'a PAS été appelé
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it('displays error message when email is empty', async () => {
+    render(<Register />);
+
+    const usernameInput = screen.getByPlaceholderText('Username');
+    const passwordInput = screen.getByPlaceholderText('Password');
+
+    fireEvent.changeText(usernameInput, 'testuser');
+    fireEvent.changeText(passwordInput, 'password123');
+
+    const signUpButton = screen.getByText('Sign Up');
+    fireEvent.press(signUpButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Please enter all fields')).toBeTruthy();
+    });
+
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it('displays error message when password is empty', async () => {
+    render(<Register />);
+
+    const usernameInput = screen.getByPlaceholderText('Username');
+    const emailInput = screen.getByPlaceholderText('Email');
+
+    fireEvent.changeText(usernameInput, 'testuser');
+    fireEvent.changeText(emailInput, 'test@example.com');
+
+    const signUpButton = screen.getByText('Sign Up');
+    fireEvent.press(signUpButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Please enter all fields')).toBeTruthy();
+    });
+
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
   it('calls signUp function with correct parameters when form is submitted', async () => {
     mockSignUp.mockResolvedValue({ error: null });
 
@@ -159,21 +220,58 @@ describe('Register Component', () => {
     });
   });
 
-  it('displays error message when signUp fails', async () => {
-    const errorMessage = 'Email already exists';
+  it('signUp with a password of 5 characters', async () => {
+    const errorMessage = 'Password should be at least 6 characters.';
     mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
 
-    const { getByPlaceholderText, getByText, findByText } = render(<Register />);
+    const { getByPlaceholderText, getByText } = render(<Register />);
 
     fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
     fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'abcde');
 
     const signUpButton = getByText('Sign Up');
     fireEvent.press(signUpButton);
 
-    const errorElement = await findByText(errorMessage);
-    expect(errorElement).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText(errorMessage)).toBeTruthy();
+    });
+  });
+
+  it('signUp with an invalid mail', async () => {
+    const errorMessage = 'Unable to validate email address: invalid format';
+    mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
+
+    const { getByPlaceholderText, getByText } = render(<Register />);
+
+    fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
+    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'abcde');
+
+    const signUpButton = getByText('Sign Up');
+    fireEvent.press(signUpButton);
+
+    await waitFor(() => {
+      expect(getByText(errorMessage)).toBeTruthy();
+    });
+  });
+
+  it('signUp with a password of 5 characters', async () => {
+    const errorMessage = 'Password should be at least 6 characters.';
+    mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
+
+    const { getByPlaceholderText, getByText } = render(<Register />);
+
+    fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
+    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'abcde');
+
+    const signUpButton = getByText('Sign Up');
+    fireEvent.press(signUpButton);
+
+    await waitFor(() => {
+      expect(getByText(errorMessage)).toBeTruthy();
+    });
   });
 
   it('redirects to main page on successful sign up', async () => {
@@ -194,7 +292,7 @@ describe('Register Component', () => {
   });
 
   it('displays error message on sign up failure for email already exists', async () => {
-    const errorMessage = 'Email already exists';
+    const errorMessage = 'User already registered';
     mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
 
     const { getByPlaceholderText, getByText } = render(<Register />);
@@ -214,7 +312,7 @@ describe('Register Component', () => {
   });
 
   it('displays error message on sign up failure for username already exists', async () => {
-    const errorMessage = 'Username already exists';
+    const errorMessage = 'Database error saving new user';
     mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
 
     const { getByPlaceholderText, getByText } = render(<Register />);
@@ -320,6 +418,7 @@ describe('Register Component', () => {
 
     expect(title).toBeTruthy();
   });
+
   it('renders username input with correct placeholder', async () => {
     render(<Register />);
 
