@@ -47,7 +47,6 @@ export default function TrackListVotes({
   );
   const {
     getVoteCount,
-    getTopTracksFrom,
     getTrackId,
     loading: loadingV,
     error: errorV,
@@ -116,8 +115,6 @@ export default function TrackListVotes({
 
   return (
     <VStack className='flex-1'>
-      <TopVotesTracks topTracks={getTopTracksFrom(tracks)} />
-      <Heading className='mt-2'>Votes-room</Heading>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {
@@ -129,8 +126,7 @@ export default function TrackListVotes({
           })
           .map((track: PlaylistTrack) => {
             const trackId = getTrackId(track);
-            const voteCount = getRealtimeVoteCount(trackId); // ✅ Utiliser les votes temps réel
-            const realtimeVote = realtimeVotes?.get(trackId);
+            const voteCount = getRealtimeVoteCount(trackId);
 
             console.log(`🎵 Track: ${track.details.name} | ID: ${trackId} | Votes: ${voteCount}`);
 

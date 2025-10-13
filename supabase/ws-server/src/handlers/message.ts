@@ -3,6 +3,7 @@ import {
   handleUnvote,
   getVotesForEvent
 } from '../services/votes.ts';
+import { getEventMemberDetails } from '../services/events.ts';
 import { sendErrorMessage, sendSuccessMessage } from './error.ts';
 
 export interface WebSocketMessage {
@@ -43,6 +44,10 @@ export async function handleMessage(
         await handleGetVoteMessage(userId, message, socket);
         break;
 
+      case 'user:info':
+        handleUserInfo(userId, message, socket);
+        break;
+
       default:
         console.log('ws: unhandled message type:', message.type);
         sendErrorMessage(socket, 'Unknown message type');
@@ -52,6 +57,31 @@ export async function handleMessage(
     sendErrorMessage(socket, 'Error processing message');
   }
 }
+
+async function handleUserInfo(userId: string, message: WebSocketMessage, socket: WebSocket): Promise<void> {
+  try {
+    if (!isUserInfoMessage(message)) {
+      sendErrorMessage(socket, 'Invalid user info message format');
+      return;
+    }
+    const userDataRes = await getEventMemberDetails(message.eventId!, userId);
+    if (userDataRes.success && userDataRes.data) {
+      const vote_remaining = userDataRes.data.max_votes - userDataRes.data.vote_count;
+      sendSuccessMessage(socket, {
+        type: 'user:info:response',
+        userId: userId,
+        vote_remaining: vote_remaining,
+        voteCount: userDataRes.data.vote_count,
+        voteMax: userDataRes.data.max_votes,
+        message: 'User info retrieved successfully'
+      });
+    }
+  } catch (error) {
+    console.error('ws: error handling user info message:', error);
+    sendErrorMessage(socket, 'Error processing user info message');
+  }
+}
+
 
 // Handle ping message
 function handlePing(userEmail: string, socket: WebSocket): void {
@@ -159,5 +189,10 @@ function isUnvoteMessage(message: WebSocketMessage): message is { type: 'unvote'
 
 function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string;} {
   return message.type === 'vote:get' &&
+         typeof message.eventId === 'string';
+}
+
+function isUserInfoMessage(message: WebSocketMessage): message is { type: 'user:info'; eventId: string;} {
+  return message.type === 'user:info' &&
          typeof message.eventId === 'string';
 }

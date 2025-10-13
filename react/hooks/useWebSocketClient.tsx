@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSession } from '@/services/session';
 
 export interface TrackVote {
@@ -9,20 +9,31 @@ export interface TrackVote {
   voters: string[];
 }
 
+export interface eventUserData {
+  userId: string;
+  vote_remaining: number;
+  voteCount: number;
+  voteMax: number;
+}
+
 export interface WebSocketActions {
   connected: boolean;
   sendVote: (eventId: string, trackId: string) => boolean;
+  sendUnvote: (eventId: string, trackId: string) => boolean;
   sendPing: () => boolean;
   trackVotes: Map<string, TrackVote>;
+  eventUserData: eventUserData | null;
   subscribeToVotes: (callback: (vote: TrackVote) => void) => () => void;
 }
 
 export default function useWebSocketClient(event_id: string): WebSocketActions {
   const serverUrl = process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
+  const webSocketRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [trackVotes, setTrackVotes] = useState<Map<string, TrackVote>>(new Map());
   const [voteCallbacks, setVoteCallbacks] = useState<Set<(vote: TrackVote) => void>>(new Set());
+  const [eventUserData, setEventUserData] = useState<eventUserData | null>(null);
 
   useEffect(() => {
     const initWebSocket = async () => {
@@ -33,8 +44,8 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
-        console.log('ws: connected to', url.replace(currentSession?.access_token, '***TOKEN***'));
         setConnected(true);
+        sendRequestUserInfo(ws);
         ws.send(JSON.stringify({
           type: 'vote:get',
           eventId: event_id
@@ -55,7 +66,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
           const data = JSON.parse(event.data);
           console.log('ws: message received', data.type);
 
-          // Gérer les différents types de messages
           switch (data.type) {
             case 'subscribed':
               console.log('📋 Subscribed to event:', data.eventId);
@@ -66,8 +76,17 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
             case 'track_vote:update':
               handleTrackVoteUpdate(data);
               break;
+            case 'vote:confirmed':
+              sendRequestUserInfo();
+              break;
+            case 'unvote:confirmed':
+              sendRequestUserInfo();
+              break;
             case 'vote:list':
               handleVoteList(data.votes);
+              break;
+            case 'user:info:response':
+              handleUserInfo(data);
               break;
             default:
               console.log('ws: unhandled message type:', data.type);
@@ -78,10 +97,25 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       };
 
       setWebSocket(ws);
+      webSocketRef.current = ws;
     };
 
     initWebSocket();
   }, []);
+
+  const sendRequestUserInfo = useCallback((ws?: WebSocket) => {
+    const socketToUse = ws || webSocketRef.current || webSocket;
+
+    if (socketToUse && socketToUse.readyState === WebSocket.OPEN) {
+      socketToUse.send(JSON.stringify({
+        type: 'user:info',
+        eventId: event_id
+      }));
+    } else {
+      console.warn('ws: cannot send user info request - socket not available or not open');
+      console.warn('ws: socket readyState:', socketToUse?.readyState);
+    }
+  }, [event_id, webSocket]);
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
@@ -138,6 +172,25 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       return false;
     }
   };
+
+  const handleUserInfo = useCallback((data: {
+    userId: string;
+    vote_remaining: number;
+    voteCount: number;
+    voteMax: number;
+  }) => {
+    console.log('📊 Received user info:', data);
+
+    const newUserData = {
+      userId: data.userId,
+      vote_remaining: data.vote_remaining,
+      voteCount: data.voteCount,
+      voteMax: data.voteMax
+    };
+
+    console.log('📊 Setting eventUserData to:', newUserData);
+    setEventUserData(newUserData);
+  }, []);
 
   const handleVoteList = useCallback((votes: any[]) => {
     console.log('📋 Processing vote list with', votes.length, 'entries');
@@ -216,6 +269,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     sendVote,
     sendUnvote,
     trackVotes,
-    subscribeToVotes
+    subscribeToVotes,
+    eventUserData
   }
 }

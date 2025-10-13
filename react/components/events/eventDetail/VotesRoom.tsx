@@ -4,6 +4,8 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackListVotes from '@/components/track/votes/TrackListVotes';
 import { VStack } from '@/components/ui/vstack';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
 import useWebSocketClient, { TrackVote } from '@/hooks/useWebSocketClient';
 import { useEffect, useState } from 'react';
 
@@ -13,8 +15,16 @@ interface Props {
 
 export default function VotesRoom({ eventId }: Props) {
   const { data, loading, error } = useEvent(eventId);
-  const { connected, sendVote, sendUnvote, trackVotes, subscribeToVotes } = useWebSocketClient(eventId);
+  const {
+    connected,
+    sendVote,
+    sendUnvote,
+    trackVotes,
+    subscribeToVotes,
+    eventUserData
+  } = useWebSocketClient(eventId);
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(new Map());
+
 
   const {
     playlist,
@@ -25,11 +35,8 @@ export default function VotesRoom({ eventId }: Props) {
   useEffect(() => {
     if (!data?.event?.id) return;
 
-    console.log('📡 Subscribing to realtime votes for event:', data.event.id);
-
     const unsubscribe = subscribeToVotes((vote: TrackVote) => {
-      if (vote.eventId === data.event.id) {
-        console.log('� Vote update for our event:', vote);
+      if (vote.eventId === (data?.event?.id as unknown as string)) {
         setRealtimeVotes(prev => {
           const newMap = new Map(prev);
           newMap.set(vote.trackId, vote);
@@ -81,25 +88,53 @@ export default function VotesRoom({ eventId }: Props) {
       return;
     }
 
-
     if (dir !== 'left') {
-      sendVote(data.event.id, trackId);
+      if (eventUserData?.vote_remaining === 0) {
+        console.warn('❌ Cannot vote: No votes remaining');
+        return;
+      }
+
+      const success = sendVote(data.event.id, trackId);
+      if (success) {
+        console.log('✅ Vote sent successfully for track:', trackId);
+      }
     } else {
-      sendUnvote(data.event.id, trackId);
+      const success = sendUnvote(data.event.id, trackId);
+      if (success) {
+        console.log('✅ Unvote sent successfully for track:', trackId);
+      }
     }
   };
 
   return (
-    <VStack className='flex-1 w-full px-2'>
-      <TrackListVotes
-        eventId={eventId}
-        playlistId={playlist.id}
-        playlistTracks={playlist.tracks}
-        realtimeVotes={realtimeVotes}
-        onTrackSwiping={(dir, trackId) => {
-          onTrackSwipe(dir, trackId);
-        }}
-      />
-    </VStack>
+    <>
+      <VStack className='flex-1 w-full px-2'>
+        {eventUserData && (
+          <View className="bg-gray-100 p-3 rounded-lg mb-4">
+            <Text className="text-sm text-gray-600">
+              Votes left: <Text className="font-bold text-blue-600">{eventUserData.vote_remaining}</Text> / {eventUserData.voteMax}
+            </Text>
+            <Text className="text-xs text-gray-500">
+              Total votes: {eventUserData.voteCount}
+            </Text>
+            {!connected && (
+              <Text className="text-xs text-red-500">
+                ⚠️ WebSocket connection closed
+              </Text>
+            )}
+          </View>
+        )}
+
+        <TrackListVotes
+          eventId={eventId}
+          playlistId={playlist.id}
+          playlistTracks={playlist.tracks}
+          realtimeVotes={realtimeVotes}
+          onTrackSwiping={(dir: string, trackId: string) => {
+            onTrackSwipe(dir, trackId);
+          }}
+        />
+      </VStack>
+    </>
   );
 }
