@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
-import Register from '../app/(auth)/register';
-import { useAuth } from '../contexts/authCtx';
+import Register from '../../app/(auth)/register';
+import { useAuth } from '../../contexts/authCtx';
 import { useRouter } from 'expo-router';
 
 // Dependencies mock
@@ -9,7 +9,7 @@ jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
 
-jest.mock('../contexts/authCtx', () => ({
+jest.mock('../../contexts/authCtx', () => ({
   useAuth: jest.fn(),
 }));
 
