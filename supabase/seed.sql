@@ -96,7 +96,7 @@ SELECT
   event_data.owner_id,
   event_data.beginning_at,
   event_data.is_private,
-  event_data.everyone_can_vote,
+  event_data.everyone_can_vote
 FROM (
   VALUES
     ('Summer Bash 2024', 'Join us for an unforgettable summer party with great music!', (SELECT id FROM auth.users WHERE email = 'alice@example.com' LIMIT 1), NOW(), false, true),
