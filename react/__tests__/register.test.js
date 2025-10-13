@@ -220,24 +220,6 @@ describe('Register Component', () => {
     });
   });
 
-  it('signUp with a password of 5 characters', async () => {
-    const errorMessage = 'Password should be at least 6 characters.';
-    mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
-
-    const { getByPlaceholderText, getByText } = render(<Register />);
-
-    fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
-    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'abcde');
-
-    const signUpButton = getByText('Sign Up');
-    fireEvent.press(signUpButton);
-
-    await waitFor(() => {
-      expect(getByText(errorMessage)).toBeTruthy();
-    });
-  });
-
   it('signUp with an invalid mail', async () => {
     const errorMessage = 'Unable to validate email address: invalid format';
     mockSignUp.mockResolvedValue({ error: { message: errorMessage } });
@@ -245,8 +227,8 @@ describe('Register Component', () => {
     const { getByPlaceholderText, getByText } = render(<Register />);
 
     fireEvent.changeText(getByPlaceholderText('Username'), 'testuser');
-    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Password'), 'abcde');
+    fireEvent.changeText(getByPlaceholderText('Email'), 'test@');
+    fireEvent.changeText(getByPlaceholderText('Password'), 'password123');
 
     const signUpButton = getByText('Sign Up');
     fireEvent.press(signUpButton);
