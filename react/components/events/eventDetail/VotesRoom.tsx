@@ -21,7 +21,10 @@ export default function VotesRoom({ eventId }: Props) {
     sendUnvote,
     trackVotes,
     subscribeToVotes,
-    eventUserData
+    eventUserData,
+    connectionAttempts,
+    lastError,
+    reconnect
   } = useWebSocketClient(eventId);
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(new Map());
 
@@ -94,12 +97,12 @@ export default function VotesRoom({ eventId }: Props) {
         return;
       }
 
-      const success = sendVote(data.event.id, trackId);
+      const success = sendVote(eventId, trackId);
       if (success) {
         console.log('✅ Vote sent successfully for track:', trackId);
       }
     } else {
-      const success = sendUnvote(data.event.id, trackId);
+      const success = sendUnvote(eventId, trackId);
       if (success) {
         console.log('✅ Unvote sent successfully for track:', trackId);
       }
@@ -108,7 +111,7 @@ export default function VotesRoom({ eventId }: Props) {
 
   return (
     <>
-      <VStack className='flex-1 w-full px-2'>
+      <VStack className='flex-1 w-full'>
         {eventUserData && (
           <View className="bg-gray-100 p-3 rounded-lg mb-4">
             <Text className="text-sm text-gray-600">
@@ -117,11 +120,6 @@ export default function VotesRoom({ eventId }: Props) {
             <Text className="text-xs text-gray-500">
               Total votes: {eventUserData.voteCount}
             </Text>
-            {!connected && (
-              <Text className="text-xs text-red-500">
-                ⚠️ WebSocket connection closed
-              </Text>
-            )}
           </View>
         )}
 

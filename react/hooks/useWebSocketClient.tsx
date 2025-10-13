@@ -24,6 +24,9 @@ export interface WebSocketActions {
   trackVotes: Map<string, TrackVote>;
   eventUserData: eventUserData | null;
   subscribeToVotes: (callback: (vote: TrackVote) => void) => () => void;
+  connectionAttempts: number;
+  lastError: string | null;
+  reconnect: () => void;
 }
 
 export default function useWebSocketClient(event_id: string): WebSocketActions {
@@ -35,16 +38,54 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const [voteCallbacks, setVoteCallbacks] = useState<Set<(vote: TrackVote) => void>>(new Set());
   const [eventUserData, setEventUserData] = useState<eventUserData | null>(null);
 
-  useEffect(() => {
-    const initWebSocket = async () => {
+  // États pour la gestion des erreurs et reconnexion
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const maxReconnectAttempts = 5;
+  const reconnectDelay = 3000; // 3 secondes
+
+  // Fonction de reconnexion automatique
+  const attemptReconnect = useCallback(async () => {
+    if (connectionAttempts >= maxReconnectAttempts) {
+      console.error('ws: max reconnection attempts reached');
+      setLastError('Unable to reconnect to server. Please refresh the app.');
+      return;
+    }
+
+    setConnectionAttempts(prev => prev + 1);
+    console.log(`ws: attempting reconnection ${connectionAttempts + 1}/${maxReconnectAttempts}`);
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      initWebSocket();
+    }, reconnectDelay);
+  }, [connectionAttempts, maxReconnectAttempts, reconnectDelay]);
+
+  const initWebSocket = useCallback(async () => {
+    try {
+      // Nettoyer les timeouts précédents
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
       console.log('ws: initializing connection to', serverUrl);
       const currentSession = await getSession();
 
-      const url = `${serverUrl}?token=${encodeURIComponent(currentSession?.access_token || '')}`;
+      if (!currentSession?.access_token) {
+        setLastError('No valid session token available');
+        return;
+      }
+
+      const url = `${serverUrl}?token=${encodeURIComponent(currentSession.access_token)}`;
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
+        console.log('✅ ws: connection established successfully');
         setConnected(true);
+        setConnectionAttempts(0); // Reset attempts on success
+        setLastError(null);
+
         sendRequestUserInfo(ws);
         ws.send(JSON.stringify({
           type: 'vote:get',
@@ -52,13 +93,28 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         }));
       };
 
-      ws.onclose = () => {
-        console.log('ws: connection closed');
+      ws.onclose = (event) => {
+        console.log('ws: connection closed', { code: event.code, reason: event.reason });
         setConnected(false);
+
+        // Tentative de reconnexion si la fermeture n'est pas intentionnelle
+        if (event.code !== 1000) { // 1000 = normal closure
+          console.log('ws: unexpected closure, attempting reconnection...');
+          attemptReconnect();
+        }
       };
 
       ws.onerror = (error) => {
-        console.error('ws: error occurred', error);
+        console.error('❌ ws: connection error', {
+          error,
+          readyState: ws.readyState,
+          url: ws.url
+        });
+        setLastError('Connection error occurred');
+        setConnected(false);
+
+        // Tentative de reconnexion après une erreur
+        attemptReconnect();
       };
 
       ws.onmessage = (event) => {
@@ -98,10 +154,30 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
       setWebSocket(ws);
       webSocketRef.current = ws;
-    };
+    } catch (error) {
+      console.error('ws: failed to initialize WebSocket:', error);
+      setLastError('Failed to initialize WebSocket connection');
+      setConnected(false);
+      attemptReconnect();
+    }
+  }, [attemptReconnect]);
 
+  useEffect(() => {
     initWebSocket();
-  }, []);
+
+    // Cleanup lors du démontage
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
+      if (webSocketRef.current) {
+        webSocketRef.current.close(1000, 'Component unmounted');
+        webSocketRef.current = null;
+      }
+    };
+  }, [initWebSocket]);
 
   const sendRequestUserInfo = useCallback((ws?: WebSocket) => {
     const socketToUse = ws || webSocketRef.current || webSocket;
@@ -263,6 +339,14 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     };
   }, []);
 
+  // Fonction de reconnexion manuelle
+  const reconnect = useCallback(() => {
+    console.log('ws: manual reconnection requested');
+    setConnectionAttempts(0);
+    setLastError(null);
+    initWebSocket();
+  }, [initWebSocket]);
+
   return {
     connected,
     sendPing,
@@ -270,6 +354,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     sendUnvote,
     trackVotes,
     subscribeToVotes,
-    eventUserData
+    eventUserData,
+    connectionAttempts,
+    lastError,
+    reconnect
   }
 }

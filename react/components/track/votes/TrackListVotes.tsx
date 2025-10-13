@@ -1,7 +1,7 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Icon } from '@/components/ui/icon';
-import { PlusCircleIcon } from 'lucide-react-native';
+import { PlusCircleIcon, CircleMinus } from 'lucide-react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
@@ -11,9 +11,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { Box } from '@/components/ui/box';
 import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
-import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
-import TopVotesTracks from '@/components/track/votes/TopVotes';
 import { useEffect } from 'react';
 
 interface TrackVote {
@@ -118,7 +116,6 @@ export default function TrackListVotes({
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {
-            // ✅ Trier par votes temps réel
             const va = getRealtimeVoteCount(getTrackId(a));
             const vb = getRealtimeVoteCount(getTrackId(b));
             if (vb !== va) return vb - va;
@@ -139,14 +136,14 @@ export default function TrackListVotes({
                     <Reanimated.View
                       style={{
                         flex: 1,
-                        backgroundColor: colors.indigo[500],
+                        backgroundColor: colors.red[600],
                         justifyContent: 'center',
                         alignItems: 'center',
                         width: 80,
                       }}
                     >
                       <Box className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
+                        <Icon as={CircleMinus} color='white' size='xl' />
                       </Box>
                     </Reanimated.View>
                   )}
@@ -154,14 +151,14 @@ export default function TrackListVotes({
                     <Reanimated.View
                       style={{
                         flex: 1,
-                        backgroundColor: colors.indigo[500],
+                        backgroundColor: colors.green[600],
                         justifyContent: 'center',
                         alignItems: 'center',
                         width: 80,
                       }}
                     >
                       <Box className='flex-1 justify-center items-start w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
+                        <Icon as={PlusCircleIcon} color='white' size='xl' />
                       </Box>
                     </Reanimated.View>
                   )}

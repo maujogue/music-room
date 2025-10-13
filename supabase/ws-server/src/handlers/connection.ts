@@ -106,6 +106,35 @@ export function handleConnectionClose(
 }
 
 // Handle WebSocket error
-export function handleConnectionError(userId: string, error: Event): void {
-  console.error('ws: socket error for user:', { userId, error });
+export function handleConnectionError(
+  userId: string,
+  error: Event,
+  socket: WebSocket,
+  clientsByUser: Map<string, Set<WebSocket>>
+): void {
+  console.error('ws: socket error for user:', {
+    userId,
+    errorType: error.type,
+    timestamp: new Date().toISOString()
+  });
+
+  // Tenter de nettoyer la connexion défaillante
+  try {
+    removeClient(userId, socket, clientsByUser);
+
+    // Optionnel : envoyer un message d'erreur si la socket est encore ouverte
+    if (socket.readyState === WebSocket.OPEN) {
+      sendErrorMessage(socket, 'Connection error occurred, please reconnect');
+    }
+  } catch (cleanupError) {
+    console.error('ws: error during socket cleanup:', cleanupError);
+  }
+
+  // Log détaillé pour debug
+  console.error('ws: connection error details:', {
+    userId,
+    readyState: socket.readyState,
+    url: socket.url,
+    protocol: socket.protocol
+  });
 }

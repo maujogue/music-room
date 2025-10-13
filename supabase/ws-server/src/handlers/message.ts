@@ -82,7 +82,6 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
   }
 }
 
-
 // Handle ping message
 function handlePing(userEmail: string, socket: WebSocket): void {
   try {
