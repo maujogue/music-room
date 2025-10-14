@@ -39,10 +39,10 @@ export default function AllEvents() {
   if (events.length === 0) {
     return <EmptyState
       source={emptyPng}
-      title="No events yet"
-      subtitle="What a sadness ! Let's create a supa-event as soon as possible !"
+      title="No events"
+      subtitle="Nothing on the radar, only dust and empty bullets."
+      text="What a sadness ! Let's create a supa-event as soon as possible !"
       onPressCta={handlePressCreateEvent}
-
     />;
   }
 

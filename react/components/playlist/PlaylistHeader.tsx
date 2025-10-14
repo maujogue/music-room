@@ -1,8 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { CircleIcon } from '@/components/ui/icon';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Box } from '@/components/ui/box';
 import {
   Avatar,
@@ -12,7 +11,6 @@ import {
 import { Image } from '@/components/ui/image';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
-import { Playlist } from '@/types/playlist';
 import { UserRoundPlus } from 'lucide-react-native';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
@@ -33,6 +31,8 @@ import {
   AlertDialogBody,
 } from '@/components/ui/alert-dialog';
 import { ButtonText } from '@/components/ui/button';
+import PrivateBadge from '@/components/generics/PrivateBadge';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 
 type Props = {
   playlist: Playlist;
@@ -109,27 +109,15 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
       />
       <Card>
         <VStack>
-          <HStack className='justify-between'>
+          <HStack className='justify-between items-center'>
             <Heading size='4xl'>{playlist.name}</Heading>
             <HStack className='gap-2'>
-              {playlist.is_collaborative && (
-                <Badge action='info' className='rounded-full'>
-                  <BadgeIcon as={CircleIcon} className='' />
-                </Badge>
-              )}
-              {!playlist.is_private ? (
-                <Badge action='success' className='rounded-full'>
-                  <BadgeText>Public</BadgeText>
-                </Badge>
-              ) : (
-                <Badge action='warning' className='rounded-full'>
-                  <BadgeText>Private</BadgeText>
-                </Badge>
-              )}
+              {playlist.is_collaborative && (<CollaborativeBadge />)}
+              {playlist.is_private ? (<PrivateBadge />) : null}
             </HStack>
           </HStack>
           {playlist?.description ? (
-            <Text size='sm' className='color-secondary-700'>
+            <Text size='sm' className='px-4 color-secondary-700'>
               {playlistDescription}
             </Text>
           ) : null}

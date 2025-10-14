@@ -10,6 +10,7 @@ type EmptyStateProps = {
   source: any;
   title?: string;
   subtitle?: string;
+  text?: string;
   ctaLabel?: string;
   onPressCta?: () => void;
   testID?: string;
@@ -19,7 +20,7 @@ export default function EmptyState({
   source,
   title = "No events yet",
   subtitle = "Create your first event to see it here.",
-  ctaLabel,
+  text = "",
   onPressCta,
   testID = 'empty-state',
 }: EmptyStateProps) {
@@ -33,19 +34,22 @@ export default function EmptyState({
       />
       <VStack space="lg" className="absolute h-full justify-between px-10 py-40">
         <VStack className="items-center" space="sm">
-          <Text size="6xl" className="text-center font-black  text-white" >
+          <Text size="6xl" className="text-center font-black mb-8 text-white" >
             {title}
           </Text>
-          <Box className="bg-primary-500 rounded-3xl border border-neutral-300 p-4" >
-            <Text size="lg" className="text-center font-semibold text-white/80">
+          <Box className="bg-primary-500/70 rounded-3xl border border-neutral-300 p-4" >
+            <Text size="2xl" className="text-center font-semibold text-white">
               {subtitle}
+            </Text>
+            <Text size="md" className="text-center px-12 mt-4 text-white/80">
+              {text}
             </Text>
           </Box>
         </VStack>
 
         {onPressCta ? (
           <Box className="w-auto self-center bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5">
-            <Button size="lg" className="rounded-full w-20 h-20 p-3.5" action="primary" onPress={onPressCta}>
+            <Button size="lg" className="rounded-full bg-primary-500/70 w-20 h-20 p-3.5" action="primary" onPress={onPressCta}>
               <ButtonIcon size="xl" className="w-10 h-10" as={AddIcon} />
             </Button>
           </Box>

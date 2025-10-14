@@ -4,13 +4,13 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { CircleIcon } from '../ui/icon';
 import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
+import PrivateBadge from '@/components/generics/PrivateBadge';
 
 type Props = {
-  playlist: SpotifyPlaylist;
+  playlist: Playlist;
   onPress?: () => void;
 };
 
@@ -49,25 +49,13 @@ export default function PlaylistListItem({ playlist, onPress }: Props) {
               {playlist.name}
             </Heading>
             <HStack className='gap-2'>
-              {playlist.collaborative && (
-                <Badge action='info' className='rounded-full'>
-                  <BadgeIcon as={CircleIcon} className='' />
-                </Badge>
-              )}
-              {playlist.public ? (
-                <Badge action='success' className='rounded-full'>
-                  <BadgeText>Public</BadgeText>
-                </Badge>
-              ) : (
-                <Badge action='warning' className='rounded-full'>
-                  <BadgeText>Private</BadgeText>
-                </Badge>
-              )}
+              {playlist.is_collaborative && (<CollaborativeBadge />)}
+              {playlist.is_private && (<PrivateBadge />)}
             </HStack>
           </HStack>
-          {playlist.owner?.display_name && (
+          {playlist.owner?.username && (
             <Text size='sm' className='text-typography-400'>
-              By {playlist.owner.display_name}
+              By {playlist.owner.username}
             </Text>
           )}
         </VStack>

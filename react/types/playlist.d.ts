@@ -1,6 +1,6 @@
 type PlaylistSection = {
   title: string;
-  data: SpotifyPlaylist[];
+  data: Playlist[];
 };
 
 type PlaylistPayload = {
