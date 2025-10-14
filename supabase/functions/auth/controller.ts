@@ -13,10 +13,11 @@ import {
 } from './services/spotify.ts';
 
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
-const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
+const base_url = Deno.env.get('SUPABASE_URL')!;
+const spotify_redirect_uri = Deno.env.get('SPOTIFY_REDIRECT_URI')! || base_url;
+const redirect_uri = `${spotify_redirect_uri}/functions/v1/auth/spotify/callback`;
 
 export async function handleSpotifyAuth(c: Context) {
-  const redirect_uri = `${base_url}/functions/v1/auth/spotify/callback`;
   const state = generateRandomString(16);
   const scope = [
     'user-read-private',

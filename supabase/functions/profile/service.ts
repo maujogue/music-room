@@ -1,9 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
 import { formatDbError } from '../../utils/postgres_errors_map.tsx';
 
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+console.log('check SUPABASE_URL', Deno.env.get('SUPABASE_URL'));
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {
     persistSession: false,
@@ -138,7 +139,7 @@ export async function getUserFollows(
   userId: string,
   currentUserId?: string
 ): Promise<{ data: { followers: any[]; following: any[] }; error: any }> {
-    // Get both followers and following in parallel
+  // Get both followers and following in parallel
   const [followersResult, followingResult] = await Promise.all([
     supabase
       .from('follows')
@@ -206,7 +207,7 @@ export async function getUserFollows(
         is_friend: false,
       })) || [];
 
-    return { data: { followers, following }};
+    return { data: { followers, following } };
   }
 
   // Get current user's follow relationships (both following and followers)
@@ -283,7 +284,7 @@ export async function getUserFollows(
       };
     }) || [];
 
-  return { data: { followers, following }};
+  return { data: { followers, following } };
 }
 
 // Follow a user
@@ -302,7 +303,7 @@ export async function followUserById(
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  return { data: { success: true }};
+  return { data: { success: true } };
 }
 
 // Unfollow a user
@@ -322,7 +323,7 @@ export async function unfollowUserById(
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  return { data: { success: true }};
+  return { data: { success: true } };
 }
 
 // Search users
@@ -330,7 +331,7 @@ export async function searchUsersByQuery(
   currentUserId: string,
   query: string
 ): Promise<{ data: any[]; error: any }> {
-    // Search for users by username or email
+  // Search for users by username or email
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select(

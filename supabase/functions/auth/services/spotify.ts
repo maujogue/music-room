@@ -1,5 +1,6 @@
-const base_url = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL') || 'http://localhost:54321';
-const redirect_uri = `${base_url}/functions/v1/auth/spotify/callback`;
+const base_url = Deno.env.get('SUPABASE_URL')!;
+const spotify_redirect_uri = Deno.env.get('SPOTIFY_REDIRECT_URI')! || base_url;
+const redirect_uri = `${spotify_redirect_uri}/functions/v1/auth/spotify/callback`;
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const client_secret = Deno.env.get('SPOTIFY_CLIENT_SECRET')!;
 
