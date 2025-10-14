@@ -36,6 +36,12 @@
           "photosPermission": "The app accesses your photos to let you change your avatar."
         }
       ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.672488124519-1evo7am5jdfsga8utom0q2ittcfd0npn"
+        }
+      ],
       "expo-router",
       "expo-secure-store"
     ]
