@@ -18,6 +18,8 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
+import { Alert } from '@/components/ui/alert';
+import { useAppToast } from '@/hooks/useAppToast';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -70,6 +72,7 @@ export default function EditEventForm({
   const [loading, setLoading] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const toast = useAppToast();
 
   // DateTimePicker handlers
   const onBeginningChange = (event: any, selectedDate?: Date) => {
@@ -113,22 +116,15 @@ export default function EditEventForm({
         throw new Error('No image uri!');
       }
 
-      // Preview immediately using local uri
       setImageUrl(image.uri);
 
       const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
       const path = `${Date.now()}.${fileExt}`;
 
       console.log('Uploading to path:', path);
-
-      // (optional) perform upload to Supabase here and update imageUrl to public URL when done
-      // ...existing upload logic...
+      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
     } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      } else {
-        throw error;
-      }
+      toast.error({ title: 'uploading event image failed' });
     } finally {
       setUploading(false);
     }
@@ -220,9 +216,9 @@ export default function EditEventForm({
                 variant='solid'
                 onPress={uploadAvatar}
                 disabled={uploading}
-                className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-white/70'
+                className='mb-2 absolute right-2 top-2 z-10 rounded-full w-12 h-12 p-1.5 bg-primary-500/70 '
               >
-                <ButtonIcon as={Pen} />
+                <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
               </Button>
 
               <Box className='p-4 pt-0'>

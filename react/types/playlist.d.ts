@@ -8,6 +8,7 @@ type PlaylistPayload = {
   is_private?: boolean;
   is_collaborative?: boolean;
   description?: string;
+  cover_url?: string;
 };
 
 // Playlist types for the new playlist system
