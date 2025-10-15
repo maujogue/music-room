@@ -1,19 +1,15 @@
-import { apiFetch } from '@/utils/apiFetch';
 import { Linking } from 'react-native';
+import { apiFetch } from '@/utils/apiFetch';
 import {
   GoogleSignin,
-  GoogleSigninButton,
   statusCodes,
-  type GoogleSigninButtonProps,
 } from '@react-native-google-signin/google-signin';
 import { supabase } from './supabase';
 
 // Google Sign-In configuration
 const GOOGLE_CONFIG = {
-  webClientId:
-    '672488124519-goc32u81109lslod22kkbltk83qo3303.apps.googleusercontent.com',
-  iosClientId:
-    '672488124519-1evo7am5jdfsga8utom0q2ittcfd0npn.apps.googleusercontent.com',
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 };
 
 // Initialize Google Sign-In configuration

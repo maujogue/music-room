@@ -1,7 +1,7 @@
 -- Create a table for public profiles
 create table if not exists public.profiles (
   id uuid not null primary key references auth.users(id) on delete cascade,
-  username text unique,
+  username text,
   email text,
   avatar_url text,
   bio text,
