@@ -6,7 +6,6 @@ import {
   AvatarFallbackText,
 } from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
-import { MusicEventFetchResult } from '@/types/event';
 import { UserRoundPlus, MoreVertical, UserMinus } from 'lucide-react-native';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {

@@ -22,7 +22,7 @@ export const MOCK_VOTES: EventVote[] = [
   },
 ];
 
-export const MOCK_EVENTS: Event[] = [
+export const MOCK_EVENTS: MusicEvent[] = [
   {
     id: '0',
     name: 'Super Event MachinChose',

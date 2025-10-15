@@ -14,6 +14,7 @@ type EmptyStateProps = {
   ctaLabel?: string;
   onPressCta?: () => void;
   testID?: string;
+  compact?: boolean;
 };
 
 export default function EmptyState({
@@ -23,7 +24,11 @@ export default function EmptyState({
   text = "",
   onPressCta,
   testID = 'empty-state',
+  compact = false,
 }: EmptyStateProps) {
+
+  const vstackClass = compact ? "absolute h-full gap-20 px-10 py-40" : "absolute h-full justify-between px-10 py-40";
+
   return (
     <Center testID={testID} >
       <Image
@@ -32,7 +37,7 @@ export default function EmptyState({
         alt="Empty state illustration"
         resizeMode="cover"
       />
-      <VStack space="lg" className="absolute h-full justify-between px-10 py-40">
+      <VStack space="lg" className={vstackClass}>
         <VStack className="items-center" space="sm">
           <Text size="6xl" className="text-center font-black mb-8 text-white" >
             {title}

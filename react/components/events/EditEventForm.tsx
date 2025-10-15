@@ -20,9 +20,9 @@ import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
 
 type Props = {
-  onSubmit: (payload: EventPayload) => Promise<void> | void;
+  onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
   ApiError: string;
-  initialValues?: Partial<Event>;
+  initialValues?: Partial<MusicEventFetchResult>;
 };
 
 export default function EditEventForm({
@@ -38,7 +38,7 @@ export default function EditEventForm({
     initialValues.event?.image_url ?? ''
   );
   const [playlist, setPlaylist] = useState<Playlist | null>(
-    initialValues.playlist ?? null
+    initialValues.event?.playlist ?? null
   );
   const [beginningAt, setBeginningAt] = useState(
     initialValues.event?.beginning_at
@@ -157,7 +157,7 @@ export default function EditEventForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
-    const payload: EventPayload = {
+    const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
       image_url: imageUrl.trim() || null,
@@ -217,7 +217,7 @@ export default function EditEventForm({
 
               <Button
                 size='sm'
-                variant='filled'
+                variant='solid'
                 onPress={uploadAvatar}
                 disabled={uploading}
                 className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-white/70'

@@ -17,6 +17,7 @@ export function useEvent(id: string) {
       setLoading(true);
       setError(null);
       const data = await getEventById(id);
+      console.log('------------------------------------Fetched event data ----------------------------\n', data);
       setData(data);
     } catch (err) {
       setError(getErrorMsg(err));
@@ -51,5 +52,5 @@ export function useEvent(id: string) {
     }
   }, [id]);
 
-  return { data, loading, error, refetch, deleteEvent };
+  return { data, loading, error, setError, refetch, deleteEvent };
 }

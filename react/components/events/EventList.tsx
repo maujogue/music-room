@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import FloatButton from '@/components/generics/FloatButton';
 
+
 type Props = {
   sections: MusicEventSection[];
 };
@@ -19,7 +20,7 @@ export default function EventList({ sections }: Props) {
       <ScrollView>
         <SectionList
           sections={sections}
-          keyExtractor={item => `item-${item.id}-${Math.random()}`}
+          keyExtractor={item => `item-${item.event.id}-${Math.random()}`}
           renderItem={({ item }) => (
             <EventListItem event={item.event} owner={item.owner} />
           )}
