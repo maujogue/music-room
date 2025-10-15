@@ -5,7 +5,7 @@ import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Calendar1Icon } from 'lucide-react-native';
 
 interface Props {
-  event: Pick<Event, 'beginning_at'>;
+  event: Pick<MusicEvent, 'beginning_at'>;
 }
 
 export default function EventDatesInfos({ event }: Props) {

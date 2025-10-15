@@ -17,6 +17,7 @@ export default function PlaylistList({ sections }: Props) {
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 32 }}
+      className='px-4'
     >
       <AddPlaylistItem onPress={onPlaylistPress} title='Add Playlist' />
       <SectionList

@@ -4,6 +4,11 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackListVotes from '@/components/track/votes/TrackListVotes';
 import { VStack } from '@/components/ui/vstack';
+import EmptyState from '@/components/generics/screens/EmptyStateScreen';
+import emptyPng from '@/assets/no-playlist.png';
+import { useRouter } from 'expo-router';
+import { Box } from '@/components/ui/box';
+
 
 interface Props {
   eventId: string;
@@ -16,7 +21,11 @@ export default function VotesRoom({ eventId }: Props) {
     loading: ploading,
     error: perror,
     refetch,
-  } = usePlaylist(data ? data.event.playlist_id : null);
+  } = usePlaylist(data ? data.playlist?.id : null);
+  const router = useRouter();
+  const goToEditEvent = () => {
+    router.push(`(main)/events/${eventId}/edit`);
+  }
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -26,6 +35,18 @@ export default function VotesRoom({ eventId }: Props) {
   }
   if (!data || error) {
     return <ErrorScreen error={error} />;
+  }
+  if (perror === "no playlist found, no id given") {
+    return <Box className='min-h-screen w-full'>
+      <EmptyState
+        source={emptyPng}
+        title="No playlist"
+        subtitle="An event without music ? How dare you ? "
+        text="Add a playlist fast to not disappoint your guests !"
+        onPressCta={goToEditEvent}
+        compact
+      />
+    </Box>;
   }
   if (perror || !playlist) {
     return <ErrorScreen error={perror} />;
