@@ -139,7 +139,6 @@ dev:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	make serve-functions
 	cd ${REACT_APP_DIR} && npm start
 
 dev-cloud:
@@ -153,7 +152,6 @@ dev-tunnel:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	make serve-functions
 	cd ${REACT_APP_DIR} && npm start --tunnel
 
 # Clean up build files and node_modules
@@ -209,13 +207,11 @@ restart: stop-supabase start-supabase
 android:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	make serve-functions
 	cd ${REACT_APP_DIR} && npx expo run:android
 
 ios:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	make serve-functions
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
 prod-android:
@@ -231,6 +227,7 @@ prod-ios:
 test:
 	cd ${REACT_APP_DIR} && npm test
 
-deploy:
+deploy-db:
 	npx supabase db push
+deploy-functions:
 	npx supabase functions deploy
