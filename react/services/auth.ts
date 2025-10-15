@@ -1,5 +1,131 @@
 import { apiFetch } from '@/utils/apiFetch';
 import { Linking } from 'react-native';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+  type GoogleSigninButtonProps,
+} from '@react-native-google-signin/google-signin';
+import { supabase } from './supabase';
+
+// Google Sign-In configuration
+const GOOGLE_CONFIG = {
+  webClientId:
+    '672488124519-goc32u81109lslod22kkbltk83qo3303.apps.googleusercontent.com',
+  iosClientId:
+    '672488124519-1evo7am5jdfsga8utom0q2ittcfd0npn.apps.googleusercontent.com',
+};
+
+// Initialize Google Sign-In configuration
+export function configureGoogleSignIn() {
+  GoogleSignin.configure(GOOGLE_CONFIG);
+}
+
+// Google Sign-In error types
+export interface GoogleSignInError {
+  code: string;
+  message: string;
+}
+
+// Google Sign-In result
+export interface GoogleSignInResult {
+  success: boolean;
+  data?: any;
+  error?: GoogleSignInError;
+}
+
+// Handle Google Sign-In flow
+export async function signInWithGoogle(): Promise<GoogleSignInResult> {
+  try {
+    // Check if Google Play Services are available
+    await GoogleSignin.hasPlayServices();
+
+    // Get the user info and ID token
+    const userInfo = await GoogleSignin.signIn();
+
+    if (!userInfo.data.idToken) {
+      return {
+        success: false,
+        error: {
+          code: 'NO_ID_TOKEN',
+          message: 'No ID token present!',
+        },
+      };
+    }
+
+    // Use the ID token to sign in with Supabase
+    const { data, error: googleSignInError } =
+      await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: userInfo.data.idToken,
+      });
+
+    if (googleSignInError) {
+      return {
+        success: false,
+        error: {
+          code: 'SUPABASE_ERROR',
+          message: googleSignInError.message,
+        },
+      };
+    }
+    console.log('Google Sign-In successful:', userInfo.data);
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error: any) {
+    console.log('Google Sign-In Error:', error);
+
+    let errorMessage = 'Google Sign-In failed. Please try again.';
+    let errorCode = 'UNKNOWN_ERROR';
+
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // User cancelled the login flow
+      console.log('User cancelled Google Sign-In');
+      errorCode = 'CANCELLED';
+      errorMessage = 'Sign-in was cancelled';
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // Operation (e.g. sign in) is in progress already
+      console.log('Google Sign-In already in progress');
+      errorCode = 'IN_PROGRESS';
+      errorMessage = 'Sign-in already in progress';
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      // Play services not available or outdated
+      errorCode = 'PLAY_SERVICES_NOT_AVAILABLE';
+      errorMessage =
+        'Google Play Services not available. Please update your Google Play Services.';
+    }
+
+    return {
+      success: false,
+      error: {
+        code: errorCode,
+        message: errorMessage,
+      },
+    };
+  }
+}
+
+// Sign out from Google
+export async function signOutFromGoogle() {
+  try {
+    await GoogleSignin.signOut();
+  } catch (error) {
+    console.log('Error signing out from Google:', error);
+  }
+}
+
+// Check if user is signed in with Google
+export async function isSignedInWithGoogle(): Promise<boolean> {
+  try {
+    return await GoogleSignin.isSignedIn();
+  } catch (error) {
+    console.log('Error checking Google sign-in status:', error);
+    return false;
+  }
+}
 
 export async function connectToSpotify() {
   const response = await apiFetch<{ url: string }>(

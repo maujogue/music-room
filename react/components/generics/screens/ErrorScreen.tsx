@@ -4,9 +4,12 @@ import { VStack } from '@/components/ui/vstack';
 import { Card } from '@/components/ui/card';
 import { Center } from '@/components/ui/center';
 import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Heading } from '@/components/ui/heading';
-
+import { Button } from '@/components/ui/button';
+import { ButtonText } from '@/components/ui/button';
+import { useRouter } from 'expo-router';
+import { supabase } from '@/services/supabase';
 interface Props {
   error: string | null;
   text?: string;
@@ -16,6 +19,8 @@ export default function ErrorScreen({
   error,
   text = 'Please try again later.',
 }: Props) {
+  const router = useRouter();
+
   return (
     <Center className='flex-1 p-24'>
       <Card className='items-center rounded-xl'>
@@ -34,6 +39,15 @@ export default function ErrorScreen({
         </HStack>
         <HStack space='md' className='items-start'>
           <VStack className=''>
+          <Button
+            variant='outline'
+            onPress={() => {
+              supabase.auth.signOut();
+            }}
+            className='mt-2'
+          >
+            <ButtonText>Log out</ButtonText>
+          </Button>
             <Text size='md' className='font-semibold'>
               {error ? error : 'Unknown error broke the music'}
             </Text>

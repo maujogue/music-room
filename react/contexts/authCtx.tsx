@@ -7,6 +7,12 @@ import {
 } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
+import {
+  configureGoogleSignIn,
+  signInWithGoogle as googleSignInService,
+  signOutFromGoogle,
+  type GoogleSignInResult,
+} from '../services/auth';
 
 interface AuthContextType {
   session: Session | null;
@@ -18,7 +24,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ error: any }>;
-  signInWithGoogle: (idToken: string) => Promise<{ data: any; error: any }>;
+  signInWithGoogle: () => Promise<GoogleSignInResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -39,6 +45,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -84,18 +93,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const signOut = async () => {
     setIsLoading(true);
+    await signOutFromGoogle();
     await supabase.auth.signOut();
     setIsLoading(false);
   };
 
-  const signInWithGoogle = async (idToken: string) => {
+  const signInWithGoogle = async (): Promise<GoogleSignInResult> => {
     setIsLoading(true);
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: idToken,
-    });
+    const result = await googleSignInService();
     setIsLoading(false);
-    return { data, error };
+    return result;
   };
 
   const resetPassword = async (email: string) => {
