@@ -1,5 +1,4 @@
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
-//import { CreatePlaylistPayload } from '../types/playlist.d.ts';
 
 export function validateCreatePlaylistPayload(body: any): CreatePlaylistPayload {
   // Vérifier les champs requis

@@ -4,7 +4,7 @@ import { formatDbError } from '../utils/postgres_errors_map.tsx';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SECRET_SERVICE_ROLE_KEY')!
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
 export async function getCurrentUser(req: Request): Promise<any> {

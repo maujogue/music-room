@@ -51,7 +51,8 @@ create trigger on_auth_user_created
 
 -- Set up Storage!
 insert into storage.buckets (id, name)
-  values ('avatars', 'avatars');
+  values ('avatars', 'avatars')
+  on conflict (id) do nothing;
 
 -- Set up access controls for storage.
 -- See https://supabase.com/docs/guides/storage/security/access-control#policy-examples for more details.

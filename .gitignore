@@ -5,3 +5,7 @@ node_modules/
 .keep
 app/android
 react/coverage
+supabase/functions/.env.dev
+supabase/functions/.env.prod
+react/.env.dev
+react/.env.prod
