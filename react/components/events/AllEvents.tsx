@@ -8,6 +8,7 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
 import emptyPng from '@/assets/empty-events.png';
 import { useRouter } from 'expo-router';
+import { Box } from '@/components/ui/box';
 
 export default function AllEvents() {
   const { events, refetch, loading, error } = useUserEvents();
@@ -37,13 +38,17 @@ export default function AllEvents() {
 
 
   if (events.length === 0) {
-    return <EmptyState
-      source={emptyPng}
-      title="No events"
-      subtitle="Nothing on the radar, only dust and empty bullets."
-      text="What a sadness ! Let's create a supa-event as soon as possible !"
-      onPressCta={handlePressCreateEvent}
-    />;
+    return (
+      <Box>
+        <EmptyState
+          source={emptyPng}
+          title="No events"
+          subtitle="Nothing on the radar, only dust and empty bullets."
+          text="What a sadness ! Let's create a supa-event as soon as possible !"
+          onPressCta={handlePressCreateEvent}
+        />
+      </Box>
+    );
   }
 
   return <EventList sections={sections} />;

@@ -17,7 +17,8 @@ export default function EventList({ sections }: Props) {
   };
   return (
     <>
-      <ScrollView>
+      <ScrollView
+        className='px-4'>
         <SectionList
           sections={sections}
           keyExtractor={item => `item-${item.event.id}-${Math.random()}`}
@@ -30,6 +31,7 @@ export default function EventList({ sections }: Props) {
           stickySectionHeadersEnabled={false}
           showsVerticalScrollIndicator={false}
           scrollEnabled={false}
+          className='w-full'
         />
       </ScrollView>
       <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
