@@ -58,7 +58,7 @@ export async function search(c: Context) {
 	})
 }
 
-async function searchTracks(spotify_token: string, params: { query: string, limit: number, offset: number }) {
+async function searchTracks(spotify_token: string, params: { query: string, limit: string, offset: string }) {
 	console.log('Searching tracks with params:', params);
 	const trackResults = await fetchSpotifySearch(spotify_token, { ...params, type: 'track' })
 	if (trackResults.error) {

@@ -16,5 +16,9 @@ export async function fetchSpotifySearch(
       Authorization: `Bearer ${spotify_token}`,
     }
   });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error('Error fetching Spotify search: ' + errorText);
+  }
   return response.json();
 }
