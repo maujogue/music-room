@@ -81,8 +81,6 @@ const testProfilesTableCreation = async () => {
 }
 
 
-
-
 // Register and run the tests
 Deno.test('Client Creation Test', testClientCreation)
 Deno.test('Event members table creation', testEventMembersTableCreation)
