@@ -18,6 +18,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ error: any }>;
+  signInWithGoogle: (idToken: string) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -87,6 +88,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setIsLoading(false);
   };
 
+  const signInWithGoogle = async (idToken: string) => {
+    setIsLoading(true);
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: idToken,
+    });
+    setIsLoading(false);
+    return { data, error };
+  };
+
   const resetPassword = async (email: string) => {
     setIsLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -102,6 +113,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isLoading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     resetPassword,
   };

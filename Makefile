@@ -131,12 +131,15 @@ setup: install setup-env setup-supabase
 	@echo "🚀 Next steps:"
 	@echo "    Start the app: make dev"
 
+serve-functions:
+	npx supabase functions serve --no-verify-jwt&
+
 # Start the Expo development server
 dev:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	npx supabase functions serve --no-verify-jwt& \
+	make serve-functions
 	cd ${REACT_APP_DIR} && npm start
 
 dev-cloud:
@@ -150,7 +153,7 @@ dev-tunnel:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	npx supabase functions serve --no-verify-jwt& \
+	make serve-functions
 	cd ${REACT_APP_DIR} && npm start --tunnel
 
 # Clean up build files and node_modules
@@ -206,11 +209,13 @@ restart: stop-supabase start-supabase
 android:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
+	make serve-functions
 	cd ${REACT_APP_DIR} && npx expo run:android
 
 ios:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
+	make serve-functions
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
 prod-android:
