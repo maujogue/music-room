@@ -6,6 +6,7 @@
 # Shortcuts
 COMPOSE_FILE := docker-compose.yml
 REACT_APP_DIR := react
+SUPABASE_DIR := supabase
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
     IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
@@ -197,5 +198,11 @@ android:
 ios:
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
-test:
+test: test-react test-supabase
+
+test-react:
 	cd ${REACT_APP_DIR} && npm test
+
+test-supabase:
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net __tests__/*.test.ts
+

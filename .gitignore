@@ -6,3 +6,4 @@ node_modules/
 app/android
 react/coverage
 .expo
+deno.lock
