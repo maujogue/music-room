@@ -51,5 +51,5 @@ export function useEvent(id: string) {
     }
   }, [id]);
 
-  return { data, loading, error, refetch, deleteEvent };
+  return { data, loading, error, setError, refetch, deleteEvent };
 }

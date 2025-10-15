@@ -18,11 +18,11 @@ export default function AddPlaylistItem({ onPress, title }: Props) {
         className='rounded-lg h-[70px] w-100 mb-4 p-2'
         variant='elevated'
       >
-        <HStack className='py-1 flex-1 justify-start items-center gap-4'>
+        <HStack className='py-1 flex-1 justify-start items-center'>
           <Box className='rounded-md h-[60px] w-[60px] justify-center items-center'>
-            <Icon as={AddIcon} size='2xl' />
+            <Icon as={AddIcon} size='xl' className='h-10 w-10' />
           </Box>
-          <Text size='sm' className='text-typography-800'>
+          <Text size='xl' className='font-semibold text-typography-800'>
             {title}
           </Text>
         </HStack>

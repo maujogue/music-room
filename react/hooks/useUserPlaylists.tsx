@@ -3,7 +3,7 @@ import { getSession } from '@/services/session';
 import { getCurrentUserPlaylists } from '@/services/playlist';
 
 export function useUserPlaylists() {
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[] | null>(null);
+  const [playlists, setPlaylists] = useState<Playlist[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
