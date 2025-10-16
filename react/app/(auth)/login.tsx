@@ -11,7 +11,7 @@ import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { useAuth } from '../../contexts/authCtx';
 
 export default function SignIn() {
-  const { signIn, signInWithGoogle, isLoading } = useAuth();
+  const { signIn, signInWithGoogle, signInWithSpotify, isLoading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +47,21 @@ export default function SignIn() {
     }
   };
 
+  const handleSpotifySignIn = async () => {
+    setError('');
+
+    const result = await signInWithSpotify();
+
+    if (result.success) {
+      console.log('Spotify Sign-In successful:', result.data);
+      router.replace('/(main)');
+    } else {
+      setError(
+        result.error?.message || 'Spotify Sign-In failed. Please try again.'
+      );
+    }
+  };
+
   return (
     <View
       style={{
@@ -71,6 +86,14 @@ export default function SignIn() {
           onPress={handleGoogleSignIn}
           disabled={isLoading}
         />
+        <Button
+          variant='outline'
+          onPress={handleSpotifySignIn}
+          disabled={isLoading}
+          style={{ marginTop: 8 }}
+        >
+          <ButtonText>Sign in with Spotify</ButtonText>
+        </Button>
         <FormControl>
           <Input>
             <InputField

@@ -30,6 +30,19 @@ export interface GoogleSignInResult {
   error?: GoogleSignInError;
 }
 
+// Spotify Sign-In error types
+export interface SpotifySignInError {
+  code: string;
+  message: string;
+}
+
+// Spotify Sign-In result
+export interface SpotifySignInResult {
+  success: boolean;
+  data?: any;
+  error?: SpotifySignInError;
+}
+
 // Handle Google Sign-In flow
 export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   try {
@@ -123,16 +136,58 @@ export async function isSignedInWithGoogle(): Promise<boolean> {
   }
 }
 
-export async function connectToSpotify() {
-  const response = await apiFetch<{ url: string }>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,
-    {
-      method: 'POST',
+// Handle Spotify Sign-In flow
+export async function signInWithSpotify(): Promise<SpotifySignInResult> {
+  try {
+    // Get the Spotify authorization URL (using existing endpoint)
+    const response = await apiFetch<{ url: string }>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,
+      {
+        method: 'POST',
+      }
+    );
+
+    if (!response.success) {
+      return {
+        success: false,
+        error: {
+          code: 'API_ERROR',
+          message:
+            response.error?.message ||
+            'Failed to get Spotify authorization URL',
+        },
+      };
     }
-  );
-  if (!response.success) {
-    console.error('Error connecting to Spotify:', response.error);
-    throw response.error;
+
+    // Open the Spotify authorization URL
+    await Linking.openURL(response.data.url);
+
+    // Note: The actual authentication happens in the callback
+    // This function just initiates the flow
+    return {
+      success: true,
+      data: { message: 'Spotify authorization initiated' },
+    };
+  } catch (error: any) {
+    console.log('Spotify Sign-In Error:', error);
+
+    let errorMessage = 'Spotify Sign-In failed. Please try again.';
+    let errorCode = 'UNKNOWN_ERROR';
+
+    if (error.message?.includes('cancelled')) {
+      errorCode = 'CANCELLED';
+      errorMessage = 'Sign-in was cancelled';
+    } else if (error.message?.includes('network')) {
+      errorCode = 'NETWORK_ERROR';
+      errorMessage = 'Network error. Please check your connection.';
+    }
+
+    return {
+      success: false,
+      error: {
+        code: errorCode,
+        message: errorMessage,
+      },
+    };
   }
-  await Linking.openURL(response.data.url);
 }

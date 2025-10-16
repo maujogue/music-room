@@ -67,13 +67,12 @@ export async function createUserWithSpotifyData(userData: any): Promise<any> {
     email: userData.email,
     displayName: userData.displayName,
   };
-
   const { data, error } = await supabase.auth.admin.createUser({
     email: spotifyUser.email,
     email_confirm: true,
     password: crypto.randomUUID(),
     user_metadata: {
-      spotify_id: spotifyUser.id,
+      username: spotifyUser.displayName,
       display_name: spotifyUser.displayName,
     },
   });
@@ -84,4 +83,47 @@ export async function createUserWithSpotifyData(userData: any): Promise<any> {
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
   return data;
+}
+
+export async function findUserByEmail(email: string): Promise<any | null> {
+  const { data, error } = await supabase.auth.admin.listUsers();
+
+  if (error) {
+    console.error('Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  const user = data.users.find((user) => user.email === email);
+  return user || null;
+}
+
+async function impersonateUser(userEmail: string) {
+  // Generate magic link to get session tokens
+  const { data: magicLink, error: linkError } =
+    await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userEmail,
+    });
+
+  if (linkError || !magicLink?.properties?.hashed_token) {
+    throw new Error('Failed to generate auth token');
+  }
+
+  const { data: verified } = await supabase.auth.verifyOtp({
+    token_hash: magicLink.properties.hashed_token,
+    type: 'email',
+  });
+
+  const accessToken = verified.session.access_token;
+  const refreshToken = verified.session.refresh_token;
+
+  if (!accessToken || !refreshToken) {
+    throw new Error('Failed to extract session tokens');
+  }
+
+  return {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  };
 }

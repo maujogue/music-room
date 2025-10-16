@@ -5,17 +5,21 @@ import {
   insertOauthStateToSupabase,
   getAndDeleteOauthState,
   updateSpotifyUserTokens,
-  createUserWithSpotifyData
+  createUserWithSpotifyData,
+  findUserByEmail,
+  impersonateUser,
 } from './services/supabase.ts';
 import {
   fetchSpotifyUserTokenData,
-  fetchSpotifyUserProfile
+  fetchSpotifyUserProfile,
 } from './services/spotify.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const base_url = Deno.env.get('SUPABASE_URL')!;
 const spotify_redirect_uri = Deno.env.get('SPOTIFY_REDIRECT_URI')! || base_url;
 const redirect_uri = `${spotify_redirect_uri}/functions/v1/auth/spotify/callback`;
+
 
 export async function handleSpotifyAuth(c: Context) {
   const state = generateRandomString(16);
@@ -76,8 +80,34 @@ export async function handleSpotifyCallback(c: Context) {
     return c.json({ message: 'Failed to obtain access token from Spotify' });
   }
 
+  // Get Spotify user profile
+  const spotifyProfile = await fetchSpotifyUserProfile(token.access_token);
+
   if (user_id) {
+    // Existing user - just update their Spotify tokens
     await updateSpotifyUserTokens(user_id, token);
+
+    return c.redirect(redirectUrl);
+  } else {
+    // No existing user - check if user exists by email
+    const existingUser = await findUserByEmail(spotifyProfile.email);
+
+    if (existingUser) {
+      // User exists - update their Spotify tokens
+      await updateSpotifyUserTokens(existingUser.id, token);
+    } else {
+      // New user - create account with Spotify data
+      const newUser = await createUserWithSpotifyData({
+        id: spotifyProfile.id,
+        email: spotifyProfile.email,
+        displayName: spotifyProfile.display_name,
+      });
+      // Update the new user's Spotify tokens
+      await updateSpotifyUserTokens(newUser.user.id, token);
+    }
   }
-  return c.json({ message: 'User authenticated successfully' });
+  const sessionTokens = await impersonateUser(spotifyProfile.email);
+
+  const redirectUrl = `music-room://(auth)/callback?access_token=${sessionTokens.access_token}&refresh_token=${sessionTokens.refresh_token}`;
+  return c.redirect(redirectUrl);
 }

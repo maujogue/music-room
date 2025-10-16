@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { connectToSpotify } from '@/services/auth';
+import { signInWithSpotify } from '@/services/auth';
 import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 import { PrivacySetting } from '@/types/user';
 
@@ -101,7 +101,7 @@ export function useProfileData(userId: string) {
   const actions = {
     handleSpotifyConnect: useCallback(async () => {
       try {
-        await connectToSpotify();
+        await signInWithSpotify();
       } catch (error) {
         console.error('Error during Spotify OAuth:', error);
       }

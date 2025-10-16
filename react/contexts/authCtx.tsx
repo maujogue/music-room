@@ -10,8 +10,10 @@ import { supabase } from '../services/supabase';
 import {
   configureGoogleSignIn,
   signInWithGoogle as googleSignInService,
+  signInWithSpotify as spotifySignInService,
   signOutFromGoogle,
   type GoogleSignInResult,
+  type SpotifySignInResult,
 } from '../services/auth';
 
 interface AuthContextType {
@@ -25,6 +27,7 @@ interface AuthContextType {
     password: string
   ) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<GoogleSignInResult>;
+  signInWithSpotify: () => Promise<SpotifySignInResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -105,6 +108,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return result;
   };
 
+  const signInWithSpotify = async (): Promise<SpotifySignInResult> => {
+    setIsLoading(true);
+    const result = await spotifySignInService();
+    setIsLoading(false);
+    return result;
+  };
+
   const resetPassword = async (email: string) => {
     setIsLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -121,6 +131,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithSpotify,
     signOut,
     resetPassword,
   };
