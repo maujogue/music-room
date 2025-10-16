@@ -229,7 +229,7 @@ test-react:
 	cd ${REACT_APP_DIR} && npm test
 
 test-supabase:
-	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net __tests__/*.test.ts
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net __tests__/**/*.test.ts __tests__/*.test.ts
 
 deploy:
 	npx supabase db push
