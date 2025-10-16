@@ -4,24 +4,24 @@ import EditEventForm from '@/components/events/EditEventForm';
 import { updateEvent } from '@/services/events';
 import { useLocalSearchParams } from 'expo-router';
 import { useEvent } from '@/hooks/useEvent';
-import { Center } from '@/components/ui/center';
-import { ActivityIndicator } from 'react-native';
-import { Text } from '@/components/ui/text';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 
 export default function EditEvent() {
   const router = useRouter();
   const { profile } = useProfile();
   const { eventId: eventId } = useLocalSearchParams();
-  const { data, loading, error } = useEvent(eventId);
+  const id = Array.isArray(eventId) ? eventId[0] : eventId;
+  const { data, loading, error, setError } = useEvent(id);
 
-  const onSubmit = async (payload: EventPayload) => {
+  const onSubmit = async (payload: MusicEventPayload) => {
     if (!profile) {
       setError('Authentification error, try reconnect with Spotify please');
       return;
     }
 
     try {
-      await updateEvent(eventId, {
+      await updateEvent(id, {
         ...payload,
       });
       if (router.canGoBack()) {
@@ -34,35 +34,15 @@ export default function EditEvent() {
     }
   };
 
-  if (loading) {
-    return (
-      <Center>
-        <ActivityIndicator size='large' />
-      </Center>
-    );
-  }
-
-  if (error) {
-    return (
-      <Center>
-        <Text style={{ color: 'red' }}>{fetchError}</Text>
-      </Center>
-    );
-  }
-
-  if (!data) {
-    return (
-      <Center>
-        <Text>Event not found</Text>
-      </Center>
-    );
-  }
+  if (loading) { return (<LoadingSpinner text="Loading event..." />); }
+  if (error) { return (<ErrorScreen error={error} />); }
+  if (!data) { return (<ErrorScreen error={"impossible to retrieve event data yet."} />); }
 
   return (
     <EditEventForm
       initialValues={data ?? {}}
       onSubmit={onSubmit}
-      ApiError={error}
+      ApiError={error ?? ''}
     />
   );
 }

@@ -55,7 +55,7 @@
     "lint-staged": "^16.1.5",
     "lucide-react-native": "^0.542.0",
     "luxon": "^3.7.2",
-    "nativewind": "^4.1.23",
+    "nativewind": "4.1.23",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",

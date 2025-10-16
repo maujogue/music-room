@@ -9,16 +9,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogBackdrop,
+  AlertDialogCloseButton,
 } from '@/components/ui/alert-dialog';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import React, { useState } from 'react';
+import { CloseIcon, Icon } from '@/components/ui/icon';
+import { useAppToast } from '@/hooks/useAppToast';
 
 export default function Invite() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const toast = useAppToast();
 
   const handleUserPress = (user: any) => {
     setSelectedUser(user);
@@ -34,10 +38,12 @@ export default function Invite() {
     if (selectedUser) {
       try {
         await addUserToPlaylist(playlistId, selectedUser.id, role);
-        console.log('User invited successfully');
+        toast.show({
+          title: 'User invited successfully',
+          description :`${selectedUser.username} has been invited as ${role}.`});
         handleClose();
       } catch (error) {
-        console.error('Error inviting user:', error);
+        toast.error({title : 'Invitation failed'});
       }
     }
   };
@@ -65,6 +71,9 @@ export default function Invite() {
             <Heading className='text-typography-950 font-semibold' size='md'>
               Invite {selectedUser?.username} to playlist?
             </Heading>
+            <AlertDialogCloseButton >
+              <Icon as={CloseIcon} size="md" />
+            </AlertDialogCloseButton>
           </AlertDialogHeader>
           <AlertDialogBody className='mt-3 mb-4'>
             <Text size='sm'>
@@ -73,14 +82,6 @@ export default function Invite() {
             </Text>
           </AlertDialogBody>
           <AlertDialogFooter>
-            <Button
-              variant='outline'
-              action='secondary'
-              onPress={handleClose}
-              size='sm'
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
             <Button size='sm' onPress={() => handleConfirmInvite('member')}>
               <ButtonText>Invite as Member</ButtonText>
             </Button>

@@ -1,16 +1,6 @@
-type MusicEventFetchResult = {
-  event: Event;
-  location: MusicEventLocation;
-  members: EventUser[];
-  owner: UserInfo;
-};
 
-type EventUser = {
-  Info: UserInfo;
-  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
-};
-
-type Event = {
+// Note: naming 'Event' would conflict with built-in DOM Event
+type MusicEvent = {
   id: string;
   name: string;
   owner_id: string;
@@ -25,6 +15,24 @@ type Event = {
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
+};
+
+type MusicEventFetchResult = {
+  event: MusicEvent;
+  location: MusicEventLocation;
+  members: EventUser[];
+  owner: UserInfo;
+  playlist: Playlist;
+  user?: EventUser;
+};
+
+type EventUser = {
+  // Info: UserInfo;
+  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
+  can_delete: boolean,
+  can_edit: boolean;
+  can_invite: boolean;
+  can_vote: boolean;
 };
 
 type EventVote = {
@@ -54,11 +62,26 @@ type MusicEventLocation = {
 
 type MusicEventSection = {
   title: string;
-  data: Event[];
+  data: MusicEventFetchResult[];
 };
 
 type MusicEventPayload = {
   name: string;
+
+  // TODO : complete here from backend shape
+  // id: string;
+  name: string;
+  image_url?: string;
+  // owner: SpotifyOwner;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
+  // playlistId: string;
+  location: MusicEventLocation;
+
+  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  beginning_at: string;
 };
 
 type EventDateLabels = {

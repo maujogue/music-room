@@ -2,8 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {
     persistSession: false,

@@ -10,7 +10,7 @@ export default function AddNewEvent() {
   const [error, setError] = useState<string>('');
   const { profile } = useProfile();
 
-  const onSubmit = async (payload: EventPayload) => {
+  const onSubmit = async (payload: MusicEventPayload) => {
     console.log('HERE IMPLEMENT POST NEW EVENT TO BACK');
 
     if (!profile) {

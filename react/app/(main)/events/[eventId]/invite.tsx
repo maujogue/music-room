@@ -9,6 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogBackdrop,
+  AlertDialogCloseButton,
 } from '@/components/ui/alert-dialog';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -17,6 +18,10 @@ import { Switch } from '@/components/ui/switch';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import React, { useState } from 'react';
+import { CloseIcon, Icon } from '@/components/ui/icon';
+import { useAppToast } from '@/hooks/useAppToast';
+
+
 
 export default function Invite() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -24,6 +29,7 @@ export default function Invite() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [can_invite, setCanInvite] = useState(true);
   const [can_vote, setCanVote] = useState(true);
+  const toast = useAppToast();
 
   const handleUserPress = (user: any) => {
     setSelectedUser(user);
@@ -48,9 +54,14 @@ export default function Invite() {
                 : 'member';
         await addUserToEvent(eventId, selectedUser.id, role);
         console.log('User invited successfully');
+        toast.show({
+          title: 'User invited successfully',
+          description :`${selectedUser.username} has been invited as ${role}.`}
+        );
         handleClose();
       } catch (error) {
         console.error('Error inviting user:', error);
+        toast.error({title : 'Invitation failed'});
       }
     }
   };
@@ -79,6 +90,9 @@ export default function Invite() {
               Invite {selectedUser?.username} to event?
             </Heading>
           </AlertDialogHeader>
+          <AlertDialogCloseButton >
+            <Icon as={CloseIcon} size="md" />
+          </AlertDialogCloseButton>
           <AlertDialogBody className='mt-3 mb-4'>
             <Text size='sm'>
               Are you sure you want to invite {selectedUser?.username} to

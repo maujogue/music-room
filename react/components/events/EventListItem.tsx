@@ -10,9 +10,10 @@ import { VStack } from '@/components/ui/vstack';
 import { useEventDate } from '@/hooks/useEventDate';
 import { LinearGradient } from 'expo-linear-gradient';
 
+
 type Props = {
-  event: Event;
-  owner: User;
+  event: MusicEvent;
+  owner: UserInfo;
 };
 
 export default function EventListItem({ event, owner }: Props) {

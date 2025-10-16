@@ -3,8 +3,8 @@ import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { formatDbError } from '../../utils/postgres_errors_map.tsx'
 
-const supabaseUrl = Deno.env.get('LOCAL_SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SECRET_SERVICE_ROLE_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 export async function createSupabaseEvent(eventData: EventPayload): Promise<any> {
@@ -134,7 +134,7 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
 }
 
 export async function getPublicUrlForPath(path: string): string {
-  const localUrl = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL');
+  const localUrl = Deno.env.get('SUPABASE_URL');
 
   const { data } = supabaseClient.storage.from('avatars').createSignedUrl(path, 3600);
 
