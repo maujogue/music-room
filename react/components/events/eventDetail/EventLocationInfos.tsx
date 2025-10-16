@@ -27,7 +27,7 @@ export default function EventLocationInfo({ location }: Props) {
   return (
     <VStack className='gap-2'>
       {venuename && (
-        <Badge size='md' action='info' className='rounded-xl h-6'>
+        <Badge size='md' className='rounded-xl h-6'>
           <BadgeIcon as={ShellIcon} size='lg' />
           <BadgeText className='pl-1 font-bold'>{venuename}</BadgeText>
         </Badge>
@@ -42,24 +42,13 @@ export default function EventLocationInfo({ location }: Props) {
           )}
           <HStack className='items-center gap-1'>
             {city && <Text className='text-secondary-700'>{city}</Text>}
-            {city && country && <Text className='text-secondary-700'>, </Text>}
+            {city && country && <Text className='text-secondary-700'> | </Text>}
             {country && <Text className='text-secondary-700'>{country}</Text>}
           </HStack>
         </VStack>
       )}
 
-      {parsedCoordinates && (
-        <Badge
-          size='md'
-          action='muted'
-          className='rounded-md bg-indigo-200 h-6'
-        >
-          <BadgeIcon as={MapPinIcon} size='lg' />
-          <BadgeText className='pl-1'>
-            {parsedCoordinates.y.toFixed(5)}, {parsedCoordinates.x.toFixed(5)}
-          </BadgeText>
-        </Badge>
-      )}
+
     </VStack>
   );
 }

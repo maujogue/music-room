@@ -60,7 +60,7 @@ export default function EditEventForm({
 
   // location fields
   const initialLocation = (initialValues as any).location ?? {};
-  const [venueName, setVenueName] = useState(initialLocation.venueName ?? '');
+  const [venueName, setVenueName] = useState(initialLocation.venuename ?? '');
   const [complement, setComplement] = useState(
     initialLocation.complement ?? ''
   );

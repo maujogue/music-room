@@ -40,7 +40,7 @@ interface Props {
 }
 
 const COMPACT_H = 200;
-const EXPANDED_H = 330;
+const EXPANDED_H = 285;
 
 export default function EventHeader({
   eventData,
@@ -108,7 +108,7 @@ export default function EventHeader({
   };
 
   return (
-    <Animated.View style={containerStyle} className=''>
+    <Animated.View style={containerStyle} className='bg-primary-500'>
       <Card className='p-0 rounded-lg bg-transparent' variant='elevated'>
         <VStack className='relative'>
           <Image
@@ -116,8 +116,6 @@ export default function EventHeader({
             className='w-full h-[200px]'
             alt='Event image'
           />
-
-          {/* Overlay avec gradient pour lisibilité */}
           <VStack className='absolute bottom-0 left-0 right-0 p-4'>
             <HStack className='justify-between items-end mb-2'>
               <VStack className='w-full'>
@@ -132,9 +130,9 @@ export default function EventHeader({
                   )}
                 </HStack>
                 <HStack className='justify-between px-2 pt-2 items-bottom'>
-                  {eventData.user.role != 'owner' && (
+                  {eventData.user.role != 'owner' ? (
                     <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
-                  )}
+                  ) : <Box/>}
                   <HStack className='gap-1'>
                     {!eventData.event.isPublic && (
                       <PrivateBadge />
@@ -170,12 +168,10 @@ export default function EventHeader({
         </VStack>
 
         {/* Expanded CONTENT */}
-        <Animated.View style={extraStyle} className='mt-2'>
-          <VStack className='px-2 mb-2'>
-          </VStack>
-          <HStack className='justify-between items-top px-2'>
+        <Animated.View style={extraStyle}>
+          <HStack className='justify-between items-top pt-4 pb-2 px-2'>
             <EventLocationInfo location={eventData.location} />
-            <EventDatesInfos event={eventData.event} />
+            <EventDatesInfos event={eventData.event} coordinates={eventData.location.coordinates}/>
           </HStack>
         </Animated.View>
       </Card>
