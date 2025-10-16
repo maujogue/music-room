@@ -3,9 +3,14 @@ import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { CreatePlaylistPayload, PlaylistResponse } from '../../../types/playlist.d.ts'
 
+import 'jsr:@std/dotenv/load'
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseKey = Deno.env.get('SUPABASE_PUBLISHABLE_KEY');
+
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  supabaseUrl!,
+  supabaseKey!
 );
 
 export async function getSupabasePlaylistByOwner(ownerId: string): Promise<any[]> {
