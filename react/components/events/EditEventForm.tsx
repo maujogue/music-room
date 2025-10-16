@@ -40,7 +40,7 @@ export default function EditEventForm({
     initialValues.event?.image_url ?? ''
   );
   const [playlist, setPlaylist] = useState<Playlist | null>(
-    initialValues.event?.playlist ?? null
+    initialValues.playlist ?? null
   );
   const [beginningAt, setBeginningAt] = useState(
     initialValues.event?.beginning_at
