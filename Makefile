@@ -7,6 +7,7 @@
 COMPOSE_FILE := docker-compose.yml
 REACT_APP_DIR := react
 SUPABASE_DIR := supabase
+WS_SERVER_DIR := ${SUPABASE_DIR}/ws-server
 SUPABASE_FUNCTIONS_DIR := ${SUPABASE_DIR}/functions
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
@@ -131,12 +132,16 @@ setup: install setup-env setup-supabase
 	@echo "🚀 Next steps:"
 	@echo "    Start the app: make dev"
 
-# Start the Expo development server
+
 dev:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	npx supabase functions serve --no-verify-jwt& \
+	@echo "🔁 Starting supabase functions in background..."
+	cd ${SUPABASE_FUNCTIONS_DIR} && nohup npx supabase functions serve --no-verify-jwt > supabase-functions.log 2>&1 &
+	@echo "🔁 Starting ws server in background..."
+	cd ${WS_SERVER_DIR} && nohup deno task start > ws-server.log 2>&1 &
+	@echo "🔁 Starting Expo (foreground)..."
 	cd ${REACT_APP_DIR} && npm start
 
 dev-cloud:
