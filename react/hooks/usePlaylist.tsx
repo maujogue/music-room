@@ -28,7 +28,6 @@ export function usePlaylist(id: string | null) {
       setPlaylist(data);
       setCanEdit(data.user.can_edit ?? false);
     } catch (err) {
-      console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
     } finally {
       setLoading(false);
