@@ -4,13 +4,13 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackListVotes from '@/components/track/votes/TrackListVotes';
 import { VStack } from '@/components/ui/vstack';
-import { HStack } from '@/components/ui/hstack';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import useWebSocketClient, { TrackVote } from '@/hooks/useWebSocketClient';
-import { use, useEffect, useState } from 'react';
-import { Image } from '@/components/ui/image';
+import { useEffect, useState } from 'react';
 import { Box } from '@/components/ui/box';
+import VotedTrack from '@/components/track/votes/VotedTrack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface Props {
   eventId: string;
@@ -71,26 +71,18 @@ export default function VotesRoom({ eventId }: Props) {
     }
   }, [eventUserData]);
 
+  useEffect(() => {
+    console.log('votedTracks:', eventUserData?.voted_tracks);
+  }, [eventUserData?.voted_tracks]);
+
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
   }
   if (ploading) {
-    return <LoadingSpinner text="Loading event's playlist" />;
+    return <LoadingSpinner text=">Loading event's playlist" />;
   }
   if (!data || error) {
     return <ErrorScreen error={error} />;
-  }
-  if (perror === "no playlist found, no id given") {
-    return <Box className='min-h-screen w-full'>
-      <EmptyState
-        source={emptyPng}
-        title="No playlist"
-        subtitle="An event without music ? How dare you ? "
-        text="Add a playlist fast to not disappoint your guests !"
-        onPressCta={goToEditEvent}
-        compact
-      />
-    </Box>;
   }
   if (perror || !playlist) {
     return <ErrorScreen error={perror} />;
@@ -125,7 +117,6 @@ export default function VotesRoom({ eventId }: Props) {
     }
   };
 
-
   return (
     <>
       <VStack className='flex-1 w-full'>
@@ -144,34 +135,41 @@ export default function VotesRoom({ eventId }: Props) {
                   <Text className="font-bold text-gray-700 mb-2">
                     Tracks you voted for: ({Object.keys(eventUserData.voted_tracks).length})
                   </Text>
-                  {Object.entries(eventUserData.voted_tracks).map(([trackId, voteCount]) => {
-                    const track = playlist?.tracks?.find((t: any) => t.spotify_id === trackId);
-                    return track ? (
-                      <Box key={track.spotify_id} className="p-2 bg-white rounded mb-1 border-l-4 border-blue-500">
-                        <HStack>
-                          <Image source={{ uri: track.details.album.images[0]?.url }} style={{ width: 40, height: 40 }} />
-                          <VStack className="ml-3">
-                            <Text className="text-gray-800 font-medium">{track.details.name}</Text>
-                            <Text className="text-xs text-gray-500">
-                              {track.details.artists?.map((artist: any) => artist.name).join(', ')}
-                            </Text>
-                            <Text className="text-xs text-blue-600 mt-1">
-                              Your votes: {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-                            </Text>
-                          </VStack>
-                        </HStack>
-                      </Box>
-                    ) : (
-                      <Box key={trackId} className="p-2 bg-gray-100 rounded mb-1">
-                        <Text className="text-gray-500 text-xs">Track not found (ID: {trackId})</Text>
-                        <Text className="text-xs text-blue-600">
-                          Your votes: {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-                        </Text>
-                      </Box>
-                    );
-                  })}
-              </Box>
-                  )}
+                  <GestureHandlerRootView>
+                    {Object.entries(eventUserData.voted_tracks).map(([trackId, voteCount]) => {
+                      const track = playlist?.tracks?.find((t: any) => t.spotify_id === trackId);
+                      return track ? (
+                        <VotedTrack
+                          key={trackId}
+                          track={track}
+                          voteCount={voteCount}
+                          onVote={async (id) => {
+                            if (!connected) {
+                              console.warn('❌ Cannot vote: WebSocket not connected');
+                              return false;
+                            }
+                            return sendVote(eventId, id);
+                          }}
+                          onUnvote={async (id) => {
+                            if (!connected) {
+                              console.warn('❌ Cannot unvote: WebSocket not connected');
+                              return false;
+                            }
+                            return sendUnvote(eventId, id);
+                          }}
+                        />
+                      ) : (
+                        <Box key={trackId} className="p-2 bg-gray-100 rounded mb-1">
+                          <Text className="text-gray-500 text-xs">Track not found (ID: {trackId})</Text>
+                          <Text className="text-xs text-blue-600">
+                            Your votes: {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
+                          </Text>
+                        </Box>
+                      );
+                    })}
+                  </GestureHandlerRootView>
+                </Box>
+            )}
           </>
         )}
 

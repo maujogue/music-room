@@ -42,7 +42,6 @@ export async function getEventMemberDetails(eventId: string, userId: string): Pr
     message?: string
 }> {
     try {
-        // Fetch member details
         const { data, error } = await supabase
             .from('event_members')
             .select('profile_id, max_votes, vote_count')
@@ -58,7 +57,6 @@ export async function getEventMemberDetails(eventId: string, userId: string): Pr
             return { success: false, message: 'Event member not found' };
         }
 
-        // Fetch voted tracks
         const { data: votesData, error: votesError } = await supabase
             .from('track_votes')
             .select('track_id, voters')
@@ -72,7 +70,13 @@ export async function getEventMemberDetails(eventId: string, userId: string): Pr
         const voted_tracks: Record<string, number> = {};
         if (votesData) {
             for (const vote of votesData) {
-                voted_tracks[vote.track_id] = vote.voters.map((v: any) => v.id == userId).length;
+            const voters = vote.voters ?? [];
+            const count = voters.reduce((acc: number, v: any) => {
+                if (typeof v === 'string') return acc + (v === userId ? 1 : 0);
+                if (v && (v.id === userId || v.user_id === userId)) return acc + 1;
+                return acc;
+            }, 0);
+            if (count > 0) voted_tracks[vote.track_id] = count;
             }
         }
 

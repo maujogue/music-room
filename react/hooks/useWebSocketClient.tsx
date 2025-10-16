@@ -39,14 +39,12 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const [voteCallbacks, setVoteCallbacks] = useState<Set<(vote: TrackVote) => void>>(new Set());
   const [eventUserData, setEventUserData] = useState<eventUserData | null>(null);
 
-  // États pour la gestion des erreurs et reconnexion
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000; // 3 secondes
 
-  // Fonction de reconnexion automatique
   const attemptReconnect = useCallback(async () => {
     if (connectionAttempts >= maxReconnectAttempts) {
       console.error('ws: max reconnection attempts reached');
@@ -97,12 +95,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       ws.onclose = (event) => {
         console.log('ws: connection closed', { code: event.code, reason: event.reason });
         setConnected(false);
-
-        // Tentative de reconnexion si la fermeture n'est pas intentionnelle
-        if (event.code !== 1000) { // 1000 = normal closure
-          console.log('ws: unexpected closure, attempting reconnection...');
-          attemptReconnect();
-        }
       };
 
       ws.onerror = (error) => {
