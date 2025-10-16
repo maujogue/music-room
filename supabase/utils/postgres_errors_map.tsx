@@ -22,7 +22,6 @@ export const PG_ERRORS: Record<string, PgErrorMap> = {
   // Syntax / Invalid queries
   "42601": { message: "Invalid request.", status: 400 },
   "42703": { message: "Invalid Column.", status: 400 },
-  "42703": { message: "Invalid field.", status: 400 },
   "42P01": { message: "Invalid resource.", status: 400 },
   "42883": { message: "Invalid request.", status: 400 },
 
