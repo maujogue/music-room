@@ -98,7 +98,7 @@ export async function findUserByEmail(email: string): Promise<any | null> {
   return user || null;
 }
 
-async function impersonateUser(userEmail: string) {
+export async function impersonateUser(userEmail: string) {
   // Generate magic link to get session tokens
   const { data: magicLink, error: linkError } =
     await supabase.auth.admin.generateLink({

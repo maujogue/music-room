@@ -1,0 +1,35 @@
+{
+  "folders": [
+    {
+      "path": "./react"
+    },
+    {
+      "path": "./supabase"
+    },
+    {
+      "name": "config",
+      "path": ".",
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "react": true,
+      "supabase": true,
+      "**/.cursor": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/.env": true,
+      "**/.env.local": true,
+      "**/.env.development.local": true,
+      "**/.env.test.local": true,
+      "**/.env.production.local": true,
+      "**/node_modules": true,
+      "**/android": true,
+      "**/ios": true,
+      "**/build": true,
+      "**/.branches": true,
+      "**/.temp": true,
+      "**/.expo": true,
+    }
+  },
+}
