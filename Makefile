@@ -138,7 +138,7 @@ dev:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
 	@echo "🔁 Starting supabase functions in background..."
-	cd ${SUPABASE_FUNCTIONS_DIR} && nohup npx supabase functions serve --no-verify-jwt > supabase-functions.log 2>&1 &
+	cd ${SUPABASE_FUNCTIONS_DIR} && nohup npx supabase functions serve > supabase-functions.log 2>&1 &
 	@echo "🔁 Starting Expo (foreground)..."
 	cd ${REACT_APP_DIR} && npm start
 
