@@ -28,8 +28,8 @@ export default function EditEvent() {
         router.back();
       }
     } catch (error) {
-      console.error('Error creating event:', error);
-      setError(`Error creating event: ${error}`);
+      console.error('Error editing event:', error);
+      setError(`Error editing event: ${error}`);
       return;
     }
   };

@@ -18,7 +18,7 @@ export function parsePointCoordinates(
   return { x, y };
 }
 
-export function useEventCoordinates(event: CompleteEvent | null) {
+export function useEventCoordinates(event: any | null) {
   return useMemo(() => {
     if (!event || !event.adresses.length) return null;
 
@@ -35,4 +35,20 @@ export function useEventCoordinates(event: CompleteEvent | null) {
         }
       : null;
   }, [event]);
+}
+
+export function parseLocation(location: MusicEventLocation | undefined | null): PickedPlace | null {
+  if (!location) return null;
+
+  const coords = parsePointCoordinates(location.coordinates || '');
+  if (!coords) return null;
+
+  return {
+    latitude: coords.y,
+    longitude: coords.x,
+    address: location.address || undefined,
+    street: location.complement || undefined,
+    city: location.city || undefined,
+    country: location.country || undefined,
+  };
 }

@@ -1,4 +1,3 @@
-// components/LocationPickerModal.tsx
 import { useCallback, useEffect, useState } from "react";
 import MapView, { Marker, MapPressEvent, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -7,16 +6,16 @@ import { Box } from "@/components/ui/box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import LoadingSpinner from "./screens/LoadingSpinner";
-import { VStack } from "../ui/vstack";
+import LoadingSpinner from "@/components/generics/screens/LoadingSpinner";
+import { VStack } from "@/components//ui/vstack";
 
 
 type Coords = { latitude: number; longitude: number };
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (value: Coords & { address?: string }) => void;
+  onConfirm: (value: PickedPlace) => void;
   initialCoords?: Coords;
 };
 
@@ -26,9 +25,9 @@ export default function LocationPickerModal({
   onConfirm,
   initialCoords,
 }: Props) {
+  const [picked, setPicked] = useState<PickedPlace | null>(null);
   const [loading, setLoading] = useState(true);
   const [region, setRegion] = useState<Region | null>(null);
-  const [picked, setPicked] = useState<Coords | null>(null);
   const [address, setAddress] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,16 +86,24 @@ export default function LocationPickerModal({
     }
   }, []);
 
-  const handlePress = useCallback(
-    async (e: MapPressEvent) => {
+   const handlePress = useCallback(async (e: MapPressEvent) => {
       const { latitude, longitude } = e.nativeEvent.coordinate;
-      const c = { latitude, longitude };
-      setPicked(c);
-      setAddress(undefined);
-      doReverse(c);
-    },
-    [doReverse]
-  );
+      const reverse = await Location.reverseGeocodeAsync({ latitude, longitude });
+      const r = reverse?.[0];
+      const place: PickedPlace = {
+        latitude,
+        longitude,
+        address: [r?.name, r?.street, r?.postalCode, r?.city, r?.country]
+          .filter(Boolean)
+          .join(", "),
+        street: r?.street ?? undefined,
+        postalCode: r?.postalCode ?? undefined,
+        city: r?.city ?? undefined,
+        region: r?.region ?? undefined,
+        country: r?.country ?? undefined,
+      };
+      setPicked(place);
+    }, []);
 
   const handleDragEnd = useCallback(
     async (e: any) => {
@@ -110,8 +117,7 @@ export default function LocationPickerModal({
   );
 
   const confirm = () => {
-    if (!picked) return;
-    onConfirm({ ...picked, address });
+    if (picked) onConfirm(picked);
     onClose();
   };
 

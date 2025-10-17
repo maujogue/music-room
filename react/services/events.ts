@@ -97,7 +97,6 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
   const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`;
 
   const form = createEventFormData(payload);
-
   const res = await apiFetch<MusicEvent>(url, {
     method: 'PUT',
     body: form,

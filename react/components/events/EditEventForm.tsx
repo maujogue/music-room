@@ -20,6 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
 import LocationPickerModal from '../generics/LocationPickerModal';
+import { parseLocation } from '@/utils/parsePointCoordinates';
 
 
 type Props = {
@@ -27,8 +28,6 @@ type Props = {
   ApiError: string;
   initialValues?: Partial<MusicEventFetchResult>;
 };
-
-type LocationValue = { latitude: number; longitude: number; address?: string };
 
 export default function EditEventForm({
   initialValues = {},
@@ -62,17 +61,16 @@ export default function EditEventForm({
   const [mode, setMode] = useState<'date' | 'time'>('date');
 
   // location fields
-  const initialLocation = (initialValues as any).location ?? {};
+  const initialLocation = parseLocation(initialValues?.location); // TODO : check l'initialisation
   const [isLocationOpen, setLocationOpen] = useState(false);
-  const [location, setLocation] = useState<LocationValue | null>(null);
-
-  const [venueName, setVenueName] = useState(initialLocation.venuename ?? '');
-  const [complement, setComplement] = useState(
-    initialLocation.complement ?? ''
-  );
-  const [address, setAddress] = useState(initialLocation.address ?? '');
-  const [city, setCity] = useState(initialLocation.city ?? '');
-  const [country, setCountry] = useState(initialLocation.country ?? '');
+  const [location, setLocation] = useState<PickedPlace | null>(initialLocation);
+  const [venueName, setVenueName] = useState(initialValues?.location?.venuename ?? '');
+  // const [complement, setComplement] = useState(
+  //   initialLocation.complement ?? ''
+  // );
+  // const [address, setAddress] = useState(initialLocation.address ?? '');
+  // const [city, setCity] = useState(initialLocation.city ?? '');
+  // const [country, setCountry] = useState(initialLocation.country ?? '');
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -99,24 +97,6 @@ export default function EditEventForm({
   const showBeginningTimepicker = () => {
     showBeginningMode('time');
   };
-
-  // async function test() {
-  //   console.log("TEST FUNC CALL-------------")
-  //   // const results = await Location.geocodeAsync("10 avenue des Champs Élysées, Paris");
-  //   // console.log(results[0]);
-
-  //   let { status } = await Location.requestForegroundPermissionsAsync();
-  //   if (status !== 'granted') {
-  //     setErrorMsg('Permission to access location was denied');
-  //     return;
-  //   }
-
-  //   let location = await Location.getCurrentPositionAsync({});
-  //   setLocation(location);
-  //   console.log('LOCATION : ', location);
-
-  // }
-
 
   async function uploadAvatar() {
     try {
@@ -177,6 +157,23 @@ export default function EditEventForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
+    const getLoc = location ? {
+      id: initialValues?.location?.id,
+      event_id: initialValues?.event?.id,
+      venuename: venueName.trim() || null,
+      address: location?.address ?? null,
+      complement: location?.street ?? null,
+      city: location?.city ?? null,
+      country: location?.country ?? null,
+      coordinates: `(${location?.latitude},${location?.longitude})`,
+    } : null;
+
+    const getLocFallback = venueName ? {
+      id: initialValues?.location?.id,
+      event_id: initialValues?.event?.id,
+      venuename: venueName.trim() || null,
+    } : null;
+
     const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
@@ -185,14 +182,7 @@ export default function EditEventForm({
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       is_private,
       everyone_can_vote,
-      // include location as nested object to match get_complete_event structure
-      location: {
-        venuename: venueName.trim() || null,
-        complement: complement.trim() || null,
-        address: address.trim() || null,
-        city: city.trim() || null,
-        country: country.trim() || null,
-      } as any,
+      location: getLoc ?? getLocFallback,
     } as any;
 
     try {
@@ -340,6 +330,15 @@ export default function EditEventForm({
 
 
                 {/* ---------- LOCATION ----------- */}
+                <Text className='mt-2 font-semibold'>Place name</Text>
+                <Input className='bg-white'>
+                  <InputField
+                    placeholder='Place name'
+                    value={venueName}
+                    onChangeText={setVenueName}
+                  />
+                </Input>
+
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
                   {location ? (
@@ -354,19 +353,12 @@ export default function EditEventForm({
                   )}
 
                   <Button action="primary" onPress={() => setLocationOpen(true)}>
-                    <ButtonText>{location ? "Change place" : "Choose place"}</ButtonText>
+                    <ButtonText>{location ? "Change event's place" : "Set event's place"}</ButtonText>
                   </Button>
                 </Box>
 
-                <Text className='mt-2'>Venue name</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Venue name'
-                    value={venueName}
-                    onChangeText={setVenueName}
-                  />
-                </Input>
 
+                {/*
                 <Text className='mt-2'>Complement</Text>
                 <Input className='bg-white'>
                   <InputField
@@ -375,7 +367,6 @@ export default function EditEventForm({
                     onChangeText={setComplement}
                   />
                 </Input>
-
                 <Text className='mt-2'>Address</Text>
                 <Input className='bg-white'>
                   <InputField
@@ -401,7 +392,7 @@ export default function EditEventForm({
                     value={country}
                     onChangeText={setCountry}
                   />
-                </Input>
+                </Input> */}
               </Box>
             </Box>
             {error ? (
@@ -443,6 +434,7 @@ export default function EditEventForm({
         isOpen={isLocationOpen}
         onClose={() => setLocationOpen(false)}
         onConfirm={(val) => {
+          console.log("Lieu choisi détaillé :", val);
           setLocation(val);
         }}
         initialCoords={location ? { latitude: location.latitude, longitude: location.longitude } : undefined}
