@@ -43,7 +43,7 @@ export default function EditAvatar({ url, onUpload, isEdit }: Props) {
       const arraybuffer = await fetch(image.uri).then(res => res.arrayBuffer());
 
       const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const path = `${Date.now()}.${fileExt}`;
+      const path = `profiles/${Date.now()}.${fileExt}`;
       const {
         data: { publicUrl },
       } = supabase.storage.from('avatars').getPublicUrl(path);

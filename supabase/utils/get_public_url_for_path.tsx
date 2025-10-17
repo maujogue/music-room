@@ -2,11 +2,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.34.0'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SECRET_SERVICE_ROLE_KEY')!
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
 export default async function getPublicUrlForPath(path: string): string {
-  const localUrl = Deno.env.get('EXPO_PUBLIC_SUPABASE_URL');
+  const localUrl = Deno.env.get('SUPABASE_URL');
 
   const { data } = supabase.storage.from('avatars').createSignedUrl(path, 3600);
 

@@ -7,27 +7,23 @@ export async function getCurrentUserPlaylists() {
       method: 'GET',
     }
   );
-  console.log('API response:', res);
   if (!res.success) {
-    console.error('Error fetching user playlists:', res.error);
     throw res.error;
   }
   return res.data;
 }
 
 export async function getPlaylistById(id: string) {
-  console.log(`Fetching playlist with id: ${id}`);
+  if (!id) {
+    throw new Error("no playlist found, no id given");
+  }
   const res = await apiFetch<Playlist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
     {
       method: 'GET',
     }
   );
-
-  console.log('API response:', res);
-
   if (!res.success) {
-    console.error('Error fetching playlist:', res.error);
     throw res.error;
   }
   return res.data;

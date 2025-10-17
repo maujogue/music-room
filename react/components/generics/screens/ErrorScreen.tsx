@@ -35,7 +35,7 @@ export default function ErrorScreen({
         <HStack space='md' className='items-start'>
           <VStack className=''>
             <Text size='md' className='font-semibold'>
-              {error ? error : 'Unknow error broke the music'}
+              {error ? error : 'Unknown error broke the music'}
             </Text>
             <Text size='md' className='text-secondary-700'>
               {text}

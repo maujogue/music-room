@@ -20,7 +20,7 @@ export default function AddEventItem({ onPress, title }: Props) {
       >
         <HStack className='py-1 flex-1 justify-start items-center gap-4'>
           <Box className='rounded-md h-[60px] w-[60px] justify-center items-center'>
-            <Icon as={AddIcon} size='2xl' color='white' />
+            <Icon as={AddIcon} size='xl' color='white' />
           </Box>
           <Text size='2xl' className='text-white'>
             {title}

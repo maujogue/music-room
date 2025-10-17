@@ -16,7 +16,11 @@ export function usePlaylist(id: string | null) {
   // Fetch playlist (GET)
   // ---------------------------------------------------------------
   const fetchPlaylist = useCallback(async () => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      setError("no playlist found, no id given");
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
@@ -24,7 +28,6 @@ export function usePlaylist(id: string | null) {
       setPlaylist(data);
       setCanEdit(data.user.can_edit ?? false);
     } catch (err) {
-      console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
     } finally {
       setLoading(false);

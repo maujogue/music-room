@@ -1,3 +1,5 @@
+import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+
 export async function fetchSpotifySearch(
   spotify_token: string,
   params: { query: string; type: string; limit?: string; offset?: string }
@@ -16,5 +18,9 @@ export async function fetchSpotifySearch(
       Authorization: `Bearer ${spotify_token}`,
     }
   });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new HTTPException(response.status, { message: errorData.error.message || 'Unknown error from Spotify API' });
+  }
   return response.json();
 }

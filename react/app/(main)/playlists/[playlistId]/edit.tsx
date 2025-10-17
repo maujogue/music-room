@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { useProfile } from '@/contexts/profileCtx';
 import { useLocalSearchParams } from 'expo-router';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import EditPlaylistForm from '@/components/playlist/EditPlaylistForm';
