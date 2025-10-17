@@ -4,14 +4,12 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  CloseCircleIcon,
 } from '@/components/ui/icon';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { CircleIcon } from '@/components/ui/icon';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -21,10 +19,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import LikeButton from '@/components/generics/LikeButton';
-import { UserRoundPlus } from 'lucide-react-native';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
-import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -49,7 +45,7 @@ export default function EventHeader({
   onRefresh,
 }: Props) {
   const router = useRouter();
-  const [eventLiked, setEventLiked] = useState(!!eventData.user.role);
+  const [eventLiked, setEventLiked] = useState(!!eventData.user?.role);
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [image] = useState(
     eventData.event.image_url || 'https://picsum.photos/111'
@@ -96,7 +92,7 @@ export default function EventHeader({
   });
 
   const handleLikePress = () => {
-    if (eventData.user.role) {
+    if (eventData.user?.role) {
       removeUserFromEvent(eventData.event.id, '').then(() => {
         setEventLiked(false);
       });
@@ -119,20 +115,20 @@ export default function EventHeader({
           <VStack className='absolute bottom-0 left-0 right-0 p-4'>
             <HStack className='justify-between items-end mb-2'>
               <VStack className='w-full'>
-                <HStack className='rounded-xl px-2 gap-2 items-baseline bg-neutral-300/50 border border-neutral-300'>
-                  <Heading size='3xl' className='font-bold '>
+                <HStack className='rounded-xl px-2 gap-2 items-baseline bg-neutral-300/50 border border-neutral-300 overflow-hidden'>
+                  <Heading size='3xl' className='font-bold ' numberOfLines={1} ellipsizeMode="tail">
                     {eventData.event.name}
                   </Heading>
                   {eventData.owner?.username && (
-                    <Text size='sm' className='text-neutral-200'>
+                    <Text size='sm' className='text-neutral-700'>
                       By {eventData.owner.username}
                     </Text>
                   )}
                 </HStack>
                 <HStack className='justify-between px-2 pt-2 items-bottom'>
-                  {eventData.user.role != 'owner' ? (
+                  {eventData.user?.role != 'owner' ? (
                     <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
-                  ) : <Box/>}
+                  ) : <Box />}
                   <HStack className='gap-1'>
                     {!eventData.event.isPublic && (
                       <PrivateBadge />
@@ -171,7 +167,7 @@ export default function EventHeader({
         <Animated.View style={extraStyle}>
           <HStack className='justify-between items-top pt-4 pb-2 px-2'>
             <EventLocationInfo location={eventData.location} />
-            <EventDatesInfos event={eventData.event} coordinates={eventData.location.coordinates}/>
+            <EventDatesInfos event={eventData.event} coordinates={eventData.location.coordinates} />
           </HStack>
         </Animated.View>
       </Card>
