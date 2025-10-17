@@ -56,8 +56,9 @@ export default function PlaylistDetail() {
     router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
-  if (loading || !playlist) { return <LoadingSpinner text='Loading Events' />;}
+  if (loading) { return <LoadingSpinner text='Loading Playlist' />;}
   if (error) { return (<ErrorScreen error={error} />);}
+  if (!playlist) { return <ErrorScreen error={"Can't retreive playlist"} />;}
 
   return (
     <>
