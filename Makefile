@@ -1,11 +1,13 @@
 # Music Room Project Makefile
 # This Makefile automates the setup and development workflow
 
-.PHONY: help install setup-supabase start-supabase stop-supabase setup-env start-app clean reset migrate reset-db
+.PHONY: help install setup-supabase start-supabase stop-supabase setup-env setup-frontend-env setup-backend-env setup-prod-env start-app clean reset migrate reset-db
 
 # Shortcuts
 COMPOSE_FILE := docker-compose.yml
 REACT_APP_DIR := react
+SUPABASE_DIR := supabase
+SUPABASE_FUNCTIONS_DIR := ${SUPABASE_DIR}/functions
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
     IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
@@ -20,7 +22,9 @@ help:
 	@echo "📦 Setup Commands:"
 	@echo "  install          Install all dependencies"
 	@echo "  setup-supabase   Initialize and start Supabase locally"
-	@echo "  setup-env        Create .env file with local Supabase config"
+	@echo "  setup-env        Create .env files for frontend and backend"
+	@echo "  setup-frontend-env Create frontend .env.dev file"
+	@echo "  setup-prod-env   Create production .env files"
 	@echo "  setup            Complete project setup (install + setup-supabase + setup-env)"
 	@echo ""
 	@echo "🚀 Development Commands:"
@@ -54,8 +58,8 @@ setup-supabase:
 	@echo "🔧 Setting up Supabase locally..."
 	@if [ ! -d "supabase" ]; then \
 		echo "Initializing Supabase..."; \
-		npx supabase init; \
-		npx supabase start; \
+		npx supabase init \
+		npx supabase start \
 	else \
 		echo "Supabase already initialized, skipping..."; \
 	fi
@@ -86,40 +90,37 @@ reset-db:
 	npx supabase db reset
 	@echo "✅ Database reset complete!"
 
-# Create .env file with local Supabase configuration
-.PHONY: setup-env create-env-local
+# Create .env files with local Supabase configuration
+.PHONY: setup-env create-env-local setup-frontend-env
 
-setup-env:
-	@echo "⚙️  Setting up environment variables in ${REACT_APP_DIR}/.env..."
-	@if [ ! -f "${REACT_APP_DIR}/.env" ]; then \
-		echo "Creating .env file..."; \
+setup-env: setup-frontend-env setup-backend-env
+	@echo "✅ Environment setup complete!"
+
+setup-frontend-env:
+	@echo "⚙️  Setting up frontend environment variables in ${REACT_APP_DIR}/.env.dev..."
+	@if [ ! -f "${REACT_APP_DIR}/.env.dev" ]; then \
+		echo "Creating frontend .env.dev file..."; \
 		cd ${REACT_APP_DIR}; \
 		IP=$$(ipconfig getifaddr en0 2>/dev/null || hostname -I | awk '{print $$1}'); \
-		echo "EXPO_PUBLIC_SUPABASE_URL=http://$${IP}:54321" > .env; \
-		echo "LOCAL_SUPABASE_URL=http://kong:8000" >> .env; \
-		ANON_KEY=$$(npx supabase start | grep "anon key" | awk -F": " '{print $$2}'); \
-		SECRET_SERVICE_ROLE_KEY=$$(npx supabase status | grep "service_role key" | awk -F": " '{print $$2}'); \
-		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$${ANON_KEY}" >> .env; \
-		echo "SECRET_SERVICE_ROLE_KEY=$${SECRET_SERVICE_ROLE_KEY}" >> .env; \
-		read -p "SPOTIFY_CLIENT_ID: " spotify_id; echo "SPOTIFY_CLIENT_ID=$$spotify_id" >> .env; \
-		read -p "SPOTIFY_CLIENT_SECRET: " spotify_secret; echo "SPOTIFY_CLIENT_SECRET=$$spotify_secret" >> .env; \
-		echo "⚠️  Check that the following env keys are correct"; \
-		cat .env; \
+		echo "EXPO_PUBLIC_SUPABASE_URL=http://$${IP}:54321" > .env.dev; \
+		ANON_KEY=$$(npx supabase status | grep "anon key" | awk -F": " '{print $$2}'); \
+		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$${ANON_KEY}" >> .env.dev; \
+		echo "✅ Frontend .env.dev created"; \
+		echo "⚠️ Switch EXPO_PUBLIC_SUPABASE_URL to tunnel url if you want to use spotify auth"; \
 	else \
-		echo "⚠️  .env file already exists. Skipping..."; \
-		echo "   If you need to update it, run 'make reset-env'"; \
+		echo "⚠️  Frontend .env.dev file already exists. Skipping..."; \
 	fi
 
 
 # Reset environment file
 reset-env:
-	@echo "🔄 Resetting environment file..."
-	cd ${REACT_APP_DIR} && rm -f .env
+	@echo "🔄 Resetting environment files..."
+	cd ${REACT_APP_DIR} && rm -f .env.dev
 	make setup-env
-	@echo "✅ .env file removed. Run 'make setup-env' to recreate it."
+	@echo "✅ Environment files reset. Run 'make setup-env' to recreate them."
 
 # Complete project setup
-setup: install setup-supabase setup-env
+setup: install setup-env setup-supabase
 	@echo ""
 	@echo "🎉 Project setup complete!"
 	@echo ""
@@ -134,19 +135,30 @@ setup: install setup-supabase setup-env
 # Start the Expo development server
 dev:
 	@echo "📱 Starting Expo development server..."
-	npx supabase functions serve --no-verify-jwt --env-file react/.env & \
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${REACT_APP_DIR} && cp .env.dev .env
+	npx supabase functions serve --no-verify-jwt& \
 	cd ${REACT_APP_DIR} && npm start
+
+dev-cloud:
+	@echo "📱 Starting Expo development server..."
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
+	cd ${REACT_APP_DIR} && cp .env.prod .env
+	cd ${REACT_APP_DIR} && npm start
+
 
 dev-tunnel:
 	@echo "📱 Starting Expo development server..."
-	npx supabase functions serve --no-verify-jwt --env-file react/.env & \
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${REACT_APP_DIR} && cp .env.dev .env
+	npx supabase functions serve --no-verify-jwt& \
 	cd ${REACT_APP_DIR} && npm start --tunnel
 
 # Clean up build files and node_modules
 clean:
 	@echo "🧹 Cleaning up build files..."
 	cd ${REACT_APP_DIR} && rm -rf node_modules package-lock.json .expo
-	cd supabase && rm -rf .branches .temp
+	cd ${SUPABASE_DIR} && rm -rf .branches .temp
 	@echo "✅ Cleanup complete! Run 'make install' to reinstall dependencies."
 
 # Reset Supabase database and restart
@@ -164,17 +176,17 @@ status:
 	@echo ""
 	@echo "📁 Project Structure:"
 	@if [ -d "supabase" ]; then echo "  ✅ Supabase initialized"; else echo "  ❌ Supabase not initialized"; fi
-	@if [ -f "${REACT_APP_DIR}/.env" ]; then echo "  ✅ Environment configured"; else echo "  ❌ Environment not configured"; fi
+	@if [ -f "${REACT_APP_DIR}/.env.dev" ]; then echo "  ✅ Frontend environment configured"; else echo "  ❌ Frontend environment not configured"; fi
 	@if [ -d "${REACT_APP_DIR}/node_modules" ]; then echo "  ✅ Dependencies installed"; else echo "  ❌ Dependencies not installed"; fi
 	@echo ""
 	@echo "🔧 Supabase Status:"
 	@npx supabase status 2>/dev/null || echo "  ❌ Supabase services not running"
 	@echo ""
 	@echo "🗄️  Database Migrations:"
-	@if [ -d "supabase/migrations" ]; then \
+	@if [ -d "${SUPABASE_DIR}/migrations" ]; then \
 		echo "  ✅ Migrations directory exists"; \
 		echo "  📁 Migration files:"; \
-		ls -la supabase/migrations/ 2>/dev/null | grep "\.sql" | wc -l | xargs echo "    - Found"; \
+		ls -la ${SUPABASE_DIR}/migrations/ 2>/dev/null | grep "\.sql" | wc -l | xargs echo "    - Found"; \
 	else \
 		echo "  ❌ Migrations directory not found"; \
 	fi
@@ -193,10 +205,28 @@ down: stop-supabase
 restart: stop-supabase start-supabase
 
 android:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${REACT_APP_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && npx expo run:android
 
 ios:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${REACT_APP_DIR} && cp .env.dev .env
+	cd ${REACT_APP_DIR} && npx expo run:ios
+
+prod-android:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
+	cd ${REACT_APP_DIR} && cp .env.prod .env
+	cd ${REACT_APP_DIR} && npx expo run:android
+
+prod-ios:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
+	cd ${REACT_APP_DIR} && cp .env.prod .env
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
 test:
 	cd ${REACT_APP_DIR} && npm test
+
+deploy:
+	npx supabase db push
+	npx supabase functions deploy

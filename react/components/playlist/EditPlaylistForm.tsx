@@ -3,14 +3,17 @@ import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
+import { Image } from 'react-native';
 import { Switch } from '@/components/ui/switch';
 import { HStack } from '@/components/ui/hstack';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
+import { Pen } from 'lucide-react-native';
 import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
-import { PlaylistPayload } from '@/types/playlist';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
+import { useAppToast } from '@/hooks/useAppToast';
+import * as ImagePicker from 'expo-image-picker';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -34,8 +37,14 @@ export default function EditPlayListForm({
     initialValues?.is_collaborative ?? false
   );
 
+  const [imageUrl, setImageUrl] = useState(
+    initialValues?.cover_url ?? null
+  );
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const toast = useAppToast();
 
   const validate = (): boolean => {
     if (!name.trim()) {
@@ -55,6 +64,7 @@ export default function EditPlayListForm({
       is_private: isPrivate,
       is_collaborative: isCollaborative,
       description: description.trim() || undefined,
+      cover_url: imageUrl || undefined,
     };
 
     try {
@@ -67,10 +77,71 @@ export default function EditPlayListForm({
     }
   };
 
+  async function uploadCover() {
+    try {
+      setUploading(true);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsMultipleSelection: false,
+        allowsEditing: true,
+        quality: 1,
+        aspect: [1, 1],
+        exif: false,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const image = result.assets[0];
+
+      if (!image.uri) {
+        throw new Error('No image uri!');
+      }
+
+      setImageUrl(image.uri);
+
+      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
+      const path = `${Date.now()}.${fileExt}`;
+      console.log('Uploading to path:', path);
+      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
+    } catch (error) {
+      toast.error({ title: 'uploading playlist cover image failed' });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <FormControl className='p-4 border rounded-lg border-outline-300'>
       <VStack space='md'>
         <Box>
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              style={{
+                width: '100%',
+                height: 300,
+                marginTop: 0,
+                marginBottom: 10,
+              }}
+              resizeMode='cover'
+            />
+          ) : (
+            <Box
+              className='bg-gray-200 items-center justify-center'
+              style={{ width: '100%', height: 300, marginTop: 0 }}
+            >
+              <Text className='text-gray-500'>No image selected</Text>
+            </Box>
+          )}
+          <Button
+            onPress={uploadCover}
+            disabled={uploading}
+            className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-primary-500/70 w-12 h-12 p-1.5'
+          >
+            <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
+          </Button>
+
           <Text>Name</Text>
           <Input>
             <InputField
@@ -151,6 +222,6 @@ export default function EditPlayListForm({
           <Icon as={CheckIcon} color='white' size='sm' />
         </Button>
       </VStack>
-    </FormControl>
+    </FormControl >
   );
 }

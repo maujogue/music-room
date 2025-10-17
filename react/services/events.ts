@@ -1,5 +1,6 @@
 import { apiFetch } from '@/utils/apiFetch';
 
+
 export async function createEvent(payload: MusicEventPayload) {
   const form = createEventFormData(payload);
 
@@ -78,7 +79,7 @@ export async function deleteEventById(id: string) {
 }
 
 export async function getCurrentUserEvents() {
-  const res = await apiFetch<Event[]>(
+  const res = await apiFetch<MusicEventFetchResult[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/events`,
     {
       method: 'GET',
@@ -97,7 +98,7 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
 
   const form = createEventFormData(payload);
 
-  const res = await apiFetch<Event>(url, {
+  const res = await apiFetch<MusicEvent>(url, {
     method: 'PUT',
     body: form,
   });

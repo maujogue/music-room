@@ -3,7 +3,7 @@ import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 
 const supabase = createClient(
-  Deno.env.get('EXPO_PUBLIC_SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 

@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EventsHome() {
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 12 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <AllEvents />
     </SafeAreaView>
   );

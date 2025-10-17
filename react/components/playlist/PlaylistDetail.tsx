@@ -4,16 +4,15 @@ import {
   useRouter,
   useFocusEffect,
 } from 'expo-router';
-import { ActivityIndicator } from 'react-native';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/track/TrackList';
 import { useEffect, useState, useCallback } from 'react';
 import Playlist3DotMenu from '@/components/playlist/PlaylistDotMenu';
-import { Text } from '@/components/ui/text';
-import { Center } from '@/components/ui/center';
 import DeleteAlert from '@/components/generics/DeleteAlert';
 import { ScrollView } from 'react-native';
 import PlaylistHeader from '@/components/playlist/PlaylistHeader';
+import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -57,21 +56,9 @@ export default function PlaylistDetail() {
     router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
-  if (loading || !playlist) {
-    return (
-      <Center>
-        <ActivityIndicator size='large' />
-      </Center>
-    );
-  }
-
-  if (error) {
-    return (
-      <Center>
-        <Text style={{ color: 'red' }}>{error}</Text>
-      </Center>
-    );
-  }
+  if (loading) { return <LoadingSpinner text='Loading Playlist' />;}
+  if (error) { return (<ErrorScreen error={error} />);}
+  if (!playlist) { return <ErrorScreen error={"Can't retreive playlist"} />;}
 
   return (
     <>
