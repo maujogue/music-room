@@ -14,18 +14,21 @@ import { Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
-import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
-import { Alert } from '@/components/ui/alert';
 import { useAppToast } from '@/hooks/useAppToast';
+import * as ImagePicker from 'expo-image-picker';
+import LocationPickerModal from '../generics/LocationPickerModal';
+
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
   ApiError: string;
   initialValues?: Partial<MusicEventFetchResult>;
 };
+
+type LocationValue = { latitude: number; longitude: number; address?: string };
 
 export default function EditEventForm({
   initialValues = {},
@@ -60,6 +63,9 @@ export default function EditEventForm({
 
   // location fields
   const initialLocation = (initialValues as any).location ?? {};
+  const [isLocationOpen, setLocationOpen] = useState(false);
+  const [location, setLocation] = useState<LocationValue | null>(null);
+
   const [venueName, setVenueName] = useState(initialLocation.venuename ?? '');
   const [complement, setComplement] = useState(
     initialLocation.complement ?? ''
@@ -93,6 +99,24 @@ export default function EditEventForm({
   const showBeginningTimepicker = () => {
     showBeginningMode('time');
   };
+
+  // async function test() {
+  //   console.log("TEST FUNC CALL-------------")
+  //   // const results = await Location.geocodeAsync("10 avenue des Champs Élysées, Paris");
+  //   // console.log(results[0]);
+
+  //   let { status } = await Location.requestForegroundPermissionsAsync();
+  //   if (status !== 'granted') {
+  //     setErrorMsg('Permission to access location was denied');
+  //     return;
+  //   }
+
+  //   let location = await Location.getCurrentPositionAsync({});
+  //   setLocation(location);
+  //   console.log('LOCATION : ', location);
+
+  // }
+
 
   async function uploadAvatar() {
     try {
@@ -222,7 +246,7 @@ export default function EditEventForm({
               </Button>
 
               <Box className='p-4 pt-0'>
-                <Text>Name</Text>
+                <Text className='font-semibold'>Name</Text>
                 <Input className='bg-white'>
                   <InputField
                     placeholder='Supacool event'
@@ -232,7 +256,7 @@ export default function EditEventForm({
                   />
                 </Input>
 
-                <Text className='mt-2'>Description</Text>
+                <Text className='mt-2 font-semibold'>Description</Text>
                 <Textarea className='bg-white'>
                   <TextareaInput
                     placeholder='Event description'
@@ -242,7 +266,7 @@ export default function EditEventForm({
                   />
                 </Textarea>
 
-                <Text className='mt-2'>Playlist</Text>
+                <Text className='mt-2 font-semibold'>Playlist</Text>
                 {!playlist ? (
                   <AddPlaylistItem
                     onPress={handleSelectPlaylist}
@@ -284,7 +308,7 @@ export default function EditEventForm({
                   </HStack>
                 </VStack>
 
-                <Text className='mt-2'>Beginning Date & Time</Text>
+                <Text className='mt-2 font-semibold'>Beginning Date & Time</Text>
                 <HStack className='gap-2 mb-2'>
                   <Button
                     size='sm'
@@ -314,7 +338,25 @@ export default function EditEventForm({
                   />
                 )}
 
-                <Text className='mt-4 font-medium'>Location</Text>
+
+                {/* ---------- LOCATION ----------- */}
+                <Text className='mt-4 font-semibold'>Location</Text>
+                <Box>
+                  {location ? (
+                    <Box>
+                      <Text>{location.address ?? "No address place"}</Text>
+                      <Text size="xs">
+                        {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                      </Text>
+                    </Box>
+                  ) : (
+                    <Text>No location selected</Text>
+                  )}
+
+                  <Button action="primary" onPress={() => setLocationOpen(true)}>
+                    <ButtonText>{location ? "Change place" : "Choose place"}</ButtonText>
+                  </Button>
+                </Box>
 
                 <Text className='mt-2'>Venue name</Text>
                 <Input className='bg-white'>
@@ -395,6 +437,15 @@ export default function EditEventForm({
         isOpen={isPlaylistModalOpen}
         onClose={() => setIsPlaylistModalOpen(false)}
         onSelect={handlePlaylistSelected}
+      />
+
+      <LocationPickerModal
+        isOpen={isLocationOpen}
+        onClose={() => setLocationOpen(false)}
+        onConfirm={(val) => {
+          setLocation(val);
+        }}
+        initialCoords={location ? { latitude: location.latitude, longitude: location.longitude } : undefined}
       />
     </>
   );

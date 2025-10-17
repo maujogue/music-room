@@ -24,7 +24,7 @@ export default function EventDatesInfos({ event, coordinates = "(1.123456, 25.98
     : null;
 
   return (
-    <VStack space='sm'>
+    <VStack className='justify-between pb-1'>
       <Badge size='md' className='rounded-xl h-6'>
         <BadgeIcon as={Calendar1Icon} size='lg' />
         <BadgeText className='pl-1 font-bold'>{startFull}</BadgeText>
