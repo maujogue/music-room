@@ -1,6 +1,5 @@
 import { Context } from 'https://deno.land/x/hono@v3.12.11/mod.ts';
 import { generateRandomString } from './utils.ts';
-import { SupabaseError } from './supabase_error.ts';
 import {
   insertOauthStateToSupabase,
   getAndDeleteOauthState,
@@ -13,7 +12,6 @@ import {
   fetchSpotifyUserTokenData,
   fetchSpotifyUserProfile,
 } from './services/spotify.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const base_url = Deno.env.get('SUPABASE_URL')!;

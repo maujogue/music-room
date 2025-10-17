@@ -8,7 +8,7 @@
     },
     {
       "name": "config",
-      "path": ".",
+      "path": "."
     }
   ],
   "settings": {
@@ -24,7 +24,8 @@
       "**/build": true,
       "**/.branches": true,
       "**/.temp": true,
-      "**/.expo": true,
-    }
-  },
+      "**/.expo": true
+    },
+    "deno.enable": true
+  }
 }
