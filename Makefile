@@ -49,8 +49,7 @@ help:
 install:
 	@echo "📦 Installing dependencies..."
 	cd ${REACT_APP_DIR} && npx expo install
-	cd ${REACT_APP_DIR} && npm install --save-dev \
-		babel-plugin-module-resolver
+	cd ${REACT_APP_DIR} && npm install --save-dev
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
