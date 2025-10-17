@@ -42,8 +42,38 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const pingIntervalRef = useRef<number | null>(null);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000; // 3 secondes
+  const pingInterval = 30000; // 30 secondes
+
+  // Fonction pour vérifier si le token est encore valide
+  const checkTokenValidity = useCallback(async () => {
+    try {
+      const session = await getSession();
+      if (!session?.access_token) {
+        console.warn('🔐 Token expired or missing, reconnection needed');
+        return false;
+      }
+
+      // Vérifier si le token expire bientôt (dans les 5 prochaines minutes)
+      if (session.expires_at) {
+        const expirationTime = new Date(session.expires_at).getTime();
+        const currentTime = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        if (expirationTime - currentTime < fiveMinutes) {
+          console.warn('🔐 Token expires soon, will need refresh');
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('🔐 Error checking token validity:', error);
+      return false;
+    }
+  }, []);
 
   const initWebSocket = useCallback(async () => {
     try {
@@ -70,6 +100,17 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         setConnectionAttempts(0); // Reset attempts on success
         setLastError(null);
 
+        // Démarrer le ping automatique
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+        }
+        pingIntervalRef.current = window.setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
+            console.log('🏓 Auto-ping sent');
+          }
+        }, pingInterval);
+
         sendRequestUserInfo(ws);
         ws.send(JSON.stringify({
           type: 'vote:get',
@@ -80,6 +121,21 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       ws.onclose = (event) => {
         console.log('ws: connection closed', { code: event.code, reason: event.reason });
         setConnected(false);
+
+        // Arrêter le ping
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
+        }
+
+        // Reconnexion automatique si ce n'est pas une fermeture intentionnelle
+        if (event.code !== 1000 && connectionAttempts < maxReconnectAttempts) {
+          console.log(`🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttempts + 1}/${maxReconnectAttempts})`);
+          reconnectTimeoutRef.current = window.setTimeout(() => {
+            setConnectionAttempts(prev => prev + 1);
+            initWebSocket();
+          }, reconnectDelay);
+        }
       };
 
       ws.onerror = () => {
@@ -98,6 +154,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
               break;
             case 'error':
               console.error('❌ Server error:', data.message);
+              break;
+            case 'pong':
+              console.log('🏓 Pong received - connection alive');
               break;
             case 'track_vote:update':
               handleTrackVoteUpdate(data);
@@ -139,6 +198,11 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
+      }
+
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
       }
 
       if (webSocketRef.current) {
@@ -310,18 +374,37 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     };
   }, []);
 
-  const reconnect = useCallback(() => {
+  const reconnect = useCallback(async () => {
     console.log('ws: manual reconnection requested');
-    if (connectionAttempts > maxReconnectAttempts) {
+
+    // Vérifier la validité du token avant la reconnexion
+    const tokenValid = await checkTokenValidity();
+    if (!tokenValid) {
+      setLastError('Session expired. Please login again.');
+      return;
+    }
+
+    if (connectionAttempts >= maxReconnectAttempts) {
       console.error('ws: max reconnection attempts reached');
       setLastError('Unable to reconnect to server. Please refresh the app.');
       return;
     }
 
+    // Nettoyer les timers existants
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+
     setConnectionAttempts((prev) => prev + 1);
     setLastError(null);
     initWebSocket();
-  }, [initWebSocket]);
+  }, [initWebSocket, checkTokenValidity, connectionAttempts, maxReconnectAttempts]);
 
   return {
     connected,
