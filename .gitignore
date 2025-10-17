@@ -10,3 +10,4 @@ supabase/functions/.env.prod
 react/.env.dev
 react/.env.prod
 *.log
+.expo

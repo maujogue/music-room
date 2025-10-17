@@ -7,9 +7,7 @@ export async function getCurrentUserPlaylists() {
       method: 'GET',
     }
   );
-  console.log('API response:', res);
   if (!res.success) {
-    console.error('Error fetching user playlists:', res.error);
     throw res.error;
   }
   return res.data;
@@ -25,11 +23,7 @@ export async function getPlaylistById(id: string) {
       method: 'GET',
     }
   );
-
-  console.log('API response:', res);
-
   if (!res.success) {
-    console.error('Error fetching playlist:', res.error);
     throw res.error;
   }
   return res.data;
