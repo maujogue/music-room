@@ -17,7 +17,6 @@ export interface VoteMessage extends WebSocketMessage {
   trackId: string;
 }
 
-// Handle incoming WebSocket messages
 export async function handleMessage(
   userId: string,
   userEmail: string,
@@ -83,7 +82,6 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
   }
 }
 
-// Handle ping message
 function handlePing(userEmail: string, socket: WebSocket): void {
   try {
     socket.send(JSON.stringify({
@@ -148,13 +146,11 @@ async function handleGetVoteMessage(
 }
 
 
-// Handle vote message
 async function handleVoteMessage(
   userId: string,
   message: WebSocketMessage,
   socket: WebSocket
 ): Promise<void> {
-  // Validate vote message structure
   if (!isVoteMessage(message)) {
     sendErrorMessage(socket, 'Invalid vote message format');
     return;
@@ -174,7 +170,6 @@ async function handleVoteMessage(
   }
 }
 
-// Type guard for vote messages
 function isVoteMessage(message: WebSocketMessage): message is VoteMessage {
   return message.type === 'vote' &&
          typeof message.eventId === 'string' &&

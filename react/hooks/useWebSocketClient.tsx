@@ -45,21 +45,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000; // 3 secondes
 
-  const attemptReconnect = useCallback(async () => {
-    if (connectionAttempts >= maxReconnectAttempts) {
-      console.error('ws: max reconnection attempts reached');
-      setLastError('Unable to reconnect to server. Please refresh the app.');
-      return;
-    }
-
-    setConnectionAttempts(prev => prev + 1);
-    console.log(`ws: attempting reconnection ${connectionAttempts + 1}/${maxReconnectAttempts}`);
-
-    reconnectTimeoutRef.current = setTimeout(() => {
-      initWebSocket();
-    }, reconnectDelay);
-  }, [connectionAttempts, maxReconnectAttempts, reconnectDelay]);
-
   const initWebSocket = useCallback(async () => {
     try {
       // Nettoyer les timeouts précédents
@@ -97,17 +82,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         setConnected(false);
       };
 
-      ws.onerror = (error) => {
-        console.error('❌ ws: connection error', {
-          error,
-          readyState: ws.readyState,
-          url: ws.url
-        });
+      ws.onerror = () => {
         setLastError('Connection error occurred');
         setConnected(false);
-
-        // Tentative de reconnexion après une erreur
-        attemptReconnect();
       };
 
       ws.onmessage = (event) => {
@@ -151,9 +128,8 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       console.error('ws: failed to initialize WebSocket:', error);
       setLastError('Failed to initialize WebSocket connection');
       setConnected(false);
-      attemptReconnect();
     }
-  }, [attemptReconnect]);
+  }, []);
 
   useEffect(() => {
     initWebSocket();
@@ -334,10 +310,15 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     };
   }, []);
 
-  // Fonction de reconnexion manuelle
   const reconnect = useCallback(() => {
     console.log('ws: manual reconnection requested');
-    setConnectionAttempts(0);
+    if (connectionAttempts > maxReconnectAttempts) {
+      console.error('ws: max reconnection attempts reached');
+      setLastError('Unable to reconnect to server. Please refresh the app.');
+      return;
+    }
+
+    setConnectionAttempts((prev) => prev + 1);
     setLastError(null);
     initWebSocket();
   }, [initWebSocket]);

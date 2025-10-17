@@ -1,13 +1,23 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 import { addClient, removeClient } from '../core/websocket_manager.ts';
 import { handleMessage, WebSocketMessage } from './message.ts';
 import { sendErrorMessage, sendMessage } from './error.ts';
 
-const SUPABASE_URL = "http://localhost:54321";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || Deno.env.get('_SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('_SUPABASE_SERVICE_ROLE_KEY')!;
+
+console.log('🔧 Supabase config:', {
+  url: SUPABASE_URL ? 'SET' : 'MISSING',
+  key: SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING'
+});
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false },
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  },
 });
 
 export interface AuthenticatedUser {
@@ -18,21 +28,22 @@ export interface AuthenticatedUser {
 // Authenticate user with token
 export async function authenticateUser(token: string): Promise<AuthenticatedUser | null> {
   try {
-    console.log('ws: validating token...');
-    const { data: userData, error } = await supabase.auth.getUser(token);
+    console.log('🔐 ws: validating token (length:', token, ')');
 
-    if (error || !userData?.user) {
-      console.error('ws: token validation failed:', error);
+    const { error, data: sessionData } = await supabase.auth.getUser(token)
+
+    if (error || !sessionData?.user) {
+      console.error('❌ ws: session validation failed:', error?.message || 'No user data');
       return null;
     }
 
-    const userId = userData.user.id;
-    const userEmail = userData.user.email || 'unknown';
+    const userId = sessionData.user.id;
+    const userEmail = sessionData.user.email || 'unknown';
 
-    console.log('ws: user authenticated:', { userId, email: userEmail });
+    console.log('✅ ws: user authenticated:', { userId, email: userEmail });
     return { userId, userEmail };
   } catch (err) {
-    console.error('ws: authentication error:', err);
+    console.error('💥 ws: authentication error:', err);
     return null;
   }
 }

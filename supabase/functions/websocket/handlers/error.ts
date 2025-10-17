@@ -9,7 +9,6 @@ export interface SuccessMessage {
   [key: string]: unknown;
 }
 
-// Send error message to WebSocket client
 export function sendErrorMessage(socket: WebSocket, message: string): void {
   try {
     const errorMessage: ErrorMessage = {
@@ -23,7 +22,6 @@ export function sendErrorMessage(socket: WebSocket, message: string): void {
   }
 }
 
-// Send success message to WebSocket client
 export function sendSuccessMessage(socket: WebSocket, message: SuccessMessage): void {
   try {
     socket.send(JSON.stringify({
@@ -35,7 +33,6 @@ export function sendSuccessMessage(socket: WebSocket, message: SuccessMessage): 
   }
 }
 
-// Send generic message to WebSocket client
 export function sendMessage(socket: WebSocket, message: Record<string, unknown>): void {
   try {
     socket.send(JSON.stringify({

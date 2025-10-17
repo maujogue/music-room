@@ -3,7 +3,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { Minus, Plus } from 'lucide-react-native';
+import { CircleMinus, CirclePlus } from 'lucide-react-native';
 import { Card } from '@/components/ui/card';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
@@ -11,57 +11,54 @@ import { useRef } from 'react';
 type Props = {
     track: PlaylistTrack;
     voteCount: number;
-    onVote: (trackId: string) => Promise<boolean> | boolean;
-    onUnvote: (trackId: string) => Promise<boolean> | boolean;
+    onSwipeableOpen: (dir: 'left' | 'right') => Promise<boolean>;
 };
 
-export default function VotedTrack({ track, voteCount, onVote, onUnvote }: Props) {
+export default function VotedTrack({ track, voteCount, onSwipeableOpen }: Props) {
   const swipeableRef = useRef<any>(null);
 
   const renderRightAction = () => (
-    <Box className="flex-1 bg-red-500 justify-center items-center pl-4 rounded-l">
-      <Minus color="white" size={20} />
-      <Text className="text-white font-bold text-xs mt-1">Unvote</Text>
+    <Box className="flex-1 bg-red-500 justify-center items-end px-8 rounded-l">
+      <CircleMinus color="white" size={30} />
     </Box>
   );
 
   const renderLeftAction = () => (
-    <Box className="flex-1 bg-green-500 justify-center items-center pr-4 rounded-r">
-      <Plus color="white" size={20} />
-      <Text className="text-white font-bold text-xs mt-1">Vote</Text>
+    <Box className="flex-1 bg-green-500 justify-center items-start px-8 rounded-r">
+      <CirclePlus color="white" size={30} />
     </Box>
   );
 
-  const onSwipeableOpen = async (dir: 'left' | 'right') => {
-    let success = false;
-
+  const handleSwipeableOpen = async (direction: 'left' | 'right') => {
     try {
-      if (dir === 'right') {
-        success = await onVote(track.spotify_id);
-      } else if (dir === 'left') {
-        success = await onUnvote(track.spotify_id);
+      const result = await onSwipeableOpen(direction);
+
+      // Fermer le swipeable après l'action, que ce soit réussi ou échoué
+      if (swipeableRef.current) {
+        swipeableRef.current.close();
       }
+
+      return result;
     } catch (error) {
-      console.error('❌ Error during swipe action:', error);
-    } finally {
-      setTimeout(() => {
-        if (swipeableRef.current) {
-          swipeableRef.current.close();
-        }
-      }, success ? 300 : 800);
+      // Fermer même en cas d'erreur
+      if (swipeableRef.current) {
+        swipeableRef.current.close();
+      }
+      console.error('Error in swipe action:', error);
+      return false;
     }
   };
 
   return (
     <ReanimatedSwipeable
       ref={swipeableRef}
-      onSwipeableOpen={direction => onSwipeableOpen(direction === 'left' ? 'left' : 'right')}
+      onSwipeableOpen={handleSwipeableOpen}
       renderLeftActions={renderLeftAction}
       renderRightActions={renderRightAction}
       leftThreshold={75}
       rightThreshold={75}
     >
-        <Card key={track.spotify_id} className="p-2 bg-white rounded mb-1 border-l-4 border-blue-500">
+        <Card key={track.spotify_id} className="bg-white rounded border-l-4 border-blue-500">
             <HStack>
               <Image source={{ uri: track.details.album.images[0]?.url }} style={{ width: 40, height: 40 }} />
               <Box className='flex-1 flex-row justify-between items-center'>

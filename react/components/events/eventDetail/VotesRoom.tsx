@@ -11,6 +11,8 @@ import { useEffect, useState } from 'react';
 import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppToast } from '@/components/generics/AppToast';
+import { useAppToast } from '@/hooks/useAppToast';
 
 interface Props {
   eventId: string;
@@ -29,14 +31,14 @@ export default function VotesRoom({ eventId }: Props) {
     lastError,
     reconnect
   } = useWebSocketClient(eventId);
+  const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(new Map());
-
 
   const {
     playlist,
     loading: ploading,
     error: perror,
-  } = usePlaylist(data ? data.event.playlist_id : null);
+  } = usePlaylist(data ? data.playlist?.id : null);
 
   useEffect(() => {
     if (!data?.event?.id) return;
@@ -55,8 +57,25 @@ export default function VotesRoom({ eventId }: Props) {
   }, [data?.event?.id, subscribeToVotes]);
 
   useEffect(() => {
+    if (!connected && connectionAttempts > 0) {
+      toast.error({
+        title: 'Disconnected from server',
+        description: lastError ? lastError : 'Connection lost. Attempting to reconnect...',
+        duration: 3000,
+      });
+      reconnect();
+    }
+  }, [connected, reconnect]);
+
+  useEffect(() => {
     setRealtimeVotes(trackVotes);
   }, [trackVotes]);
+
+  useEffect(() => {
+    if (!connected && connectionAttempts > 0) {
+      reconnect();
+    }
+  }, [connected, connectionAttempts, reconnect]);
 
   useEffect(() => {
     if (eventUserData) {
@@ -90,30 +109,36 @@ export default function VotesRoom({ eventId }: Props) {
 
   const onTrackSwipe = (dir: string, trackId: string) => {
     if (!connected) {
-      console.warn('❌ Cannot vote: WebSocket not connected');
+      toast.error({
+        title: 'Cannot vote',
+        description: 'Not connected to server.',
+        duration: 3000,
+      });
       return;
     }
 
     if (!data?.event?.id) {
-      console.warn('❌ Cannot vote: No event ID');
+      toast.error({
+        title: 'Cannot vote',
+        description: 'No event ID',
+        duration: 3000,
+      });
       return;
     }
 
     if (dir !== 'left') {
       if (eventUserData?.vote_remaining === 0) {
-        console.warn('❌ Cannot vote: No votes remaining');
+        toast.show({
+          title: 'Cannot vote',
+          description: 'No votes remaining',
+          duration: 3000,
+        });
         return;
       }
 
-      const success = sendVote(eventId, trackId);
-      if (success) {
-        console.log('✅ Vote sent successfully for track:', trackId);
-      }
+      sendVote(eventId, trackId);
     } else {
-      const success = sendUnvote(eventId, trackId);
-      if (success) {
-        console.log('✅ Unvote sent successfully for track:', trackId);
-      }
+      sendUnvote(eventId, trackId);
     }
   };
 
@@ -143,19 +168,9 @@ export default function VotesRoom({ eventId }: Props) {
                           key={trackId}
                           track={track}
                           voteCount={voteCount}
-                          onVote={async (id) => {
-                            if (!connected) {
-                              console.warn('❌ Cannot vote: WebSocket not connected');
-                              return false;
-                            }
-                            return sendVote(eventId, id);
-                          }}
-                          onUnvote={async (id) => {
-                            if (!connected) {
-                              console.warn('❌ Cannot unvote: WebSocket not connected');
-                              return false;
-                            }
-                            return sendUnvote(eventId, id);
+                          onSwipeableOpen={(dir: 'left' | 'right') => {
+                            onTrackSwipe(dir, trackId);
+                            return Promise.resolve(true);
                           }}
                         />
                       ) : (

@@ -82,11 +82,6 @@ export default function TrackListVotes({
 
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
-      console.log(
-        `Implement vote for track(${trackId}) in playlist(${playlistId}) and direction(${dir})`
-      );
-      // await voteForTrack(eventId, trackId);
-
       if (onTrackSwiping) {
         onTrackSwiping(dir, trackId);
       }

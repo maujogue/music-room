@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getEventSupabase } from './events.ts';
 import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 
-const SUPABASE_URL = "http://localhost:54321";
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -156,7 +156,6 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
       const voteCount = trackVote.vote_count;
       const voters = trackVote.voters || [];
 
-      // Récupérer les participants à notifier
       const { data: event } = await supabase
         .from('events')
         .select('owner_id, name')
@@ -183,7 +182,6 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
         timestamp: new Date().toISOString()
       });
 
-      // Diffuser à tous les participants
       let sentCount = 0;
       for (const uid of recipients) {
         const userSockets = clientsByUser.get(uid);
@@ -277,7 +275,6 @@ export async function getVotesForEvent(
     data?: TrackVoteRecord[];
     message?: string }> {
   try {
-    // Vérifier que l'utilisateur a accès à l'événement
     const { data: event } = await supabase
       .from('events')
       .select('owner_id, everyone_can_vote')
