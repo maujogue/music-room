@@ -94,3 +94,11 @@ type EventDateLabels = {
   timezone: string;
   locale: string;
 };
+
+type TrackVote = {
+  eventId: string;
+  eventName?: string;
+  trackId: string;
+  voteCount: number;
+  voters: string[];
+};
