@@ -1,7 +1,7 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Icon } from '@/components/ui/icon';
-import { PlusCircleIcon } from 'lucide-react-native';
+import { PlusCircleIcon, CircleMinus } from 'lucide-react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
@@ -11,15 +11,22 @@ import { Pressable } from '@/components/ui/pressable';
 import { Box } from '@/components/ui/box';
 import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
-import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
-import TopVotesTracks from '@/components/track/votes/TopVotes';
 import { useEffect } from 'react';
+
+interface TrackVote {
+  eventId: string;
+  eventName?: string;
+  trackId: string;
+  voteCount: number;
+  voters: string[];
+}
 
 interface Props {
   eventId: string;
   playlistId: string;
   playlistTitle?: string;
+  realtimeVotes?: Map<string, TrackVote>; // ✅ Interface mise à jour
   playlistTracks: PlaylistTrack[];
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
@@ -27,9 +34,10 @@ interface Props {
 export default function TrackListVotes({
   eventId,
   playlistId,
-  playlistTitle,
+  playlistTitle: _playlistTitle,
   playlistTracks,
   onTrackSwiping,
+  realtimeVotes,
 }: Props) {
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
@@ -37,7 +45,6 @@ export default function TrackListVotes({
   );
   const {
     getVoteCount,
-    getTopTracksFrom,
     getTrackId,
     loading: loadingV,
     error: errorV,
@@ -48,34 +55,33 @@ export default function TrackListVotes({
   useEffect(() => {
     if (!playlistTracks) return;
 
-    playlistTracks?.forEach(t => {
-      console.log('playlistTracks', t.details.name);
-      console.log('ID :', t.spotify_id);
-    });
-
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
 
   useEffect(() => {
-    if (!tracks) return;
+    console.log('Realtime votes updated:', realtimeVotes);
+  }, [realtimeVotes]);
 
-    tracks?.forEach(t => {
-      console.log('Track in PL:', t.details.name);
-      console.log('ID :', t.spotify_id, 'Votes:', getVoteCount(t.spotify_id));
-    });
+  useEffect(() => {
+    if (!tracks) return;
 
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
   // --------------------------------------------------
   // --------------------------------------------------
 
+  const getRealtimeVoteCount = (trackId: string): number => {
+    const realtimeVote = realtimeVotes?.get(trackId);
+    if (realtimeVote) {
+      return realtimeVote.voteCount;
+    }
+
+    const fallbackVotes = getVoteCount(trackId);
+    return fallbackVotes;
+  };
+
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
-      console.log(
-        `Implement vote for track(${trackId}) in playlist(${playlistId}) and direction(${dir})`
-      );
-      // await voteForTrack(eventId, trackId);
-
       if (onTrackSwiping) {
         onTrackSwiping(dir, trackId);
       }
@@ -102,19 +108,19 @@ export default function TrackListVotes({
 
   return (
     <VStack className='flex-1'>
-      <TopVotesTracks topTracks={getTopTracksFrom(tracks)} />
-
-      <Heading className='mt-2'>Votes-room</Heading>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {
-            const va = getVoteCount(getTrackId(a));
-            const vb = getVoteCount(getTrackId(b));
+            const va = getRealtimeVoteCount(getTrackId(a));
+            const vb = getRealtimeVoteCount(getTrackId(b));
             if (vb !== va) return vb - va;
             return a.details.name.localeCompare(b.details.name);
           })
           .map((track: PlaylistTrack) => {
-            const voteCount = getVoteCount(getTrackId(track));
+            const trackId = getTrackId(track);
+            const voteCount = getRealtimeVoteCount(trackId);
+
+            console.log(`🎵 Track: ${track.details.name} | ID: ${trackId} | Votes: ${voteCount}`);
 
             return (
               <Pressable key={track.added_at}>
@@ -125,14 +131,14 @@ export default function TrackListVotes({
                     <Reanimated.View
                       style={{
                         flex: 1,
-                        backgroundColor: colors.indigo[500],
+                        backgroundColor: colors.red[600],
                         justifyContent: 'center',
                         alignItems: 'center',
                         width: 80,
                       }}
                     >
                       <Box className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
+                        <Icon as={CircleMinus} color='white' size='xl' />
                       </Box>
                     </Reanimated.View>
                   )}
@@ -140,14 +146,14 @@ export default function TrackListVotes({
                     <Reanimated.View
                       style={{
                         flex: 1,
-                        backgroundColor: colors.indigo[500],
+                        backgroundColor: colors.green[600],
                         justifyContent: 'center',
                         alignItems: 'center',
                         width: 80,
                       }}
                     >
                       <Box className='flex-1 justify-center items-start w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
+                        <Icon as={PlusCircleIcon} color='white' size='xl' />
                       </Box>
                     </Reanimated.View>
                   )}

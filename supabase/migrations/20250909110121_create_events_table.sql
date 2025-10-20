@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS public.event_members (
   role text DEFAULT 'member' CHECK (role IN ('member', 'voter', 'inviter', 'collaborator')),
   event_id uuid REFERENCES events(id) ON DELETE CASCADE,
   profile_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  vote_count integer DEFAULT 0,
+  max_votes integer DEFAULT 5,
   joined_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
   PRIMARY KEY (event_id, profile_id)
 );
@@ -135,5 +137,315 @@ BEGIN
   FROM (SELECT DISTINCT id FROM user_events) u;
 
   RETURN res;
+END;
+$$;
+
+-- Table for track votes in events
+CREATE TABLE IF NOT EXISTS public.track_votes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  track_id text NOT NULL,
+  vote_count integer DEFAULT 0 NOT NULL,
+  voters uuid[] DEFAULT '{}' NOT NULL, -- Array of user IDs who voted for this track
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+  UNIQUE(event_id, track_id) -- Une entrée par track par event
+);
+
+-- Index for performance on track_votes
+CREATE INDEX IF NOT EXISTS idx_track_votes_event_id ON track_votes(event_id);
+CREATE INDEX IF NOT EXISTS idx_track_votes_track_id ON track_votes(track_id);
+CREATE INDEX IF NOT EXISTS idx_track_votes_vote_count ON track_votes(vote_count DESC);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.track_votes;
+
+-- Function to handle track vote changes and broadcast to realtime
+CREATE OR REPLACE FUNCTION public.handle_track_vote_changes()
+RETURNS trigger
+SECURITY DEFINER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  event_record RECORD;
+  owner_id UUID;
+  member_ids UUID[];
+  recipient_id UUID;
+  old_voters UUID[];
+  new_voters UUID[];
+  voter_id UUID;
+BEGIN
+  -- Get the event record
+  SELECT e.* INTO event_record
+  FROM events e
+  WHERE e.id = COALESCE(NEW.event_id, OLD.event_id);
+
+  IF NOT FOUND THEN
+    RETURN COALESCE(NEW, OLD);
+  END IF;
+
+  -- Get the owner_id from the event record
+  owner_id := event_record.owner_id;
+
+  -- Get all members of the event
+  SELECT ARRAY_AGG(em.profile_id) INTO member_ids
+  FROM event_members em
+  WHERE em.event_id = event_record.id;
+
+  -- Determine who voted (for new votes, find the difference in voters arrays)
+  old_voters := COALESCE(OLD.voters, '{}');
+  new_voters := COALESCE(NEW.voters, '{}');
+
+  -- For INSERT or UPDATE, find the voter who was added
+  IF TG_OP = 'INSERT' THEN
+    -- On insert, the last voter in the array is the new one
+    IF array_length(new_voters, 1) > 0 THEN
+      voter_id := new_voters[array_length(new_voters, 1)];
+    END IF;
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- On update, find the voter that was added (difference between arrays)
+    SELECT unnest INTO voter_id
+    FROM unnest(new_voters)
+    WHERE unnest != ALL(old_voters)
+    LIMIT 1;
+  END IF;
+
+  -- Broadcast to owner
+  IF owner_id IS NOT NULL THEN
+    PERFORM pg_notify(
+      'track_vote_changes:' || owner_id::text,
+      json_build_object(
+        'type', 'track_vote:' || TG_OP,
+        'event_id', event_record.id,
+        'event_name', event_record.name,
+        'track_id', COALESCE(NEW.track_id, OLD.track_id),
+        'vote_count', COALESCE(NEW.vote_count, OLD.vote_count, 0),
+        'voters', COALESCE(NEW.voters, OLD.voters, '{}'),
+        'voter_id', voter_id,
+        'timestamp', now()
+      )::text
+    );
+  END IF;
+
+  -- Broadcast to all members
+  IF member_ids IS NOT NULL THEN
+    FOREACH recipient_id IN ARRAY member_ids
+    LOOP
+      PERFORM pg_notify(
+        'track_vote_changes:' || recipient_id::text,
+        json_build_object(
+          'type', 'track_vote:' || TG_OP,
+          'event_id', event_record.id,
+          'event_name', event_record.name,
+          'track_id', COALESCE(NEW.track_id, OLD.track_id),
+          'vote_count', COALESCE(NEW.vote_count, OLD.vote_count, 0),
+          'voters', COALESCE(NEW.voters, OLD.voters, '{}'),
+          'voter_id', voter_id,
+          'timestamp', now()
+        )::text
+      );
+    END LOOP;
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+-- Trigger for track vote changes
+CREATE TRIGGER track_votes_changes_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON public.track_votes
+  FOR EACH ROW EXECUTE FUNCTION handle_track_vote_changes();
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER track_votes_updated_at_trigger
+  BEFORE UPDATE ON public.track_votes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Function to update vote_count in event_members when track votes change
+CREATE OR REPLACE FUNCTION public.update_member_vote_count()
+RETURNS trigger
+SECURITY DEFINER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  event_id_val UUID;
+  old_voters UUID[];
+  new_voters UUID[];
+BEGIN
+  -- Get the event_id from the affected row
+  event_id_val := COALESCE(NEW.event_id, OLD.event_id);
+
+  IF TG_OP = 'INSERT' THEN
+    -- Get new voters array
+    new_voters := COALESCE(NEW.voters, '{}');
+
+    -- ✅ Pour INSERT, compter les votes de chaque utilisateur
+    WITH vote_counts AS (
+      SELECT user_id, COUNT(*) as vote_count
+      FROM unnest(new_voters) AS user_id
+      GROUP BY user_id
+    )
+    -- Incrémenter le vote_count selon le nombre de votes
+    INSERT INTO event_members (event_id, profile_id, vote_count)
+    SELECT event_id_val, vc.user_id, vc.vote_count
+    FROM vote_counts vc
+    ON CONFLICT (event_id, profile_id)
+    DO UPDATE SET vote_count = event_members.vote_count + EXCLUDED.vote_count;
+
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- Get old and new voters arrays
+    old_voters := COALESCE(OLD.voters, '{}');
+    new_voters := COALESCE(NEW.voters, '{}');
+
+    -- ✅ Pour les votes multiples, calculer la différence de nombre de votes par utilisateur
+    -- Compter les votes de chaque utilisateur dans l'ancien et le nouveau array
+    WITH old_counts AS (
+      SELECT user_id, COUNT(*) as vote_count
+      FROM unnest(old_voters) AS user_id
+      GROUP BY user_id
+    ),
+    new_counts AS (
+      SELECT user_id, COUNT(*) as vote_count
+      FROM unnest(new_voters) AS user_id
+      GROUP BY user_id
+    ),
+    vote_changes AS (
+      SELECT
+        COALESCE(n.user_id, o.user_id) as user_id,
+        COALESCE(n.vote_count, 0) - COALESCE(o.vote_count, 0) as vote_diff
+      FROM new_counts n
+      FULL OUTER JOIN old_counts o ON n.user_id = o.user_id
+      WHERE COALESCE(n.vote_count, 0) != COALESCE(o.vote_count, 0)
+    )
+    -- Mettre à jour le vote_count pour chaque utilisateur selon la différence
+    UPDATE event_members em
+    SET vote_count = GREATEST(em.vote_count + vc.vote_diff, 0)
+    FROM vote_changes vc
+    WHERE em.event_id = event_id_val
+    AND em.profile_id = vc.user_id;
+
+  ELSIF TG_OP = 'DELETE' THEN
+    -- Get old voters array
+    old_voters := COALESCE(OLD.voters, '{}');
+
+    -- ✅ DELETE : décrémenter selon le nombre de votes par utilisateur
+    WITH vote_counts AS (
+      SELECT user_id, COUNT(*) as vote_count
+      FROM unnest(old_voters) AS user_id
+      GROUP BY user_id
+    )
+    -- Décrémenter le vote_count selon le nombre de votes
+    UPDATE event_members em
+    SET vote_count = GREATEST(em.vote_count - vc.vote_count, 0)
+    FROM vote_counts vc
+    WHERE em.event_id = event_id_val
+    AND em.profile_id = vc.user_id;
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$;
+
+-- Trigger to update member vote counts when track votes change
+CREATE TRIGGER update_member_vote_count_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON public.track_votes
+  FOR EACH ROW EXECUTE FUNCTION update_member_vote_count();
+
+-- Function to get member vote statistics for an event
+CREATE OR REPLACE FUNCTION get_event_member_votes(p_event_id UUID)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN (
+    SELECT json_agg(
+      json_build_object(
+        'user_id', em.profile_id,
+        'username', p.username,
+        'vote_count', em.vote_count,
+        'max_votes', em.max_votes,
+        'remaining_votes', GREATEST(em.max_votes - em.vote_count, 0),
+        'joined_at', em.joined_at
+      )
+    )
+    FROM event_members em
+    JOIN profiles p ON em.profile_id = p.id
+    WHERE em.event_id = p_event_id
+    ORDER BY em.vote_count DESC, p.username ASC
+  );
+END;
+$$;
+
+-- Function to check if a user can still vote in an event
+CREATE OR REPLACE FUNCTION can_user_vote(p_event_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  member_record RECORD;
+  event_record RECORD;
+BEGIN
+  -- Get event info
+  SELECT * INTO event_record FROM events WHERE id = p_event_id;
+  IF NOT FOUND THEN
+    RETURN FALSE;
+  END IF;
+
+  -- Check if everyone can vote (public event)
+  IF event_record.everyone_can_vote THEN
+    -- For public events, check if user has exceeded max votes (default 5)
+    SELECT * INTO member_record
+    FROM event_members
+    WHERE event_id = p_event_id AND profile_id = p_user_id;
+
+    IF FOUND THEN
+      RETURN member_record.vote_count < member_record.max_votes;
+    ELSE
+      -- User not in members table, insert them with default values
+      INSERT INTO event_members (event_id, profile_id, vote_count, max_votes)
+      VALUES (p_event_id, p_user_id, 0, 5);
+      RETURN TRUE;
+    END IF;
+  ELSE
+    -- For private events, user must be a member or owner
+    IF event_record.owner_id = p_user_id THEN
+      -- Owner can always vote, check their vote count
+      SELECT * INTO member_record
+      FROM event_members
+      WHERE event_id = p_event_id AND profile_id = p_user_id;
+
+      IF FOUND THEN
+        RETURN member_record.vote_count < member_record.max_votes;
+      ELSE
+        -- Owner not in members table, insert them
+        INSERT INTO event_members (event_id, profile_id, vote_count, max_votes)
+        VALUES (p_event_id, p_user_id, 0, 5);
+        RETURN TRUE;
+      END IF;
+    ELSE
+      -- Check if user is a member
+      SELECT * INTO member_record
+      FROM event_members
+      WHERE event_id = p_event_id AND profile_id = p_user_id;
+
+      IF FOUND THEN
+        RETURN member_record.vote_count < member_record.max_votes;
+      ELSE
+        RETURN FALSE;  -- Not a member of private event
+      END IF;
+    END IF;
+  END IF;
 END;
 $$;

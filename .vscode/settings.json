@@ -12,5 +12,5 @@
     "typescript",
     "typescriptreact"
   ],
-  "deno.enable": true
+  "deno.enable": false,
 }

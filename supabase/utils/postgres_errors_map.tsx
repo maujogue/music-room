@@ -38,6 +38,13 @@ export function formatDbError(error: any): { message: string; status: number } {
     status: 500
   };
 
+  let message = formatError.message;
+
+  // Ajouter le message d'erreur original s'il existe
+  if (error.message) {
+    message += ` (${error.message})`;
+  }
+
   // Try to enrich message with details if available
   if (error.details) {
     // Unique violation: Key (field)=(value) already exists
@@ -46,13 +53,22 @@ export function formatDbError(error: any): { message: string; status: number } {
       const field = uniqueMatch[1];
       const value = uniqueMatch[2];
       return {
-        message: `The field "${field}" with value "${value}" already exists.`,
+        message: `The field "${field}" with value "${value}" already exists.${error.message ? ` (${error.message})` : ''}`,
         status: formatError.status
       };
     }
 
-    // You can add more patterns for other error types if needed
+    // Ajouter les détails à la fin du message s'ils n'ont pas été traités spécifiquement
+    message += ` Details: ${error.details}`;
   }
 
-  return formatError;
+  // Ajouter d'autres informations utiles si disponibles
+  if (error.hint) {
+    message += ` Hint: ${error.hint}`;
+  }
+
+  return {
+    message,
+    status: formatError.status
+  };
 }

@@ -34,7 +34,6 @@ export default function TrackListItem({
   renderLeftAction,
   renderRightAction,
 }: TrackListItemProps) {
-  console.log('Rendering TrackListItem for track:', track);
   const swipeableRef = useRef<SwipeableMethods>(null);
 
   const getImage = () => {
