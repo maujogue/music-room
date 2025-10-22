@@ -7,6 +7,7 @@ import {
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { refreshSpotifyToken } from '../auth.ts';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
+import { Context } from '@hono/hono';
 
 export async function search(c: Context) {
 	const user = c.get('user')

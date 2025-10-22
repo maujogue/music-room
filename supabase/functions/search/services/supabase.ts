@@ -1,6 +1,7 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
+import { createClient } from '@supabase/supabase-js';
+import { HTTPException } from '@hono/http-exception'
+import { formatDbError } from '@postgres/postgres_errors_map';
+import { PlaylistResponse } from '../../../types/playlist.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

@@ -26,7 +26,7 @@ interface Props {
   eventId: string;
   playlistId: string;
   playlistTitle?: string;
-  realtimeVotes?: Map<string, TrackVote>; // ✅ Interface mise à jour
+  realtimeVotes?: Map<string, TrackVote>;
   playlistTracks: PlaylistTrack[];
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
@@ -119,8 +119,6 @@ export default function TrackListVotes({
           .map((track: PlaylistTrack) => {
             const trackId = getTrackId(track);
             const voteCount = getRealtimeVoteCount(trackId);
-
-            console.log(`🎵 Track: ${track.details.name} | ID: ${trackId} | Votes: ${voteCount}`);
 
             return (
               <Pressable key={track.added_at}>
