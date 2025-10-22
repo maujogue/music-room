@@ -4,14 +4,12 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  CloseCircleIcon,
 } from '@/components/ui/icon';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { CircleIcon } from '@/components/ui/icon';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -21,14 +19,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import LikeButton from '@/components/generics/LikeButton';
-import { UserRoundPlus } from 'lucide-react-native';
 import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
 import EventDatesInfos from './Dates/EventDatesInfos';
-import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { addUserToEvent, removeUserFromEvent } from '@/services/events';
+import PrivateBadge from '@/components/generics/PrivateBadge';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
+import { Box } from '@/components/ui/box';
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
@@ -37,7 +36,7 @@ interface Props {
 }
 
 const COMPACT_H = 200;
-const EXPANDED_H = 330;
+const EXPANDED_H = 285;
 
 export default function EventHeader({
   eventData,
@@ -45,9 +44,8 @@ export default function EventHeader({
   onToggle,
   onRefresh,
 }: Props) {
-  console.log('EventData in EventHeader:', eventData);
   const router = useRouter();
-  const [eventLiked, setEventLiked] = useState(!!eventData.user.role);
+  const [eventLiked, setEventLiked] = useState(!!eventData.user?.role);
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [image] = useState(
     eventData.event.image_url || 'https://picsum.photos/111'
@@ -94,7 +92,7 @@ export default function EventHeader({
   });
 
   const handleLikePress = () => {
-    if (eventData.user.role) {
+    if (eventData.user?.role) {
       removeUserFromEvent(eventData.event.id, '').then(() => {
         setEventLiked(false);
       });
@@ -106,7 +104,7 @@ export default function EventHeader({
   };
 
   return (
-    <Animated.View style={containerStyle} className='bg-indigo-100'>
+    <Animated.View style={containerStyle} className='bg-primary-500'>
       <Card className='p-0 rounded-lg bg-transparent' variant='elevated'>
         <VStack className='relative'>
           <Image
@@ -114,80 +112,62 @@ export default function EventHeader({
             className='w-full h-[200px]'
             alt='Event image'
           />
-
-          {/* Overlay avec gradient pour lisibilité */}
           <VStack className='absolute bottom-0 left-0 right-0 p-4'>
             <HStack className='justify-between items-end mb-2'>
-              <VStack className='flex-1'>
-                <Heading size='4xl' className='font-bold'>
-                  {eventData.event.name}
-                </Heading>
-                {eventData.event.owner?.display_name && (
-                  <Text size='sm' className='text-gray-200'>
-                    By {eventData.event.owner.display_name}
-                  </Text>
-                )}
-                {eventData.user.role != 'owner' && (
-                  <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
-                )}
+              <VStack className='w-full'>
+                <HStack className='rounded-xl px-2 gap-2 items-baseline bg-neutral-300/50 border border-neutral-300 overflow-hidden'>
+                  <Heading size='3xl' className='font-bold ' numberOfLines={1} ellipsizeMode="tail">
+                    {eventData.event.name}
+                  </Heading>
+                  {eventData.owner?.username && (
+                    <Text size='sm' className='text-neutral-700'>
+                      By {eventData.owner.username}
+                    </Text>
+                  )}
+                </HStack>
+                <HStack className='justify-between px-2 pt-2 items-bottom'>
+                  {eventData.user?.role != 'owner' ? (
+                    <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
+                  ) : <Box />}
+                  <HStack className='gap-1'>
+                    {!eventData.event.isPublic && (
+                      <PrivateBadge />
+                    )}
+                    {eventData.event.everyone_can_vote && (
+                      <CollaborativeBadge />
+                    )}
+                    <HStack className='gap-2 ml-2 items-center'>
+                      <Button
+                        variant='link'
+                        onPress={onToggle}
+                        accessibilityRole='button'
+                      >
+                        <Animated.View style={chevronStyle}>
+                          <Badge
+                            size='md'
+                            className='rounded-xl bg-white/20 backdrop-blur-sm'
+                          >
+                            <BadgeIcon
+                              size='md'
+                              as={expanded ? ChevronDownIcon : ChevronUpIcon}
+                              className='text-white'
+                            />
+                          </Badge>
+                        </Animated.View>
+                      </Button>
+                    </HStack>
+                  </HStack>
+                </HStack>
               </VStack>
-
-              <HStack className='gap-2 items-center'>
-                <Button
-                  variant='link'
-                  onPress={onToggle}
-                  accessibilityRole='button'
-                >
-                  <Animated.View style={chevronStyle}>
-                    <Badge
-                      size='md'
-                      className='rounded-xl bg-white/20 backdrop-blur-sm'
-                    >
-                      <BadgeIcon
-                        size='md'
-                        as={expanded ? ChevronDownIcon : ChevronUpIcon}
-                        className='text-white'
-                      />
-                    </Badge>
-                  </Animated.View>
-                </Button>
-              </HStack>
             </HStack>
           </VStack>
         </VStack>
 
         {/* Expanded CONTENT */}
-        <Animated.View style={extraStyle} className='mt-2'>
-          <HStack className='justify-between items-top px-2'>
+        <Animated.View style={extraStyle}>
+          <HStack className='justify-between items-top pt-4 pb-2 px-2'>
             <EventLocationInfo location={eventData.location} />
-            <EventDatesInfos event={eventData.event} />
-            <Badge
-              size='sm'
-              action={eventData.event.isPublic ? 'info' : 'warning'}
-              className='rounded-full h-6 bg-black/20 backdrop-blur-sm'
-            >
-              <BadgeIcon
-                size='md'
-                as={eventData.event.isPublic ? CircleIcon : CloseCircleIcon}
-              />
-              <BadgeText className='ml-1 text-white'>
-                {eventData.event.isPublic ? 'Public' : 'Private'}
-              </BadgeText>
-            </Badge>
-            {eventData?.user?.can_invite && (
-              <Button
-                size='lg'
-                className='rounded-full p-3.5 w-10'
-                variant='outline'
-                onPress={handleInviteUserPress}
-              >
-                <ButtonIcon as={UserRoundPlus} size='sm' />
-              </Button>
-            )}
-            <AvatarGroup
-              users={eventData.members.map(member => member.profile)}
-              onPress={handleMemberAvatarGroupPress}
-            />
+            <EventDatesInfos event={eventData.event} coordinates={eventData.location.coordinates} />
           </HStack>
         </Animated.View>
       </Card>

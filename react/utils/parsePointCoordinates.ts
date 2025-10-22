@@ -5,7 +5,7 @@ export function parsePointCoordinates(
 ): { x: number; y: number } | null {
   if (!pointString) return null;
 
-  // Format attendu: "(x,y)" ou "EventLocationInfo (x,y)"
+  // Expected Format : "(x,y)" or "EventLocationInfo (x,y)"
   const match = pointString.match(/\(([^,]+),([^)]+)\)/);
 
   if (!match) return null;
@@ -18,21 +18,42 @@ export function parsePointCoordinates(
   return { x, y };
 }
 
-export function useEventCoordinates(event: CompleteEvent | null) {
+export function useEventCoordinates(event: any | null) {
   return useMemo(() => {
     if (!event || !event.adresses.length) return null;
 
-    const address = event.adresses[0]; // Première adresse
+    const address = event.adresses[0];
     const coords = parsePointCoordinates(address.coordinates);
 
     return coords
       ? {
           x: coords.x,
           y: coords.y,
-          latitude: coords.y, // Convention: y = latitude
-          longitude: coords.x, // Convention: x = longitude
+          latitude: coords.y,
+          longitude: coords.x,
           address,
         }
       : null;
   }, [event]);
+}
+
+export function parseLocation(location: MusicEventLocation | undefined | null): PickedPlace | null {
+  if (!location) return null;
+
+  const coords = parsePointCoordinates(location.coordinates || '');
+  if (!coords) return null;
+
+  return {
+    latitude: coords.y,
+    longitude: coords.x,
+    address: location.address || undefined,
+    street: location.complement || undefined,
+    city: location.city || undefined,
+    country: location.country || undefined,
+  };
+}
+
+export function truncateAddress(address?: string, parts = 3): string {
+  if (!address) return "";
+  return address.split(",").slice(0, parts).join(",").trim();
 }
