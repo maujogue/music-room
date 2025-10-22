@@ -1,4 +1,4 @@
-type Event = {
+export interface EventResponse {
   id: string;
   name: string;
   image_url?: string;
@@ -14,12 +14,12 @@ type Event = {
   beginning_at: string;
 };
 
-type Coordinates = {
+interface Coordinates {
   lat: number;
   long: number;
 }
 
-type MusicEventLocation = {
+interface MusicEventLocation {
   coordinates?: Coordinates;
   venueName?: string;
   address?: string;
@@ -27,7 +27,7 @@ type MusicEventLocation = {
   country?: string;
 }
 
-type EventPayload = {
+interface EventPayload {
 	event?: Event;
 	location?: MusicEventLocation;
 }

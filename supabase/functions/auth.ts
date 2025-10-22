@@ -1,13 +1,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { formatDbError } from '../utils/postgres_errors_map.ts';
+import type { HonoRequest } from 'jsr:@hono/hono';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-export async function getCurrentUser(req: Request): Promise<any> {
+export async function getCurrentUser(req: HonoRequest): Promise<any> {
   const authHeader = req.header('Authorization') || req.header('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     console.log('No Authorization header or invalid format');
@@ -61,7 +62,7 @@ export async function refreshSpotifyToken(user_id: string): Promise<void> {
   }
   const refresh_token = data[0].spotify_refresh_token;
   if (!refresh_token) {
-    throw new HTTPException(400, { message: 'No refresh token available' });
+    throw new HTTPException(401, { message: 'No refresh token available' });
   }
 
   const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;

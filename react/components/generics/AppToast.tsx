@@ -10,7 +10,7 @@ type AppToastProps = {
 
 export function AppToast({ id, title, description, action, variant = 'solid' }: AppToastProps) {
   return (
-    <Toast nativeID={id} action={action} variant={variant}>
+    <Toast nativeID={id} action={action} variant={variant} style={{ right: '10%', width: '120%' }}>
       <ToastTitle>{title}</ToastTitle>
       {description ? <ToastDescription>{description}</ToastDescription> : null}
     </Toast>

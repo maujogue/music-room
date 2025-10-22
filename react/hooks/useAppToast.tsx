@@ -17,7 +17,7 @@ export function useAppToast() {
     title,
     description,
     duration = 1500,
-    placement = 'bottom',
+    placement = 'top',
   }: ShowArgs) =>
     toast.show({
       placement,

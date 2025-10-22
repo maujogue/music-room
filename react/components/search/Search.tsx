@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ScrollView } from 'react-native';
 import useSearchGlobal from '@/hooks/useSearchGlobal';
@@ -8,6 +8,7 @@ import TrackListItem from '@/components/track/TrackListItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import UserListItem from '@/components/profile/UserListItem';
 import EventListItem from '@/components/events/EventListItem';
+import { useAppToast } from '@/hooks/useAppToast';
 
 interface Props {
   placeholder?: string;
@@ -34,7 +35,7 @@ export default function Search({
     <EventListItem event={item} owner={item.owner} key={item.id} />
   ),
 }: Props) {
-  const { query, setQuery, filter, setFilter, onChangeFilter, results } =
+  const { query, setQuery, filter, setFilter, onChangeFilter, results, error } =
     useSearchGlobal(defaultType);
 
   const users = results.userResults ?? [];
@@ -43,9 +44,20 @@ export default function Search({
   const tracks =
     results.trackResults?.tracks?.items ?? results.trackResults ?? [];
   const events = results.eventResults?.events ?? results.eventResults ?? [];
+  const toast = useAppToast();
 
   console.log('Search results events:', events);
   const limit = filter === 'all' ? 3 : undefined;
+
+  useEffect(() => {
+    if (error) {
+      toast.error({
+        title: 'Search Error',
+        description: error.message,
+        duration: 3000,
+      });
+    }
+  }, [error]);
 
   return (
     <GestureHandlerRootView>
@@ -73,7 +85,6 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemPlaylist}
         />
@@ -84,7 +95,6 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemEvent}
         />
@@ -95,7 +105,6 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemUser}
         />

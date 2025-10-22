@@ -26,7 +26,7 @@ export default function useAddTrack(playlistId: string) {
             paddingLeft: 16,
           }}
         >
-          <Icon as={AddIcon} color='white' size={6} />
+          <Icon as={AddIcon} color='white' size={'xl'} />
         </Box>
       </Reanimated.View>
     );
