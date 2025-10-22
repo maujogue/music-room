@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AppToast } from '@/components/generics/AppToast';
 import { useAppToast } from '@/hooks/useAppToast';
 import EventGuest from '@/components/track/votes/EventGuest';
 
@@ -147,10 +146,10 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
 
   return (
     <>
+      <EventGuest eventData={data} onRefresh={onRefresh} />
       <VStack className='flex-1 w-full'>
         {eventUserData && (
           <>
-            <EventGuest eventData={data} onRefresh={onRefresh} />
             <View className="bg-gray-100 p-3 rounded-lg mb-4">
               <Text className="text-sm text-gray-600">
                 Votes left: <Text className="font-bold text-blue-600">{eventUserData.vote_remaining}</Text> / {eventUserData.voteMax}
