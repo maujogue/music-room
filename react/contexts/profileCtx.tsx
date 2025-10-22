@@ -17,6 +17,7 @@ import {
 
 interface ProfileContextType {
   profile: UserInfo | null;
+  isConnectedToSpotify?: boolean;
   isLoading: boolean;
   followers: any[];
   following: any[];
@@ -46,6 +47,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnectedToSpotify, setIsConnectedToSpotify] = useState<boolean>(false);
 
   // Fetch profile and subscribe to realtime changes when user is authenticated
   useEffect(() => {
@@ -128,6 +130,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         setFollowing([]);
       } else {
         // The data now includes both profile and follow information
+        console.log('Fetched profile data:', data);
+        setIsConnectedToSpotify(!!data.profile?.is_connected_to_spotify);
         setProfile(data?.profile || data);
         setFollowers(data?.followers || []);
         setFollowing(data?.following || []);

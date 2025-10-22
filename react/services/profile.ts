@@ -1,21 +1,10 @@
 import { apiFetch } from '@/utils/apiFetch';
-import { UserInfo } from '@/types/user';
 
 const baseUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/profile`;
 
 // Get another user's profile with follow relationships
-export async function getUserProfile(userId: string): Promise<{
-  data: {
-    profile: any;
-    is_following: boolean;
-    is_follower: boolean;
-    is_friend: boolean;
-    followers: any[];
-    following: any[];
-  } | null;
-  error: any;
-}> {
-  const res = await apiFetch(`${baseUrl}/user/${userId}`);
+export async function getUserProfile(userId: string): Promise<UserProfile> {
+  const res = await apiFetch<UserProfile>(`${baseUrl}/user/${userId}`);
   if (!res.success) {
     console.error('Error fetching user profile:', res.error);
     throw res.error;

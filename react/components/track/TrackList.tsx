@@ -109,7 +109,7 @@ export default function TrackList({
                 : () => (
                     <Reanimated.View style={[styles.deleteAction]}>
                       <View className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={TrashIcon} color='white' size={6} />
+                        <Icon as={TrashIcon} color='white' size={'xl'} />
                       </View>
                     </Reanimated.View>
                   )

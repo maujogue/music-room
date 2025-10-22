@@ -45,8 +45,6 @@ export default function Search({
     results.trackResults?.tracks?.items ?? results.trackResults ?? [];
   const events = results.eventResults?.events ?? results.eventResults ?? [];
   const toast = useAppToast();
-
-  console.log('Search results events:', events);
   const limit = filter === 'all' ? 3 : undefined;
 
   useEffect(() => {

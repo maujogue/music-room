@@ -1,5 +1,5 @@
-import { Context } from 'jsr:@hono/hono';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { Context } from '@hono/hono';
+import { HTTPException } from '@hono/http-exception';
 import {
   getUserProfile,
   getUserProfileWithFollows,
@@ -7,15 +7,15 @@ import {
   getUserFollows,
   followUserById,
   unfollowUserById,
-  searchUsersByQuery,
-  areUsersFriends,
+  searchUsersByQuery
 } from './service.ts';
+import type { ProfileWithFollowInfo } from '@profile';
 
 export async function fetchUserProfile(c: Context): Promise<Response> {
   const userId = c.req.param('userId');
   const currentUser = c.get('user');
 
-  let res;
+  let res: ProfileWithFollowInfo | null;
   // If userId is "me", use current user's ID
   if (userId === 'me') {
     res = await getUserProfile(currentUser.id);

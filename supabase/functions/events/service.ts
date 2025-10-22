@@ -1,7 +1,6 @@
-import { Hono } from 'jsr:@hono/hono'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-import { formatDbError } from '../../utils/postgres_errors_map.ts'
+import { HTTPException } from '@hono/http-exception';
+import { createClient } from '@supabase/supabase-js';
+import { formatDbError } from '@postgres/postgres_errors_map';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
