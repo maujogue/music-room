@@ -11,14 +11,16 @@ import { useEffect, useState } from 'react';
 import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AppToast } from '@/components/generics/AppToast';
 import { useAppToast } from '@/hooks/useAppToast';
+import EventGuest from '@/components/track/votes/EventGuest';
+
 
 interface Props {
   eventId: string;
+  onRefresh: () => void;
 }
 
-export default function VotesRoom({ eventId }: Props) {
+export default function VotesRoom({ eventId, onRefresh }: Props) {
   const { data, loading, error } = useEvent(eventId);
   const {
     connected,
@@ -144,6 +146,7 @@ export default function VotesRoom({ eventId }: Props) {
 
   return (
     <>
+      <EventGuest eventData={data} onRefresh={onRefresh} />
       <VStack className='flex-1 w-full'>
         {eventUserData && (
           <>

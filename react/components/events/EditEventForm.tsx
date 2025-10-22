@@ -14,12 +14,14 @@ import { Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
-import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
-import { Alert } from '@/components/ui/alert';
 import { useAppToast } from '@/hooks/useAppToast';
+import * as ImagePicker from 'expo-image-picker';
+import LocationPickerModal from '../generics/LocationPickerModal';
+import { parseLocation } from '@/utils/parsePointCoordinates';
+
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -40,7 +42,7 @@ export default function EditEventForm({
     initialValues.event?.image_url ?? ''
   );
   const [playlist, setPlaylist] = useState<Playlist | null>(
-    initialValues.event?.playlist ?? null
+    initialValues.playlist ?? null
   );
   const [beginningAt, setBeginningAt] = useState(
     initialValues.event?.beginning_at
@@ -59,14 +61,16 @@ export default function EditEventForm({
   const [mode, setMode] = useState<'date' | 'time'>('date');
 
   // location fields
-  const initialLocation = (initialValues as any).location ?? {};
-  const [venueName, setVenueName] = useState(initialLocation.venueName ?? '');
-  const [complement, setComplement] = useState(
-    initialLocation.complement ?? ''
-  );
-  const [address, setAddress] = useState(initialLocation.address ?? '');
-  const [city, setCity] = useState(initialLocation.city ?? '');
-  const [country, setCountry] = useState(initialLocation.country ?? '');
+  const initialLocation = parseLocation(initialValues?.location); // TODO : check l'initialisation
+  const [isLocationOpen, setLocationOpen] = useState(false);
+  const [location, setLocation] = useState<PickedPlace | null>(initialLocation);
+  const [venueName, setVenueName] = useState(initialValues?.location?.venuename ?? '');
+  // const [complement, setComplement] = useState(
+  //   initialLocation.complement ?? ''
+  // );
+  // const [address, setAddress] = useState(initialLocation.address ?? '');
+  // const [city, setCity] = useState(initialLocation.city ?? '');
+  // const [country, setCountry] = useState(initialLocation.country ?? '');
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -153,6 +157,23 @@ export default function EditEventForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
+    const getLoc = location ? {
+      id: initialValues?.location?.id,
+      event_id: initialValues?.event?.id,
+      venuename: venueName.trim() || null,
+      address: location?.address ?? null,
+      complement: location?.street ?? null,
+      city: location?.city ?? null,
+      country: location?.country ?? null,
+      coordinates: `(${location?.latitude},${location?.longitude})`,
+    } : null;
+
+    const getLocFallback = venueName ? {
+      id: initialValues?.location?.id,
+      event_id: initialValues?.event?.id,
+      venuename: venueName.trim() || null,
+    } : null;
+
     const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
@@ -161,14 +182,7 @@ export default function EditEventForm({
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       is_private,
       everyone_can_vote,
-      // include location as nested object to match get_complete_event structure
-      location: {
-        venuename: venueName.trim() || null,
-        complement: complement.trim() || null,
-        address: address.trim() || null,
-        city: city.trim() || null,
-        country: country.trim() || null,
-      } as any,
+      location: getLoc ?? getLocFallback,
     } as any;
 
     try {
@@ -222,7 +236,7 @@ export default function EditEventForm({
               </Button>
 
               <Box className='p-4 pt-0'>
-                <Text>Name</Text>
+                <Text className='font-semibold'>Name</Text>
                 <Input className='bg-white'>
                   <InputField
                     placeholder='Supacool event'
@@ -232,7 +246,7 @@ export default function EditEventForm({
                   />
                 </Input>
 
-                <Text className='mt-2'>Description</Text>
+                <Text className='mt-2 font-semibold'>Description</Text>
                 <Textarea className='bg-white'>
                   <TextareaInput
                     placeholder='Event description'
@@ -242,7 +256,7 @@ export default function EditEventForm({
                   />
                 </Textarea>
 
-                <Text className='mt-2'>Playlist</Text>
+                <Text className='mt-2 font-semibold'>Playlist</Text>
                 {!playlist ? (
                   <AddPlaylistItem
                     onPress={handleSelectPlaylist}
@@ -284,7 +298,7 @@ export default function EditEventForm({
                   </HStack>
                 </VStack>
 
-                <Text className='mt-2'>Beginning Date & Time</Text>
+                <Text className='mt-2 font-semibold'>Beginning Date & Time</Text>
                 <HStack className='gap-2 mb-2'>
                   <Button
                     size='sm'
@@ -314,17 +328,37 @@ export default function EditEventForm({
                   />
                 )}
 
-                <Text className='mt-4 font-medium'>Location</Text>
 
-                <Text className='mt-2'>Venue name</Text>
+                {/* ---------- LOCATION ----------- */}
+                <Text className='mt-2 font-semibold'>Place name</Text>
                 <Input className='bg-white'>
                   <InputField
-                    placeholder='Venue name'
+                    placeholder='Place name'
                     value={venueName}
                     onChangeText={setVenueName}
                   />
                 </Input>
 
+                <Text className='mt-4 font-semibold'>Location</Text>
+                <Box>
+                  {location ? (
+                    <Box>
+                      <Text>{location.address ?? "No address place"}</Text>
+                      <Text size="xs">
+                        {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                      </Text>
+                    </Box>
+                  ) : (
+                    <Text>No location selected</Text>
+                  )}
+
+                  <Button action="primary" onPress={() => setLocationOpen(true)}>
+                    <ButtonText>{location ? "Change event's place" : "Set event's place"}</ButtonText>
+                  </Button>
+                </Box>
+
+
+                {/*
                 <Text className='mt-2'>Complement</Text>
                 <Input className='bg-white'>
                   <InputField
@@ -333,7 +367,6 @@ export default function EditEventForm({
                     onChangeText={setComplement}
                   />
                 </Input>
-
                 <Text className='mt-2'>Address</Text>
                 <Input className='bg-white'>
                   <InputField
@@ -359,7 +392,7 @@ export default function EditEventForm({
                     value={country}
                     onChangeText={setCountry}
                   />
-                </Input>
+                </Input> */}
               </Box>
             </Box>
             {error ? (
@@ -395,6 +428,16 @@ export default function EditEventForm({
         isOpen={isPlaylistModalOpen}
         onClose={() => setIsPlaylistModalOpen(false)}
         onSelect={handlePlaylistSelected}
+      />
+
+      <LocationPickerModal
+        isOpen={isLocationOpen}
+        onClose={() => setLocationOpen(false)}
+        onConfirm={(val) => {
+          console.log("Lieu choisi détaillé :", val);
+          setLocation(val);
+        }}
+        initialCoords={location ? { latitude: location.latitude, longitude: location.longitude } : undefined}
       />
     </>
   );
