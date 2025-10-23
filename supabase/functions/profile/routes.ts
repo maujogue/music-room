@@ -1,12 +1,11 @@
-import { Hono } from 'jsr:@hono/hono';
+import { Hono } from '@hono/hono';
 import {
   fetchUserProfile,
   updateProfile,
   fetchUserFollows,
   followUser,
   unfollowUser,
-  searchUsers,
-  checkFriendship,
+  searchUsers
 } from './controller.ts';
 
 const router = new Hono();

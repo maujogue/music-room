@@ -7,7 +7,8 @@ import type {
   ProfileRow, 
   FollowerRow, 
   FollowRow, 
-  FollowingRow 
+  FollowingRow,
+  ProfileSupabaseResponse
 } from '@profile';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -22,7 +23,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 export async function getUserProfile(
   userId: string
-): Promise<ProfileWithFollowInfo> {
+): Promise<ProfileResponse> {
+  console.log('getUserProfile called with userId:', userId);
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
@@ -36,6 +38,7 @@ export async function getUserProfile(
   }
 
   const { followers, following } = await getUserFollows(userId);
+  console.log('Fetched followers and following for userId:', userId);
   let is_connected_to_spotify = !!profile.spotify_access_token;
   if (is_connected_to_spotify) {
     if (new Date(profile.spotify_token_expires_at) < new Date()) {
@@ -43,13 +46,22 @@ export async function getUserProfile(
     }
   }
 
-  const res: ProfileWithFollowInfo = {
-    ...profile,
+  console.log('is_connected_to_spotify for userId', userId, ':', is_connected_to_spotify);
+  const {
+    spotify_access_token: _sat,
+    spotify_refresh_token: _srt,
+    spotify_token_expires_at: _stea,
+    ...profileWithoutSpotify
+  } = profile as ProfileSupabaseResponse;
+
+  const res: ProfileResponse = {
+    ...profileWithoutSpotify,
     is_connected_to_spotify,
     followers: followers || [],
     following: following || [],
   };
 
+  console.log('getUserProfile res:', res);
   return res;
 }
 
@@ -146,7 +158,7 @@ export async function updateUserProfile(
 export async function getUserFollows(
   userId: string,
   currentUserId?: string
-): Promise<{ followers: any[]; following: any[] }> {
+): Promise<{ followers: ProfileResponse[]; following: ProfileResponse[] }> {
   const followers = await getUserFollowers(userId); 
   const following = await getUserFollowing(userId);
 
@@ -213,11 +225,11 @@ async function getUserRelationships(userId: string): Promise<{ followingSet: Set
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  const followingSet = new Set(
-    currentUserFollowsResult.data?.map((f) => f.following_id) || []
+  const followingSet: Set<string> = new Set(
+    currentUserFollowsResult.data?.map((f: { following_id: string }) => f.following_id) || []
   );
-  const followersSet = new Set(
-    currentUserFollowersResult.data?.map((f) => f.follower_id) || []
+  const followersSet: Set<string> = new Set(
+    currentUserFollowersResult.data?.map((f: { follower_id: string }) => f.follower_id) || []
   );
 
   return { followingSet, followersSet };
@@ -273,7 +285,7 @@ async function getUserFollowing(userId: string): Promise<ProfileWithFollowInfo[]
       `
       )
       .eq('follower_id', userId)
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching following:', error);

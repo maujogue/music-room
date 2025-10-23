@@ -9,13 +9,14 @@ import {
   unfollowUserById,
   searchUsersByQuery
 } from './service.ts';
-import type { ProfileWithFollowInfo } from '@profile';
+import type { ProfileResponse, ProfileWithFollowInfo } from '@profile';
 
 export async function fetchUserProfile(c: Context): Promise<Response> {
+  console.log('Fetching user profile...');
   const userId = c.req.param('userId');
   const currentUser = c.get('user');
 
-  let res: ProfileWithFollowInfo | null;
+  let res: ProfileResponse | null;
   // If userId is "me", use current user's ID
   if (userId === 'me') {
     res = await getUserProfile(currentUser.id);
@@ -23,18 +24,12 @@ export async function fetchUserProfile(c: Context): Promise<Response> {
     res = await getUserProfileWithFollows(userId, currentUser.id);
   }
   if (!res) {
-    throw new HTTPException(500, { message: 'Failed to fetch user profile' });
-  }
-
-  if (res.error) {
-    c.status(res.error.status || 500);
-    return c.json({
-      error: res.error.message || 'Failed to fetch user profile',
-    });
+    c.status(404);
+    return c.json({ error: 'User profile not found' });
   }
 
   c.status(200);
-  return c.json(res.data);
+  return c.json(res);
 }
 
 export async function updateProfile(c: Context): Promise<Response> {

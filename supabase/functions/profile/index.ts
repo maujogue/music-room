@@ -4,11 +4,12 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { Hono } from '@hono/hono';
+import { Context, Hono } from '@hono/hono';
 import { serve } from '@deno/server';
 import { HTTPException } from '@hono/http-exception';
 import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
 import profileRoutes from './routes.ts';
+import type { StatusCode } from '@hono/hono/utils/http-status'
 
 const app = new Hono();
 
@@ -32,10 +33,11 @@ app.use('*', async (c, next) => {
   }
 });
 
-app.onError((err, c) => {
+app.onError((err, c: Context) => {
   console.error('Error occurred:', err);
   if (err instanceof HTTPException) {
-    return err.getResponse();
+    c.status(err.status as StatusCode);
+    return c.json({ message: err.message });
   }
   return c.json(
     {

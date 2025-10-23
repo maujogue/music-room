@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@hono/hono@*": "4.10.2"
+  },
+  "jsr": {
+    "@hono/hono@4.10.2": {
+      "integrity": "9cdb32df3b1f8eba43b197035a90e0c3c543ddf99f75cebfa31a2414bc5633f8"
+    }
+  },
+  "remote": {
+    "https://deno.land/x/hono@v3.2.3/http-exception.ts": "be4736556518a6c923ed99573eea823d7b14e7f37dcca7d38015896426c1928a",
+    "https://deno.land/x/hono@v3.2.3/utils/http-status.ts": "e0c4343ea7717c314dc600131e16b636c29d61cfdaf9df93b267258d1729d1a0"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@hono/hono@*"
+    ]
+  }
+}
