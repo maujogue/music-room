@@ -154,19 +154,12 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const { error } = await updateProfileAPI(updates);
-
-      if (error) {
-        console.error('Error updating profile:', error);
-        return { error };
-      } else {
-        // Update local state with new data
-        setProfile(prev => (prev ? { ...prev, ...updates } : null));
-        return { error: null };
-      }
+      await updateProfileAPI(updates);
+      setProfile(prev => (prev ? { ...prev, ...updates } : null));
+      return { error: null };
     } catch (error) {
       console.error('Unexpected error updating profile:', error);
-      return { error: { message: 'An unexpected error occurred' } };
+      return { error: { message: error || 'An unexpected error occurred' } };
     } finally {
       setIsLoading(false);
     }
