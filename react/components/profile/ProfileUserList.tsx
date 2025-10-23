@@ -15,41 +15,6 @@ export default function ProfileUserList({
   type,
   title,
 }: ProfileUserListProps) {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        // Choose the appropriate function based on type
-        const result =
-          type === 'followers'
-            ? await getUserFollowers(userId)
-            : await getUserFollowing(userId);
-
-        if (result.error) {
-          console.error(`Error loading ${type}:`, result.error);
-          return;
-        }
-      } catch (error) {
-        console.error(`Error loading ${type}:`, error);
-      }
-      setIsLoading(false);
-    };
-
-    loadUsers();
-  }, [userId, type]);
-
-  if (isLoading) {
-    return (
-      <UserList
-        type={type}
-        title={title}
-        showFollowButtons={true}
-        userId={userId}
-      />
-    );
-  }
-
   return (
     <UserList
       type={type}

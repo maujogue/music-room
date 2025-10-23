@@ -30,3 +30,8 @@ interface UserProfileWithFollows extends UserInfo {
   followers: any[];
   following: any[];
 }
+
+interface UserFollows {
+  followers: any[];
+  following: any[];
+}

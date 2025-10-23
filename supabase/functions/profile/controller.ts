@@ -56,10 +56,7 @@ export async function followUser(c: Context): Promise<Response> {
   const user = c.get('user');
   const userId = c.req.param('userId');
 
-  const res = await followUserById(user.id, userId);
-  if (!res) {
-    throw new HTTPException(500, { message: 'Failed to follow user' });
-  }
+  await followUserById(user.id, userId);
 
   c.status(200);
   return c.json({ success: true });
@@ -69,10 +66,7 @@ export async function unfollowUser(c: Context): Promise<Response> {
   const user = c.get('user');
   const userId = c.req.param('userId');
 
-  const res = await unfollowUserById(user.id, userId);
-  if (!res) {
-    throw new HTTPException(500, { message: 'Failed to unfollow user' });
-  }
+  await unfollowUserById(user.id, userId);
 
   c.status(200);
   return c.json({ success: true });

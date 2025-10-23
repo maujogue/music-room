@@ -66,21 +66,14 @@ export async function unfollowUser(userId: string): Promise<{ error: any }> {
   }
 }
 
-// Get user's follows (both followers and following)
-export async function getUserFollows(userId: string): Promise<{
-  data: { followers: any[]; following: any[] } | null;
-  error: any;
-}> {
-  try {
-    const response = await apiFetch(`${baseUrl}/profile/follows/${userId}`);
-    return { data: response.data || null, error: null };
-  } catch (error) {
-    console.error('Error fetching user follows:', error);
-    return { data: null, error };
+export async function getUserFollows(userId: string): Promise<UserFollows | null> {
+  const response = await apiFetch<UserFollows>(`${baseUrl}/profile/follows/${userId}`);
+  if (!response.success) {
+    throw response.error;
   }
+  return response.data;
 }
 
-// Get user's followers by userId (convenience function)
 export async function getUserFollowers(
   userId: string
 ): Promise<{ data: any[] | null; error: any }> {
@@ -96,7 +89,6 @@ export async function getUserFollowers(
   }
 }
 
-// Get user's following by userId (convenience function)
 export async function getUserFollowing(
   userId: string
 ): Promise<{ data: any[] | null; error: any }> {
@@ -108,35 +100,6 @@ export async function getUserFollowing(
     return { data: response.data?.following || null, error: null };
   } catch (error) {
     console.error('Error fetching user following:', error);
-    return { data: null, error };
-  }
-}
-
-// Search users
-export async function searchUsers(
-  query: string
-): Promise<{ data: any[] | null; error: any }> {
-  try {
-    const response = await apiFetch(
-      `${baseUrl}/profile/search?q=${encodeURIComponent(query)}`
-    );
-    return { data: response.data || null, error: null };
-  } catch (error) {
-    console.error('Error searching users:', error);
-    return { data: null, error };
-  }
-}
-
-// Check if two users are friends
-export async function areUsersFriends(
-  userId1: string,
-  userId2: string
-): Promise<{ data: boolean | null; error: any }> {
-  try {
-    const response = await apiFetch(`${baseUrl}/profile/friends/${userId1}/${userId2}`);
-    return { data: response.areFriends || null, error: null };
-  } catch (error) {
-    console.error('Error checking friendship:', error);
     return { data: null, error };
   }
 }

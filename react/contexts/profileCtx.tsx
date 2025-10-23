@@ -12,7 +12,6 @@ import {
   updateProfile as updateProfileAPI,
   followUser,
   unfollowUser,
-  searchUsers,
 } from '@/services/profile';
 
 interface ProfileContextType {
@@ -28,7 +27,6 @@ interface ProfileContextType {
   clearProfile: () => void;
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
-  searchUsers: (query: string) => Promise<{ data: any[]; error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -124,15 +122,14 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       const data = await getCurrentUserProfile();
 
       if (!data) {
-        console.error('Error fetching profile:', error);
         setProfile(null);
         setFollowers([]);
         setFollowing([]);
       } else {
         // The data now includes both profile and follow information
         console.log('Fetched profile data:', data);
-        setIsConnectedToSpotify(!!data.profile?.is_connected_to_spotify);
-        setProfile(data?.profile || data);
+        setIsConnectedToSpotify(!!data.is_connected_to_spotify);
+        setProfile(data);
         setFollowers(data?.followers || []);
         setFollowing(data?.following || []);
       }
@@ -211,17 +208,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const handleSearchUsers = async (
-    query: string
-  ): Promise<{ data: any[]; error: any }> => {
-    try {
-      return await searchUsers(query);
-    } catch (error) {
-      console.error('Unexpected error searching users:', error);
-      return { data: [], error: { message: 'An unexpected error occurred' } };
-    }
-  };
-
   const value: ProfileContextType = {
     profile,
     isLoading,
@@ -233,8 +219,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     refreshProfile,
     clearProfile,
     followUser: handleFollowUser,
-    unfollowUser: handleUnfollowUser,
-    searchUsers: handleSearchUsers,
+    unfollowUser: handleUnfollowUser
   };
 
   return (

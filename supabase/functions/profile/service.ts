@@ -301,8 +301,8 @@ async function getUserFollowing(userId: string): Promise<ProfileWithFollowInfo[]
 export async function followUserById(
   followerId: string,
   followingId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase.from('follows').insert({
+): Promise<void> {
+  const { error } = await supabase.from('follows').insert({
     follower_id: followerId,
     following_id: followingId,
   });
@@ -312,16 +312,14 @@ export async function followUserById(
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-
-  return { data: { success: true } };
 }
 
 // Unfollow a user
 export async function unfollowUserById(
   followerId: string,
   followingId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<void> {
+  const { error } = await supabase
     .from('follows')
     .delete()
     .eq('follower_id', followerId)
@@ -332,8 +330,6 @@ export async function unfollowUserById(
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-
-  return { data: { success: true } };
 }
 
 // Search users

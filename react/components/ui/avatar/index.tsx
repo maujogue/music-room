@@ -147,10 +147,47 @@ const AvatarImage = React.forwardRef<
   React.ComponentRef<typeof UIAvatar.Image>,
   IAvatarImageProps
 >(function AvatarImage({ className, ...props }, ref) {
+  // Defensive normalization of the `source` prop to avoid passing native maps
+  // (e.g. ReadableNativeMap) to the underlying Image which expects a string uri
+  const incoming: any = props;
+  let normalizedSource = incoming.source;
+
+  try {
+    if (normalizedSource) {
+      // If a plain string was passed, convert to { uri }
+      if (typeof normalizedSource === 'string') {
+        normalizedSource = { uri: normalizedSource };
+      }
+
+      // If source is an object with uri but uri is not a string, try to extract common fields
+      if (typeof normalizedSource === 'object' && normalizedSource.uri && typeof normalizedSource.uri !== 'string') {
+        const maybe = normalizedSource.uri;
+        if (maybe && typeof maybe === 'object') {
+          if (typeof maybe.url === 'string') {
+            normalizedSource = { uri: maybe.url };
+          } else if (typeof maybe.signedUrl === 'string') {
+            normalizedSource = { uri: maybe.signedUrl };
+          } else {
+            // fallback: drop source to avoid crash
+            normalizedSource = undefined;
+          }
+        } else {
+          // not a usable uri
+          normalizedSource = undefined;
+        }
+      }
+    }
+  } catch (e) {
+    // If anything unexpected happens, drop the source to avoid native crash
+    normalizedSource = undefined;
+  }
+
+  const forwardedProps = { ...props, source: normalizedSource } as any;
+
   return (
     <UIAvatar.Image
       ref={ref}
-      {...props}
+      {...forwardedProps}
       className={avatarImageStyle({
         class: className,
       })}
