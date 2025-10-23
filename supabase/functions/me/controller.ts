@@ -1,5 +1,5 @@
-import { Context } from 'jsr:@hono/hono'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { Context } from '@hono/hono'
+import { HTTPException } from '@hono/http-exception'
 import {
   getCurrentUserPlaylists,
   getCurrentUserPlayingTrack,
@@ -11,13 +11,28 @@ import {
   getSupabaseEventByOwner,
   getCurrentUserPlaylistSupabase
 } from './services/supabase.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from '@supabase/supabase-js';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
+import { getUserProfile } from '@profile/service';
+import type { ProfileResponse } from '@profile';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
+
+export async function fetchCurrentUserProfile(c: Context): Promise<Response> {
+    const user = c.get('user')
+    const res: ProfileResponse | null = await getUserProfile(user.id)
+
+    if (!res) {
+      c.status(404);
+      return c.json({ error: 'User profile not found' });
+    }
+
+    c.status(200);
+    return c.json(res);
+}
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const user = c.get('user')

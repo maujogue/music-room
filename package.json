@@ -41,6 +41,7 @@
     "@legendapp/motion": "^2.4.0",
     "expo": "^54.0.13",
     "expo-router": "~5.1.6",
+    "hono": "^4.10.2",
     "jest": "^30.2.0",
     "react-native-safe-area-context": "^5.6.1"
   }

@@ -8,7 +8,7 @@ import {
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
 import {
-  getUserProfile,
+  getCurrentUserProfile,
   updateProfile as updateProfileAPI,
   followUser,
   unfollowUser,
@@ -121,7 +121,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const data = await getUserProfile('me');
+      const data = await getCurrentUserProfile();
 
       if (!data) {
         console.error('Error fetching profile:', error);

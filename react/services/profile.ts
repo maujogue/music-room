@@ -1,10 +1,20 @@
 import { apiFetch } from '@/utils/apiFetch';
 
-const baseUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/profile`;
+const baseUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`;
 
 // Get another user's profile with follow relationships
+export async function getCurrentUserProfile(): Promise<UserProfile> {
+  const res = await apiFetch<UserProfile>(
+    `${baseUrl}/me/profile`
+  );
+  if (!res.success) {
+    throw res.error;
+  }
+  return res.data;
+}
+
 export async function getUserProfile(userId: string): Promise<UserProfile> {
-  const res = await apiFetch<UserProfile>(`${baseUrl}/user/${userId}`);
+  const res = await apiFetch<UserProfile>(`${baseUrl}/profile/user/${userId}`);
   if (!res.success) {
     console.error('Error fetching user profile:', res.error);
     throw res.error;
@@ -17,7 +27,7 @@ export async function updateProfile(
   updates: Partial<UserInfo>
 ): Promise<{ data: any; error: any }> {
   try {
-    const response = await apiFetch(`${baseUrl}/update`, {
+    const response = await apiFetch(`${baseUrl}/profile/update`, {
       method: 'PUT',
       body: updates,
     });
@@ -32,7 +42,7 @@ export async function updateProfile(
 // Follow a user
 export async function followUser(userId: string): Promise<{ error: any }> {
   try {
-    await apiFetch(`${baseUrl}/follow/${userId}`, {
+    await apiFetch(`${baseUrl}/profile/follow/${userId}`, {
       method: 'POST',
     });
     return { error: null };
@@ -45,7 +55,7 @@ export async function followUser(userId: string): Promise<{ error: any }> {
 // Unfollow a user
 export async function unfollowUser(userId: string): Promise<{ error: any }> {
   try {
-    await apiFetch(`${baseUrl}/follow/${userId}`, {
+    await apiFetch(`${baseUrl}/profile/follow/${userId}`, {
       method: 'DELETE',
     });
     return { error: null };
@@ -61,7 +71,7 @@ export async function getUserFollows(userId: string): Promise<{
   error: any;
 }> {
   try {
-    const response = await apiFetch(`${baseUrl}/follows/${userId}`);
+    const response = await apiFetch(`${baseUrl}/profile/follows/${userId}`);
     return { data: response.data || null, error: null };
   } catch (error) {
     console.error('Error fetching user follows:', error);
@@ -107,7 +117,7 @@ export async function searchUsers(
 ): Promise<{ data: any[] | null; error: any }> {
   try {
     const response = await apiFetch(
-      `${baseUrl}/search?q=${encodeURIComponent(query)}`
+      `${baseUrl}/profile/search?q=${encodeURIComponent(query)}`
     );
     return { data: response.data || null, error: null };
   } catch (error) {
@@ -122,7 +132,7 @@ export async function areUsersFriends(
   userId2: string
 ): Promise<{ data: boolean | null; error: any }> {
   try {
-    const response = await apiFetch(`${baseUrl}/friends/${userId1}/${userId2}`);
+    const response = await apiFetch(`${baseUrl}/profile/friends/${userId1}/${userId2}`);
     return { data: response.areFriends || null, error: null };
   } catch (error) {
     console.error('Error checking friendship:', error);
