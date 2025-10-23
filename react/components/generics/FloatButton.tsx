@@ -1,19 +1,28 @@
 import { Button, ButtonIcon } from '@/components/ui/button';
+import React from 'react';
 
 type Props = {
-  onPress: () => void;
+  onPress?: () => void;
   icon: React.ComponentType<any>;
+  className?: string;
+  [key: string]: any;
 };
 
-export default function FloatButton({ onPress, icon }: Props) {
+const FloatButton = React.forwardRef<any, Props>(function FloatButton(
+  { icon, className, ...rest },
+  ref
+) {
   return (
     <Button
-      onPress={onPress}
-      className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
+      {...rest}
+      ref={ref}
+      className={className ?? 'absolute bottom-4 right-4 rounded-full p-4 blurred-bg'}
       variant='solid'
       size='xl'
     >
       <ButtonIcon as={icon} size='xl' />
     </Button>
   );
-}
+});
+
+export default FloatButton;

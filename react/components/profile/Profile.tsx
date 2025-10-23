@@ -9,6 +9,8 @@ import ProfileActions from '@/components/profile/ProfileActions';
 import ProfileContent from '@/components/profile/ProfileContent';
 import { useProfileData } from '@/hooks/useProfileData';
 import { Spinner } from '../ui/spinner';
+import FloatButton from '../generics/FloatButton';
+import { Pencil, Heart, SettingsIcon, Close } from 'lucide-react-native';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
@@ -78,13 +80,6 @@ export default function Profile({
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >
-        <ProfileActions
-          profile={profile}
-          canEdit={permissions.canEdit}
-          editProfile={editProfile}
-          isFollowing={otherUserData?.is_following}
-          actions={actions}
-        />
 
         <ProfileContent
           profile={profile}
@@ -97,6 +92,12 @@ export default function Profile({
           actions={actions}
         />
       </ScrollView>
+      <ProfileActions
+        isOwner={isOwnProfile}
+        editProfile={editProfile}
+        isFollowing={otherUserData?.is_following || false}
+        actions={actions}
+      />
     </View>
   );
 }
