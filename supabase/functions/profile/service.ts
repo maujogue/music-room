@@ -8,7 +8,8 @@ import type {
   FollowerRow, 
   FollowRow, 
   FollowingRow,
-  ProfileSupabaseResponse
+  ProfileSupabaseResponse,
+  FollowingProfileRow
 } from '@profile';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -70,59 +71,40 @@ export async function getUserProfileWithFollows(
   targetUserId: string,
   currentUserId: string
 ): Promise<ProfileWithFollowInfo> {
-  try {
-    // Get the target user's profile
-    const profileRes = await getUserProfile(targetUserId);
-    if (profileRes.error) {
-      return profileRes;
-    }
-
-    // Get the target user's followers and following
-    const followsData = await getUserFollows(targetUserId, currentUserId);
-    if (followsData.error) {
-      console.error('Error fetching user follows:', followsData.error);
-      return {
-        data: {
-          profile: profileRes.data,
-          is_following: false,
-          is_follower: false,
-          is_friend: false,
-          followers: [],
-          following: [],
-        },
-        error: null,
-      };
-    }
-
-    // Extract relationship status from the follows data
-    const followers = followsData.data?.followers || [];
-    const following = followsData.data?.following || [];
-
-    // Find the current user in the followers/following lists to determine relationships
-    let isFollowing = false;
-    // is_following: true if current user is following the target user (i.e., target user's id is in current user's following list)
-    // is_follower: true if current user is followed by the target user (i.e., target user's id is in current user's followers list)
-    let is_following = followers.some((f) => f.id === currentUserId);
-    let is_follower = following.some((f) => f.id === currentUserId);
-
-    return {
-      data: {
-        profile: profileRes.data.profile,
-        is_following,
-        is_follower,
-        is_friend: is_following && is_follower,
-        followers,
-        following,
-      },
-      error: null,
-    };
-  } catch (error) {
-    console.error(
-      'Unexpected error fetching user profile with follows:',
-      error
-    );
-    return { data: null, error: { message: 'An unexpected error occurred' } };
+  const profileRes = await getUserProfile(targetUserId);
+  if (!profileRes) {
+    throw new HTTPException(404, { message: 'User profile not found' });
   }
+
+  const followsData = await getUserFollows(targetUserId, currentUserId);
+  if (!followsData) {
+    console.error('Error fetching follows data for userId:', targetUserId);
+    return {
+        ...profileRes,
+        is_following: false,
+        is_follower: false,
+        is_friend: false,
+        followers: [],
+        following: [],
+      };
+  }
+
+  console.log('Follows data fetched for userId:', followsData);
+  const followers = followsData.followers || [];
+  const following = followsData.following || [];
+
+  const is_following = followers.some((f) => f.id === currentUserId);
+  const is_follower = following.some((f) => f.id === currentUserId);
+
+  console.log(`User ${currentUserId} following status for ${targetUserId}: is_following=${is_following}, is_follower=${is_follower}`);
+  return {
+    ...profileRes,
+    is_following,
+    is_follower,
+    is_friend: is_following && is_follower,
+    followers,
+    following,
+  };
 }
 
 // Update user profile
@@ -258,15 +240,19 @@ async function getUserFollowers(userId: string): Promise<ProfileWithFollowInfo[]
   }
 
   const followers: ProfileWithFollowInfo[] =
-    data?.map((follow: FollowerRow) => ({
-      id: follow.follower[0].id,
-      username: follow.follower[0].username,
-      avatar_url: follow.follower[0].avatar_url,
-      created_at: follow.created_at,
-      is_follower: false,
-      is_following: false,
-      is_friend: false,
-    })) || [];
+    data
+      ?.map((follow: any) => {
+        return {
+          id: follow.follower.id,
+          username: follow.follower.username,
+          avatar_url: follow.follower.avatar,
+          created_at: follow.created_at,
+          is_follower: false,
+          is_following: false,
+          is_friend: false,
+        } as ProfileWithFollowInfo;
+      })
+      .filter(Boolean) as ProfileWithFollowInfo[] || [];
 
   return followers;
 }
@@ -294,15 +280,19 @@ async function getUserFollowing(userId: string): Promise<ProfileWithFollowInfo[]
   }
 
   const following: ProfileWithFollowInfo[] =
-    data?.map((follow: FollowingRow) => ({
-      id: follow.following[0].id,
-      username: follow.following[0].username,
-      avatar_url: follow.following[0].avatar_url,
-      created_at: follow.created_at,
-      is_follower: false,
-      is_following: false,
-      is_friend: false,
-    })) || [];
+    data
+      ?.map((follow: any) => {
+        return {
+          id: follow.following.id,
+          username: follow.following.username,
+          avatar_url: follow.following.avatar,
+          created_at: follow.created_at,
+          is_follower: false,
+          is_following: false,
+          is_friend: false,
+        } as ProfileWithFollowInfo;
+      })
+      .filter(Boolean) as ProfileWithFollowInfo[] || [];
 
   return following;
 }

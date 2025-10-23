@@ -3,8 +3,8 @@ import { apiFetch } from '@/utils/apiFetch';
 const baseUrl = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`;
 
 // Get another user's profile with follow relationships
-export async function getCurrentUserProfile(): Promise<UserProfile> {
-  const res = await apiFetch<UserProfile>(
+export async function getCurrentUserProfile(): Promise<UserProfileWithFollows> {
+  const res = await apiFetch<UserProfileWithFollows>(
     `${baseUrl}/me/profile`
   );
   if (!res.success) {
@@ -13,12 +13,13 @@ export async function getCurrentUserProfile(): Promise<UserProfile> {
   return res.data;
 }
 
-export async function getUserProfile(userId: string): Promise<UserProfile> {
-  const res = await apiFetch<UserProfile>(`${baseUrl}/profile/user/${userId}`);
+export async function getUserProfile(userId: string): Promise<UserProfileWithFollows> {
+  const res = await apiFetch<UserProfileWithFollows>(`${baseUrl}/profile/user/${userId}`);
   if (!res.success) {
     console.error('Error fetching user profile:', res.error);
     throw res.error;
   }
+  console.log('Fetched user profile:', res.data);
   return res.data;
 }
 

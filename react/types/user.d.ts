@@ -23,7 +23,10 @@ interface FollowInfo {
   following: any[];
 }
 
-interface UserProfile {
-  profile: UserInfo;
-  followInfo: FollowInfo;
+interface UserProfileWithFollows extends UserInfo {
+  is_following: boolean;
+  is_follower: boolean;
+  is_friend: boolean;
+  followers: any[];
+  following: any[];
 }

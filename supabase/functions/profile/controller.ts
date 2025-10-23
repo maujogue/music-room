@@ -9,20 +9,14 @@ import {
   unfollowUserById,
   searchUsersByQuery
 } from './service.ts';
-import type { ProfileResponse, ProfileWithFollowInfo } from '@profile';
+import type { ProfileWithFollowInfo } from '@profile';
 
 export async function fetchUserProfile(c: Context): Promise<Response> {
-  console.log('Fetching user profile...');
   const userId = c.req.param('userId');
   const currentUser = c.get('user');
 
-  let res: ProfileResponse | null;
-  // If userId is "me", use current user's ID
-  if (userId === 'me') {
-    res = await getUserProfile(currentUser.id);
-  } else {
-    res = await getUserProfileWithFollows(userId, currentUser.id);
-  }
+  const res: ProfileWithFollowInfo | null = await getUserProfileWithFollows(userId, currentUser.id);
+
   if (!res) {
     c.status(404);
     return c.json({ error: 'User profile not found' });
@@ -55,7 +49,7 @@ export async function fetchUserFollows(c: Context): Promise<Response> {
   }
 
   c.status(200);
-  return c.json(res.data);
+  return c.json(res);
 }
 
 export async function followUser(c: Context): Promise<Response> {

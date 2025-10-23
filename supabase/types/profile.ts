@@ -28,6 +28,15 @@ export interface ProfileSupabaseResponse {
     spotify_token_expires_at?: string | null;
 }
 
+export interface FollowingProfileRow {
+  created_at: string;
+  following: {
+    id: any;
+    username: any;
+    avatar?: any | null;
+  }
+}
+
 export interface ProfileRow {
   id: string;
   username: string;
