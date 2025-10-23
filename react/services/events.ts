@@ -1,6 +1,5 @@
 import { apiFetch } from '@/utils/apiFetch';
 
-
 export async function createEvent(payload: MusicEventPayload) {
   const form = createEventFormData(payload);
 

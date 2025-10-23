@@ -14,7 +14,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppToast } from '@/hooks/useAppToast';
 import EventGuest from '@/components/track/votes/EventGuest';
 
-
 interface Props {
   eventId: string;
   onRefresh: () => void;
@@ -31,10 +30,12 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     eventUserData,
     connectionAttempts,
     lastError,
-    reconnect
+    reconnect,
   } = useWebSocketClient(eventId);
   const toast = useAppToast();
-  const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(new Map());
+  const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
+    new Map()
+  );
 
   const {
     playlist,
@@ -62,7 +63,9 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     if (!connected && connectionAttempts > 0) {
       toast.error({
         title: 'Disconnected from server',
-        description: lastError ? lastError : 'Connection lost. Attempting to reconnect...',
+        description: lastError
+          ? lastError
+          : 'Connection lost. Attempting to reconnect...',
         duration: 3000,
       });
       reconnect();
@@ -87,7 +90,8 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
         voteMax: eventUserData.voteMax,
         voted_tracks: eventUserData.voted_tracks,
         voted_tracks_keys: Object.keys(eventUserData.voted_tracks || {}),
-        voted_tracks_length: Object.keys(eventUserData.voted_tracks || {}).length
+        voted_tracks_length: Object.keys(eventUserData.voted_tracks || {})
+          .length,
       });
     }
   }, [eventUserData]);
@@ -150,44 +154,60 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
       <VStack className='flex-1 w-full'>
         {eventUserData && (
           <>
-            <View className="bg-gray-100 p-3 rounded-lg mb-4">
-              <Text className="text-sm text-gray-600">
-                Votes left: <Text className="font-bold text-blue-600">{eventUserData.vote_remaining}</Text> / {eventUserData.voteMax}
+            <View className='bg-gray-100 p-3 rounded-lg mb-4'>
+              <Text className='text-sm text-gray-600'>
+                Votes left:{' '}
+                <Text className='font-bold text-blue-600'>
+                  {eventUserData.vote_remaining}
+                </Text>{' '}
+                / {eventUserData.voteMax}
               </Text>
-              <Text className="text-xs text-gray-500">
+              <Text className='text-xs text-gray-500'>
                 Total votes: {eventUserData.voteCount}
               </Text>
             </View>
-            {eventUserData.voted_tracks && Object.keys(eventUserData.voted_tracks).length > 0 && (
-                <Box className="mb-4">
-                  <Text className="font-bold text-gray-700 mb-2">
-                    Tracks you voted for: ({Object.keys(eventUserData.voted_tracks).length})
+            {eventUserData.voted_tracks &&
+              Object.keys(eventUserData.voted_tracks).length > 0 && (
+                <Box className='mb-4'>
+                  <Text className='font-bold text-gray-700 mb-2'>
+                    Tracks you voted for: (
+                    {Object.keys(eventUserData.voted_tracks).length})
                   </Text>
                   <GestureHandlerRootView>
-                    {Object.entries(eventUserData.voted_tracks).map(([trackId, voteCount]) => {
-                      const track = playlist?.tracks?.find((t: any) => t.spotify_id === trackId);
-                      return track ? (
-                        <VotedTrack
-                          key={trackId}
-                          track={track}
-                          voteCount={voteCount}
-                          onSwipeableOpen={(dir: 'left' | 'right') => {
-                            onTrackSwipe(dir, trackId);
-                            return Promise.resolve(true);
-                          }}
-                        />
-                      ) : (
-                        <Box key={trackId} className="p-2 bg-gray-100 rounded mb-1">
-                          <Text className="text-gray-500 text-xs">Track not found (ID: {trackId})</Text>
-                          <Text className="text-xs text-blue-600">
-                            Your votes: {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-                          </Text>
-                        </Box>
-                      );
-                    })}
+                    {Object.entries(eventUserData.voted_tracks).map(
+                      ([trackId, voteCount]) => {
+                        const track = playlist?.tracks?.find(
+                          (t: any) => t.spotify_id === trackId
+                        );
+                        return track ? (
+                          <VotedTrack
+                            key={trackId}
+                            track={track}
+                            voteCount={voteCount}
+                            onSwipeableOpen={(dir: 'left' | 'right') => {
+                              onTrackSwipe(dir, trackId);
+                              return Promise.resolve(true);
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            key={trackId}
+                            className='p-2 bg-gray-100 rounded mb-1'
+                          >
+                            <Text className='text-gray-500 text-xs'>
+                              Track not found (ID: {trackId})
+                            </Text>
+                            <Text className='text-xs text-blue-600'>
+                              Your votes: {voteCount}{' '}
+                              {voteCount === 1 ? 'vote' : 'votes'}
+                            </Text>
+                          </Box>
+                        );
+                      }
+                    )}
                   </GestureHandlerRootView>
                 </Box>
-            )}
+              )}
           </>
         )}
 

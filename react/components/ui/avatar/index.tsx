@@ -160,7 +160,11 @@ const AvatarImage = React.forwardRef<
       }
 
       // If source is an object with uri but uri is not a string, try to extract common fields
-      if (typeof normalizedSource === 'object' && normalizedSource.uri && typeof normalizedSource.uri !== 'string') {
+      if (
+        typeof normalizedSource === 'object' &&
+        normalizedSource.uri &&
+        typeof normalizedSource.uri !== 'string'
+      ) {
         const maybe = normalizedSource.uri;
         if (maybe && typeof maybe === 'object') {
           if (typeof maybe.url === 'string') {
@@ -178,7 +182,7 @@ const AvatarImage = React.forwardRef<
       }
     }
   } catch (e) {
-    // If anything unexpected happens, drop the source to avoid native crash
+    console.error(e);
     normalizedSource = undefined;
   }
 
@@ -191,7 +195,6 @@ const AvatarImage = React.forwardRef<
       className={avatarImageStyle({
         class: className,
       })}
-      // @ts-expect-error : This is a workaround to fix the issue with the image style on web.
       style={
         Platform.OS === 'web'
           ? { height: 'revert-layer', width: 'revert-layer' }

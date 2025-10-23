@@ -16,7 +16,9 @@ const FloatButton = React.forwardRef<any, Props>(function FloatButton(
     <Button
       {...rest}
       ref={ref}
-      className={className ?? 'absolute bottom-4 right-4 rounded-full p-4 blurred-bg'}
+      className={
+        className ?? 'absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
+      }
       variant='solid'
       size='xl'
     >

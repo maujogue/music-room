@@ -31,13 +31,20 @@ export interface WebSocketActions {
 }
 
 export default function useWebSocketClient(event_id: string): WebSocketActions {
-  const serverUrl = process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
+  const serverUrl =
+    process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
   const webSocketRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
-  const [trackVotes, setTrackVotes] = useState<Map<string, TrackVote>>(new Map());
-  const [voteCallbacks, setVoteCallbacks] = useState<Set<(vote: TrackVote) => void>>(new Set());
-  const [eventUserData, setEventUserData] = useState<eventUserData | null>(null);
+  const [trackVotes, setTrackVotes] = useState<Map<string, TrackVote>>(
+    new Map()
+  );
+  const [voteCallbacks, setVoteCallbacks] = useState<
+    Set<(vote: TrackVote) => void>
+  >(new Set());
+  const [eventUserData, setEventUserData] = useState<eventUserData | null>(
+    null
+  );
 
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
@@ -112,14 +119,19 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         }, pingInterval);
 
         sendRequestUserInfo(ws);
-        ws.send(JSON.stringify({
-          type: 'vote:get',
-          eventId: event_id
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'vote:get',
+            eventId: event_id,
+          })
+        );
       };
 
-      ws.onclose = (event) => {
-        console.log('ws: connection closed', { code: event.code, reason: event.reason });
+      ws.onclose = event => {
+        console.log('ws: connection closed', {
+          code: event.code,
+          reason: event.reason,
+        });
         setConnected(false);
 
         // Arrêter le ping
@@ -130,7 +142,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
         // Reconnexion automatique si ce n'est pas une fermeture intentionnelle
         if (event.code !== 1000 && connectionAttempts < maxReconnectAttempts) {
-          console.log(`🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttempts + 1}/${maxReconnectAttempts})`);
+          console.log(
+            `🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttempts + 1}/${maxReconnectAttempts})`
+          );
           reconnectTimeoutRef.current = window.setTimeout(() => {
             setConnectionAttempts(prev => prev + 1);
             initWebSocket();
@@ -143,7 +157,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         setConnected(false);
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
           console.log('ws: message received', data.type);
@@ -212,19 +226,26 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     };
   }, [initWebSocket]);
 
-  const sendRequestUserInfo = useCallback((ws?: WebSocket) => {
-    const socketToUse = ws || webSocketRef.current || webSocket;
+  const sendRequestUserInfo = useCallback(
+    (ws?: WebSocket) => {
+      const socketToUse = ws || webSocketRef.current || webSocket;
 
-    if (socketToUse && socketToUse.readyState === WebSocket.OPEN) {
-      socketToUse.send(JSON.stringify({
-        type: 'user:info',
-        eventId: event_id
-      }));
-    } else {
-      console.warn('ws: cannot send user info request - socket not available or not open');
-      console.warn('ws: socket readyState:', socketToUse?.readyState);
-    }
-  }, [event_id, webSocket]);
+      if (socketToUse && socketToUse.readyState === WebSocket.OPEN) {
+        socketToUse.send(
+          JSON.stringify({
+            type: 'user:info',
+            eventId: event_id,
+          })
+        );
+      } else {
+        console.warn(
+          'ws: cannot send user info request - socket not available or not open'
+        );
+        console.warn('ws: socket readyState:', socketToUse?.readyState);
+      }
+    },
+    [event_id, webSocket]
+  );
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
@@ -247,7 +268,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         type: 'vote',
         eventId,
         trackId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       webSocket.send(JSON.stringify(message));
@@ -270,7 +291,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         type: 'unvote',
         eventId,
         trackId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       webSocket.send(JSON.stringify(message));
@@ -282,32 +303,35 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     }
   };
 
-  const handleUserInfo = useCallback((data: {
-    userId: string;
-    vote_remaining: number;
-    voteCount: number;
-    voteMax: number;
-    voted_tracks: Record<string, number>;
-  }) => {
-    console.log('📊 Received user info:', data);
+  const handleUserInfo = useCallback(
+    (data: {
+      userId: string;
+      vote_remaining: number;
+      voteCount: number;
+      voteMax: number;
+      voted_tracks: Record<string, number>;
+    }) => {
+      console.log('📊 Received user info:', data);
 
-    const newUserData = {
-      userId: data.userId,
-      vote_remaining: data.vote_remaining,
-      voteCount: data.voteCount,
-      voteMax: data.voteMax,
-      voted_tracks: data.voted_tracks
-    };
+      const newUserData = {
+        userId: data.userId,
+        vote_remaining: data.vote_remaining,
+        voteCount: data.voteCount,
+        voteMax: data.voteMax,
+        voted_tracks: data.voted_tracks,
+      };
 
-    console.log('📊 Setting eventUserData to:', newUserData);
-    setEventUserData(newUserData);
-  }, []);
+      console.log('📊 Setting eventUserData to:', newUserData);
+      setEventUserData(newUserData);
+    },
+    []
+  );
 
   const handleVoteList = useCallback((votes: any[]) => {
     console.log('📋 Processing vote list with', votes.length, 'entries');
     const newMap = new Map<string, TrackVote>();
 
-    votes.forEach((vote) => {
+    votes.forEach(vote => {
       const trackId = vote.trackId || vote.track_id;
       const eventId = vote.eventId || vote.event_id;
       const voteCount = vote.voteCount || vote.vote_count;
@@ -320,7 +344,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
           eventId,
           voteCount,
           voters,
-          eventName
+          eventName,
         };
 
         newMap.set(trackId, normalizedVote);
@@ -332,47 +356,53 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     setTrackVotes(newMap);
   }, []);
 
-  const handleTrackVoteUpdate = useCallback((data: {
-    eventId: string;
-    eventName?: string;
-    trackId: string;
-    voteCount: number;
-    voters: string[];
-  }) => {
-    const trackVote: TrackVote = {
-      eventId: data.eventId,
-      eventName: data.eventName,
-      trackId: data.trackId,
-      voteCount: data.voteCount,
-      voters: data.voters || []
-    };
+  const handleTrackVoteUpdate = useCallback(
+    (data: {
+      eventId: string;
+      eventName?: string;
+      trackId: string;
+      voteCount: number;
+      voters: string[];
+    }) => {
+      const trackVote: TrackVote = {
+        eventId: data.eventId,
+        eventName: data.eventName,
+        trackId: data.trackId,
+        voteCount: data.voteCount,
+        voters: data.voters || [],
+      };
 
-    setTrackVotes(prev => {
-      const newMap = new Map(prev);
-      newMap.set(data.trackId, trackVote);
-      return newMap;
-    });
-
-    voteCallbacks.forEach(callback => {
-      try {
-        callback(trackVote);
-      } catch (error) {
-        console.error('Error in vote callback:', error);
-      }
-    });
-  }, [voteCallbacks]);
-
-  const subscribeToVotes = useCallback((callback: (vote: TrackVote) => void) => {
-    setVoteCallbacks(prev => new Set([...prev, callback]));
-
-    return () => {
-      setVoteCallbacks(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(callback);
-        return newSet;
+      setTrackVotes(prev => {
+        const newMap = new Map(prev);
+        newMap.set(data.trackId, trackVote);
+        return newMap;
       });
-    };
-  }, []);
+
+      voteCallbacks.forEach(callback => {
+        try {
+          callback(trackVote);
+        } catch (error) {
+          console.error('Error in vote callback:', error);
+        }
+      });
+    },
+    [voteCallbacks]
+  );
+
+  const subscribeToVotes = useCallback(
+    (callback: (vote: TrackVote) => void) => {
+      setVoteCallbacks(prev => new Set([...prev, callback]));
+
+      return () => {
+        setVoteCallbacks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(callback);
+          return newSet;
+        });
+      };
+    },
+    []
+  );
 
   const reconnect = useCallback(async () => {
     console.log('ws: manual reconnection requested');
@@ -401,10 +431,15 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       pingIntervalRef.current = null;
     }
 
-    setConnectionAttempts((prev) => prev + 1);
+    setConnectionAttempts(prev => prev + 1);
     setLastError(null);
     initWebSocket();
-  }, [initWebSocket, checkTokenValidity, connectionAttempts, maxReconnectAttempts]);
+  }, [
+    initWebSocket,
+    checkTokenValidity,
+    connectionAttempts,
+    maxReconnectAttempts,
+  ]);
 
   return {
     connected,
@@ -416,6 +451,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     eventUserData,
     connectionAttempts,
     lastError,
-    reconnect
-  }
+    reconnect,
+  };
 }

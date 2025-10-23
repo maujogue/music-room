@@ -112,8 +112,8 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
           <HStack className='justify-between items-center'>
             <Heading size='4xl'>{playlist.name}</Heading>
             <HStack className='gap-2'>
-              {playlist.is_collaborative && (<CollaborativeBadge />)}
-              {playlist.is_private ? (<PrivateBadge />) : null}
+              {playlist.is_collaborative && <CollaborativeBadge />}
+              {playlist.is_private ? <PrivateBadge /> : null}
             </HStack>
           </HStack>
           {playlist?.description ? (

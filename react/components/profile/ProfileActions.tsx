@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import { Pressable } from 'react-native';
 import FloatButton from '../generics/FloatButton';
-import { 
-  Pencil, 
-  Heart, 
-  Settings as SettingsIcon , 
-  LogOut, 
+import {
+  Pencil,
+  Settings as SettingsIcon,
+  LogOut,
   KeyRound,
   UserPlus,
-  UserMinus
+  UserMinus,
 } from 'lucide-react-native';
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerBackdrop, 
-  DrawerHeader, 
+import {
+  Drawer,
+  DrawerContent,
+  DrawerBackdrop,
+  DrawerHeader,
   DrawerBody,
-  DrawerCloseButton
+  DrawerCloseButton,
 } from '@/components/ui/drawer';
 import { Icon, CloseIcon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
@@ -38,7 +37,12 @@ interface ProfileActionsProps {
   };
 }
 
-export default function ProfileActions({ isOwner, editProfile, isFollowing, actions }: ProfileActionsProps) {
+export default function ProfileActions({
+  isOwner,
+  editProfile,
+  isFollowing,
+  actions,
+}: ProfileActionsProps) {
   const [showDrawer, setShowDrawer] = useState(false);
 
   return (
@@ -48,75 +52,75 @@ export default function ProfileActions({ isOwner, editProfile, isFollowing, acti
           <FloatButton
             icon={editProfile ? CloseIcon : Pencil}
             onPress={actions.handleEditToggle}
-            className="absolute bottom-20 right-4 rounded-full p-4 blurred-bg"
-          /> 
+            className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+          />
 
           <FloatButton
-          icon={SettingsIcon}
-          onPress={() => setShowDrawer(true)}
-          className="absolute bottom-4 right-4 rounded-full p-4 blurred-bg"
+            icon={SettingsIcon}
+            onPress={() => setShowDrawer(true)}
+            className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
           />
         </Box>
-      ): (
+      ) : (
         <FloatButton
           icon={isFollowing ? UserMinus : UserPlus}
           onPress={actions.handleFollowAction || (() => {})}
-          className="absolute bottom-4 right-4 rounded-full p-4 blurred-bg"
+          className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
         />
       )}
 
       {showDrawer && (
-      <>
-        <Pressable onPress={() => setShowDrawer(false)} />
-        <Drawer
-        isOpen={showDrawer}
-        size="sm"
-        anchor="bottom"
-        onClose={() => {
-          setShowDrawer(false);
-        }}
-        >
-        <DrawerBackdrop />
-        <DrawerContent>
-          <DrawerHeader>
-            <Heading size="lg">Settings</Heading>
-            <DrawerCloseButton>
-              <Icon as={CloseIcon} />
-            </DrawerCloseButton>
-          </DrawerHeader>
-          <Divider />
-          <DrawerBody className='gap-8'>
-          <VStack className='gap-2'>
-              {/* Delete Button */}
-              <Button
-                variant='link'
-                className='w-full justify-start'
-                onPress={actions.handleSpotifyConnect}
-              >
-                <HStack className='items-center gap-3'>
-                  <KeyRound />
-                  <ButtonText>Connect To Spotify</ButtonText>
-                </HStack>
-              </Button>
+        <>
+          <Pressable onPress={() => setShowDrawer(false)} />
+          <Drawer
+            isOpen={showDrawer}
+            size='sm'
+            anchor='bottom'
+            onClose={() => {
+              setShowDrawer(false);
+            }}
+          >
+            <DrawerBackdrop />
+            <DrawerContent>
+              <DrawerHeader>
+                <Heading size='lg'>Settings</Heading>
+                <DrawerCloseButton>
+                  <Icon as={CloseIcon} />
+                </DrawerCloseButton>
+              </DrawerHeader>
+              <Divider />
+              <DrawerBody className='gap-8'>
+                <VStack className='gap-2'>
+                  {/* Delete Button */}
+                  <Button
+                    variant='link'
+                    className='w-full justify-start'
+                    onPress={actions.handleSpotifyConnect}
+                  >
+                    <HStack className='items-center gap-3'>
+                      <KeyRound />
+                      <ButtonText>Connect To Spotify</ButtonText>
+                    </HStack>
+                  </Button>
 
-              {/* Edit Button */}
-              <Button
-                variant='link'
-                className='w-full justify-start'
-                onPress={actions.signOut}
-              >
-                <HStack className='items-center justify-between w-full'>
-                  <HStack className='items-center gap-3'>
-                    <LogOut />
-                    <ButtonText>Logout</ButtonText>
-                  </HStack>
-                </HStack>
-              </Button>
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-        </Drawer>
-      </>
+                  {/* Edit Button */}
+                  <Button
+                    variant='link'
+                    className='w-full justify-start'
+                    onPress={actions.signOut}
+                  >
+                    <HStack className='items-center justify-between w-full'>
+                      <HStack className='items-center gap-3'>
+                        <LogOut />
+                        <ButtonText>Logout</ButtonText>
+                      </HStack>
+                    </HStack>
+                  </Button>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
+        </>
       )}
     </>
   );

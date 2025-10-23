@@ -78,7 +78,7 @@ export default function EventDetail() {
 
         {/* Votes / Guests tabs */}
         <Center className='flex-1'>
-          <VotesRoom eventId={eventId} onRefresh={refetch}/>
+          <VotesRoom eventId={eventId} onRefresh={refetch} />
         </Center>
         {/* ------------------ */}
       </VStack>

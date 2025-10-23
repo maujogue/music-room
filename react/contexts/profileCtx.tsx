@@ -45,7 +45,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnectedToSpotify, setIsConnectedToSpotify] = useState<boolean>(false);
+  const [isConnectedToSpotify, setIsConnectedToSpotify] =
+    useState<boolean>(false);
 
   // Fetch profile and subscribe to realtime changes when user is authenticated
   useEffect(() => {
@@ -219,7 +220,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     refreshProfile,
     clearProfile,
     followUser: handleFollowUser,
-    unfollowUser: handleUnfollowUser
+    unfollowUser: handleUnfollowUser,
   };
 
   return (

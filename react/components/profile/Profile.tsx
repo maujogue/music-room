@@ -9,8 +9,6 @@ import ProfileActions from '@/components/profile/ProfileActions';
 import ProfileContent from '@/components/profile/ProfileContent';
 import { useProfileData } from '@/hooks/useProfileData';
 import { Spinner } from '../ui/spinner';
-import FloatButton from '../generics/FloatButton';
-import { Pencil, Heart, SettingsIcon, Close } from 'lucide-react-native';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
@@ -80,7 +78,6 @@ export default function Profile({
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >
-
         <ProfileContent
           profile={profile}
           userId={userId}

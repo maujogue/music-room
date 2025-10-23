@@ -37,9 +37,7 @@ export default function EditPlayListForm({
     initialValues?.is_collaborative ?? false
   );
 
-  const [imageUrl, setImageUrl] = useState(
-    initialValues?.cover_url ?? null
-  );
+  const [imageUrl, setImageUrl] = useState(initialValues?.cover_url ?? null);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,7 +101,10 @@ export default function EditPlayListForm({
       const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
       const path = `${Date.now()}.${fileExt}`;
       console.log('Uploading to path:', path);
-      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
+      toast.show({
+        title: 'uploaded playlist cover',
+        description: `Uploading to ${path}`,
+      });
     } catch (error) {
       toast.error({ title: 'uploading playlist cover image failed' });
     } finally {
@@ -139,7 +140,7 @@ export default function EditPlayListForm({
             disabled={uploading}
             className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-primary-500/70 w-12 h-12 p-1.5'
           >
-            <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
+            <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
           </Button>
 
           <Text>Name</Text>
@@ -222,6 +223,6 @@ export default function EditPlayListForm({
           <Icon as={CheckIcon} color='white' size='sm' />
         </Button>
       </VStack>
-    </FormControl >
+    </FormControl>
   );
 }

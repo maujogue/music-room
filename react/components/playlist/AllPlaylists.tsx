@@ -36,9 +36,9 @@ export default function AllPlaylists() {
     return (
       <EmptyState
         source={emptyPng}
-        title="No Playlists"
-        subtitle="A world without playlists… devilish, isn’t it ?"
-        text="Synchronize with your Spotify account, or even create your own playlist from scratch right now !"
+        title='No Playlists'
+        subtitle='A world without playlists… devilish, isn’t it ?'
+        text='Synchronize with your Spotify account, or even create your own playlist from scratch right now !'
         onPressCta={onPlaylistPress}
       />
     );

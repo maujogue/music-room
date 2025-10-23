@@ -18,7 +18,7 @@ export function usePlaylist(id: string | null) {
   const fetchPlaylist = useCallback(async () => {
     if (!id) {
       setLoading(false);
-      setError("no playlist found, no id given");
+      setError('no playlist found, no id given');
       return;
     }
     try {

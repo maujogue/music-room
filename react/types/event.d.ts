@@ -1,4 +1,3 @@
-
 // Note: naming 'Event' would conflict with built-in DOM Event
 type MusicEvent = {
   id: string;
@@ -29,7 +28,7 @@ type MusicEventFetchResult = {
 type EventUser = {
   // Info: UserInfo;
   role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
-  can_delete: boolean,
+  can_delete: boolean;
   can_edit: boolean;
   can_invite: boolean;
   can_vote: boolean;

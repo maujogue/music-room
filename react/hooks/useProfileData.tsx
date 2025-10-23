@@ -18,7 +18,8 @@ export function useProfileData(userId: string) {
   } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
-  const [otherUserData, setOtherUserData] = useState<UserProfileWithFollows | null>(null);
+  const [otherUserData, setOtherUserData] =
+    useState<UserProfileWithFollows | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,8 +31,7 @@ export function useProfileData(userId: string) {
       ? 'public'
       : otherUserData.privacy_setting === 'public'
         ? 'public'
-        : otherUserData.privacy_setting === 'friends' &&
-            otherUserData.is_friend
+        : otherUserData.privacy_setting === 'friends' && otherUserData.is_friend
           ? 'friends'
           : 'private';
 

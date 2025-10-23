@@ -5,10 +5,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from '@/components/ui/icon';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/ui/icon';
 import { Badge, BadgeIcon } from '@/components/ui/badge';
 import Animated, {
   Extrapolation,
@@ -116,7 +113,12 @@ export default function EventHeader({
             <HStack className='justify-between items-end mb-2'>
               <VStack className='w-full'>
                 <HStack className='rounded-xl px-2 gap-2 items-baseline bg-neutral-300/50 border border-neutral-300 overflow-hidden'>
-                  <Heading size='3xl' className='font-bold ' numberOfLines={1} ellipsizeMode="tail">
+                  <Heading
+                    size='3xl'
+                    className='font-bold '
+                    numberOfLines={1}
+                    ellipsizeMode='tail'
+                  >
                     {eventData.event.name}
                   </Heading>
                   {eventData.owner?.username && (
@@ -127,12 +129,15 @@ export default function EventHeader({
                 </HStack>
                 <HStack className='justify-between px-2 pt-2 items-bottom'>
                   {eventData.user?.role != 'owner' ? (
-                    <LikeButton isLiked={eventLiked} onPress={handleLikePress} />
-                  ) : <Box />}
+                    <LikeButton
+                      isLiked={eventLiked}
+                      onPress={handleLikePress}
+                    />
+                  ) : (
+                    <Box />
+                  )}
                   <HStack className='gap-1'>
-                    {!eventData.event.isPublic && (
-                      <PrivateBadge />
-                    )}
+                    {!eventData.event.isPublic && <PrivateBadge />}
                     {eventData.event.everyone_can_vote && (
                       <CollaborativeBadge />
                     )}
@@ -167,7 +172,10 @@ export default function EventHeader({
         <Animated.View style={extraStyle}>
           <HStack className='justify-between items-top pt-4 pb-2 px-2'>
             <EventLocationInfo location={eventData.location} />
-            <EventDatesInfos event={eventData.event} coordinates={eventData.location.coordinates} />
+            <EventDatesInfos
+              event={eventData.event}
+              coordinates={eventData.location.coordinates}
+            />
           </HStack>
         </Animated.View>
       </Card>

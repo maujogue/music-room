@@ -7,5 +7,4 @@ export default function PrivateBadge() {
       <BadgeIcon as={Lock} className='h-6 w-6' />
     </Badge>
   );
-
 }

@@ -6,9 +6,6 @@ import { RefreshCw } from 'lucide-react-native';
 import { useAppToast } from '@/hooks/useAppToast';
 import { useRouter } from 'expo-router';
 
-
-
-
 export default function PlaylistMenu() {
   const toast = useAppToast();
   const router = useRouter();
@@ -38,10 +35,7 @@ export default function PlaylistMenu() {
         textValue='spotify-sync'
         onPress={handleSyncSpotifyPress}
       >
-        <Icon as={RefreshCw}
-          size='lg'
-          className='text-typography-600 mr-2'
-        />
+        <Icon as={RefreshCw} size='lg' className='text-typography-600 mr-2' />
         <MenuItemLabel size='md'>Synchronize with Spotify</MenuItemLabel>
       </MenuItem>
     </Menu>

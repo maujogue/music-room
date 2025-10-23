@@ -7,5 +7,4 @@ export default function CollaborativeBadge() {
       <BadgeIcon as={Aperture} className='h-6 w-6' />
     </Badge>
   );
-
 }

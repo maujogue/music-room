@@ -15,7 +15,7 @@ export async function getCurrentUserPlaylists() {
 
 export async function getPlaylistById(id: string) {
   if (!id) {
-    throw new Error("no playlist found, no id given");
+    throw new Error('no playlist found, no id given');
   }
   const res = await apiFetch<Playlist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
