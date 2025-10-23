@@ -1,3 +1,12 @@
+export interface ProfilePayload {
+    username?: string;
+    avatar_url?: string;
+    bio?: string;
+    music_genre?: string;
+    privacy_setting?: 'public' | 'friends' | 'private';
+    email?: string;
+}
+
 export interface ProfileResponse {
     id: string;
     email?: string;

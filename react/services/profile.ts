@@ -26,18 +26,17 @@ export async function getUserProfile(userId: string): Promise<UserProfileWithFol
 // Update current user's profile
 export async function updateProfile(
   updates: Partial<UserInfo>
-): Promise<{ data: any; error: any }> {
-  try {
-    const response = await apiFetch(`${baseUrl}/profile/update`, {
-      method: 'PUT',
-      body: updates,
-    });
-
-    return { data: response.data, error: null };
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    return { data: null, error };
+): Promise<UserInfo> {
+  const res = await apiFetch<UserInfo>(`${baseUrl}/profile/update`, {
+    method: 'PUT',
+    body: updates,
+  });
+  if (!res.success) {
+    console.error('Error updating profile:', res.error);
+    throw res.error;
   }
+  console.log('Profile updated successfully:', res.data);
+  return res.data;
 }
 
 // Follow a user

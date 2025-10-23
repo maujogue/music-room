@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
 import UserList from '@/components/profile/UserList';
-import { getUserFollowers, getUserFollowing } from '@/services/profile';
 
 type ProfileUserListType = 'followers' | 'following';
 
