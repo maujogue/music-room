@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { CreatePlaylistPayload, PlaylistResponse } from '../../../types/playlist.d.ts'
+import { CreatePlaylistPayload, PlaylistResponse } from '../../../types/playlist.ts'
 
 import 'jsr:@std/dotenv/load'
 
@@ -35,7 +35,7 @@ export async function createPlaylistInSupabase(
   const { data, error } = await supabase.from('playlists')
     .insert([{
       owner_id,
-      name: payload.title,
+      name: payload.name,
       description: payload.description,
       cover_url: payload.cover_url,
       is_private: payload.is_private,
@@ -137,7 +137,7 @@ export async function editPlaylistSupabaseById(
 ): Promise<any> {
   const { error } = await supabase.from('playlists')
     .update({
-      name: payload.title,
+      name: payload.name,
       description: payload.description,
       is_private: payload.is_private,
       is_collaborative: payload.is_collaborative,

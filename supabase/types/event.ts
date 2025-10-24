@@ -1,4 +1,6 @@
-type Event = {
+import { SpotifyOwner } from '../../react/types/spotify.d.ts'
+
+export interface EventResponse {
   id: string;
   name: string;
   image_url?: string;
@@ -8,18 +10,17 @@ type Event = {
   description?: string;
   playlist_id?: string;
   location: MusicEventLocation;
-  playlistId: string;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
 };
 
-type Coordinates = {
+interface Coordinates {
   lat: number;
   long: number;
 }
 
-type MusicEventLocation = {
+interface MusicEventLocation {
   coordinates?: Coordinates;
   venueName?: string;
   address?: string;
@@ -27,7 +28,7 @@ type MusicEventLocation = {
   country?: string;
 }
 
-type EventPayload = {
+export interface EventPayload {
 	event?: Event;
 	location?: MusicEventLocation;
 }

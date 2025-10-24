@@ -1,6 +1,6 @@
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getSupabasePlaylistById } from './services/supabase.ts'
-import { PlaylistResponse } from '../../types/playlist.d.ts'
+import { PlaylistResponse } from '../../types/playlist.ts'
 
 
 export const ROLES = {

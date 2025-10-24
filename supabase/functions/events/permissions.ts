@@ -1,5 +1,6 @@
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getSupabaseEventById } from './service.ts'
+import { EventResponse } from '../../types/event.ts'
 
 export const ROLES = {
   MEMBER: "member",

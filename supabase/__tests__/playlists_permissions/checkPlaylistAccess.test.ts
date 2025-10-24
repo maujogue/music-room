@@ -8,13 +8,13 @@ const valid_playlist = {
   description: "Jazz music",
   cover_url: "",
   owner_id: "ownerId",
-  is_private: "true",
-  is_collaborative: "false",
+  is_private: true,
+  is_collaborative: false,
   created_at: "01-01-2025",
   updated_at: "01-10-2025",
-  is_spotify_sync: "false",
+  is_spotify_sync: false,
   spotify_id: "spt258",
-  can_edit: "false",
+  can_edit: false,
   owner: { id: "ownerId" },
   collaborators: [{id: "collab"}],
   members: [{id: "member"}]
@@ -35,8 +35,6 @@ Deno.test("returns playlist if it is public", async () => {
 });
 
 Deno.test("throws 403 if access is denied", async () => {
-
-
   await assertRejects(
     () => checkPlaylistAccess(valid_playlist as any, "user123"),
     HTTPException,
