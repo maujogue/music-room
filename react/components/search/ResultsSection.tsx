@@ -19,7 +19,6 @@ export default function ResultsSection<T>({
 }: Props<T>) {
   if (!items || items.length === 0) return null;
 
-  // Filter out null/undefined items
   const validItems = items.filter(item => item != null);
   if (validItems.length === 0) return null;
 

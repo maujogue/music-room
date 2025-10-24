@@ -1,6 +1,13 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { formatDbError } from '../../../utils/postgres_errors_map.ts';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { createClient } from '@supabase/supabase-js';
+import { formatDbError } from '@postgres/postgres_errors_map';
+import { HTTPException } from '@hono/http-exception'
+import type { 
+  CreatePlaylistPayload, 
+  PlaylistResponse,
+  PlaylistTrack,
+  PlaylistCollaborator,
+  PlaylistMember
+ } from '@playlist';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -25,7 +32,6 @@ export async function createPlaylistInSupabase(
   owner_id: string,
   payload: CreatePlaylistPayload
 ): Promise<PlaylistResponse> {
-  console.log('Creating playlist in Supabase for owner:', owner_id, 'with payload:', payload);
   const { data, error } = await supabase.from('playlists')
     .insert([{
       owner_id,
@@ -47,7 +53,7 @@ export async function createPlaylistInSupabase(
   return data;
 }
 
-export async function getSupabasePlaylistById(id: string): Promise<any> {
+export async function getSupabasePlaylistById(id: string): Promise<PlaylistResponse> {
   const { data, error } = await supabase.rpc('get_playlist_complete', {
     p_playlist_id: id
   });
@@ -57,10 +63,11 @@ export async function getSupabasePlaylistById(id: string): Promise<any> {
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-  return data;
+
+  return data as PlaylistResponse;
 }
 
-export async function deletePlaylistInSupabase(id: string, user_id: string): Promise<any> {
+export async function deletePlaylistInSupabase(id: string, user_id: string): Promise<void> {
   const { error } = await supabase.from('playlists')
     .delete()
     .eq('id', id)
@@ -90,7 +97,7 @@ export async function isPlaylistCollaborator(playlist_id: string, user_id: strin
   return !!data;
 }
 
-export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks: string[], added_by: string): Promise<any> {
+export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks: string[], added_by: string): Promise<PlaylistTrack[]> {
   const payload = tracks.map(track_id => ({
     playlist_id,
     track_id,
@@ -107,16 +114,16 @@ export async function addTracksToPlaylistInSupabase(playlist_id: string, tracks:
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  return data;
+  return data as PlaylistTrack[];
 }
 
-export async function deleteTracksFromPlaylistInSupabase(playlist_id: string, track_ids: string[]): Promise<any> {
+export async function deleteTracksFromPlaylistInSupabase(playlist_id: string, track_ids: string[]): Promise<void> {
   const response = await supabase.from('playlist_tracks')
     .delete()
     .eq('playlist_id', playlist_id)
     .in('track_id', track_ids);
 
-  const { data, error } = response;
+  const { error } = response;
 
   if (error) {
     console.error('Supabase error:', error);
@@ -128,7 +135,7 @@ export async function deleteTracksFromPlaylistInSupabase(playlist_id: string, tr
 export async function editPlaylistSupabaseById(
   id: string,
   payload: Partial<CreatePlaylistPayload>
-): Promise<any> {
+): Promise<void> {
   const { error } = await supabase.from('playlists')
     .update({
       name: payload.name,
@@ -150,7 +157,7 @@ export async function addUserToPlaylistInSupabase(
   playlist_id: string,
   user_id: string,
   role: string
-): Promise<any> {
+): Promise<PlaylistCollaborator[] | PlaylistMember[]> {
   console.log('Adding user to playlist in Supabase:', playlist_id, user_id, role);
 
   let result;
@@ -182,7 +189,7 @@ export async function removeUserFromPlaylistInSupabase(
   playlist_id: string,
   user_id: string,
   role: string | undefined
-): Promise<any> {
+): Promise<void> {
 
   if (role === 'member' || !role) {
     const { error: memberError } = await supabase.from('playlist_members')
@@ -197,7 +204,6 @@ export async function removeUserFromPlaylistInSupabase(
     }
   }
 
-  // Remove from playlist_collaborators
   const { error: collaboratorError } = await supabase.from('playlist_collaborators')
     .delete()
     .eq('playlist_id', playlist_id)

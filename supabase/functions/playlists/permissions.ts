@@ -1,10 +1,12 @@
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getSupabasePlaylistById } from './services/supabase.ts'
+import { PlaylistResponse } from "@playlist";
 
 export const ROLES = {
   MEMBER: "member",
   COLLABORATOR: "collaborator",
   OWNER: "owner",
+  NONE: "none",
 } as const;
 
 export const PERMISSIONS = {
@@ -18,7 +20,9 @@ export const PERMISSIONS = {
   DELETE_SONG: "delete_song",
 } as const;
 
-export function getUserRoleInPlaylist(playlist: any, userId: string): string | null {
+export function getUserRoleInPlaylist(
+  playlist: PlaylistResponse, userId: string): 
+  'owner' | 'collaborator' | 'member' | 'none' {
   if (playlist.owner.id === userId) {
     return ROLES.OWNER;
   }
@@ -33,7 +37,7 @@ export function getUserRoleInPlaylist(playlist: any, userId: string): string | n
     return ROLES.MEMBER;
   }
 
-  return null;
+  return ROLES.NONE;
 }
 
 export function canUserPerformAction(role: string | null, permission: string, playlist: any): boolean {
@@ -100,7 +104,7 @@ export async function checkPermission(playlistId: string, userId: string, permis
   return playlist;
 }
 
-export async function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) {
+export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) {
   if (!playlist) {
     throw new HTTPException(404, { message: 'Playlist not found' });
   }

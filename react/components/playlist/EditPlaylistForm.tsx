@@ -14,6 +14,7 @@ import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
+import FloatButton from '@/components/generics/FloatButton';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -213,15 +214,10 @@ export default function EditPlayListForm({
         )}
 
         {/* Submit */}
-        <Button
-          size='md'
-          variant='solid'
-          disabled={loading}
+        <FloatButton
           onPress={handlePressValid}
-          action='positive'
-        >
-          <Icon as={CheckIcon} color='white' size='sm' />
-        </Button>
+          icon={CheckIcon}
+        />
       </VStack>
     </FormControl>
   );

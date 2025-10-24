@@ -1,5 +1,12 @@
-import { Hono } from 'jsr:@hono/hono'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { HTTPException } from '@hono/http-exception'
+import { 
+  PlaylistResponse, 
+  SpotifyTrackDetails,
+  PlaylistTrack,
+  SpotifyPlaylistItemsResponse,
+  SpotifyPlaylistItem,
+  SpotifyPlaylistResponse
+ } from "@playlist";
 
 
 export async function fetchSpotifyUserProfile(spotify_token: string): Promise<any> {
@@ -11,84 +18,64 @@ export async function fetchSpotifyUserProfile(spotify_token: string): Promise<an
 	return response.json();
 }
 
-export async function fetchSpotifyTracks(spotify_token: string, track_ids: string[]): Promise<any> {
+export async function fetchSpotifyTracks(
+  spotify_token: string, track_ids: string[]
+): Promise<{
+  data: SpotifyTrackDetails[];
+  error?: { status: number; message: string };
+}> 
+{
   const idsParam = track_ids
     .map(id => id.trim().replace(/^spotify:track:/i, ''))
     .join(',');
   const url = `https://api.spotify.com/v1/tracks?ids=${idsParam}`;
-  console.log('Fetching tracks from URL:', url);
-  const response = await fetch(`https://api.spotify.com/v1/tracks?ids=${idsParam}`, {
+  const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${spotify_token}`,
     },
   });
-  return await response.json();
-}
 
-export async function createSpotifyPlaylist(
-	spotify_token: string,
-	user_id: string,
-	body: {name: string, description: string, public: boolean, collaborative: boolean}): Promise<any> {
-	  const response = await fetch(`https://api.spotify.com/v1/users/${user_id}/playlists`, {
-		method: 'POST',
-		headers: {
-		  Authorization: `Bearer ${spotify_token}`,
-		  'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(body),
-	  });
-	  return response.json();
-}
-
-export async function postItemsToSpotifyPlaylist(
-  spotify_token: string,
-  id: string,
-  body: { uris: string[], position?: number }): Promise<any> {
-
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${spotify_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    return response.json();
+  if (!response.ok) {
+    return {
+      data: [],
+      error: { status: response.status, message: 'Failed to fetch Spotify tracks' }
+    };
   }
 
-  export async function deleteItemsFromSpotifyPlaylist(spotify_token: string, id: string, body: { uris: string[] }): Promise<any> {
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${id}/tracks`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${spotify_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    return response.json();
-  }
+  const result = await response.json();
+  return {
+    data: result.tracks as SpotifyTrackDetails[],
+    error: result.error ? { status: result.error.status, message: result.error.message } : undefined
+  };
+}
 
-export async function fetchSpotifyPlaylist(spotify_token: string, id: string): Promise<any> {
+export async function fetchSpotifyPlaylist(
+  spotify_token: string, id: string): Promise<SpotifyPlaylistResponse> 
+{
     const response = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
       headers: {
         Authorization: `Bearer ${spotify_token}`,
       },
     });
+    if (!response.ok) {
+      throw new HTTPException(response.status, { message: 'Failed to fetch Spotify playlist' });
+    }
     return response.json();
 }
 
-export async function fetchSpotifyPlaylistTracksIds(playlist: any, spotify_token: string): Promise<void> {
+export async function fetchSpotifyPlaylistTracksIds(
+  playlist: PlaylistResponse, spotify_token: string): Promise<string[]> 
+{
   const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.spotify_id}/tracks`, {
     headers: {
       Authorization: `Bearer ${spotify_token}`,
     },
   });
   if (!response.ok) {
-    console.error('Error fetching Spotify playlist tracks:', await response.text());
-    return;
+    throw new HTTPException(response.status, { message: 'Failed to fetch Spotify playlist tracks' });
   }
   const data = await response.json();
-  const spotifyTrackIds = data.items.map((item: any) => item.track.id);
+  const spotifyTrackIds = data.items.map((item: SpotifyPlaylistItem) => item.track.id);
 
   return spotifyTrackIds;
 }

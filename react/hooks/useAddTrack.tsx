@@ -3,14 +3,24 @@ import { addItemToPlaylist } from '@/services/playlist';
 import { Icon, AddIcon } from '@/components/ui/icon';
 import { Box } from '@/components/ui/box';
 import Reanimated from 'react-native-reanimated';
+import { useAppToast } from '@/hooks/useAppToast';
 
 export default function useAddTrack(playlistId: string) {
+  const toast = useAppToast();
+
   const onSwipeableOpen = async (trackId: string) => {
     try {
-      console.log('Adding track to playlist:', trackId);
       await addItemToPlaylist(playlistId, [`spotify:track:${trackId}`]);
+      toast.show({
+        title: 'Track added to playlist',
+        duration: 1500,
+        placement: 'top',
+      });
     } catch (error) {
-      console.error('Error adding track to playlist:', error);
+      toast.error({ 
+        title: 'Failed to add track to playlist', 
+        description: 'Please try again later.'
+      });
     }
   };
 
@@ -32,15 +42,9 @@ export default function useAddTrack(playlistId: string) {
     );
   };
 
-  const renderRightAction = () => {
-    // Placeholder pour future fonctionnalité
-    return null;
-  };
-
   return {
     onSwipeableOpen,
     renderLeftAction,
-    renderRightAction,
   };
 }
 

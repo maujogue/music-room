@@ -2,13 +2,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { formatDbError } from '../utils/postgres_errors_map.ts';
 import type { HonoRequest } from 'jsr:@hono/hono';
+import type { User } from '../types/user.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-export async function getCurrentUser(req: HonoRequest): Promise<any> {
+export async function getCurrentUser(req: HonoRequest): Promise<User> {
   const authHeader = req.header('Authorization') || req.header('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     console.log('No Authorization header or invalid format');

@@ -101,7 +101,7 @@ export default function TrackList({
 
         {tracks.map((item, index) => (
           <TrackListItem
-            key={item.spotify_id || `track-${index}`}
+            key={item.track_id || `track-${index}`}
             track={item.details}
             renderRightAction={
               isSpotifySync
@@ -117,7 +117,7 @@ export default function TrackList({
             onSwipeableOpen={
               isSpotifySync
                 ? undefined
-                : () => handleSwipeableOpen(item.spotify_id)
+                : () => handleSwipeableOpen(item.track_id)
             }
           />
         ))}

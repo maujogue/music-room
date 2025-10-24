@@ -51,7 +51,6 @@ export async function deleteItemFromPlaylist(
   playlistId: string,
   uris: string[]
 ) {
-  console.log(`Deleting items from playlist ${playlistId}:`, uris);
   const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/tracks`,
     {

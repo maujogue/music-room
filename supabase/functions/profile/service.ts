@@ -4,12 +4,7 @@ import { formatDbError } from '@postgres/postgres_errors_map';
 import type { 
   ProfileResponse, 
   ProfileWithFollowInfo, 
-  ProfileRow, 
-  FollowerRow, 
-  FollowRow, 
-  FollowingRow,
   ProfileSupabaseResponse,
-  FollowingProfileRow
 } from '@profile';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

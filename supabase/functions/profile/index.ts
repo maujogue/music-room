@@ -5,6 +5,13 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { Context, Hono } from '@hono/hono';
+
+declare module '@hono/hono' {
+  interface ContextVariableMap {
+    user: Awaited<ReturnType<typeof getCurrentUser>>;
+    spotify_token: Awaited<ReturnType<typeof getUserSpotifyToken>>;
+  }
+}
 import { serve } from '@deno/server';
 import { HTTPException } from '@hono/http-exception';
 import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
