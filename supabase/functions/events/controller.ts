@@ -1,11 +1,9 @@
-import { Hono } from 'jsr:@hono/hono'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
+import { Context } from '@hono/hono';
+import { HTTPException } from '@hono/http-exception';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import {
   createSupabaseEvent,
   getSupabaseEventById,
-  getSupabaseEventByOwner,
   deleteSupabaseEventById,
   updateSupabaseEventById,
   uploadEventImage,
@@ -24,64 +22,38 @@ import {
   checkPermission,
   PERMISSIONS,
 } from './permissions.ts'
+import type { EventPayload } from '@event';
 
-export async function createEvent(c: Context): Promise<any> {
+export async function createEvent(c: Context): Promise<Response> {
   const contentTypeHeader = c.req.header('content-type') || ''
-  let body: any = {}
-  let uploadedFile: File | null = null
+  let payload: EventPayload;
+  let uploadedFile: File | null = null;
 
   if (contentTypeHeader.includes('multipart/form-data')) {
     const form = await c.req.raw.formData()
-    for (const [key, value] of form.entries()) {
-      if (key === 'image') {
-        uploadedFile = value as File
-      } else if (key === 'location') {
-        try {
-          body.location = JSON.parse(value as string)
-        } catch (e) {
-          body.location = value === '' ? null : value
-        }
-      } else if (key === 'is_private' || key === 'everyone_can_vote') {
-        const s = String(value);
-        if (s === '') {
-          body[key] = null;
-        } else if (s === 'true' || s === '1') {
-          body[key] = true;
-        } else if (s === 'false' || s === '0') {
-          body[key] = false;
-        } else {
-          try {
-            body[key] = JSON.parse(s);
-          } catch (e) {
-            body[key] = s;
-          }
-        }
-      } else {
-        body[key] = value === '' ? null : value
-      }
-    }
+    const result = createPayloadFromFormData(form)
+    payload = result.payload
+    uploadedFile = result.uploadedFile
   } else {
-    body = await c.req.json()
+    payload = await c.req.json()
   }
 
-  body.owner_id = c.get('user').id
-
-  const validation = validateEventPayload(body, { requireName: true })
+  const validation = validateEventPayload(payload, { requireName: true })
   if (!validation.valid) {
-    throw new HTTPException(400, { message: validation.message })
+    return c.json({ error: validation.message }, 400)
   }
 
   if (uploadedFile) {
     try {
       const publicUrl = await uploadEventImage(uploadedFile as File)
-      body.image_url = publicUrl
+      payload.image_url = publicUrl
     } catch (err) {
       console.error('Error uploading file in createEvent:', err)
       throw new HTTPException(500, { message: 'Failed to upload image' })
     }
   }
 
-  const event = await createSupabaseEvent(body)
+  const event = await createSupabaseEvent(payload, c.get('user').id)
   if (!event) {
     throw new HTTPException(500, { message: 'Failed to create event' })
   }
@@ -90,20 +62,65 @@ export async function createEvent(c: Context): Promise<any> {
   return c.json(event)
 }
 
-export async function fetchEvent(c: Context): Promise<any> {
+function createPayloadFromFormData(
+  form: FormData
+): { payload: EventPayload, uploadedFile: File | null } {
+  const payload: EventPayload = {} as EventPayload;
+  let uploadedFile: File | null = null;
+
+  for (const [key, value] of form.entries()) {
+    switch (key) {
+      case 'image':
+        uploadedFile = value as File;
+        break;
+      case 'location':
+        try {
+          payload.location = JSON.parse(value as string);
+        } catch (_e) {
+          payload.location = value === '' ? undefined : value as any;
+        }
+        break;
+      case 'is_private':
+        payload.is_private = (value === 'true' || value === '1');
+        break;
+      case 'everyone_can_vote':
+        payload.everyone_can_vote = (value === 'true' || value === '1');
+        break;
+      case 'name':
+        payload.name = value as string;
+        break;
+      case 'description':
+        payload.description = value as string;
+        break;
+      case 'playlist_id':
+        payload.playlist_id = value as string;
+        break;
+      case 'beginning_at':
+        payload.beginning_at = value as string;
+        break;
+      default:
+        break;
+    }
+
+  }
+
+  return { payload, uploadedFile };
+}
+
+export async function fetchEvent(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
-  let data = await getSupabaseEventById(id)
-  if (!data) {
+  let event = await getSupabaseEventById(id)
+  if (!event) {
     throw new HTTPException(404, { message: 'Event not found' })
   }
-  await checkEventAccess(data, user.id)
+  await checkEventAccess(event, user.id)
 
   try {
-    const imagePath = data.event?.image_url;
+    const imagePath = event?.image_url;
     if (imagePath) {
       const publicUrl = await getPublicUrlForPath(imagePath);
-      data.event.image_url = publicUrl;
+      event.image_url = publicUrl;
     }
   } catch (err) {
     console.error('Error resolving public url for image:', err);
@@ -161,7 +178,7 @@ function setUserPermissions(data: any, user: any) {
   return data
 }
 
-export async function deleteEventById(c: Context): Promise<any> {
+export async function deleteEventById(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
 
@@ -176,7 +193,7 @@ export async function deleteEventById(c: Context): Promise<any> {
   return c.json({ message: 'Event deleted successfully' })
 }
 
-export async function updateEventById(c: Context): Promise<any> {
+export async function updateEventById(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
 
@@ -188,34 +205,9 @@ export async function updateEventById(c: Context): Promise<any> {
 
   if (contentTypeHeader.includes('multipart/form-data')) {
     const form = await c.req.raw.formData()
-    for (const [key, value] of form.entries()) {
-      if (key === 'image') {
-        uploadedFile = value as File
-      } else if (key === 'location') {
-        try {
-          body.location = JSON.parse(value as string)
-        } catch (e) {
-          body.location = value === '' ? null : value
-        }
-      } else if (key === 'is_private' || key === 'everyone_can_vote') {
-        const s = String(value);
-        if (s === '') {
-          body[key] = null;
-        } else if (s === 'true' || s === '1') {
-          body[key] = true;
-        } else if (s === 'false' || s === '0') {
-          body[key] = false;
-        } else {
-          try {
-            body[key] = JSON.parse(s);
-          } catch (e) {
-            body[key] = s;
-          }
-        }
-      } else {
-        body[key] = value === '' ? null : value
-      }
-    }
+    const result = createPayloadFromFormData(form)
+    body = result.payload
+    uploadedFile = result.uploadedFile
   } else {
     body = await c.req.json()
   }
@@ -234,7 +226,7 @@ export async function updateEventById(c: Context): Promise<any> {
     return c.json({ error: 'Event not found' })
   }
 
-  if (data.event.owner_id !== user.id) {
+  if (data.owner.id !== user.id) {
     c.status(403)
     return c.json({ error: 'You do not have permission to update this event' })
   }
@@ -250,16 +242,12 @@ export async function updateEventById(c: Context): Promise<any> {
     }
   }
 
-  const updated = await updateSupabaseEventById(id, eventData, location)
-  if (!updated) {
-    c.status(500)
-    return c.json({ error: 'Failed to update event' })
-  }
+  await updateSupabaseEventById(id, eventData as EventPayload, location)
 
-  return c.json(updated)
+  return c.json({ message: 'Event updated successfully' })
 }
 
-export async function addUserToEvent(c: Context): Promise<any> {
+export async function addUserToEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
   const body = await c.req.json()
   const user = c.get('user')
@@ -275,14 +263,11 @@ export async function addUserToEvent(c: Context): Promise<any> {
   }
 
   const { user_id, role } = body
-  const result = await addUserToEventSupabase(eventId, user_id, role)
-  if (!result) {
-    throw new HTTPException(500, { message: 'Failed to add user to event' })
-  }
+  await addUserToEventSupabase(eventId, user_id, role)
   return c.json({ message: 'User added to event successfully', data: result })
 }
 
-export async function removeUserFromEvent(c: Context): Promise<any> {
+export async function removeUserFromEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
   const body = await c.req.json()
   const user = c.get('user')
@@ -300,14 +285,11 @@ export async function removeUserFromEvent(c: Context): Promise<any> {
   }
 
   const { user_id } = body
-  const result = await removeUserFromEventSupabase(eventId, user_id)
-  if (!result) {
-    throw new HTTPException(500, { message: 'Failed to remove user from event' })
-  }
-  return c.json({ message: 'User removed from event successfully', data: result })
+  await removeUserFromEventSupabase(eventId, user_id)
+  return c.json({ message: 'User removed from event successfully'})
 }
 
-export async function editUserInEvent(c: Context): Promise<any> {
+export async function editUserInEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
   const body = await c.req.json()
   const user = c.get('user')
@@ -319,12 +301,8 @@ export async function editUserInEvent(c: Context): Promise<any> {
   await checkPermission(eventId, user.id, PERMISSIONS.UPDATE_USER_ROLE)
 
   const { user_id, role } = body
-  const result = await editUserInEventSupabase(eventId, user_id, role)
-
-  if (!result) {
-    throw new HTTPException(500, { message: 'Failed to edit user in event' })
-  }
-  return c.json({ message: 'User edited in event successfully', data: result })
+  await editUserInEventSupabase(eventId, user_id, role)  
+  return c.json({ message: 'User edited in event successfully' })
 }
 
 

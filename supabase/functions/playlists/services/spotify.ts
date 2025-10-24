@@ -2,8 +2,6 @@ import { HTTPException } from '@hono/http-exception'
 import { 
   PlaylistResponse, 
   SpotifyTrackDetails,
-  PlaylistTrack,
-  SpotifyPlaylistItemsResponse,
   SpotifyPlaylistItem,
   SpotifyPlaylistResponse
  } from "@playlist";

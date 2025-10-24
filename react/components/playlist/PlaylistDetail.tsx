@@ -30,6 +30,8 @@ export default function PlaylistDetail() {
   } = usePlaylist(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
+  const [displayInviteButton, setDisplayInviteButton] = useState(false);
+  const [displayAddTrackButton, setDisplayAddTrackButton] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -38,6 +40,11 @@ export default function PlaylistDetail() {
       refetch();
     }, [refetch])
   );
+
+  useEffect(() => {
+    setDisplayAddTrackButton(canEdit && !playlist?.is_spotify_sync && (playlist?.tracks.length ?? 0) > 0);
+    setDisplayInviteButton(canInvite);
+  }, [canEdit, canInvite, playlist]);
 
   const handleAddTrackPress = () => {
     router.push({
@@ -102,17 +109,17 @@ export default function PlaylistDetail() {
         {/* </Box> */}
       </ScrollView>
 
-      {canEdit && !playlist.is_spotify_sync && playlist.tracks.length > 0 && (
+      {displayAddTrackButton && (
         <FloatButton 
           onPress={handleAddTrackPress} 
           icon={AddIcon}
         />
       )}
-      {canInvite && (
+      {displayInviteButton && (
         <FloatButton
           onPress={handleInviteUserPress}
           icon={UserRoundPlus}
-          className='absolute right-4 bottom-20 rounded-full p-4 blurred-bg'
+          className={`absolute bottom-${displayAddTrackButton ? '20' : '4'} right-4 rounded-full p-4 blurred-bg`}
         />
       )}
 

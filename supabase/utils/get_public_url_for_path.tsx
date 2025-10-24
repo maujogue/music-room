@@ -5,7 +5,7 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-export default async function getPublicUrlForPath(path: string): string {
+export default async function getPublicUrlForPath(path: string): Promise<string> {
   const localUrl = Deno.env.get('SUPABASE_URL');
 
   const { data } = supabase.storage.from('avatars').createSignedUrl(path, 3600);

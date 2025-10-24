@@ -94,10 +94,10 @@ export async function fetchPlaylistItems(c: Context): Promise<Response> {
   }
 
   if (playlist.is_spotify_sync && playlist.spotify_id) {
-    await refreshSpotifyToken(playlist.owner_id)
+    await refreshSpotifyToken(user.id)
     const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, spotify_token)
     if (tracksIds) {
-      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, playlist.owner_id)
+      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, user.id)
       playlist = await getSupabasePlaylistById(playlist.id)
     }
   }

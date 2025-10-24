@@ -7,7 +7,7 @@ export interface EventResponse {
   everyone_can_vote: boolean;
   description?: string;
   playlist_id?: string;
-  location: MusicEventLocation;
+  location: EventLocation;
   playlistId: string;
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
@@ -19,7 +19,7 @@ interface Coordinates {
   long: number;
 }
 
-interface MusicEventLocation {
+export interface EventLocation {
   coordinates?: Coordinates;
   venueName?: string;
   address?: string;
@@ -27,7 +27,14 @@ interface MusicEventLocation {
   country?: string;
 }
 
-interface EventPayload {
-	event?: Event;
+export interface EventPayload {
+  name: string;
+  image_url?: string;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
+  beginning_at: string;
+  playlistId: string;
 	location?: MusicEventLocation;
 }

@@ -38,7 +38,6 @@ export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
     const user = c.get('user')
     const res = await getCurrentUserPlaylistSupabase(user.id)
 
-    console.log('Playlists fetched from Supabase:', res);
     c.status(200)
     return c.json(res)
 }
@@ -129,7 +128,7 @@ export async function skipToNextUserTrack(c: Context): Promise<Response> {
     return c.body(null);
 }
 
-export async function fetchCurrentUserEvents(c: Context): Promise<any> {
+export async function fetchCurrentUserEvents(c: Context): Promise<Response> {
   const user = c.get('user')
 
   const events = await getSupabaseEventByOwner(user.id)
@@ -152,7 +151,7 @@ export async function fetchCurrentUserEvents(c: Context): Promise<any> {
   return c.json(events)
 }
 
-export async function syncSpotifyPlaylists(c: Context): Promise<any> {
+export async function syncSpotifyPlaylists(c: Context): Promise<Response> {
   const user = c.get('user')
   const spotify_token = c.get('spotify_token')
 
