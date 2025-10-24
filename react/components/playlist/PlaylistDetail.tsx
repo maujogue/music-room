@@ -13,11 +13,21 @@ import { ScrollView } from 'react-native';
 import PlaylistHeader from '@/components/playlist/PlaylistHeader';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import FloatButton from '@/components/generics/FloatButton';
+import { AddIcon } from '@/components/ui/icon';
+import { UserRoundPlus } from 'lucide-react-native';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const { playlist, loading, error, refetch, deletePlaylist, canEdit } =
-    usePlaylist(playlistId);
+  const { 
+    playlist, 
+    loading, 
+    error, 
+    refetch, 
+    deletePlaylist, 
+    canEdit, 
+    canInvite 
+  } = usePlaylist(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const navigation = useNavigation();
@@ -28,6 +38,13 @@ export default function PlaylistDetail() {
       refetch();
     }, [refetch])
   );
+
+  const handleAddTrackPress = () => {
+    router.push({
+      pathname: '/(main)/playlists/[playlistId]/tracks/add',
+      params: { playlistId, playlistTitle: playlist!.name },
+    });
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -56,6 +73,10 @@ export default function PlaylistDetail() {
     router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
+  const handleInviteUserPress = () => {
+    router.push(`(main)/playlists/${playlistId}/invite`);
+  }
+
   if (loading) {
     return <LoadingSpinner text='Loading Playlist' />;
   }
@@ -80,6 +101,20 @@ export default function PlaylistDetail() {
         />
         {/* </Box> */}
       </ScrollView>
+
+      {canEdit && !playlist.is_spotify_sync && playlist.tracks.length > 0 && (
+        <FloatButton 
+          onPress={handleAddTrackPress} 
+          icon={AddIcon}
+        />
+      )}
+      {canInvite && (
+        <FloatButton
+          onPress={handleInviteUserPress}
+          icon={UserRoundPlus}
+          className='absolute right-4 bottom-20 rounded-full p-4 blurred-bg'
+        />
+      )}
 
       <DeleteAlert
         showAlertDialog={showAlertDialog}

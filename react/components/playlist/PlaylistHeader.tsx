@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Box } from '@/components/ui/box';
 import {
   Avatar,
@@ -136,16 +135,6 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
               </Text>
             </HStack>
             <HStack>
-              {playlist.user.can_invite && (
-                <Button
-                  size='lg'
-                  className='rounded-full p-3.5 w-10'
-                  variant='outline'
-                  onPress={handleInviteUserPress}
-                >
-                  <ButtonIcon as={UserRoundPlus} size='sm' />
-                </Button>
-              )}
               {(() => {
                 const allUsers = [
                   ...(playlist.members || []),
