@@ -79,16 +79,12 @@ type MusicEventPayload = {
   // playlistId: string;
   location: MusicEventLocation;
 
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
 };
 
 type EventDateLabels = {
   start: { date: string; time?: string; full: string };
-  end: { date: string; time?: string; full: string };
-  rangeLabel: string;
-  duration: { ms: number; minutes: number; hours: number; human: string };
-  isSameDay: boolean;
   isCurrentYear: boolean;
   timezone: string;
   locale: string;

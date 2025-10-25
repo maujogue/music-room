@@ -13,6 +13,7 @@ import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppToast } from '@/hooks/useAppToast';
 import EventGuest from '@/components/track/votes/EventGuest';
+import { useIsFocused } from '@react-navigation/native';
 
 interface Props {
   eventId: string;
@@ -23,6 +24,7 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
   const { data, loading, error } = useEvent(eventId);
   const {
     connected,
+    disconnect,
     sendVote,
     sendUnvote,
     trackVotes,
@@ -36,12 +38,19 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
   );
+  const isFocused = useIsFocused();
 
   const {
     playlist,
     loading: ploading,
     error: perror,
   } = usePlaylist(data ? data.playlist?.id : null);
+
+  useEffect(() => {
+    if (!isFocused) {
+      disconnect();
+    }
+  }, [isFocused, disconnect]);
 
   useEffect(() => {
     if (!data?.event?.id) return;
@@ -81,24 +90,6 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
       reconnect();
     }
   }, [connected, connectionAttempts, reconnect]);
-
-  useEffect(() => {
-    if (eventUserData) {
-      console.log('👤 Event user data in VotesRoom:', {
-        voteCount: eventUserData.voteCount,
-        vote_remaining: eventUserData.vote_remaining,
-        voteMax: eventUserData.voteMax,
-        voted_tracks: eventUserData.voted_tracks,
-        voted_tracks_keys: Object.keys(eventUserData.voted_tracks || {}),
-        voted_tracks_length: Object.keys(eventUserData.voted_tracks || {})
-          .length,
-      });
-    }
-  }, [eventUserData]);
-
-  useEffect(() => {
-    console.log('votedTracks:', eventUserData?.voted_tracks);
-  }, [eventUserData?.voted_tracks]);
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;

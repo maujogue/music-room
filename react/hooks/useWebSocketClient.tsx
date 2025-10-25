@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import { getSession } from '@/services/session';
 
 export interface TrackVote {
@@ -28,6 +29,7 @@ export interface WebSocketActions {
   connectionAttempts: number;
   lastError: string | null;
   reconnect: () => void;
+  disconnect: () => void;
 }
 
 export default function useWebSocketClient(event_id: string): WebSocketActions {
@@ -45,21 +47,20 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const [eventUserData, setEventUserData] = useState<eventUserData | null>(
     null
   );
-
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
+  const shouldReconnectRef = useRef<boolean>(true);
+  const connectionAttemptsRef = useRef<number>(0);
   const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000; // 3 secondes
-  const pingInterval = 30000; // 30 secondes
+  const reconnectDelay = 3000;
+  const pingInterval = 10000;
 
-  // Fonction pour vérifier si le token est encore valide
   const checkTokenValidity = useCallback(async () => {
     try {
       const session = await getSession();
       if (!session?.access_token) {
-        console.warn('🔐 Token expired or missing, reconnection needed');
         return false;
       }
 
@@ -70,7 +71,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         const fiveMinutes = 5 * 60 * 1000;
 
         if (expirationTime - currentTime < fiveMinutes) {
-          console.warn('🔐 Token expires soon, will need refresh');
           return false;
         }
       }
@@ -84,6 +84,11 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
   const initWebSocket = useCallback(async () => {
     try {
+      if (!shouldReconnectRef.current) {
+        // reconnections disabled (app backgrounded or manually stopped)
+        console.log('ws: init aborted — reconnection disabled');
+        return;
+      }
       // Nettoyer les timeouts précédents
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -105,6 +110,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         console.log('✅ ws: connection established successfully');
         setConnected(true);
         setConnectionAttempts(0); // Reset attempts on success
+        connectionAttemptsRef.current = 0;
         setLastError(null);
 
         // Démarrer le ping automatique
@@ -141,14 +147,21 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         }
 
         // Reconnexion automatique si ce n'est pas une fermeture intentionnelle
-        if (event.code !== 1000 && connectionAttempts < maxReconnectAttempts) {
+        if (
+          event.code !== 1000 &&
+          shouldReconnectRef.current &&
+          connectionAttemptsRef.current < maxReconnectAttempts
+        ) {
           console.log(
-            `🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttempts + 1}/${maxReconnectAttempts})`
+            `🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttemptsRef.current + 1}/${maxReconnectAttempts})`
           );
           reconnectTimeoutRef.current = window.setTimeout(() => {
-            setConnectionAttempts(prev => prev + 1);
+            connectionAttemptsRef.current += 1;
+            setConnectionAttempts(connectionAttemptsRef.current);
             initWebSocket();
           }, reconnectDelay);
+        } else {
+          console.log('ws: not reconnecting (intentional close or max attempts reached)');
         }
       };
 
@@ -220,10 +233,57 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       }
 
       if (webSocketRef.current) {
-        webSocketRef.current.close(1000, 'Component unmounted');
+        try {
+          shouldReconnectRef.current = false;
+          webSocketRef.current.close(1000, 'Component unmounted');
+        } catch {
+          /* ignore */
+        }
         webSocketRef.current = null;
+        setWebSocket(null);
       }
     };
+  }, [initWebSocket]);
+
+  // Listen to app state and close websocket when app is backgrounded to avoid reconnect loops
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      const active = nextAppState === 'active';
+      if (!active) {
+        console.log('ws: app not active — closing socket and disabling reconnects');
+        shouldReconnectRef.current = false;
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = null;
+        }
+
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
+        }
+
+        if (webSocketRef.current) {
+          try {
+            webSocketRef.current.close(1000, 'App backgrounded');
+          } catch {
+            /* ignore */
+          }
+          webSocketRef.current = null;
+          setWebSocket(null);
+        }
+      } else {
+        // App became active again: allow reconnects and reset attempts
+        console.log('ws: app active — enabling reconnects');
+        shouldReconnectRef.current = true;
+        connectionAttemptsRef.current = 0;
+        setConnectionAttempts(0);
+        initWebSocket();
+      }
+    };
+
+    const sub = AppState.addEventListener('change', handleAppStateChange);
+    return () => sub.remove();
   }, [initWebSocket]);
 
   const sendRequestUserInfo = useCallback(
@@ -414,7 +474,12 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       return;
     }
 
-    if (connectionAttempts >= maxReconnectAttempts) {
+    if (!shouldReconnectRef.current) {
+      console.log('ws: reconnect aborted — reconnections disabled');
+      return;
+    }
+
+    if (connectionAttemptsRef.current >= maxReconnectAttempts) {
       console.error('ws: max reconnection attempts reached');
       setLastError('Unable to reconnect to server. Please refresh the app.');
       return;
@@ -431,15 +496,44 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       pingIntervalRef.current = null;
     }
 
-    setConnectionAttempts(prev => prev + 1);
+    connectionAttemptsRef.current += 1;
+    setConnectionAttempts(connectionAttemptsRef.current);
     setLastError(null);
     initWebSocket();
   }, [
     initWebSocket,
     checkTokenValidity,
-    connectionAttempts,
     maxReconnectAttempts,
   ]);
+
+  const disconnect = useCallback(() => {
+    console.log('ws: manual disconnect requested');
+
+    // disable reconnect attempts
+    shouldReconnectRef.current = false;
+
+    // clear any pending reconnect timer
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    // stop ping interval
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+
+    if (webSocketRef.current) {
+      webSocketRef.current.close(1000, 'Manual disconnect');
+      webSocketRef.current = null;
+    }
+    setWebSocket(null);
+    setConnected(false);
+    connectionAttemptsRef.current = 0;
+    setConnectionAttempts(0);
+    setLastError(null);
+  }, []);
 
   return {
     connected,
@@ -452,5 +546,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     connectionAttempts,
     lastError,
     reconnect,
+    disconnect,
   };
 }
