@@ -1,7 +1,7 @@
 import * as Hono from '@hono/hono'
 import { serve } from '@deno/server';
 import { HTTPException } from '@hono/http-exception';
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
+import { getCurrentUser, getUserSpotifyToken } from '@auth/utils'
 import searchRoutes from './routes.ts'
 import type { StatusCode } from '@hono/hono/utils/http-status'
 
@@ -17,8 +17,10 @@ app.use('*', async (c: Hono.Context, next) => {
     c.set('spotify_token', token)
     await next()
   } catch (err) {
-    console.log('Authentication error:', err)
-    return c.json({ error: err.message }, 401)
+    const message = typeof err === 'object' && err !== null && 'message' in err
+      ? (err as { message: string }).message
+      : String(err);
+    return c.json({ error: message }, 401)
   }
 })
 

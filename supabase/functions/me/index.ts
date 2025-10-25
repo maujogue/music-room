@@ -7,7 +7,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { Hono } from '@hono/hono';
 import { serve } from '@deno/server';
 import { HTTPException } from '@hono/http-exception';
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
+import { getCurrentUser, getUserSpotifyToken } from '@auth/utils';
 import meRoutes from './routes.ts';
 import { Context } from "node:vm";
 import type { StatusCode } from "@hono/hono/utils/http-status";

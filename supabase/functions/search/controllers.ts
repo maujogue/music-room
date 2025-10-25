@@ -5,12 +5,12 @@ import {
 	searchPlaylistsByQuery
  } from './services/supabase.ts'
 import { HTTPException } from '@hono/http-exception';
-import { refreshSpotifyToken } from '../auth.ts';
+import { refreshSpotifyToken } from '@auth/utils';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import { Context } from '@hono/hono';
 import type { ProfileWithFollowInfo } from '@profile';
 import type { PlaylistResponse } from "@playlist";
-import type { EventResponse } from '@event';
+import type { EventResponseReduced } from '@event';
 import type { SpotifyTrackResponse, TrackResponse } from '@track';
 
 export async function search(c: Context) {
@@ -19,7 +19,7 @@ export async function search(c: Context) {
 	const { q, type, limit, offset } = c.req.query()
 	let userResults: ProfileWithFollowInfo[] = []
 	let playlistResults: PlaylistResponse[] = []
-	let eventResults: EventResponse[] = []
+	let eventResults: EventResponseReduced[] = []
 	let trackResults: TrackResponse[] = []
 
 	console.log('Search params:', { q, type, limit, offset });
@@ -44,13 +44,12 @@ export async function search(c: Context) {
 	}
 	if (type === 'event' || type === 'all') {
 		eventResults = await searchEventsByQuery({ query: q, limit, offset })
-		eventResults = await Promise.all(eventResults.map(event => {
+		eventResults = await Promise.all(eventResults.map(async (event) => {
 			if (event.image_url) {
-				event.image_url = getPublicUrlForPath(event.image_url)
+				event.image_url = await getPublicUrlForPath(event.image_url)
 			}
 			return event
 		}))
-		console.log('Event results after processing:', eventResults);
 	}
 
 	c.status(200)

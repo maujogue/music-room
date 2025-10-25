@@ -27,7 +27,7 @@ import type {
   EventResponse,
   EventMember
  } from '@event';
-import type { User } from '@user';
+import type { User } from '@supabase/supabase-js';
 
 export async function createEvent(c: Context): Promise<Response> {
   const contentTypeHeader = c.req.header('content-type') || ''

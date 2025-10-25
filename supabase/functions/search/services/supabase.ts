@@ -3,7 +3,7 @@ import { HTTPException } from '@hono/http-exception'
 import { formatDbError } from '@postgres/postgres_errors_map';
 import type { PlaylistResponse, PlaylistRow } from '@playlist';
 import type { ProfileResponse, ProfileWithFollowInfo } from '@profile';
-import type { EventResponse } from '@event';
+import type { EventResponse, EventResponseReduced } from '@event';
 
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -85,7 +85,7 @@ export async function searchUsersByQuery(
 
 export async function searchEventsByQuery(
 	params: { query: string, limit?: string, offset?: string }
-): Promise<EventResponse[]> {
+): Promise<EventResponseReduced[]> {
 	const { data: events, error: eventsError } = await supabase
 	.from('events')
 	.select('*, owner:profiles!events_owner_id_fkey(id, username, email, avatar_url, bio)')

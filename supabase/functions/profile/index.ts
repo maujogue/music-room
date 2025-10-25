@@ -14,7 +14,7 @@ declare module '@hono/hono' {
 }
 import { serve } from '@deno/server';
 import { HTTPException } from '@hono/http-exception';
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
+import { getCurrentUser, getUserSpotifyToken } from '@auth/utils';
 import profileRoutes from './routes.ts';
 import type { StatusCode } from '@hono/hono/utils/http-status'
 
@@ -25,9 +25,6 @@ serve(app.fetch);
 app.use('*', async (c, next) => {
   try {
     console.log('Authenticating request...');
-    // console.log('url:', c.req.url);
-    // console.log('method:', c.req.method);
-    // console.log('headers:', JSON.stringify(c.req.headers, null, 2));
     const user = await getCurrentUser(c.req);
     const token = await getUserSpotifyToken(user.id);
     console.log('user:', user);
@@ -36,7 +33,10 @@ app.use('*', async (c, next) => {
     c.set('spotify_token', token);
     await next();
   } catch (err) {
-    return c.json({ error: err.message }, 401);
+    const message = typeof err === 'object' && err !== null && 'message' in err
+      ? (err as { message: string }).message
+      : String(err);
+    return c.json({ error: message }, 401)
   }
 });
 

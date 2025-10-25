@@ -15,8 +15,7 @@ export default async function getPublicUrlForPath(path: string): Promise<string>
 
   console.log('createSignedUrl result:', signedData, error);
   if (error) {
-    console.error('createSignedUrl error', error);
-    throw error;
+    return path;
   }
 
   const correctedUrl = signedData?.signedUrl?.replace(

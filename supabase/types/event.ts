@@ -27,6 +27,19 @@ export interface EventResponse {
   };
 };
 
+export interface EventResponseReduced {
+    id: string;
+    name: string;
+    image_url?: string;
+    is_private: boolean;
+    everyone_can_vote: boolean;
+    description?: string;
+    playlist_id?: string;
+    playlistId: string;
+    beginning_at: string;
+    owner: SpotifyOwner;
+}
+
 export interface EventMember {
   id: string;
   event_id: string;

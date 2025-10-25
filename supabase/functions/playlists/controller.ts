@@ -27,7 +27,7 @@ import {
   validateRemoveUserPayload,
   validateAddTracksPayload
 } from './validators.ts';
-import { refreshSpotifyToken } from '../auth.ts';
+import { refreshSpotifyToken } from '@auth/utils';
 import type { 
 PlaylistCollaborator,
   PlaylistMember,
@@ -35,7 +35,7 @@ PlaylistCollaborator,
   PlaylistTrack,
   SpotifyTrackDetails
 } from '@playlist';
-import type { User } from '@user';
+import type { User } from '@supabase/supabase-js';
 import type { StatusCode } from "@hono/hono/utils/http-status";
 
 
