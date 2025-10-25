@@ -55,7 +55,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const connectionAttemptsRef = useRef<number>(0);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
-  const pingInterval = 10000;
+  const pingInterval = 60000;
 
   const checkTokenValidity = useCallback(async () => {
     try {

@@ -13,7 +13,6 @@ import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppToast } from '@/hooks/useAppToast';
-import EventGuest from '@/components/track/votes/EventGuest';
 import { useIsFocused } from '@react-navigation/native';
 import { useProfile } from '@/contexts/profileCtx';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -23,10 +22,9 @@ import { RefreshCw } from 'lucide-react-native';
 
 interface Props {
   eventId: string;
-  onRefresh: () => void;
 }
 
-export default function VotesRoom({ eventId, onRefresh }: Props) {
+export default function VotesRoom({ eventId }: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
   const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
@@ -121,34 +119,6 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     }
   };
 
-  if (!isConnectedToSpotify) {
-    return (
-      <ErrorScreen
-        error='You need to connect your Spotify account to view playlist details.'
-        actionButton={
-          <HStack space='md' className='items-center justify-center'>
-            <Button onPress={handleConnectSpotify}>
-              <ButtonText>
-                Connect Spotify
-              </ButtonText>
-            </Button>
-            <Button 
-              onPress={() => {
-                refreshProfile();
-                refetch();
-                prefetch();
-              }}
-              className='rounded-full'
-              variant='link'
-            >
-              <RefreshCw size={20}/>
-            </Button>
-          </HStack>
-
-        }
-      />
-    );
-  }
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
   }
@@ -157,9 +127,9 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
   }
   if (!data || error) {
     return <ErrorScreen 
-      error={error}
-      actionButton={
-        <Button onPress={refetch}>
+    error={error}
+    actionButton={
+      <Button onPress={refetch}>
           <ButtonText>
             Retry
           </ButtonText>
@@ -168,6 +138,7 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
      />;
   }
   if (perror || !playlist) {
+    console.log('Playlist load error or missing playlist:', perror);
     return (
       <>
         <ErrorScreen
@@ -215,7 +186,36 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
       </>
     );
   }
+  
+  if (!isConnectedToSpotify) {
+    return (
+      <ErrorScreen
+        error='You need to connect your Spotify account to view playlist details.'
+        actionButton={
+          <HStack space='md' className='items-center justify-center'>
+            <Button onPress={handleConnectSpotify}>
+              <ButtonText>
+                Connect Spotify
+              </ButtonText>
+            </Button>
+            <Button 
+              onPress={() => {
+                refreshProfile();
+                refetch();
+                prefetch();
+              }}
+              className='rounded-full'
+              variant='link'
+            >
+              <RefreshCw size={20}/>
+            </Button>
+          </HStack>
 
+        }
+      />
+    );
+  }
+  
   const onTrackSwipe = (dir: string, trackId: string) => {
     if (!connected) {
       toast.error({
@@ -225,7 +225,7 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
       });
       return;
     }
-
+    
     if (!data?.event?.id) {
       toast.error({
         title: 'Cannot vote',
@@ -253,7 +253,6 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
 
   return (
     <>
-      <EventGuest eventData={data} onRefresh={onRefresh} />
       <VStack className='flex-1 w-full'>
         {eventUserData && (
           <>

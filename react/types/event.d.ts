@@ -1,4 +1,6 @@
 // Note: naming 'Event' would conflict with built-in DOM Event
+type UserRole = 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
+
 type MusicEvent = {
   id: string;
   name: string;
@@ -12,7 +14,7 @@ type MusicEvent = {
   image_url?: string;
   created_at: string;
 
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
 };
 
@@ -27,11 +29,12 @@ type MusicEventFetchResult = {
 
 type EventUser = {
   // Info: UserInfo;
-  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
+  role: UserRole;
   can_delete: boolean;
   can_edit: boolean;
   can_invite: boolean;
   can_vote: boolean;
+  profile: UserInfo;
 };
 
 type EventVote = {

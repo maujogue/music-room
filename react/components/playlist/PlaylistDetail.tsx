@@ -116,6 +116,9 @@ export default function PlaylistDetail() {
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner text='Loading Playlist' />;
+  }
   if (!isConnectedToSpotify) {
     return (
       <ErrorScreen
@@ -142,9 +145,6 @@ export default function PlaylistDetail() {
         }
       />
     );
-  }
-  if (loading) {
-    return <LoadingSpinner text='Loading Playlist' />;
   }
   if (error) {
     return <ErrorScreen 

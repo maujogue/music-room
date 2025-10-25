@@ -13,6 +13,8 @@ import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
 import { VStack } from '@/components/ui/vstack';
 import { useEffect } from 'react';
+import { Button, ButtonText } from '@/components/ui/button';
+import { useRouter } from 'expo-router';
 
 interface TrackVote {
   eventId: string;
@@ -39,6 +41,7 @@ export default function TrackListVotes({
   onTrackSwiping,
   realtimeVotes,
 }: Props) {
+  const router = useRouter();
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
     playlistTracks
@@ -103,7 +106,19 @@ export default function TrackListVotes({
     return <ErrorScreen error={'no tracks to load'} />;
   }
   if (tracks.length === 0) {
-    return <InfoScreen text={'Playlist chosen for event is empty'} />;
+    return <InfoScreen 
+      title={'No Tracks Available'}
+      text={'Playlist chosen for event is empty'} 
+      actionButton={
+        <Button  onPress={() => {
+          router.push(`(main)/playlists/${playlistId}`);
+        }}>
+          <ButtonText className='text-center'>
+            Go to Playlist
+          </ButtonText>
+        </Button>
+      }
+    />;
   }
 
   return (

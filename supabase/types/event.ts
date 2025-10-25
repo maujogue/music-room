@@ -3,16 +3,19 @@ import type { PlaylistRow } from './playlist.ts';
 export type EventRole = 'owner' | 'member' | 'inviter' | 'voter' | 'collaborator' | null;
 
 export interface EventResponse {
-  id: string;
-  name: string;
-  image_url?: string;
+  event: {
+    id: string;
+    name: string;
+    image_url?: string;
+    is_private: boolean;
+    everyone_can_vote: boolean;
+    description?: string;
+    playlist_id?: string;
+    playlistId: string;
+    beginning_at: string;
+  }
   owner: SpotifyOwner;
-  is_private: boolean;
-  everyone_can_vote: boolean;
-  description?: string;
-  playlist_id?: string;
   location?: EventLocation;
-  playlistId: string;
   members: EventMember[];
   playlist?: PlaylistRow;
   user: {
@@ -21,10 +24,7 @@ export interface EventResponse {
     can_delete: boolean;
     can_invite: boolean;
     can_vote: boolean;
-  }
-
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
-  beginning_at: string;
+  };
 };
 
 export interface EventMember {

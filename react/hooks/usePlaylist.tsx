@@ -19,7 +19,8 @@ export function usePlaylist(id: string | null) {
   const fetchPlaylist = useCallback(async () => {
     if (!id) {
       setLoading(false);
-      setError('no playlist found, no id given');
+      setError(null);
+      setPlaylist(null);
       return;
     }
     try {
@@ -48,6 +49,8 @@ export function usePlaylist(id: string | null) {
   // Remove Playlist (DELETE)
   // ---------------------------------------------------------------
   const deletePlaylist = useCallback(async () => {
+    if (!id) return;
+
     setLoading(true);
     setError(null);
 

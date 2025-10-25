@@ -112,73 +112,75 @@ function createPayloadFromFormData(
 export async function fetchEvent(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
-  let event = await getSupabaseEventById(id)
-  if (!event) {
+  let data = await getSupabaseEventById(id)
+  if (!data) {
     throw new HTTPException(404, { message: 'Event not found' })
   }
-  await checkEventAccess(event, user.id)
+  checkEventAccess(data, user.id)
 
   try {
-    const imagePath = event?.image_url;
+    const imagePath = data?.event.image_url;
+    console.log('Event image path:', imagePath);
     if (imagePath) {
       const publicUrl = await getPublicUrlForPath(imagePath);
-      event.image_url = publicUrl;
+      console.log('Resolved public URL for event image:', publicUrl);
+      data.event.image_url = publicUrl;
     }
   } catch (err) {
     console.error('Error resolving public url for image:', err);
   }
 
-  event = setUserPermissions(event, user)
+  data = setUserPermissions(data, user)
 
   c.status(200)
-  return c.json(event)
+  return c.json(data)
 }
 
-function setUserPermissions(event: EventResponse, user: User): EventResponse 
+function setUserPermissions(data: EventResponse, user: User): EventResponse 
 {
-  const memberEvent = event.members.find((m: EventMember) => m.profile.id === user.id)
+  const memberEvent = data.members.find((m: EventMember) => m.profile.id === user.id)
 
-  if (event.owner.id === user.id) {
-    event.user = {
+  if (data.owner.id === user.id) {
+    data.user = {
       role: 'owner',
       can_edit: true,
       can_delete: true,
       can_invite: true,
       can_vote: true
     }
-    return event
+    return data
   }
 
-  if (!memberEvent && event.is_private) {
+  if (!memberEvent && data.event.is_private) {
     throw new HTTPException(403, { message: 'You do not have permission to view this private event' })
   }
 
   if (!memberEvent) {
-    event.user = {
+    data.user = {
       role: null,
       can_edit: false,
       can_delete: false,
-      can_invite: event.is_private ? false : true,
-      can_vote: event.everyone_can_vote
+      can_invite: data.event.is_private ? false : true,
+      can_vote: data.event.everyone_can_vote
     }
-    return event
+    return data
   }
 
-  event.user = {
+  data.user = {
     role: memberEvent.role,
     can_edit: false,
     can_delete: false,
-    can_invite: event.is_private ? false : true,
-    can_vote: event.everyone_can_vote
+    can_invite: data.event.is_private ? false : true,
+    can_vote: data.event.everyone_can_vote
   }
 
-  if (event.is_private) {
-    event.user.can_invite = (memberEvent.role === 'inviter' || memberEvent.role === 'collaborator')
+  if (data.event.is_private) {
+    data.user.can_invite = (memberEvent.role === 'inviter' || memberEvent.role === 'collaborator')
   }
-  if (event.everyone_can_vote) {
-    event.user.can_vote = (memberEvent.role === 'voter' || memberEvent.role === 'collaborator')
+  if (data.event.everyone_can_vote) {
+    data.user.can_vote = (memberEvent.role === 'voter' || memberEvent.role === 'collaborator')
   }
-  return event
+  return data
 }
 
 export async function deleteEventById(c: Context): Promise<Response> {

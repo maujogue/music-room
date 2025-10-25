@@ -6,7 +6,7 @@ import {
   AvatarFallbackText,
 } from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
-import { UserRoundPlus, MoreVertical, UserMinus } from 'lucide-react-native';
+import { MoreVertical, UserMinus } from 'lucide-react-native';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import {
   Drawer,
@@ -21,12 +21,13 @@ import { removeUserFromEvent, editUserInEvent } from '@/services/events';
 import { useState } from 'react';
 import { Heading } from '@/components/ui/heading';
 import { Switch } from '@/components/ui/switch';
+import { Image } from '@/components/ui/image';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = {
   eventData: MusicEventFetchResult;
   isOpen: boolean;
   onClose: () => void;
-  onInvitePress: () => void;
   onUpdated?: () => void;
 };
 
@@ -34,7 +35,6 @@ export default function EventMembersDrawer({
   eventData,
   isOpen,
   onClose,
-  onInvitePress,
   onUpdated,
 }: Props) {
   const [selectedUser, setSelectedUser] = useState<EventUser | null>(null);
@@ -44,7 +44,7 @@ export default function EventMembersDrawer({
 
   const handleEditUser = async () => {
     try {
-      let role = 'member';
+      let role: UserRole = 'member';
       if (selectedUserCanInvite && selectedUserCanVote) {
         role = 'collaborator';
       } else if (selectedUserCanInvite) {
@@ -52,14 +52,18 @@ export default function EventMembersDrawer({
       } else if (selectedUserCanVote) {
         role = 'voter';
       }
-      await editUserInEvent(
-        eventData.event.id,
-        selectedUser.profile.id,
-        role
-      ).then(() => {
-        setShowActionDialog(false);
-        setSelectedUser(null);
-      });
+      if (selectedUser?.profile.id) {
+        await editUserInEvent(
+          eventData.event.id,
+          selectedUser.profile.id,
+          role
+        ).then(() => {
+          setShowActionDialog(false);
+          setSelectedUser(null);
+        });
+      } else {
+        console.error('Selected user profile id is undefined');
+      }
     } catch (error) {
       console.error('Failed to promote user to organizer:', error);
     }
@@ -95,17 +99,12 @@ export default function EventMembersDrawer({
     setSelectedUser(null);
   };
 
-  const filteredOrganizers =
-    eventData.organizers?.filter(
-      organizer => organizer.id !== eventData.event.owner.id
-    ) || [];
+  // There is only one owner, so organizers are empty
+  const filteredOrganizers: never[] = [];
 
-  const organizerIds = filteredOrganizers.map(organizer => organizer.id) || [];
   const filteredAttendees =
     eventData.members?.filter(
-      member =>
-        !organizerIds.includes(member.profile.id) &&
-        member.profile.id !== eventData.event.owner_id
+      member => member.profile.id !== eventData.event.owner_id
     ) || [];
 
   return (
@@ -114,21 +113,35 @@ export default function EventMembersDrawer({
         <DrawerBackdrop />
         <DrawerContent className='w-full max-h-[70vh]'>
           <ScrollView className='flex-1'>
-            <DrawerHeader>
-              <HStack className='items-center'>
-                <Text size='lg' className='font-semibold flex-1 text-left'>
-                  Event Participants
-                </Text>
-                {eventData.event.user?.can_invite && (
-                  <Button
-                    size='lg'
-                    className='rounded-full p-3.5 w-10'
-                    variant='outline'
-                    onPress={onInvitePress}
-                  >
-                    <ButtonIcon as={UserRoundPlus} size='sm' />
-                  </Button>
+            <DrawerHeader className='h-35'>
+              <HStack className='items-center gap-3'>
+                {eventData.event.image_url && (
+                  <>
+                  <Image
+                    source={{ uri: eventData.event.image_url }}
+                    className='absolute w-full h-full rounded-lg p-0'
+                    alt='Event image'
+                  />
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.4)', 'transparent']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      borderRadius: 12,
+                    }}
+                  />
+                  </>
                 )}
+                <VStack className='flex-1 p-4'>
+                  <Text size='lg' className='font-semibold text-left text-gray-100'>
+                  {eventData.event.name}
+                  </Text>
+                </VStack>
               </HStack>
             </DrawerHeader>
 
@@ -227,6 +240,7 @@ export default function EventMembersDrawer({
 
       {showActionDialog && (
         <Modal transparent visible={showActionDialog} animationType='slide'>
+          <DrawerBackdrop />
           <View className='flex-1 justify-center items-center p-4'>
             <View className='bg-white rounded-lg overflow-hidden shadow-lg w-11/12 max-w-md'>
               <View className='p-4 border-b'>
@@ -234,7 +248,7 @@ export default function EventMembersDrawer({
                   className='text-typography-950 font-semibold'
                   size='md'
                 >
-                  Actions for {selectedUser?.username}
+                  Actions for {selectedUser?.profile.username}
                 </Heading>
               </View>
               <View className='p-4'>

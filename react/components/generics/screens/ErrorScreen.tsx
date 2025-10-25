@@ -3,10 +3,9 @@ import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Card } from '@/components/ui/card';
 import { Center } from '@/components/ui/center';
-import { Music4Icon, Music2Icon, TriangleAlertIcon, Box } from 'lucide-react-native';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
+import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Heading } from '@/components/ui/heading';
-import { Button } from '@/components/ui/button';
 import React from 'react';
 
 interface Props {
