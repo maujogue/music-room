@@ -204,6 +204,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const value: ProfileContextType = {
     profile,
+    isConnectedToSpotify,
     isLoading,
     followers,
     following,

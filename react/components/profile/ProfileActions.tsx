@@ -24,6 +24,8 @@ import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';
 import { Box } from '@/components/ui/box';
+import { useProfile } from '@/contexts/profileCtx';
+import { Text } from '@/components/ui/text';
 
 interface ProfileActionsProps {
   isOwner: boolean;
@@ -44,6 +46,7 @@ export default function ProfileActions({
   actions,
 }: ProfileActionsProps) {
   const [showDrawer, setShowDrawer] = useState(false);
+  const { isConnectedToSpotify } = useProfile();
 
   return (
     <>
@@ -74,7 +77,7 @@ export default function ProfileActions({
           <Pressable onPress={() => setShowDrawer(false)} />
           <Drawer
             isOpen={showDrawer}
-            size='sm'
+            size='lg'
             anchor='bottom'
             onClose={() => {
               setShowDrawer(false);
@@ -83,7 +86,7 @@ export default function ProfileActions({
             <DrawerBackdrop />
             <DrawerContent>
               <DrawerHeader>
-                <Heading size='lg'>Settings</Heading>
+                <Heading size='xl'>Settings</Heading>
                 <DrawerCloseButton>
                   <Icon as={CloseIcon} />
                 </DrawerCloseButton>
@@ -91,19 +94,37 @@ export default function ProfileActions({
               <Divider />
               <DrawerBody className='gap-8'>
                 <VStack className='gap-2'>
-                  {/* Delete Button */}
-                  <Button
-                    variant='link'
-                    className='w-full justify-start'
-                    onPress={actions.handleSpotifyConnect}
-                  >
-                    <HStack className='items-center gap-3'>
-                      <KeyRound />
-                      <ButtonText>Connect To Spotify</ButtonText>
+                  <Text className='text-md font-medium mb-2'>Connect Accounts</Text>
+                    <HStack className='justify-between items-center w-full'>
+                    <Text className='text-extra-lg font-semibold flex-1'>
+                      Spotify
+                    </Text>
+                    <Button
+                      onPress={actions.handleSpotifyConnect}
+                      disabled={isConnectedToSpotify}
+                      size='sm'
+                      className='w-[95px]'
+                    >
+                      <ButtonText size='xs'>
+                      {isConnectedToSpotify ? 'Connected' : 'Connect'}
+                      </ButtonText>
+                    </Button>
                     </HStack>
-                  </Button>
-
-                  {/* Edit Button */}
+                    <HStack className='justify-between items-center w-full'>
+                    <Text className='text-extra-lg font-semibold flex-1'>
+                      Google
+                    </Text>
+                    <Button
+                      disabled={true}
+                      size='sm'
+                      className='w-[95px]'
+                    >
+                      <ButtonText size='xs'>
+                      Not Available
+                      </ButtonText>
+                    </Button>
+                    </HStack>
+                  <Divider />
                   <Button
                     variant='link'
                     className='w-full justify-start'
