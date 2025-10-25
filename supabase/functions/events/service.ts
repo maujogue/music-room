@@ -1,7 +1,7 @@
-import { Hono } from 'jsr:@hono/hono'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-import { formatDbError } from '../../utils/postgres_errors_map.tsx'
+import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { createClient } from '@supabase/supabase-js';
+import { formatDbError } from '../../utils/postgres_errors_map.tsx';
+import { EventPayload } from '../../../supabase/types/event.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -133,21 +133,11 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
   return data?.path || path;
 }
 
-export async function getPublicUrlForPath(path: string): string {
-  const localUrl = Deno.env.get('SUPABASE_URL');
 
-  const { data } = supabaseClient.storage.from('avatars').createSignedUrl(path, 3600);
+export async function getPublicUrlForPath(path: string): Promise<string> {
+  const localUrl = Deno.env.get('SUPABASE_URL') ?? "";
 
-  if (data?.publicUrl) {
-    const publicUrl = data.publicUrl.replace(
-      'http://kong:8000/storage/v1',
-      localUrl + '/storage/v1'
-    );
-    console.log('Public URL:', publicUrl);
-    return publicUrl;
-  }
-
-  const { data: signedData, error } = await supabaseClient.storage
+  const { data, error } = await supabaseClient.storage
     .from('avatars')
     .createSignedUrl(path, 3600);
 
@@ -156,13 +146,19 @@ export async function getPublicUrlForPath(path: string): string {
     throw error;
   }
 
-  const correctedUrl = signedData?.signedUrl?.replace(
-    'http://kong:8000/storage/v1',
-    localUrl + '/storage/v1'
-  ) || path;
+  if (!data?.signedUrl) {
+    throw new Error("No signed URL returned");
+  }
 
-  return correctedUrl;
+  const publicUrl = data.signedUrl.replace(
+    'http://kong:8000/storage/v1',
+    `${localUrl}/storage/v1`
+  );
+
+  console.log('Public URL:', publicUrl);
+  return publicUrl;
 }
+
 
 export async function addUserToEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
   const { data, error } = await supabaseClient.from('event_members')
