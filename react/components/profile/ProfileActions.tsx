@@ -5,7 +5,6 @@ import {
   Pencil,
   Settings as SettingsIcon,
   LogOut,
-  KeyRound,
   UserPlus,
   UserMinus,
 } from 'lucide-react-native';

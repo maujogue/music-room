@@ -13,6 +13,7 @@ import {
   followUser,
   unfollowUser,
 } from '@/services/profile';
+import { connectToSpotify } from '@/services/auth';
 
 interface ProfileContextType {
   profile: UserInfo | null;
@@ -27,6 +28,7 @@ interface ProfileContextType {
   clearProfile: () => void;
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
+  connectSpotify: () => Promise<{ error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -202,9 +204,20 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const connectSpotify = async (): Promise<{ error: any }> => {
+    try {
+      await connectToSpotify();
+      return { error: null };
+    } catch (error) {
+      console.error('Error during Spotify OAuth:', error);
+      return { error };
+    }
+  };
+
   const value: ProfileContextType = {
     profile,
     isConnectedToSpotify,
+    connectSpotify,
     isLoading,
     followers,
     following,

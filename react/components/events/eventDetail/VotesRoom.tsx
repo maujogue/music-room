@@ -7,6 +7,7 @@ import { VStack } from '@/components/ui/vstack';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import useWebSocketClient, { TrackVote } from '@/hooks/useWebSocketClient';
+import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
 import { useEffect, useState } from 'react';
 import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
@@ -14,6 +15,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppToast } from '@/hooks/useAppToast';
 import EventGuest from '@/components/track/votes/EventGuest';
 import { useIsFocused } from '@react-navigation/native';
+import { useProfile } from '@/contexts/profileCtx';
+import { Button, ButtonText } from '@/components/ui/button';
+import { HStack } from '@/components/ui/hstack';
+import { RefreshCw } from 'lucide-react-native';
+
 
 interface Props {
   eventId: string;
@@ -21,7 +27,9 @@ interface Props {
 }
 
 export default function VotesRoom({ eventId, onRefresh }: Props) {
-  const { data, loading, error } = useEvent(eventId);
+  const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
+  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const {
     connected,
     disconnect,
@@ -44,6 +52,7 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     playlist,
     loading: ploading,
     error: perror,
+    refetch: prefetch,
   } = usePlaylist(data ? data.playlist?.id : null);
 
   useEffect(() => {
@@ -91,6 +100,55 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     }
   }, [connected, connectionAttempts, reconnect]);
 
+    const handleConnectSpotify = async () => {
+    try {
+      const { error } = await connectSpotify();
+      if (error) {
+        throw error;
+      }
+      setTimeout(async () => {
+        refreshProfile().then(() => {
+          refetch();
+          prefetch();
+        });
+      }, 500);
+    } catch (error) {
+      toast.error({
+        title: 'Spotify Connection Error',
+        description: (error as Error).message,
+        duration: 3000,
+      });
+    }
+  };
+
+  if (!isConnectedToSpotify) {
+    return (
+      <ErrorScreen
+        error='You need to connect your Spotify account to view playlist details.'
+        actionButton={
+          <HStack space='md' className='items-center justify-center'>
+            <Button onPress={handleConnectSpotify}>
+              <ButtonText>
+                Connect Spotify
+              </ButtonText>
+            </Button>
+            <Button 
+              onPress={() => {
+                refreshProfile();
+                refetch();
+                prefetch();
+              }}
+              className='rounded-full'
+              variant='link'
+            >
+              <RefreshCw size={20}/>
+            </Button>
+          </HStack>
+
+        }
+      />
+    );
+  }
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
   }
@@ -98,10 +156,64 @@ export default function VotesRoom({ eventId, onRefresh }: Props) {
     return <LoadingSpinner text=">Loading event's playlist" />;
   }
   if (!data || error) {
-    return <ErrorScreen error={error} />;
+    return <ErrorScreen 
+      error={error}
+      actionButton={
+        <Button onPress={refetch}>
+          <ButtonText>
+            Retry
+          </ButtonText>
+        </Button>
+      }
+     />;
   }
   if (perror || !playlist) {
-    return <ErrorScreen error={perror} />;
+    return (
+      <>
+        <ErrorScreen
+          error={perror}
+          actionButton={
+            !playlist && !data.playlist?.id ? (
+              <Button onPress={() => setIsPlaylistModalOpen(true)} className='mt-8'>
+                <ButtonText>Set Playlist</ButtonText>
+              </Button>
+            ) : (
+              <Button onPress={refetch}>
+                <ButtonText>
+                  Retry
+                </ButtonText>
+              </Button>
+            )}
+        />
+        <PlaylistSelectionModal
+          isOpen={isPlaylistModalOpen}
+          onClose={() => setIsPlaylistModalOpen(false)}
+          onSelect={async (playlist) => {
+            try {
+              const payload = {
+                ...data.event,
+                location: data.location,
+                playlist_id: playlist.id,
+              } as MusicEventPayload;
+              await updateEvent(payload);
+              setIsPlaylistModalOpen(false);
+              toast.show({
+                title: 'Playlist set',
+                description: 'Event playlist updated successfully.',
+                duration: 3000,
+              });
+            } catch (e: any) {
+              console.error('Failed to set playlist on event', e);
+              toast.error({
+                title: 'Error',
+                description: e?.message ?? 'Failed to set playlist',
+                duration: 4000,
+              });
+            }
+          }}
+        />
+      </>
+    );
   }
 
   const onTrackSwipe = (dir: string, trackId: string) => {
