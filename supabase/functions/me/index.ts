@@ -16,6 +16,13 @@ const app = new Hono();
 
 serve(app.fetch);
 
+declare module '@hono/hono' {
+  interface ContextVariableMap {
+    user: Awaited<ReturnType<typeof getCurrentUser>>;
+    spotify_token: Awaited<ReturnType<typeof getUserSpotifyToken>>;
+  }
+}
+
 app.use('*', async (c: Context, next) => {
   try {
     const user = await getCurrentUser(c.req);
@@ -24,7 +31,10 @@ app.use('*', async (c: Context, next) => {
     c.set('spotify_token', token);
     await next();
   } catch (err) {
-    return c.json({ error: err.message }, 401);
+    const message = typeof err === 'object' && err !== null && 'message' in err
+      ? (err as { message: string }).message
+      : String(err);
+    return c.json({ error: message }, 401)
   }
 });
 

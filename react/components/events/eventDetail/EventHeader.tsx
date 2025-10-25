@@ -48,10 +48,6 @@ export default function EventHeader({
     eventData.event.image_url || 'https://picsum.photos/111'
   );
 
-  const handleMemberAvatarGroupPress = () => {
-    setShowMembersDrawer(true);
-  };
-
   const handleCloseMembersDrawer = () => {
     setShowMembersDrawer(false);
   };
@@ -174,7 +170,7 @@ export default function EventHeader({
             <EventLocationInfo location={eventData.location} />
             <EventDatesInfos
               event={eventData.event}
-              coordinates={eventData.location.coordinates}
+              coordinates={eventData.location?.coordinates}
             />
           </HStack>
         </Animated.View>

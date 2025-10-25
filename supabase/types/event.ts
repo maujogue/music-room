@@ -1,3 +1,7 @@
+import type { PlaylistRow } from './playlist.ts';
+
+export type EventRole = 'owner' | 'member' | 'inviter' | 'voter' | 'collaborator' | null;
+
 export interface EventResponse {
   id: string;
   name: string;
@@ -7,12 +11,45 @@ export interface EventResponse {
   everyone_can_vote: boolean;
   description?: string;
   playlist_id?: string;
-  location: EventLocation;
+  location?: EventLocation;
   playlistId: string;
+  members: EventMember[];
+  playlist?: PlaylistRow;
+  user: {
+    role: EventRole;
+    can_edit: boolean;
+    can_delete: boolean;
+    can_invite: boolean;
+    can_vote: boolean;
+  }
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
 };
+
+export interface EventMember {
+  id: string;
+  event_id: string;
+  user_id: string;
+  joined_at: string;
+  profile: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url?: string;
+    music_genre?: string;
+  };
+  role: EventRole;
+}
+
+export interface SpotifyOwner {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+}
+
+
 
 interface Coordinates {
   lat: number;

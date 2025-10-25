@@ -22,7 +22,12 @@ import {
   checkPermission,
   PERMISSIONS,
 } from './permissions.ts'
-import type { EventPayload } from '@event';
+import type { 
+  EventPayload, 
+  EventResponse,
+  EventMember
+ } from '@event';
+import type { User } from '@user';
 
 export async function createEvent(c: Context): Promise<Response> {
   const contentTypeHeader = c.req.header('content-type') || ''
@@ -54,9 +59,6 @@ export async function createEvent(c: Context): Promise<Response> {
   }
 
   const event = await createSupabaseEvent(payload, c.get('user').id)
-  if (!event) {
-    throw new HTTPException(500, { message: 'Failed to create event' })
-  }
 
   c.status(201)
   return c.json(event)
@@ -126,56 +128,57 @@ export async function fetchEvent(c: Context): Promise<Response> {
     console.error('Error resolving public url for image:', err);
   }
 
-  data = setUserPermissions(data, user)
+  event = setUserPermissions(event, user)
 
   c.status(200)
-  return c.json(data)
+  return c.json(event)
 }
 
-function setUserPermissions(data: any, user: any) {
-  const memberEvent = data.members.find((m: any) => m.profile.id === user.id)
+function setUserPermissions(event: EventResponse, user: User): EventResponse 
+{
+  const memberEvent = event.members.find((m: EventMember) => m.profile.id === user.id)
 
-  if (data.event.owner_id === user.id) {
-    data.user = {
+  if (event.owner.id === user.id) {
+    event.user = {
       role: 'owner',
       can_edit: true,
       can_delete: true,
       can_invite: true,
       can_vote: true
     }
-    return data
+    return event
   }
 
-  if (!memberEvent && data.event.is_private) {
+  if (!memberEvent && event.is_private) {
     throw new HTTPException(403, { message: 'You do not have permission to view this private event' })
   }
 
   if (!memberEvent) {
-    data.user = {
+    event.user = {
       role: null,
       can_edit: false,
       can_delete: false,
-      can_invite: data.event.is_private ? false : true,
-      can_vote: data.event.everyone_can_vote
+      can_invite: event.is_private ? false : true,
+      can_vote: event.everyone_can_vote
     }
-    return data
+    return event
   }
 
-  data.user = {
+  event.user = {
     role: memberEvent.role,
     can_edit: false,
     can_delete: false,
-    can_invite: data.event.is_private ? false : true,
-    can_vote: data.event.everyone_can_vote
+    can_invite: event.is_private ? false : true,
+    can_vote: event.everyone_can_vote
   }
 
-  if (data.event.is_private) {
-    data.user.can_invite = (memberEvent.role === 'inviter' || memberEvent.role === 'collaborator')
+  if (event.is_private) {
+    event.user.can_invite = (memberEvent.role === 'inviter' || memberEvent.role === 'collaborator')
   }
-  if (data.event.everyone_can_vote) {
-    data.user.can_vote = (memberEvent.role === 'voter' || memberEvent.role === 'collaborator')
+  if (event.everyone_can_vote) {
+    event.user.can_vote = (memberEvent.role === 'voter' || memberEvent.role === 'collaborator')
   }
-  return data
+  return event
 }
 
 export async function deleteEventById(c: Context): Promise<Response> {
@@ -256,7 +259,6 @@ export async function addUserToEvent(c: Context): Promise<Response> {
     body.user_id = user.id
   }
   await checkPermission(eventId, user.id, PERMISSIONS.ADD_USER)
-  console.log('Body in addUserToEvent:', body);
   const validation = validateAddUserPayload(body)
   if (!validation.valid) {
     throw new HTTPException(400, { message: validation.message })
@@ -264,7 +266,7 @@ export async function addUserToEvent(c: Context): Promise<Response> {
 
   const { user_id, role } = body
   await addUserToEventSupabase(eventId, user_id, role)
-  return c.json({ message: 'User added to event successfully', data: result })
+  return c.json({ message: 'User added to event successfully'})
 }
 
 export async function removeUserFromEvent(c: Context): Promise<Response> {
