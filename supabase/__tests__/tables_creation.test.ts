@@ -7,7 +7,7 @@ import 'jsr:@std/dotenv/load'
 
 // Set up the configuration for the Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-const supabaseKey = Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? ''
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 const options = {
   auth: {
     autoRefreshToken: false,
