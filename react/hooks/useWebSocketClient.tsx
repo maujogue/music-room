@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { getSession } from '@/services/session';
+import { useAppToast } from '@/hooks/useAppToast';
+
 
 export interface TrackVote {
   eventId: string;
@@ -53,6 +55,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
   const connectionAttemptsRef = useRef<number>(0);
+  const toast = useAppToast();
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
   const pingInterval = 60000;
@@ -85,11 +88,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const initWebSocket = useCallback(async () => {
     try {
       if (!shouldReconnectRef.current) {
-        // reconnections disabled (app backgrounded or manually stopped)
         console.log('ws: init aborted — reconnection disabled');
         return;
       }
-      // Nettoyer les timeouts précédents
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -182,7 +183,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
               console.log('📋 Subscribed to event:', data.eventId);
               break;
             case 'error':
-              console.error('❌ Server error:', data.message);
+              setLastError(data.message);
               break;
             case 'pong':
               console.log('🏓 Pong received - connection alive');
@@ -192,6 +193,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
               break;
             case 'vote:confirmed':
               sendRequestUserInfo();
+              break;
+            case 'unvote:error':
+              setLastError(data.message);
               break;
             case 'unvote:confirmed':
               sendRequestUserInfo();

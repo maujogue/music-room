@@ -88,6 +88,16 @@ export default function VotesRoom({ eventId }: Props) {
   }, [connected, reconnect]);
 
   useEffect(() => {
+    if (lastError) {
+      toast.error({
+        title: 'Vote error',
+        description: lastError,
+        duration: 3000,
+      });
+    }
+  }, [lastError]);
+
+  useEffect(() => {
     setRealtimeVotes(trackVotes);
   }, [trackVotes]);
 
@@ -245,7 +255,16 @@ export default function VotesRoom({ eventId }: Props) {
 
       sendVote(eventId, trackId);
     } else {
-      sendUnvote(eventId, trackId);
+      if (eventUserData?.voted_tracks[trackId]) {
+        sendUnvote(eventId, trackId);
+      }
+      else {
+        toast.show({
+          title: 'Cannot unvote',
+          description: 'You have not voted for this track',
+          duration: 3000,
+        });
+      }
     }
   };
 

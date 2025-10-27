@@ -223,10 +223,16 @@ export async function handleUnvote(
       .single();
 
     if (fetchError || !existingVote) {
-      console.error('Unvote fetch error:', fetchError);
+      const formatError = formatDbError(fetchError);
+      if (formatError.status === 404) {
+        return {
+          success: false,
+          message: 'Vote not found'
+        };
+      }
       return {
         success: false,
-        message: 'Failed to fetch vote record'
+        message: formatError.message
       };
     }
 
@@ -241,7 +247,7 @@ export async function handleUnvote(
     if (!res.success) {
       return {
         success: false,
-        message: res.message
+        message: res.message ? res.message : 'Failed to unvote'
       };
     }
 

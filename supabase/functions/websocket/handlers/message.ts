@@ -141,7 +141,7 @@ async function handleGetVoteMessage(
       message: result.message
     });
   } else {
-    sendErrorMessage(socket, result.message);
+    sendErrorMessage(socket, result.message ? result.message : 'Unknown error');
   }
 }
 
