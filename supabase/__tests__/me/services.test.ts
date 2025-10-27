@@ -4,7 +4,7 @@ import {
   startPlayback,
   pausePlayback,
   skipToNextTrack,
-} from '../../functions/me/services/spotify.js';
+} from '../../functions/me/services/spotify.ts';
 
 import 'jsr:@std/dotenv/load'
 
