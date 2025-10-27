@@ -8,14 +8,17 @@ import {
 
 import 'jsr:@std/dotenv/load'
 
+
 const spotifyToken = Deno.env.get('TEST_SPOTIFY_TOKEN') ?? '';
 if (!spotifyToken) {
     throw new Error('spotifyToken is required.');
 };
 
 
+
 Deno.test('getCurrentUserPlaylists returns playlists', async () => {
   const result = await getCurrentUserPlaylists(spotifyToken);
+  console.log(result.error)
   if (result.error) {
     throw new Error(result.error.message);
   }
@@ -41,7 +44,6 @@ Deno.test('getCurrentUserPlaylists returns invalid acces token error', async () 
     throw new Error('An error code should be return by getCurrentUserPlaylists');
   }
 });
-
 
 
 Deno.test('getCurrentUserPlayingTrack returns invalid acces token error', async () => {
@@ -95,4 +97,3 @@ Deno.test('skipToNextTrack returns invalid acces token error', async () => {
     throw new Error('This test expects a 403 status code');
   }
 });
-
