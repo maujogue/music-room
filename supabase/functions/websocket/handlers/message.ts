@@ -141,7 +141,7 @@ async function handleGetVoteMessage(
       message: result.message
     });
   } else {
-    sendErrorMessage(socket, result.message);
+    sendErrorMessage(socket, result.message ? result.message : 'Unknown error');
   }
 }
 
@@ -171,6 +171,7 @@ async function handleVoteMessage(
 }
 
 function isVoteMessage(message: WebSocketMessage): message is VoteMessage {
+  console.log('Checking if message is a vote message:', message);
   return message.type === 'vote' &&
          typeof message.eventId === 'string' &&
          typeof message.trackId === 'string';

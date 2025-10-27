@@ -15,6 +15,7 @@ import EventHeader from './eventDetail/EventHeader';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { ScrollView } from 'react-native';
+import EventActions from '@/components/events/EventActions';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -23,12 +24,18 @@ export default function EventDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
+  const [displayInviteButton, setDisplayInviteButton] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
+
+  useEffect(() => {
+    setDisplayInviteButton(data?.user?.can_invite ?? false);
+    console.log('event data changed:', data);
+  }, [data]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -67,29 +74,37 @@ export default function EventDetail() {
   }
 
   return (
-    <ScrollView>
-      <VStack className='flex-1'>
-        <EventHeader
-          eventData={data}
-          expanded={expanded}
-          onToggle={onToggleHeader}
-          onRefresh={refetch}
+    <>
+      <ScrollView>
+        <VStack className='flex-1'>
+          <EventHeader
+            eventData={data}
+            expanded={expanded}
+            onToggle={onToggleHeader}
+            onRefresh={refetch}
+          />
+
+          {/* Votes / Guests tabs */}
+          <Center className='flex-1'>
+            <VotesRoom eventId={eventId} />
+          </Center>
+          {/* ------------------ */}
+        </VStack>
+
+        <DeleteAlert
+          showAlertDialog={showAlertDialog}
+          setShowAlertDialog={setShowAlertDialog}
+          onDelete={onDeleteEvent}
+          itemName={data.event.name ?? 'event'}
+          itemType='event'
         />
-
-        {/* Votes / Guests tabs */}
-        <Center className='flex-1'>
-          <VotesRoom eventId={eventId} onRefresh={refetch}/>
-        </Center>
-        {/* ------------------ */}
-      </VStack>
-
-      <DeleteAlert
-        showAlertDialog={showAlertDialog}
-        setShowAlertDialog={setShowAlertDialog}
-        onDelete={onDeleteEvent}
-        itemName={data.event.name ?? 'event'}
-        itemType='event'
+      </ScrollView>
+      <EventActions
+        displayInviteButton={displayInviteButton}
+        eventId={eventId}
+        eventData={data}
+        onUpdated={refetch}
       />
-    </ScrollView>
+    </>
   );
 }

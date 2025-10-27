@@ -2,7 +2,7 @@ import { Hono } from 'jsr:@hono/hono'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts'
+import { getCurrentUser, getUserSpotifyToken } from './utils.ts'
 import authRoutes from './routes.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!

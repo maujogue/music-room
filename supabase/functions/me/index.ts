@@ -4,18 +4,26 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { Hono } from 'jsr:@hono/hono';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js';
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
-import { getCurrentUser, getUserSpotifyToken } from '../auth.ts';
+import { Hono } from '@hono/hono';
+import { serve } from '@deno/server';
+import { HTTPException } from '@hono/http-exception';
+import { getCurrentUser, getUserSpotifyToken } from '@auth/utils';
 import meRoutes from './routes.ts';
+import { Context } from "node:vm";
+import type { StatusCode } from "@hono/hono/utils/http-status";
 
 const app = new Hono();
 
 serve(app.fetch);
 
-app.use('*', async (c, next) => {
+declare module '@hono/hono' {
+  interface ContextVariableMap {
+    user: Awaited<ReturnType<typeof getCurrentUser>>;
+    spotify_token: Awaited<ReturnType<typeof getUserSpotifyToken>>;
+  }
+}
+
+app.use('*', async (c: Context, next) => {
   try {
     const user = await getCurrentUser(c.req);
     const token = await getUserSpotifyToken(user.id);
@@ -23,14 +31,18 @@ app.use('*', async (c, next) => {
     c.set('spotify_token', token);
     await next();
   } catch (err) {
-    return c.json({ error: err.message }, 401);
+    const message = typeof err === 'object' && err !== null && 'message' in err
+      ? (err as { message: string }).message
+      : String(err);
+    return c.json({ error: message }, 401)
   }
 });
 
 app.onError((err, c) => {
   console.error('Error occurred:', err);
   if (err instanceof HTTPException) {
-    return err.getResponse();
+    c.status(err.status as StatusCode);
+    return c.json({ message: err.message });
   }
   return c.json(
     {

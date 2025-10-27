@@ -373,7 +373,7 @@ BEGIN
                 'tracks', COALESCE(
             (SELECT json_agg(
             json_build_object(
-                'spotify_id', pt.track_id,
+                'track_id', pt.track_id,
                 'position', pt.position,
                 'added_by', pt.added_by,
                 'added_at', pt.added_at

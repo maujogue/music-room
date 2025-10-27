@@ -11,7 +11,6 @@ import { deleteItemFromPlaylist } from '@/services/playlist';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
-import AddTrackItem from '@/components/track/AddTrackItem';
 
 interface Props {
   playlistId: string;
@@ -95,13 +94,9 @@ export default function TrackList({
   return (
     <View style={styles.container}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        {!isSpotifySync && canEdit && (
-          <AddTrackItem playlistId={playlistId} playlistTitle={playlistTitle} />
-        )}
-
         {tracks.map((item, index) => (
           <TrackListItem
-            key={item.spotify_id || `track-${index}`}
+            key={item.track_id || `track-${index}`}
             track={item.details}
             renderRightAction={
               isSpotifySync
@@ -109,7 +104,7 @@ export default function TrackList({
                 : () => (
                     <Reanimated.View style={[styles.deleteAction]}>
                       <View className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={TrashIcon} color='white' size={6} />
+                        <Icon as={TrashIcon} color='white' size={'xl'} />
                       </View>
                     </Reanimated.View>
                   )
@@ -117,7 +112,7 @@ export default function TrackList({
             onSwipeableOpen={
               isSpotifySync
                 ? undefined
-                : () => handleSwipeableOpen(item.spotify_id)
+                : () => handleSwipeableOpen(item.track_id)
             }
           />
         ))}

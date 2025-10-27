@@ -49,8 +49,8 @@ export default function PlaylistListItem({ playlist, onPress }: Props) {
               {playlist.name}
             </Heading>
             <HStack className='gap-2'>
-              {playlist.is_collaborative && (<CollaborativeBadge />)}
-              {playlist.is_private && (<PrivateBadge />)}
+              {playlist.is_collaborative && <CollaborativeBadge />}
+              {playlist.is_private && <PrivateBadge />}
             </HStack>
           </HStack>
           {playlist.owner?.username && (

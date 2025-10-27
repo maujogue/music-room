@@ -1,6 +1,7 @@
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
+import { HTTPException } from '@hono/http-exception'
 import { getSupabaseEventById } from './service.ts'
-import { EventResponse } from '../../types/event.ts'
+import type { EventResponse, EventMember } from '@event';
+
 
 export const ROLES = {
   MEMBER: "member",
@@ -21,12 +22,12 @@ export const PERMISSIONS = {
   EDIT_EVENT: "edit_event",
 } as const;
 
-export function getUserRoleInEvent(event: any, userId: string): string | null {
+export function getUserRoleInEvent(event: EventResponse, userId: string): string | null {
   if (event.owner.id === userId) {
     return ROLES.OWNER;
   }
 
-  const member = event.members?.find((member: any) => member.id === userId);
+  const member = event.members?.find((member: EventMember) => member.id === userId);
   if (member) {
     switch (member.role) {
       case 'member':
@@ -48,7 +49,7 @@ export function getUserRoleInEvent(event: any, userId: string): string | null {
 export function canUserPerformAction(
   role: string | null,
   permission: string,
-  event: any
+  event: EventResponse
 ): boolean {
   switch (permission) {
     case PERMISSIONS.READ_EVENT:
@@ -86,9 +87,6 @@ export function canUserPerformAction(
         return false;
       }
       return true;
-
-    case PERMISSIONS.DELETE_EVENT:
-      return role === ROLES.OWNER;
 
     case PERMISSIONS.UPDATE_USER_ROLE:
       return role === ROLES.OWNER;
@@ -128,7 +126,7 @@ export async function checkPermission(
   return event;
 }
 
-export async function checkEventAccess(event: EventResponse, userId: string) {
+export function checkEventAccess(event: EventResponse, userId: string) {
   if (!event) {
     throw new HTTPException(404, { message: 'Event not found' });
   }
