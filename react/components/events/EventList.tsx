@@ -4,6 +4,7 @@ import EventListItem from '@/components/events/EventListItem';
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import FloatButton from '@/components/generics/FloatButton';
+import { Radar } from 'lucide-react-native';
 
 type Props = {
   sections: MusicEventSection[];
@@ -13,6 +14,10 @@ export default function EventList({ sections }: Props) {
   const router = useRouter();
   const handlePressCreateEvent = () => {
     router.push('/events/add');
+  };
+
+  const handlePressEventRadar = () => {
+    router.push('/events/radar');
   };
   return (
     <>
@@ -33,6 +38,7 @@ export default function EventList({ sections }: Props) {
         />
       </ScrollView>
       <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
+      <FloatButton onPress={handlePressEventRadar} classNames="absolute bottom-20 border-2 border-pink-500 right-4 rounded-full p-4 blurred-bg" icon={Radar} />
     </>
   );
 }
