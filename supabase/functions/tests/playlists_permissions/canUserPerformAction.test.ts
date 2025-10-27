@@ -4,7 +4,7 @@ import {
   ROLES,
   PERMISSIONS,
   canUserPerformAction,
-} from "../../functions/playlists/permissions.ts";
+} from "../../../functions/playlists/permissions.ts";
 
 
 

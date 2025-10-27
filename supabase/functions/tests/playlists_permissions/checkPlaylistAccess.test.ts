@@ -1,6 +1,6 @@
 import { assertRejects, assertStrictEquals } from "https://deno.land/std@0.203.0/testing/asserts.ts";
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { checkPlaylistAccess } from "../../functions/playlists/permissions.ts";
+import { checkPlaylistAccess } from "../../../functions/playlists/permissions.ts";
 
 const valid_playlist = {
   id: "playlistId",

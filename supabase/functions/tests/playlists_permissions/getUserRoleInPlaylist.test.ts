@@ -3,7 +3,7 @@ import { assertStrictEquals } from "https://deno.land/std@0.203.0/testing/assert
 import {
   ROLES,
   getUserRoleInPlaylist,
-} from "../../functions/playlists/permissions.ts";
+} from "../../../functions/playlists/permissions.ts";
 
 
 Deno.test("returns OWNER if userId is the owner's", () => {

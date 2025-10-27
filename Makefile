@@ -231,12 +231,21 @@ test: test-react test-supabase test-supabase-sql
 test-react:
 	cd ${REACT_APP_DIR} && npm test
 
-test-supabase:
-	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net __tests__/**/*.test.ts __tests__/*.test.ts
+test-supabase-cloud:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+
+test-supabase-local:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
 
 test-supabase-sql:
 	@echo "🧪 Running SQL database tests..."
 	cd ${SUPABASE_DIR} && supabase test db
+
+test-supabase-sql-cloud:
+	@echo "🧪 Running SQL database tests..."
+	cd ${SUPABASE_DIR} && supabase test db --linked
 
 deploy:
 	npx supabase db push
