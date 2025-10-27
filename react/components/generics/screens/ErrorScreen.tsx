@@ -6,6 +6,8 @@ import { Center } from '@/components/ui/center';
 import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Heading } from '@/components/ui/heading';
+import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
+import { useAuth } from '@/contexts/authCtx';
 
 interface Props {
   error: string | null;
@@ -16,6 +18,12 @@ export default function ErrorScreen({
   error,
   text = 'Please try again later.',
 }: Props) {
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
   return (
     <Center className='flex-1 p-24'>
       <Card className='items-center rounded-xl'>
@@ -27,6 +35,7 @@ export default function ErrorScreen({
           <Heading className='text-red-700 text-center'>
             There is a wrong note in your music room
           </Heading>
+
           <Badge size='sm' action={'error'} className='rounded-full h-6'>
             <BadgeIcon size='lg' as={Music2Icon} />
             <BadgeIcon size='lg' as={TriangleAlertIcon} />
@@ -42,6 +51,17 @@ export default function ErrorScreen({
             </Text>
           </VStack>
         </HStack>
+        <VStack space='md' className='mt-6 w-full'>
+          <Button
+            action='negative'
+            variant='solid'
+            onPress={handleLogout}
+            className='w-full'
+          >
+            <ButtonIcon size='sm' />
+            <ButtonText>Logout</ButtonText>
+          </Button>
+        </VStack>
       </Card>
     </Center>
   );
