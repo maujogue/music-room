@@ -277,7 +277,7 @@ export default function VotesRoom({ eventId }: Props) {
                     {Object.entries(eventUserData.voted_tracks).map(
                       ([trackId, voteCount]) => {
                         const track = playlist?.tracks?.find(
-                          (t: any) => t.spotify_id === trackId
+                          (t: PlaylistTrack) => t.track_id === trackId
                         );
                         return track ? (
                           <VotedTrack

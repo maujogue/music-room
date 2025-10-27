@@ -27,7 +27,7 @@ export function useVoteCountIndex(eventId: string) {
   // };
 
   const getTrackId = (track: PlaylistTrack) => {
-    return track.spotify_id;
+    return track.track_id;
   };
 
   const getTopTracksFrom = (

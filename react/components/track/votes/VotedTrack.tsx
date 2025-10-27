@@ -63,7 +63,7 @@ export default function VotedTrack({
       rightThreshold={75}
     >
       <Card
-        key={track.spotify_id}
+        key={track.track_id}
         className='bg-white rounded border-l-4 border-blue-500'
       >
         <HStack>

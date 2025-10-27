@@ -327,6 +327,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       return false;
     }
 
+    console.log(`ws: sending vote for track ${trackId} in event ${eventId}`);
     try {
       const message = {
         type: 'vote',

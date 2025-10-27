@@ -103,8 +103,10 @@ export async function fetchPlaylistItems(c: Context): Promise<Response> {
   }
 
   if (playlist.tracks && playlist.tracks.length !== 0) {
+    console.log(playlist.tracks)
     const trackIds = playlist.tracks.map((track: PlaylistTrack) => track.track_id)
     await refreshSpotifyToken(user.id)
+    console.log("tracksIds:", trackIds)
     const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
 
 
