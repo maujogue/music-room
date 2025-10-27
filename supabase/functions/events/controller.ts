@@ -58,10 +58,10 @@ export async function createEvent(c: Context): Promise<Response> {
     }
   }
 
-  const event = await createSupabaseEvent(payload, c.get('user').id)
+  await createSupabaseEvent(payload, c.get('user').id)
 
   c.status(201)
-  return c.json(event)
+  return c.json({ message: 'Event created successfully'})
 }
 
 function createPayloadFromFormData(
