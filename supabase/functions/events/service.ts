@@ -172,3 +172,19 @@ export async function editUserInEventSupabase(
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 }
+
+export async function getSupabaseEventByCoordinates(lat: number, long: number) {
+  const { data, error } = await supabaseClient.rpc('get_events_by_location', {
+    lat,
+    long,
+    range_km: 100
+  });
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}

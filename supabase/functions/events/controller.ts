@@ -9,7 +9,8 @@ import {
   uploadEventImage,
   addUserToEventSupabase,
   removeUserFromEventSupabase,
-  editUserInEventSupabase
+  editUserInEventSupabase,
+  getSupabaseEventByCoordinates
 } from './service.ts'
 import {
   validateEventPayload,
@@ -309,4 +310,14 @@ export async function editUserInEvent(c: Context): Promise<Response> {
   return c.json({ message: 'User edited in event successfully' })
 }
 
+export async function getEventsByCoordinates(c: Context): Promise<Response> {
+  const lat = c.req.param('lat')
+  const long = c.req.param('long')
 
+  if (!lat || !long) {
+    throw new HTTPException(400, { message: 'Missing latitude or longitude' })
+  }
+
+  const events = await getSupabaseEventByCoordinates(Number(lat), Number(long))
+  return c.json(events)
+}

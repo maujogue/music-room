@@ -35,13 +35,9 @@ export async function getEventById(id: string) {
 
 export async function getEventsWithRadar(coord: Coordinates) {
   const res = await apiFetch<MusicEventFetchResult[]>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/radar`,
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/radar?lat=${coord.lat}&long=${coord.long}`,
     {
       method: 'GET',
-      // TODO : check meilleur moyen d'envoyer coordonnees
-      body: {
-        
-      }
     }
   );
 
