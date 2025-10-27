@@ -9,9 +9,14 @@ import type {
   PlaylistMember
  } from '@playlist';
 
+import 'jsr:@std/dotenv/load'
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseKey = Deno.env.get('SUPABASE_PUBLISHABLE_KEY');
+
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  supabaseUrl!,
+  supabaseKey!
 );
 
 export async function getSupabasePlaylistByOwner(ownerId: string): Promise<any[]> {
@@ -35,7 +40,7 @@ export async function createPlaylistInSupabase(
   const { data, error } = await supabase.from('playlists')
     .insert([{
       owner_id,
-      name: payload.name,
+      name: payload.title,
       description: payload.description,
       cover_url: payload.cover_url,
       is_private: payload.is_private,
@@ -138,7 +143,7 @@ export async function editPlaylistSupabaseById(
 ): Promise<void> {
   const { error } = await supabase.from('playlists')
     .update({
-      name: payload.name,
+      name: payload.title,
       description: payload.description,
       is_private: payload.is_private,
       is_collaborative: payload.is_collaborative,

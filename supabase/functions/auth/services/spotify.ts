@@ -4,7 +4,7 @@ const redirect_uri = `${spotify_redirect_uri}/functions/v1/auth/spotify/callback
 const client_id = Deno.env.get('SPOTIFY_CLIENT_ID')!;
 const client_secret = Deno.env.get('SPOTIFY_CLIENT_SECRET')!;
 
-export async function fetchSpotifyUserTokenData(code: string): Promise<void> {
+export async function fetchSpotifyUserTokenData(code: string): Promise<any> {
   const bodyParams = new URLSearchParams();
   bodyParams.append('code', code);
   bodyParams.append('redirect_uri', redirect_uri);
@@ -27,7 +27,6 @@ export async function fetchSpotifyUserTokenData(code: string): Promise<void> {
     const errorText = await response.text();
     throw new Error('Error fetching access token: ' + errorText);
   }
-
   return await response.json();
 }
 

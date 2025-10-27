@@ -50,7 +50,7 @@ help:
 install:
 	@echo "📦 Installing dependencies..."
 	cd ${REACT_APP_DIR} && npx expo install
-	cd ${REACT_APP_DIR} && npm install --save-dev
+	cd ${REACT_APP_DIR} && npm install --save-dev babel-plugin-module-resolver
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
@@ -226,8 +226,28 @@ prod-ios:
 	cd ${REACT_APP_DIR} && cp .env.prod .env
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
-test:
+test: test-react test-supabase-local test-supabase-sql-local
+
+test-cloud: test-react test-supabase-cloud test-supabase-sql-cloud
+
+test-react:
 	cd ${REACT_APP_DIR} && npm test
+
+test-supabase-cloud:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+
+test-supabase-local:
+	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
+	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+
+test-supabase-sql-local:
+	@echo "🧪 Running SQL database tests..."
+	cd ${SUPABASE_DIR} && supabase test db
+
+test-supabase-sql-cloud:
+	@echo "🧪 Running SQL database tests..."
+	cd ${SUPABASE_DIR} && supabase test db --linked
 
 deploy:
 	npx supabase db push
