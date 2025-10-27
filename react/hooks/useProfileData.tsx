@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
 import { connectToSpotify } from '@/services/auth';
 import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
-import { PrivacySetting } from '@/types/user';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
@@ -19,7 +18,8 @@ export function useProfileData(userId: string) {
   } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
-  const [otherUserData, setOtherUserData] = useState<any>(null);
+  const [otherUserData, setOtherUserData] =
+    useState<UserProfileWithFollows | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,15 +29,14 @@ export function useProfileData(userId: string) {
     ? 'own'
     : !otherUserData
       ? 'public'
-      : otherUserData.profile?.privacy_setting === 'public'
+      : otherUserData.privacy_setting === 'public'
         ? 'public'
-        : otherUserData.profile?.privacy_setting === 'friends' &&
-            otherUserData.is_friend
+        : otherUserData.privacy_setting === 'friends' && otherUserData.is_friend
           ? 'friends'
           : 'private';
 
   // Use appropriate data source
-  const profile = isOwnProfile ? ownProfile : otherUserData?.profile;
+  const profile = isOwnProfile ? ownProfile : otherUserData;
   const profileFollowers = isOwnProfile
     ? followers
     : otherUserData?.followers || [];
@@ -68,6 +67,7 @@ export function useProfileData(userId: string) {
         setError('User not found');
         return;
       }
+      console.log('Loaded user profile data:', data);
       setOtherUserData(data);
     } catch (err) {
       setError('Failed to load profile');
@@ -121,9 +121,9 @@ export function useProfileData(userId: string) {
 
       try {
         if (otherUserData?.is_following) {
-          await unfollowUser(otherUserData.profile.id);
+          await unfollowUser(otherUserData.id);
         } else {
-          await followUser(otherUserData.profile.id);
+          await followUser(otherUserData!.id);
         }
         await loadUserData();
       } catch (error) {

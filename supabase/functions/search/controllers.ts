@@ -4,20 +4,23 @@ import {
 	searchEventsByQuery,
 	searchPlaylistsByQuery
  } from './services/supabase.ts'
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { refreshSpotifyToken } from '../auth.ts';
+import { HTTPException } from '@hono/http-exception';
+import { refreshSpotifyToken } from '@auth/utils';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
+import { Context } from '@hono/hono';
+import type { ProfileWithFollowInfo } from '@profile';
+import type { PlaylistResponse } from "@playlist";
+import type { EventResponseReduced } from '@event';
+import type { SpotifyTrackResponse, TrackResponse } from '@track';
 
 export async function search(c: Context) {
 	const user = c.get('user')
 	const spotify_token = c.get('spotify_token')
 	const { q, type, limit, offset } = c.req.query()
-	let {
-		trackResults,
-		playlistResults,
-		userResults,
-		eventResults
-	} = []
+	let userResults: ProfileWithFollowInfo[] = []
+	let playlistResults: PlaylistResponse[] = []
+	let eventResults: EventResponseReduced[] = []
+	let trackResults: TrackResponse[] = []
 
 	console.log('Search params:', { q, type, limit, offset });
 	if (!q) {
@@ -30,23 +33,23 @@ export async function search(c: Context) {
 	}
 	if (type === 'track') {
 		await refreshSpotifyToken(user.id);
-		trackResults = await searchTracks(spotify_token, { query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
+		trackResults = await searchTracks(spotify_token, { query: q, limit, offset})
 	}
 	if (type === 'playlist' || type === 'all') {
-		playlistResults = await searchPlaylistsByQuery({ query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
+		playlistResults = await searchPlaylistsByQuery({ query: q, limit, offset})
+		console.log('Playlist results:', playlistResults);
 	}
 	if (type === 'user' || type === 'all') {
-		userResults = await searchUsersByQuery(user.id, { query: q, limit: Number(limit) || 20 })
+		userResults = await searchUsersByQuery(user.id, { query: q, limit, offset})
 	}
 	if (type === 'event' || type === 'all') {
-		eventResults = await searchEventsByQuery({ query: q, limit: Number(limit) || 20, offset: Number(offset) || 0 })
-		eventResults = await Promise.all(eventResults.map(async event => {
+		eventResults = await searchEventsByQuery({ query: q, limit, offset })
+		eventResults = await Promise.all(eventResults.map(async (event) => {
 			if (event.image_url) {
 				event.image_url = await getPublicUrlForPath(event.image_url)
 			}
 			return event
 		}))
-		console.log('Event results after processing:', eventResults);
 	}
 
 	c.status(200)
@@ -58,11 +61,14 @@ export async function search(c: Context) {
 	})
 }
 
-async function searchTracks(spotify_token: string, params: { query: string, limit: string, offset: string }) {
+async function searchTracks(
+	spotify_token: string, 
+	params: { query: string, limit: string, offset: string })
+	: Promise<TrackResponse[]> {
 	console.log('Searching tracks with params:', params);
-	const trackResults = await fetchSpotifySearch(spotify_token, { ...params, type: 'track' })
-	if (trackResults.error) {
-		throw new HTTPException(trackResults.error.status || 500, { message: trackResults.error.message || 'Unknown error from Spotify API' })
+	const res: SpotifyTrackResponse = await fetchSpotifySearch(spotify_token, { ...params, type: 'track' })
+	if (res.error) {
+		throw new HTTPException(res.error.status || 500, { message: res.error.message || 'Unknown error from Spotify API' })
 	}
-	return trackResults
+	return res.tracks
 }

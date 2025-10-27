@@ -34,9 +34,15 @@ export default function EditEvent() {
     }
   };
 
-  if (loading) { return (<LoadingSpinner text="Loading event..." />); }
-  if (error) { return (<ErrorScreen error={error} />); }
-  if (!data) { return (<ErrorScreen error={"impossible to retrieve event data yet."} />); }
+  if (loading) {
+    return <LoadingSpinner text='Loading event...' />;
+  }
+  if (error) {
+    return <ErrorScreen error={error} />;
+  }
+  if (!data) {
+    return <ErrorScreen error={'impossible to retrieve event data yet.'} />;
+  }
 
   return (
     <EditEventForm

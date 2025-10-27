@@ -1,4 +1,3 @@
-import { apiFetch } from '@/utils/apiFetch';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useProfile } from '@/contexts/profileCtx';

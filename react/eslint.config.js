@@ -2,10 +2,7 @@ const js = require('@eslint/js');
 const typescript = require('typescript-eslint');
 
 module.exports = [
-  js.configs.recommended,
-  ...typescript.configs.recommended,
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
     ignores: [
       'node_modules/**',
       'build/**',
@@ -14,7 +11,13 @@ module.exports = [
       '.expo-shared/**',
       'android/**',
       'ios/**',
+      '__tests__/**',
     ],
+  },
+  js.configs.recommended,
+  ...typescript.configs.recommended,
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {

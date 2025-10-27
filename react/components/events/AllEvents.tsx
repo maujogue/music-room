@@ -16,7 +16,7 @@ export default function AllEvents() {
   const router = useRouter();
   const handlePressCreateEvent = () => {
     router.push('/events/add');
-  }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -25,9 +25,10 @@ export default function AllEvents() {
   );
 
   if (loading) return <LoadingSpinner text='Loading events' />;
-  if (!profile) return <LoadingSpinner text='Events loading but profile error...' />;
+  if (!profile)
+    return <LoadingSpinner text='Events loading but profile error...' />;
   if (error) return <ErrorScreen error={error} />;
-  if (!events) return <ErrorScreen error={"Impossible to fetch events"} />;
+  if (!events) return <ErrorScreen error={'Impossible to fetch events'} />;
 
   const sections = [
     {
@@ -36,14 +37,13 @@ export default function AllEvents() {
     },
   ];
 
-
   if (events.length === 0) {
     return (
       <Box>
         <EmptyState
           source={emptyPng}
-          title="No events"
-          subtitle="Nothing on the radar, only dust and empty bullets."
+          title='No events'
+          subtitle='Nothing on the radar, only dust and empty bullets.'
           text="What a sadness ! Let's create a supa-event as soon as possible !"
           onPressCta={handlePressCreateEvent}
         />

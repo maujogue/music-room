@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Box } from '@/components/ui/box';
 import {
   Avatar,
@@ -11,8 +10,7 @@ import {
 import { Image } from '@/components/ui/image';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
-import { UserRoundPlus } from 'lucide-react-native';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import { Pressable } from '@/components/ui/pressable';
@@ -112,8 +110,8 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
           <HStack className='justify-between items-center'>
             <Heading size='4xl'>{playlist.name}</Heading>
             <HStack className='gap-2'>
-              {playlist.is_collaborative && (<CollaborativeBadge />)}
-              {playlist.is_private ? (<PrivateBadge />) : null}
+              {playlist.is_collaborative && <CollaborativeBadge />}
+              {playlist.is_private ? <PrivateBadge /> : null}
             </HStack>
           </HStack>
           {playlist?.description ? (
@@ -136,16 +134,6 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
               </Text>
             </HStack>
             <HStack>
-              {playlist.user.can_invite && (
-                <Button
-                  size='lg'
-                  className='rounded-full p-3.5 w-10'
-                  variant='outline'
-                  onPress={handleInviteUserPress}
-                >
-                  <ButtonIcon as={UserRoundPlus} size='sm' />
-                </Button>
-              )}
               {(() => {
                 const allUsers = [
                   ...(playlist.members || []),
