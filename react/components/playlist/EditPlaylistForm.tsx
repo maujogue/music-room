@@ -123,6 +123,7 @@ export default function EditPlayListForm({
                 marginBottom: 10,
               }}
               resizeMode='cover'
+              alt ="Playlist's cover image"
             />
           ) : (
             <Box

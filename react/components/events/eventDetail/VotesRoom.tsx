@@ -122,7 +122,7 @@ export default function VotesRoom({ eventId }: Props) {
     return <LoadingSpinner text="Loading event's data" />;
   }
   if (ploading) {
-    return <LoadingSpinner text=">Loading event's playlist" />;
+    return <LoadingSpinner text="Loading event's playlist" />;
   }
   if (!data || error) {
     return (

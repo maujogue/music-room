@@ -6,7 +6,6 @@ type MusicEvent = {
   name: string;
   owner_id: string;
   owner: SpotifyOwner;
-  isPublic: boolean;
   playlist: Playlist;
   is_private: boolean;
   everyone_can_vote: boolean;

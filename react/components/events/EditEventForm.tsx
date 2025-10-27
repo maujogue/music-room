@@ -219,6 +219,7 @@ export default function EditEventForm({
                     marginBottom: 10,
                   }}
                   resizeMode='cover'
+                  alt ="Event's image"
                 />
               ) : (
                 <Box

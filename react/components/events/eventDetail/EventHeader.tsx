@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Image } from '@/components/ui/image';
+import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
@@ -134,7 +135,7 @@ export default function EventHeader({
                       <Box />
                     )}
                     <HStack className='gap-1'>
-                      {!eventData.event.isPublic && <PrivateBadge />}
+                      {eventData.event.is_private && <PrivateBadge />}
                       {eventData.event.everyone_can_vote && (
                         <CollaborativeBadge />
                       )}
