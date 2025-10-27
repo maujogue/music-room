@@ -5,6 +5,8 @@ import { Button, ButtonIcon } from '@/components/ui/button';
 import { AddIcon } from '@/components/ui/icon';
 import { Image } from '@/components/ui/image';
 import { Box } from '@/components/ui/box';
+import { HStack } from '@/components/ui/hstack';
+import { ReactNode } from 'react';
 
 type EmptyStateProps = {
   source: any;
@@ -15,6 +17,7 @@ type EmptyStateProps = {
   onPressCta?: () => void;
   testID?: string;
   compact?: boolean;
+  addedCTA?: ReactNode;
 };
 
 export default function EmptyState({
@@ -25,6 +28,7 @@ export default function EmptyState({
   onPressCta,
   testID = 'empty-state',
   compact = false,
+  addedCTA,
 }: EmptyStateProps) {
   const vstackClass = compact
     ? 'absolute h-full gap-20 px-10 py-40'
@@ -52,18 +56,22 @@ export default function EmptyState({
             </Text>
           </Box>
         </VStack>
-
         {onPressCta ? (
-          <Box className='w-auto self-center bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
-            <Button
-              size='lg'
-              className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
-              action='primary'
-              onPress={onPressCta}
-            >
-              <ButtonIcon size='xl' className='w-10 h-10' as={AddIcon} />
-            </Button>
-          </Box>
+          <HStack className='gap-8 justify-center w-full'>
+            <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
+                <Button
+                  size='lg'
+                  className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
+                  action='primary'
+                  onPress={onPressCta}
+                >
+                  <ButtonIcon size='xl' className='w-10 h-10' as={AddIcon} />
+                </Button>
+            </Box>
+              <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
+              {addedCTA}
+              </Box>
+            </HStack>
         ) : null}
       </VStack>
     </Center>

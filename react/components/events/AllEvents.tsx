@@ -9,13 +9,20 @@ import EmptyState from '@/components/generics/screens/EmptyStateScreen';
 import emptyPng from '@/assets/empty-events.png';
 import { useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
+import { Button, ButtonIcon } from '@/components/ui/button';
+import { Radar } from 'lucide-react-native';
 
 export default function AllEvents() {
   const { events, refetch, loading, error } = useUserEvents();
   const { profile } = useProfile();
   const router = useRouter();
+
   const handlePressCreateEvent = () => {
     router.push('/events/add');
+  };
+
+  const handlePressEventRadar = () => {
+    router.push('/events/radar');
   };
 
   useFocusEffect(
@@ -37,6 +44,18 @@ export default function AllEvents() {
     },
   ];
 
+  const radarEventButon = () => {
+    return (
+      <Button size='lg'
+              className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
+              action='primary'
+              onPress={handlePressEventRadar}
+            >
+        <ButtonIcon size='xl' className='w-14 h-14' as={Radar} />
+      </Button>
+    )
+  } 
+
   if (events.length === 0) {
     return (
       <Box>
@@ -46,6 +65,7 @@ export default function AllEvents() {
           subtitle='Nothing on the radar, only dust and empty bullets.'
           text="What a sadness ! Let's create a supa-event as soon as possible !"
           onPressCta={handlePressCreateEvent}
+          addedCTA={radarEventButon()}
         />
       </Box>
     );
