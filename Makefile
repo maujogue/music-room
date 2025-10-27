@@ -226,13 +226,17 @@ prod-ios:
 	cd ${REACT_APP_DIR} && cp .env.prod .env
 	cd ${REACT_APP_DIR} && npx expo run:ios
 
-test: test-react test-supabase
+test: test-react test-supabase test-supabase-sql
 
 test-react:
 	cd ${REACT_APP_DIR} && npm test
 
 test-supabase:
 	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net __tests__/**/*.test.ts __tests__/*.test.ts
+
+test-supabase-sql:
+	@echo "🧪 Running SQL database tests..."
+	cd ${SUPABASE_DIR} && supabase test db
 
 deploy:
 	npx supabase db push
