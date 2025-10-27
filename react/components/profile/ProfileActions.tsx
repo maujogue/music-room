@@ -1,16 +1,33 @@
-import React from 'react';
-import { View } from 'react-native';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Icon, SettingsIcon, CloseIcon } from '@/components/ui/icon';
+import React, { useState } from 'react';
+import { Pressable } from 'react-native';
+import FloatButton from '../generics/FloatButton';
 import {
-  Menu,
-  MenuItem,
-  MenuItemLabel,
-  MenuSeparator,
-} from '@/components/ui/menu';
+  Pencil,
+  Settings as SettingsIcon,
+  LogOut,
+  UserPlus,
+  UserMinus,
+} from 'lucide-react-native';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerBackdrop,
+  DrawerHeader,
+  DrawerBody,
+  DrawerCloseButton,
+} from '@/components/ui/drawer';
+import { Icon, CloseIcon } from '@/components/ui/icon';
+import { Heading } from '@/components/ui/heading';
+import { Button, ButtonText } from '@/components/ui/button';
+import { HStack } from '@/components/ui/hstack';
+import { VStack } from '@/components/ui/vstack';
+import { Divider } from '@/components/ui/divider';
+import { Box } from '@/components/ui/box';
+import { useProfile } from '@/contexts/profileCtx';
+import { Text } from '@/components/ui/text';
 
 interface ProfileActionsProps {
-  canEdit: boolean;
+  isOwner: boolean;
   editProfile: boolean;
   isFollowing?: boolean;
   actions: {
@@ -22,71 +39,104 @@ interface ProfileActionsProps {
 }
 
 export default function ProfileActions({
-  canEdit,
+  isOwner,
   editProfile,
   isFollowing,
   actions,
 }: ProfileActionsProps) {
+  const [showDrawer, setShowDrawer] = useState(false);
+  const { isConnectedToSpotify } = useProfile();
+
   return (
     <>
-      {/* Settings and Edit Profile Buttons - Only for own profile */}
-      {canEdit && (
-        <View className='flex-row justify-between mt-2 w-full gap-3'>
-          {/* Settings Menu */}
-          <View className='flex-1'>
-            <Menu
-              trigger={({ ...triggerProps }) => (
-                <Button
-                  {...triggerProps}
-                  variant='outline'
-                  className='w-full border-primary-500'
-                >
-                  <ButtonText className='text-primary-500'>Settings</ButtonText>
-                </Button>
-              )}
-            >
-              <MenuItem
-                textValue='Connect Spotify Account'
-                onPress={actions.handleSpotifyConnect}
-              >
-                <Icon as={SettingsIcon} size='sm' className='mr-3' />
-                <MenuItemLabel>Connect Spotify Account</MenuItemLabel>
-              </MenuItem>
-              <MenuSeparator />
-              <MenuItem textValue='Logout' onPress={actions.signOut}>
-                <Icon as={CloseIcon} size='sm' className='mr-3' />
-                <MenuItemLabel>Logout</MenuItemLabel>
-              </MenuItem>
-            </Menu>
-          </View>
+      {isOwner ? (
+        <Box>
+          <FloatButton
+            icon={editProfile ? CloseIcon : Pencil}
+            onPress={actions.handleEditToggle}
+            className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+          />
 
-          {/* Edit Profile Button */}
-          <View className='flex-1'>
-            <Button
-              className={`w-full ${editProfile ? 'bg-success-500' : 'bg-primary-500'}`}
-              onPress={actions.handleEditToggle}
-            >
-              <ButtonText className='text-white'>
-                {editProfile ? 'Save' : 'Edit Profile'}
-              </ButtonText>
-            </Button>
-          </View>
-        </View>
+          <FloatButton
+            icon={SettingsIcon}
+            onPress={() => setShowDrawer(true)}
+            className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
+          />
+        </Box>
+      ) : (
+        <FloatButton
+          icon={isFollowing ? UserMinus : UserPlus}
+          onPress={actions.handleFollowAction || (() => {})}
+          className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
+        />
       )}
 
-      {/* Follow Button - Only for other users */}
-      {!canEdit && actions.handleFollowAction && (
-        <Button
-          variant={isFollowing ? 'outline' : 'solid'}
-          onPress={actions.handleFollowAction}
-          className={isFollowing ? 'border-primary-500' : 'bg-primary-500'}
-        >
-          <ButtonText
-            className={isFollowing ? 'text-primary-500' : 'text-white'}
+      {showDrawer && (
+        <>
+          <Pressable onPress={() => setShowDrawer(false)} />
+          <Drawer
+            isOpen={showDrawer}
+            size='lg'
+            anchor='bottom'
+            onClose={() => {
+              setShowDrawer(false);
+            }}
           >
-            {isFollowing ? 'Unfollow' : 'Follow'}
-          </ButtonText>
-        </Button>
+            <DrawerBackdrop />
+            <DrawerContent>
+              <DrawerHeader>
+                <Heading size='xl'>Settings</Heading>
+                <DrawerCloseButton>
+                  <Icon as={CloseIcon} />
+                </DrawerCloseButton>
+              </DrawerHeader>
+              <Divider />
+              <DrawerBody className='gap-8'>
+                <VStack className='gap-2'>
+                  <Text className='text-md font-medium mb-2'>
+                    Connect Accounts
+                  </Text>
+                  <HStack className='justify-between items-center w-full'>
+                    <Text className='text-extra-lg font-semibold flex-1'>
+                      Spotify
+                    </Text>
+                    <Button
+                      onPress={actions.handleSpotifyConnect}
+                      disabled={isConnectedToSpotify}
+                      size='sm'
+                      className='w-[95px]'
+                    >
+                      <ButtonText size='xs'>
+                        {isConnectedToSpotify ? 'Connected' : 'Connect'}
+                      </ButtonText>
+                    </Button>
+                  </HStack>
+                  <HStack className='justify-between items-center w-full'>
+                    <Text className='text-extra-lg font-semibold flex-1'>
+                      Google
+                    </Text>
+                    <Button disabled={true} size='sm' className='w-[95px]'>
+                      <ButtonText size='xs'>Not Available</ButtonText>
+                    </Button>
+                  </HStack>
+                  <Divider />
+                  <Button
+                    variant='link'
+                    className='w-full justify-start'
+                    onPress={actions.signOut}
+                  >
+                    <HStack className='items-center justify-between w-full'>
+                      <HStack className='items-center gap-3'>
+                        <LogOut />
+                        <ButtonText>Logout</ButtonText>
+                      </HStack>
+                    </HStack>
+                  </Button>
+                </VStack>
+              </DrawerBody>
+            </DrawerContent>
+          </Drawer>
+        </>
       )}
     </>
   );

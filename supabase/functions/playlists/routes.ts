@@ -1,5 +1,4 @@
-import { Hono } from 'jsr:@hono/hono'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import { Hono } from '@hono/hono'
 import {
   deleteItemsFromPlaylist,
   addItemsToPlaylist,

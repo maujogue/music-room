@@ -4,17 +4,20 @@ import { VStack } from '@/components/ui/vstack';
 import { Card } from '@/components/ui/card';
 import { Center } from '@/components/ui/center';
 import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Heading } from '@/components/ui/heading';
+import React from 'react';
 
 interface Props {
   error: string | null;
   text?: string;
+  actionButton?: React.ReactNode;
 }
 
 export default function ErrorScreen({
   error,
   text = 'Please try again later.',
+  actionButton,
 }: Props) {
   return (
     <Center className='flex-1 p-24'>
@@ -32,8 +35,8 @@ export default function ErrorScreen({
             <BadgeIcon size='lg' as={TriangleAlertIcon} />
           </Badge>
         </HStack>
-        <HStack space='md' className='items-start'>
-          <VStack className=''>
+        <HStack space='md' className='items-start pb-8'>
+          <VStack>
             <Text size='md' className='font-semibold'>
               {error ? error : 'Unknown error broke the music'}
             </Text>
@@ -42,6 +45,7 @@ export default function ErrorScreen({
             </Text>
           </VStack>
         </HStack>
+        {actionButton}
       </Card>
     </Center>
   );

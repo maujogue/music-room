@@ -1,4 +1,3 @@
-// Add a client WebSocket connection for a user
 export function addClient(
   userId: string,
   ws: WebSocket,
@@ -13,7 +12,6 @@ export function addClient(
   console.log(`ws: client added for user ${userId}. Total connections: ${userSockets.size}`);
 }
 
-// Remove a client WebSocket connection for a user
 export function removeClient(
   userId: string,
   ws: WebSocket,
@@ -31,7 +29,6 @@ export function removeClient(
   }
 }
 
-// Get all connected clients for a user
 export function getUserClients(
   userId: string,
   clientsByUser: Map<string, Set<WebSocket>>
@@ -39,12 +36,10 @@ export function getUserClients(
   return clientsByUser.get(userId);
 }
 
-// Get total number of connected users
 export function getTotalConnectedUsers(clientsByUser: Map<string, Set<WebSocket>>): number {
   return clientsByUser.size;
 }
 
-// Get total number of WebSocket connections
 export function getTotalConnections(clientsByUser: Map<string, Set<WebSocket>>): number {
   let total = 0;
   for (const sockets of clientsByUser.values()) {

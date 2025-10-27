@@ -21,7 +21,7 @@ export default function PlaylistListItem({ playlist }: Props) {
 
   return (
     <View style={styles.container}>
-      <Image source={getImage()} style={styles.image} resizeMode='cover' />
+      <Image source={getImage()} style={styles.image} resizeMode='cover' alt="Playlist image cover" />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{playlist.name}</Text>
         {playlist.owner?.display_name && (

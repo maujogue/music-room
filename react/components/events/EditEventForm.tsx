@@ -22,7 +22,6 @@ import * as ImagePicker from 'expo-image-picker';
 import LocationPickerModal from '../generics/LocationPickerModal';
 import { parseLocation } from '@/utils/parsePointCoordinates';
 
-
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
   ApiError: string;
@@ -64,7 +63,9 @@ export default function EditEventForm({
   const initialLocation = parseLocation(initialValues?.location); // TODO : check l'initialisation
   const [isLocationOpen, setLocationOpen] = useState(false);
   const [location, setLocation] = useState<PickedPlace | null>(initialLocation);
-  const [venueName, setVenueName] = useState(initialValues?.location?.venuename ?? '');
+  const [venueName, setVenueName] = useState(
+    initialValues?.location?.venuename ?? ''
+  );
   // const [complement, setComplement] = useState(
   //   initialLocation.complement ?? ''
   // );
@@ -73,7 +74,6 @@ export default function EditEventForm({
   // const [country, setCountry] = useState(initialLocation.country ?? '');
 
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
@@ -126,8 +126,11 @@ export default function EditEventForm({
       const path = `${Date.now()}.${fileExt}`;
 
       console.log('Uploading to path:', path);
-      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
-    } catch (error) {
+      toast.show({
+        title: 'uploaded playlist cover',
+        description: `Uploading to ${path}`,
+      });
+    } catch {
       toast.error({ title: 'uploading event image failed' });
     } finally {
       setUploading(false);
@@ -157,22 +160,26 @@ export default function EditEventForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
-    const getLoc = location ? {
-      id: initialValues?.location?.id,
-      event_id: initialValues?.event?.id,
-      venuename: venueName.trim() || null,
-      address: location?.address ?? null,
-      complement: location?.street ?? null,
-      city: location?.city ?? null,
-      country: location?.country ?? null,
-      coordinates: `(${location?.latitude},${location?.longitude})`,
-    } : null;
+    const getLoc = location
+      ? {
+          id: initialValues?.location?.id,
+          event_id: initialValues?.event?.id,
+          venuename: venueName.trim() || null,
+          address: location?.address ?? null,
+          complement: location?.street ?? null,
+          city: location?.city ?? null,
+          country: location?.country ?? null,
+          coordinates: `(${location?.latitude},${location?.longitude})`,
+        }
+      : null;
 
-    const getLocFallback = venueName ? {
-      id: initialValues?.location?.id,
-      event_id: initialValues?.event?.id,
-      venuename: venueName.trim() || null,
-    } : null;
+    const getLocFallback = venueName
+      ? {
+          id: initialValues?.location?.id,
+          event_id: initialValues?.event?.id,
+          venuename: venueName.trim() || null,
+        }
+      : null;
 
     const payload: MusicEventPayload = {
       name: name.trim(),
@@ -186,13 +193,10 @@ export default function EditEventForm({
     } as any;
 
     try {
-      setLoading(true);
       console.log('Submitting payload:', payload);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -215,6 +219,7 @@ export default function EditEventForm({
                     marginBottom: 10,
                   }}
                   resizeMode='cover'
+                  alt ="Event's image"
                 />
               ) : (
                 <Box
@@ -232,7 +237,7 @@ export default function EditEventForm({
                 disabled={uploading}
                 className='mb-2 absolute right-2 top-2 z-10 rounded-full w-12 h-12 p-1.5 bg-primary-500/70 '
               >
-                <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
+                <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
               </Button>
 
               <Box className='p-4 pt-0'>
@@ -298,7 +303,9 @@ export default function EditEventForm({
                   </HStack>
                 </VStack>
 
-                <Text className='mt-2 font-semibold'>Beginning Date & Time</Text>
+                <Text className='mt-2 font-semibold'>
+                  Beginning Date & Time
+                </Text>
                 <HStack className='gap-2 mb-2'>
                   <Button
                     size='sm'
@@ -328,7 +335,6 @@ export default function EditEventForm({
                   />
                 )}
 
-
                 {/* ---------- LOCATION ----------- */}
                 <Text className='mt-2 font-semibold'>Place name</Text>
                 <Input className='bg-white'>
@@ -343,20 +349,25 @@ export default function EditEventForm({
                 <Box>
                   {location ? (
                     <Box>
-                      <Text>{location.address ?? "No address place"}</Text>
-                      <Text size="xs">
-                        {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                      <Text>{location.address ?? 'No address place'}</Text>
+                      <Text size='xs'>
+                        {location.latitude.toFixed(6)},{' '}
+                        {location.longitude.toFixed(6)}
                       </Text>
                     </Box>
                   ) : (
                     <Text>No location selected</Text>
                   )}
 
-                  <Button action="primary" onPress={() => setLocationOpen(true)}>
-                    <ButtonText>{location ? "Change event's place" : "Set event's place"}</ButtonText>
+                  <Button
+                    action='primary'
+                    onPress={() => setLocationOpen(true)}
+                  >
+                    <ButtonText>
+                      {location ? "Change event's place" : "Set event's place"}
+                    </ButtonText>
                   </Button>
                 </Box>
-
 
                 {/*
                 <Text className='mt-2'>Complement</Text>
@@ -433,11 +444,15 @@ export default function EditEventForm({
       <LocationPickerModal
         isOpen={isLocationOpen}
         onClose={() => setLocationOpen(false)}
-        onConfirm={(val) => {
-          console.log("Lieu choisi détaillé :", val);
+        onConfirm={val => {
+          console.log('Lieu choisi détaillé :', val);
           setLocation(val);
         }}
-        initialCoords={location ? { latitude: location.latitude, longitude: location.longitude } : undefined}
+        initialCoords={
+          location
+            ? { latitude: location.latitude, longitude: location.longitude }
+            : undefined
+        }
       />
     </>
   );

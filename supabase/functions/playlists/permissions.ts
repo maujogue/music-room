@@ -1,10 +1,12 @@
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
 import { getSupabasePlaylistById } from './services/supabase.ts'
+import { PlaylistResponse, PlaylistCollaborator, PlaylistMember } from "@playlist";
 
 export const ROLES = {
   MEMBER: "member",
   COLLABORATOR: "collaborator",
   OWNER: "owner",
+  NONE: "none",
 } as const;
 
 export const PERMISSIONS = {
@@ -18,25 +20,27 @@ export const PERMISSIONS = {
   DELETE_SONG: "delete_song",
 } as const;
 
-export function getUserRoleInPlaylist(playlist: any, userId: string): string | null {
+export function getUserRoleInPlaylist(
+  playlist: PlaylistResponse, userId: string): 
+  'owner' | 'collaborator' | 'member' | 'none' {
   if (playlist.owner.id === userId) {
     return ROLES.OWNER;
   }
 
-  const collaborator = playlist.collaborators?.find((collab: any) => collab.id === userId);
+  const collaborator = playlist.collaborators?.find((collab: PlaylistCollaborator) => collab.id === userId);
   if (collaborator) {
     return ROLES.COLLABORATOR;
   }
 
-  const member = playlist.members?.find((member: any) => member.id === userId);
+  const member = playlist.members?.find((member: PlaylistMember) => member.id === userId);
   if (member) {
     return ROLES.MEMBER;
   }
 
-  return null;
+  return ROLES.NONE;
 }
 
-export function canUserPerformAction(role: string | null, permission: string, playlist: any): boolean {
+export function canUserPerformAction(role: string | null, permission: string, playlist: PlaylistResponse): boolean {
   switch (permission) {
     case PERMISSIONS.READ_PLAYLIST:
       if (!playlist.is_private) {
@@ -57,7 +61,6 @@ export function canUserPerformAction(role: string | null, permission: string, pl
       return role === ROLES.OWNER;
 
     case PERMISSIONS.ADD_USER:
-      if (playlist.can_invite === false) return false;
       if (!playlist.is_private) {
         return true;
       }
@@ -100,7 +103,7 @@ export async function checkPermission(playlistId: string, userId: string, permis
   return playlist;
 }
 
-export async function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) {
+export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) {
   if (!playlist) {
     throw new HTTPException(404, { message: 'Playlist not found' });
   }

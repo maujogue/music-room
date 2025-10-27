@@ -29,6 +29,7 @@ export default function useSearchGlobal(
     normalizeFilter(initialFilter)
   );
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<HttpError | null>(null);
   const [results, setResults] = useState<any>({});
 
   const setFilter = (f: Filters | string) => {
@@ -58,13 +59,23 @@ export default function useSearchGlobal(
       const res: any = await apiFetch<any>(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/search?q=${uriQuery}&type=${uriFilter}`
       );
+      console.log('search results', res);
       if (res?.success) {
+        setError(null);
         setResults(res.data || {});
       } else {
+        setError({
+          message: 'Failed to fetch search results',
+          status: res.status,
+        });
         setResults({});
       }
     } catch (err) {
       console.error('search error', err);
+      setError({
+        message: 'Failed to fetch search results',
+        status: 500,
+      });
       setResults({});
     } finally {
       setLoading(false);
@@ -79,5 +90,6 @@ export default function useSearchGlobal(
     onChangeFilter,
     loading,
     results,
+    error,
   } as const;
 }

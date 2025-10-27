@@ -1,5 +1,10 @@
 import React from 'react';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
+import {
+  render,
+  fireEvent,
+  waitFor,
+  screen,
+} from '@testing-library/react-native';
 import Register from '../app/(auth)/register';
 import { useAuth } from '../contexts/authCtx';
 import { useRouter } from 'expo-router';
@@ -22,7 +27,7 @@ jest.mock('@/components/ui/button', () => ({
         onPress={onPress}
         disabled={disabled}
         testID={testID}
-        accessibilityRole="button"
+        accessibilityRole='button'
         {...props}
       >
         {children}
@@ -40,7 +45,7 @@ jest.mock('@/components/ui/input', () => ({
     const MockView = require('react-native').View;
     return <MockView>{children}</MockView>;
   },
-  InputField: (props) => {
+  InputField: props => {
     const MockTextInput = require('react-native').TextInput;
     return <MockTextInput {...props} />;
   },
@@ -215,7 +220,11 @@ describe('Register Component', () => {
     fireEvent.press(signUpButton);
 
     await waitFor(() => {
-      expect(mockSignUp).toHaveBeenCalledWith('testuser', 'test@example.com', 'password123');
+      expect(mockSignUp).toHaveBeenCalledWith(
+        'testuser',
+        'test@example.com',
+        'password123'
+      );
       expect(mockSignUp).toHaveBeenCalledTimes(1);
     });
   });
@@ -391,7 +400,7 @@ describe('Register Component', () => {
     const buttons = await screen.findAllByRole('button');
 
     expect(buttons).toHaveLength(2);
-  })
+  });
 
   it('renders the title "Register"', async () => {
     render(<Register />);
@@ -446,7 +455,9 @@ describe('Register Component', () => {
   it('renders login redirect button with correct text', async () => {
     render(<Register />);
 
-    const loginButton = await screen.findByText('Already have an account? Login');
+    const loginButton = await screen.findByText(
+      'Already have an account? Login'
+    );
 
     expect(loginButton).toBeTruthy();
   });
@@ -458,5 +469,4 @@ describe('Register Component', () => {
 
     expect(errorMessages).toHaveLength(0);
   });
-
 });

@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { createToastHook } from '@gluestack-ui/toast';
@@ -61,11 +60,11 @@ const toastTitleStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -132,11 +131,11 @@ const toastDescriptionStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -193,9 +192,9 @@ const ToastTitle = React.forwardRef<
     <Text
       {...props}
       ref={ref}
-      aria-live="assertive"
-      aria-atomic="true"
-      role="alert"
+      aria-live='assertive'
+      aria-atomic='true'
+      role='alert'
       className={toastTitleStyle({
         size,
         class: className,
@@ -239,5 +238,3 @@ ToastTitle.displayName = 'ToastTitle';
 ToastDescription.displayName = 'ToastDescription';
 
 export { useToast, Toast, ToastTitle, ToastDescription };
-
-

@@ -8,7 +8,6 @@ import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useRouter } from 'expo-router';
 import { UserRoundPlus } from 'lucide-react-native';
 
-
 interface Props {
   eventData: MusicEventFetchResult;
   onRefresh: () => void;
@@ -38,17 +37,17 @@ export default function TopVotesTracks({ eventData, onRefresh }: Props) {
           <AvatarGroup
             users={eventData.members.map(member => member.profile)}
             onPress={handleMemberAvatarGroupPress}
-            />
-            {eventData?.user?.can_invite && (
-              <Button
-                size='lg'
-                className='rounded-full p-3.5 w-10'
-                variant='outline'
-                onPress={handleInviteUserPress}
-              >
-                <ButtonIcon as={UserRoundPlus} size='sm' />
-              </Button>
-            )}
+          />
+          {eventData?.user?.can_invite && (
+            <Button
+              size='lg'
+              className='rounded-full p-3.5 w-10'
+              variant='outline'
+              onPress={handleInviteUserPress}
+            >
+              <ButtonIcon as={UserRoundPlus} size='sm' />
+            </Button>
+          )}
         </HStack>
       </HStack>
       <EventMembersDrawer

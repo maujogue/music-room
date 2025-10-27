@@ -29,7 +29,9 @@ export const PG_ERRORS: Record<string, PgErrorMap> = {
   "22P02": { message: "Invalid data format.", status: 400 },
   "22001": { message: "The value is too long.", status: 400 },
   "22007": { message: "Invalid date or time format.", status: 400 },
-  "22003": { message: "Number is out of range.", status: 400 }
+  "22003": { message: "Number is out of range.", status: 400 },
+
+  "PGRST116": { message: "Resource not found.", status: 404 }
 };
 
 export function formatDbError(error: any): { message: string; status: number } {
