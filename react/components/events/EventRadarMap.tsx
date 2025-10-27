@@ -5,6 +5,8 @@ import MapView, { Region } from "react-native-maps";
 import ErrorScreen from "@/components/generics/screens/ErrorScreen";
 import LoadingSpinner from "@/components/generics/screens/LoadingSpinner";
 import { useCurrentPosition } from "@/hooks/useCurrentPosition";
+import { useEventsRadar } from "@/hooks/useEventsRadar";
+import { EventMarker } from "@/components/events/EventMarker";
 
 type RadarProps = {
   radiusKm?: number;
@@ -22,19 +24,13 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
   } = useCurrentPosition({radiusKm})
 
   const { events, launchRadar, loading: radarLoading, error: radarError } = useEventsRadar(coords)
-  
 
-  if (loading) {
-    return (
-      <LoadingSpinner text={'Loading position'} />
-    );
-  }
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  if (error) {
-    return (
-      <ErrorScreen  error={error}/>
-    );
-  }
+  if (loading) { return (<LoadingSpinner text={'Loading position'} />);}
+  if (radarLoading) { return (<LoadingSpinner text={'Loading nearby events'} />);}
+  if (error) { return ( <ErrorScreen  error={error}/> );}
+  if (radarError) { return ( <ErrorScreen  error={error}/> );}
 
   return (
     <VStack className="h-full w-full">
@@ -51,6 +47,14 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
         showsUserLocation
         showsMyLocationButton
       >
+        {events.map((item) => (
+          <EventMarker
+            key={item.event.id}
+            item={item}
+            selected={item.event.id === selectedId}
+            onPress={setSelectedId}
+          />
+        ))}
       </MapView>
     </VStack>
   );
