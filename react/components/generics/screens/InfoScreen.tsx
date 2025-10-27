@@ -26,9 +26,7 @@ export default function InfoScreen({
           <Badge size='sm' action={'info'} className='rounded-full h-6'>
             <BadgeIcon size='lg' as={Music4Icon} />
           </Badge>
-          <Heading className='text-center'>
-            {title}
-          </Heading>
+          <Heading className='text-center'>{title}</Heading>
           <Badge size='sm' action={'info'} className='rounded-full h-6'>
             <BadgeIcon size='lg' as={Music2Icon} />
           </Badge>

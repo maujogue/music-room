@@ -41,7 +41,6 @@ export default function EditPlayListForm({
   const [imageUrl, setImageUrl] = useState(initialValues?.cover_url ?? null);
 
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
 
@@ -67,12 +66,9 @@ export default function EditPlayListForm({
     };
 
     try {
-      setLoading(true);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -106,7 +102,7 @@ export default function EditPlayListForm({
         title: 'uploaded playlist cover',
         description: `Uploading to ${path}`,
       });
-    } catch (error) {
+    } catch {
       toast.error({ title: 'uploading playlist cover image failed' });
     } finally {
       setUploading(false);
@@ -214,10 +210,7 @@ export default function EditPlayListForm({
         )}
 
         {/* Submit */}
-        <FloatButton
-          onPress={handlePressValid}
-          icon={CheckIcon}
-        />
+        <FloatButton onPress={handlePressValid} icon={CheckIcon} />
       </VStack>
     </FormControl>
   );

@@ -106,19 +106,21 @@ export default function TrackListVotes({
     return <ErrorScreen error={'no tracks to load'} />;
   }
   if (tracks.length === 0) {
-    return <InfoScreen 
-      title={'No Tracks Available'}
-      text={'Playlist chosen for event is empty'} 
-      actionButton={
-        <Button  onPress={() => {
-          router.push(`(main)/playlists/${playlistId}`);
-        }}>
-          <ButtonText className='text-center'>
-            Go to Playlist
-          </ButtonText>
-        </Button>
-      }
-    />;
+    return (
+      <InfoScreen
+        title={'No Tracks Available'}
+        text={'Playlist chosen for event is empty'}
+        actionButton={
+          <Button
+            onPress={() => {
+              router.push(`(main)/playlists/${playlistId}`);
+            }}
+          >
+            <ButtonText className='text-center'>Go to Playlist</ButtonText>
+          </Button>
+        }
+      />
+    );
   }
 
   return (

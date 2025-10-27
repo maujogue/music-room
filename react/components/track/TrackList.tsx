@@ -94,29 +94,28 @@ export default function TrackList({
   return (
     <View style={styles.container}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-
         {tracks.map((item, index) => (
           <TrackListItem
-          key={item.track_id || `track-${index}`}
-          track={item.details}
-          renderRightAction={
-            isSpotifySync
-            ? undefined
-            : () => (
-              <Reanimated.View style={[styles.deleteAction]}>
+            key={item.track_id || `track-${index}`}
+            track={item.details}
+            renderRightAction={
+              isSpotifySync
+                ? undefined
+                : () => (
+                    <Reanimated.View style={[styles.deleteAction]}>
                       <View className='flex-1 justify-center items-end w-full p-4'>
                         <Icon as={TrashIcon} color='white' size={'xl'} />
                       </View>
                     </Reanimated.View>
                   )
-                }
-                onSwipeableOpen={
-                  isSpotifySync
-                  ? undefined
-                  : () => handleSwipeableOpen(item.track_id)
-                }
-                />
-              ))}
+            }
+            onSwipeableOpen={
+              isSpotifySync
+                ? undefined
+                : () => handleSwipeableOpen(item.track_id)
+            }
+          />
+        ))}
       </GestureHandlerRootView>
     </View>
   );

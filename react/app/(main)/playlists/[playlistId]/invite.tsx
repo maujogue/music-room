@@ -43,7 +43,7 @@ export default function Invite() {
           description: `${selectedUser.username} has been invited as ${role}.`,
         });
         handleClose();
-      } catch (error) {
+      } catch {
         toast.error({ title: 'Invitation failed' });
       }
     }

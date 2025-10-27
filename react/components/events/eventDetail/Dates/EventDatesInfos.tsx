@@ -1,6 +1,4 @@
-import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { HStack } from '@/components/ui/hstack';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Calendar1Icon } from 'lucide-react-native';
 import { parsePointCoordinates } from '@/utils/parsePointCoordinates';

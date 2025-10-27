@@ -10,8 +10,7 @@ import {
 import { Image } from '@/components/ui/image';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
-import { UserRoundPlus } from 'lucide-react-native';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import { Pressable } from '@/components/ui/pressable';

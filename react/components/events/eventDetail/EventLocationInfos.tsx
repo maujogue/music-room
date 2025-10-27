@@ -1,10 +1,9 @@
-import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { MapPinIcon, ShellIcon } from 'lucide-react-native';
+import { ShellIcon } from 'lucide-react-native';
 import {
-  parsePointCoordinates,
+  // parsePointCoordinates,
   truncateAddress,
 } from '@/utils/parsePointCoordinates';
 
@@ -23,9 +22,9 @@ export default function EventLocationInfo({ location }: Props) {
     return null;
   }
 
-  const parsedCoordinates = coordinates
-    ? parsePointCoordinates(coordinates)
-    : null;
+  // const parsedCoordinates = coordinates
+  //   ? parsePointCoordinates(coordinates)
+  //   : null;
 
   return (
     <VStack className='gap-2'>

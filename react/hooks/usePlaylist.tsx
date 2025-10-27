@@ -65,13 +65,13 @@ export function usePlaylist(id: string | null) {
     }
   }, [id]);
 
-  return { 
-    playlist, 
-    loading, 
-    error, 
-    refetch, 
-    deletePlaylist, 
-    canEdit, 
-    canInvite 
+  return {
+    playlist,
+    loading,
+    error,
+    refetch,
+    deletePlaylist,
+    canEdit,
+    canInvite,
   };
 }

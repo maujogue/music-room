@@ -51,7 +51,6 @@ export const useEventDate = (
       ? fmtDayMonthNoYear(start)
       : fmtDayMonthYear(start);
 
-
     const startFull = showTime
       ? `${startDateLabel} ${fmtTime(start)}`
       : startDateLabel;

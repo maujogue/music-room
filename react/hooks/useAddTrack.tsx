@@ -16,10 +16,10 @@ export default function useAddTrack(playlistId: string) {
         duration: 1500,
         placement: 'top',
       });
-    } catch (error) {
-      toast.error({ 
-        title: 'Failed to add track to playlist', 
-        description: 'Please try again later.'
+    } catch {
+      toast.error({
+        title: 'Failed to add track to playlist:',
+        description: 'Please try again later.',
       });
     }
   };

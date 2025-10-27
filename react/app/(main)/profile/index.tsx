@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/authCtx';
 import Profile from '@/components/profile/Profile';
-import { ProfileProvider } from '@/contexts/profileCtx';
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -10,9 +9,5 @@ export default function ProfilePage() {
     return null;
   }
 
-  return (
-    <ProfileProvider>
-      <Profile userId={user.id} />
-    </ProfileProvider>
-  );
+  return <Profile userId={user.id} />;
 }

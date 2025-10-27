@@ -161,7 +161,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
             initWebSocket();
           }, reconnectDelay);
         } else {
-          console.log('ws: not reconnecting (intentional close or max attempts reached)');
+          console.log(
+            'ws: not reconnecting (intentional close or max attempts reached)'
+          );
         }
       };
 
@@ -250,7 +252,9 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       const active = nextAppState === 'active';
       if (!active) {
-        console.log('ws: app not active — closing socket and disabling reconnects');
+        console.log(
+          'ws: app not active — closing socket and disabling reconnects'
+        );
         shouldReconnectRef.current = false;
 
         if (reconnectTimeoutRef.current) {
@@ -500,11 +504,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     setConnectionAttempts(connectionAttemptsRef.current);
     setLastError(null);
     initWebSocket();
-  }, [
-    initWebSocket,
-    checkTokenValidity,
-    maxReconnectAttempts,
-  ]);
+  }, [initWebSocket, checkTokenValidity, maxReconnectAttempts]);
 
   const disconnect = useCallback(() => {
     console.log('ws: manual disconnect requested');

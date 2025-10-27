@@ -19,7 +19,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
 
-
 interface Props {
   eventId: string;
 }
@@ -98,7 +97,7 @@ export default function VotesRoom({ eventId }: Props) {
     }
   }, [connected, connectionAttempts, reconnect]);
 
-    const handleConnectSpotify = async () => {
+  const handleConnectSpotify = async () => {
     try {
       const { error } = await connectSpotify();
       if (error) {
@@ -126,16 +125,16 @@ export default function VotesRoom({ eventId }: Props) {
     return <LoadingSpinner text=">Loading event's playlist" />;
   }
   if (!data || error) {
-    return <ErrorScreen 
-    error={error}
-    actionButton={
-      <Button onPress={refetch}>
-          <ButtonText>
-            Retry
-          </ButtonText>
-        </Button>
-      }
-     />;
+    return (
+      <ErrorScreen
+        error={error}
+        actionButton={
+          <Button onPress={refetch}>
+            <ButtonText>Retry</ButtonText>
+          </Button>
+        }
+      />
+    );
   }
   if (perror || !playlist) {
     console.log('Playlist load error or missing playlist:', perror);
@@ -145,21 +144,23 @@ export default function VotesRoom({ eventId }: Props) {
           error={perror}
           actionButton={
             !playlist && !data.playlist?.id ? (
-              <Button onPress={() => setIsPlaylistModalOpen(true)} className='mt-8'>
+              <Button
+                onPress={() => setIsPlaylistModalOpen(true)}
+                className='mt-8'
+              >
                 <ButtonText>Set Playlist</ButtonText>
               </Button>
             ) : (
               <Button onPress={refetch}>
-                <ButtonText>
-                  Retry
-                </ButtonText>
+                <ButtonText>Retry</ButtonText>
               </Button>
-            )}
+            )
+          }
         />
         <PlaylistSelectionModal
           isOpen={isPlaylistModalOpen}
           onClose={() => setIsPlaylistModalOpen(false)}
-          onSelect={async (playlist) => {
+          onSelect={async playlist => {
             try {
               const payload = {
                 ...data.event,
@@ -186,7 +187,7 @@ export default function VotesRoom({ eventId }: Props) {
       </>
     );
   }
-  
+
   if (!isConnectedToSpotify) {
     return (
       <ErrorScreen
@@ -194,11 +195,9 @@ export default function VotesRoom({ eventId }: Props) {
         actionButton={
           <HStack space='md' className='items-center justify-center'>
             <Button onPress={handleConnectSpotify}>
-              <ButtonText>
-                Connect Spotify
-              </ButtonText>
+              <ButtonText>Connect Spotify</ButtonText>
             </Button>
-            <Button 
+            <Button
               onPress={() => {
                 refreshProfile();
                 refetch();
@@ -207,15 +206,14 @@ export default function VotesRoom({ eventId }: Props) {
               className='rounded-full'
               variant='link'
             >
-              <RefreshCw size={20}/>
+              <RefreshCw size={20} />
             </Button>
           </HStack>
-
         }
       />
     );
   }
-  
+
   const onTrackSwipe = (dir: string, trackId: string) => {
     if (!connected) {
       toast.error({
@@ -225,7 +223,7 @@ export default function VotesRoom({ eventId }: Props) {
       });
       return;
     }
-    
+
     if (!data?.event?.id) {
       toast.error({
         title: 'Cannot vote',

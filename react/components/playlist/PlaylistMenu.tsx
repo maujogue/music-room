@@ -15,7 +15,7 @@ export default function PlaylistMenu() {
       await syncSpotifyPlaylists();
       toast.show({ title: 'Synchronized with Spotify' });
       router.setParams({ refresh: String(Date.now()) });
-    } catch (error) {
+    } catch {
       toast.error({ title: 'Failed to sync playlists' });
     }
   };

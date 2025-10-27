@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById, getEventById, updateEvent} from '@/services/events';
+import { deleteEventById, getEventById, updateEvent } from '@/services/events';
 
 export function useEvent(id: string) {
   const [data, setData] = useState<MusicEventFetchResult | null>(null);
@@ -59,7 +59,7 @@ export function useEvent(id: string) {
       }
       setLoading(true);
       setError(null);
-      
+
       try {
         await updateEvent(id, payload);
         refetch();
@@ -74,5 +74,13 @@ export function useEvent(id: string) {
     [id]
   );
 
-  return { data, loading, error, setError, refetch, deleteEvent, updateEvent: handleUpdateEvent };
+  return {
+    data,
+    loading,
+    error,
+    setError,
+    refetch,
+    deleteEvent,
+    updateEvent: handleUpdateEvent,
+  };
 }

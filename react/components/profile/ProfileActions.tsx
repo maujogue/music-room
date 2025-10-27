@@ -93,8 +93,10 @@ export default function ProfileActions({
               <Divider />
               <DrawerBody className='gap-8'>
                 <VStack className='gap-2'>
-                  <Text className='text-md font-medium mb-2'>Connect Accounts</Text>
-                    <HStack className='justify-between items-center w-full'>
+                  <Text className='text-md font-medium mb-2'>
+                    Connect Accounts
+                  </Text>
+                  <HStack className='justify-between items-center w-full'>
                     <Text className='text-extra-lg font-semibold flex-1'>
                       Spotify
                     </Text>
@@ -105,24 +107,18 @@ export default function ProfileActions({
                       className='w-[95px]'
                     >
                       <ButtonText size='xs'>
-                      {isConnectedToSpotify ? 'Connected' : 'Connect'}
+                        {isConnectedToSpotify ? 'Connected' : 'Connect'}
                       </ButtonText>
                     </Button>
-                    </HStack>
-                    <HStack className='justify-between items-center w-full'>
+                  </HStack>
+                  <HStack className='justify-between items-center w-full'>
                     <Text className='text-extra-lg font-semibold flex-1'>
                       Google
                     </Text>
-                    <Button
-                      disabled={true}
-                      size='sm'
-                      className='w-[95px]'
-                    >
-                      <ButtonText size='xs'>
-                      Not Available
-                      </ButtonText>
+                    <Button disabled={true} size='sm' className='w-[95px]'>
+                      <ButtonText size='xs'>Not Available</ButtonText>
                     </Button>
-                    </HStack>
+                  </HStack>
                   <Divider />
                   <Button
                     variant='link'

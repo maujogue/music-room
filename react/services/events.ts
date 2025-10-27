@@ -98,7 +98,10 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
   const imageUri = (payload as any)?.image_url;
   const isLocalFile =
     typeof imageUri === 'string' &&
-    (imageUri.startsWith('file:') || imageUri.startsWith('content:') || imageUri.startsWith('/') || imageUri.startsWith('data:'));
+    (imageUri.startsWith('file:') ||
+      imageUri.startsWith('content:') ||
+      imageUri.startsWith('/') ||
+      imageUri.startsWith('data:'));
 
   if (isLocalFile) {
     const form = createEventFormData(payload);
@@ -145,7 +148,10 @@ function createEventFormData(payload: MusicEventPayload) {
     const uri = imageUri as string;
     const isLocalFile =
       typeof uri === 'string' &&
-      (uri.startsWith('file:') || uri.startsWith('content:') || uri.startsWith('/') || uri.startsWith('data:'));
+      (uri.startsWith('file:') ||
+        uri.startsWith('content:') ||
+        uri.startsWith('/') ||
+        uri.startsWith('data:'));
 
     if (isLocalFile) {
       const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';

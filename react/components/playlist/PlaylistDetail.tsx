@@ -24,14 +24,14 @@ import { RefreshCw } from 'lucide-react-native';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const { 
-    playlist, 
-    loading, 
-    error, 
-    refetch, 
-    deletePlaylist, 
-    canEdit, 
-    canInvite 
+  const {
+    playlist,
+    loading,
+    error,
+    refetch,
+    deletePlaylist,
+    canEdit,
+    canInvite,
   } = usePlaylist(playlistId);
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
   const toast = useAppToast();
@@ -51,10 +51,10 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     setDisplayAddTrackButton(
-      canEdit && 
-      !playlist?.is_spotify_sync && 
-      (playlist?.tracks.length ?? 0) > 0 &&
-      !!isConnectedToSpotify
+      canEdit &&
+        !playlist?.is_spotify_sync &&
+        (playlist?.tracks.length ?? 0) > 0 &&
+        !!isConnectedToSpotify
     );
     setDisplayInviteButton(canInvite);
   }, [canEdit, canInvite, playlist]);
@@ -95,7 +95,7 @@ export default function PlaylistDetail() {
 
   const handleInviteUserPress = () => {
     router.push(`(main)/playlists/${playlistId}/invite`);
-  }
+  };
 
   const handleConnectSpotify = async () => {
     try {
@@ -126,11 +126,9 @@ export default function PlaylistDetail() {
         actionButton={
           <HStack space='md' className='items-center justify-center'>
             <Button onPress={handleConnectSpotify}>
-              <ButtonText>
-                Connect Spotify
-              </ButtonText>
+              <ButtonText>Connect Spotify</ButtonText>
             </Button>
-            <Button 
+            <Button
               onPress={() => {
                 refreshProfile();
                 refetch();
@@ -138,25 +136,24 @@ export default function PlaylistDetail() {
               className='rounded-full'
               variant='link'
             >
-              <RefreshCw size={20}/>
+              <RefreshCw size={20} />
             </Button>
           </HStack>
-
         }
       />
     );
   }
   if (error) {
-    return <ErrorScreen 
-      error={error}
-      actionButton={
-        <Button onPress={refetch}>
-          <ButtonText>
-            Retry
-          </ButtonText>
-        </Button>
-      }
-    />;
+    return (
+      <ErrorScreen
+        error={error}
+        actionButton={
+          <Button onPress={refetch}>
+            <ButtonText>Retry</ButtonText>
+          </Button>
+        }
+      />
+    );
   }
   if (!playlist) {
     return <ErrorScreen error={"Can't retreive playlist"} />;
@@ -178,10 +175,7 @@ export default function PlaylistDetail() {
       </ScrollView>
 
       {displayAddTrackButton && (
-        <FloatButton 
-          onPress={handleAddTrackPress} 
-          icon={AddIcon}
-        />
+        <FloatButton onPress={handleAddTrackPress} icon={AddIcon} />
       )}
       {displayInviteButton && (
         <FloatButton

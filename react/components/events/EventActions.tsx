@@ -34,10 +34,7 @@ export default function EventActions({
           className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
         />
       )}
-      <FloatButton
-        onPress={() => setIsDrawerOpen(true)}
-        icon={Users}
-      />
+      <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
       <EventMembersDrawer
         eventData={eventData}
         isOpen={isDrawerOpen}

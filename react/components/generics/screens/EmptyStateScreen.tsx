@@ -1,7 +1,7 @@
 import { Center } from '@/components/ui/center';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import { AddIcon } from '@/components/ui/icon';
 import { Image } from '@/components/ui/image';
 import { Box } from '@/components/ui/box';

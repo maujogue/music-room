@@ -74,7 +74,6 @@ export default function EditEventForm({
   // const [country, setCountry] = useState(initialLocation.country ?? '');
 
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
@@ -131,7 +130,7 @@ export default function EditEventForm({
         title: 'uploaded playlist cover',
         description: `Uploading to ${path}`,
       });
-    } catch (error) {
+    } catch {
       toast.error({ title: 'uploading event image failed' });
     } finally {
       setUploading(false);
@@ -194,13 +193,10 @@ export default function EditEventForm({
     } as any;
 
     try {
-      setLoading(true);
       console.log('Submitting payload:', payload);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
-    } finally {
-      setLoading(false);
     }
   };
 

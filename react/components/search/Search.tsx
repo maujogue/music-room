@@ -41,10 +41,22 @@ export default function Search({
   const normalizeItems = <T,>(payload: any): T[] => {
     if (!payload) return [];
     if (Array.isArray(payload)) return payload as T[];
-    if (payload.items && Array.isArray(payload.items)) return payload.items as T[];
-    if (payload.tracks && payload.tracks.items && Array.isArray(payload.tracks.items)) return payload.tracks.items as T[];
-    if (payload.playlists && payload.playlists.items && Array.isArray(payload.playlists.items)) return payload.playlists.items as T[];
-    if (payload.events && Array.isArray(payload.events)) return payload.events as T[];
+    if (payload.items && Array.isArray(payload.items))
+      return payload.items as T[];
+    if (
+      payload.tracks &&
+      payload.tracks.items &&
+      Array.isArray(payload.tracks.items)
+    )
+      return payload.tracks.items as T[];
+    if (
+      payload.playlists &&
+      payload.playlists.items &&
+      Array.isArray(payload.playlists.items)
+    )
+      return payload.playlists.items as T[];
+    if (payload.events && Array.isArray(payload.events))
+      return payload.events as T[];
     return [];
   };
 

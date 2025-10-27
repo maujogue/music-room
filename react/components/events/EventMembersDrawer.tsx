@@ -117,29 +117,36 @@ export default function EventMembersDrawer({
               <HStack className='items-center gap-3'>
                 {eventData.event.image_url && (
                   <>
-                  <Image
-                    source={{ uri: eventData.event.image_url }}
-                    className='absolute w-full h-full rounded-lg p-0'
-                    alt='Event image'
-                  />
-                  <LinearGradient
-                    colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.4)', 'transparent']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      borderRadius: 12,
-                    }}
-                  />
+                    <Image
+                      source={{ uri: eventData.event.image_url }}
+                      className='absolute w-full h-full rounded-lg p-0'
+                      alt='Event image'
+                    />
+                    <LinearGradient
+                      colors={[
+                        'rgba(0,0,0,0.8)',
+                        'rgba(0,0,0,0.4)',
+                        'transparent',
+                      ]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        borderRadius: 12,
+                      }}
+                    />
                   </>
                 )}
                 <VStack className='flex-1 p-4'>
-                  <Text size='lg' className='font-semibold text-left text-gray-100'>
-                  {eventData.event.name}
+                  <Text
+                    size='lg'
+                    className='font-semibold text-left text-gray-100'
+                  >
+                    {eventData.event.name}
                   </Text>
                 </VStack>
               </HStack>

@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';

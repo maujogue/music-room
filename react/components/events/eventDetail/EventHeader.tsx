@@ -25,7 +25,6 @@ import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import { Box } from '@/components/ui/box';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 interface Props {
   eventData: MusicEventFetchResult;
   expanded: boolean;
