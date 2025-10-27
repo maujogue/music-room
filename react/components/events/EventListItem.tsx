@@ -6,9 +6,11 @@ import { Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
 import { useEventDate } from '@/hooks/useEventDate';
 import { LinearGradient } from 'expo-linear-gradient';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
+import PrivateBadge from '@/components/generics/PrivateBadge';
 
 type Props = {
   event: MusicEvent;
@@ -65,20 +67,26 @@ export default function EventListItem({ event, owner }: Props) {
             >
               {event.name}
             </Heading>
-            <VStack className='flex-row items-center px-2'>
-              <Avatar size='sm'>
-                <AvatarImage
-                  source={{
-                    uri: owner?.avatar_url
-                      ? owner.avatar_url
-                      : 'https://picsum.photos/111',
-                  }}
-                />
-              </Avatar>
-              <Text size='sm' className='text-typography-400 px-2'>
-                {owner?.username}
-              </Text>
-            </VStack>
+            <HStack className='w-full justify-between'>
+              <HStack className='items-center px-2'>
+                <Avatar size='sm'>
+                  <AvatarImage
+                    source={{
+                      uri: owner?.avatar_url
+                        ? owner.avatar_url
+                        : 'https://picsum.photos/111',
+                    }}
+                  />
+                </Avatar>
+                <Text size='sm' className='text-typography-400 px-2'>
+                  {owner?.username}
+                </Text>
+              </HStack>
+              <HStack className='items-center gap-2'>
+                {event.is_private && <PrivateBadge />}
+                {event.everyone_can_vote && <CollaborativeBadge />}
+              </HStack>
+            </HStack>
           </Box>
         </Box>
       </Card>

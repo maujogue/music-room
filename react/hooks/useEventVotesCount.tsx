@@ -19,13 +19,6 @@ export function useVoteCountIndex(eventId: string) {
 
   const getVoteCount = (trackId: string) => voteCountByTrack.get(trackId) ?? 0;
 
-  // const getTopTracks = (limit: number = 3) => {
-  //   return Array.from(voteCountByTrack.entries())
-  //     .map(([trackId, count]) => ({ trackId, count }))
-  //     .sort((a, b) => b.count - a.count)
-  //     .slice(0, limit);
-  // };
-
   const getTrackId = (track: PlaylistTrack) => {
     return track.track_id;
   };
@@ -60,7 +53,6 @@ export function useVoteCountIndex(eventId: string) {
     getTrackId,
     getVoteCount,
     getTopTracksFrom,
-    // getTopTracks,
     loading,
     error,
     refetch,
