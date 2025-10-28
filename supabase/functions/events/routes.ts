@@ -14,8 +14,9 @@ const router = new Hono()
 
 router.post('/', createEvent)
 
-router.get('/:id', fetchEvent)
+router.get('/radar', getEventsByCoordinates)
 
+router.get('/:id', fetchEvent)
 
 router.delete('/:id', deleteEventById)
 
@@ -27,6 +28,5 @@ router.put('/:id/invite', editUserInEvent)
 
 router.delete('/:id/invite', removeUserFromEvent)
 
-router.get('/radar', getEventsByCoordinates)
 
 export default router

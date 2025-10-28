@@ -1,35 +1,30 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { Marker, Callout } from 'react-native-maps';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Image } from '@/components/ui/image';
-import { parsePointCoordinates } from '@/utils/parsePointCoordinates';
 
 
 type Props = {
-  item: MusicEventFetchResult;
+  item: EventRadarResult;
   selected?: boolean;
   onPress?: (id: string) => void;
 };
 
 function EventMarkerBase({ item, selected, onPress }: Props) {
-  if (!item.location.coordinates) return null;
-  const coord = useMemo(
-    () => parsePointCoordinates(item.location.coordinates ?? ''),
-    [item.location.coordinates]
-  );
-  if (!coord) return null;
+  if (!item.radar.coordinates) return null;
+  const coord = item.radar.coordinates
 
   const cover = item.event.image_url;
-  const subtitle =
-    item.location.venuename ??
-    item.location.address ??
-    [item.location.city, item.location.country].filter(Boolean).join(', ');
+  // const subtitle =
+  //   item.location.venuename ??
+  //   item.location.address ??
+  //   [item.location.city, item.location.country].filter(Boolean).join(', ');
 
   return (
     <Marker
-      coordinate={{latitude: coord.x, longitude: coord.y}}
+      coordinate={{latitude: coord.lat, longitude: coord.long}}
       onPress={() => onPress?.(item.event.id)}
       pinColor={selected ? '#007AFF' : undefined}
       tracksViewChanges={false}
@@ -63,11 +58,6 @@ function EventMarkerBase({ item, selected, onPress }: Props) {
           <Text size="md" className="font-semibold text-neutral-900">
             {item.event.name}
           </Text>
-          {!!subtitle && (
-            <Text size="sm" className="text-neutral-700 mt-0.5">
-              {subtitle}
-            </Text>
-          )}
           {!!item.event.beginning_at && (
             <Text size="xs" className="text-neutral-500 mt-1">
               {new Date(item.event.beginning_at).toLocaleString()}

@@ -99,3 +99,12 @@ type TrackVote = {
   voteCount: number;
   voters: string[];
 };
+
+type EventRadarResult = {
+  radar: {
+    coordinates: Coordinates;
+    dist: number;
+  }
+  event: MusicEvent;
+  owner: UserInfo;
+};

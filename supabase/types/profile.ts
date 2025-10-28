@@ -11,7 +11,7 @@ export interface ProfileResponse {
     id: string;
     email?: string;
     username: string;
-    avatar_url?: string;
+    avatar_url?: string | undefined;
     bio?: string;
     music_genre?: string;
     is_connected_to_spotify?: boolean;
@@ -29,7 +29,7 @@ export interface ProfileSupabaseResponse {
     id: string;
     email: string;
     username: string;
-    avatar_url?: string | null;
+    avatar_url?: string;
     bio?: string | null;
     music_genre?: string | null;
     spotify_access_token?: string | null;

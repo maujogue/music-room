@@ -26,7 +26,8 @@ import {
 import type { 
   EventPayload, 
   EventResponse,
-  EventMember
+  EventMember,
+  EventRadarFromDb
  } from '@event';
 import type { User } from '@supabase/supabase-js';
 
@@ -311,13 +312,37 @@ export async function editUserInEvent(c: Context): Promise<Response> {
 }
 
 export async function getEventsByCoordinates(c: Context): Promise<Response> {
-  const lat = c.req.param('lat')
-  const long = c.req.param('long')
+  const lat = c.req.query('lat')
+  const long = c.req.query('long')
 
   if (!lat || !long) {
     throw new HTTPException(400, { message: 'Missing latitude or longitude' })
   }
 
-  const events = await getSupabaseEventByCoordinates(Number(lat), Number(long))
+  const eventsRaw = await getSupabaseEventByCoordinates(Number(lat), Number(long));
+  const events = await Promise.all(eventsRaw.map((event: EventRadarFromDb) => formatEventsRadars(event)));
   return c.json(events)
+}
+
+async function formatEventsRadars(event: EventRadarFromDb) {
+  const {
+    id,
+    beginning_at,
+    name,
+    image_url,
+    owner_id,
+    owner_name,
+    owner_avatar_url,
+    long,
+    lat,
+    dist_meters
+  } = event
+
+  const publicUrl = image_url ? await getPublicUrlForPath(image_url): null
+  
+  return {
+    event: { id, name, beginning_at, image_url: publicUrl },
+    owner: { id: owner_id, name: owner_name, avatar_url: owner_avatar_url },
+    radar: { coordinates: { lat, long }, dist: dist_meters }
+  }
 }

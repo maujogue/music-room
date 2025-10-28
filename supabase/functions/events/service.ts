@@ -174,14 +174,16 @@ export async function editUserInEventSupabase(
 }
 
 export async function getSupabaseEventByCoordinates(lat: number, long: number) {
-  const { data, error } = await supabaseClient.rpc('get_events_by_location', {
-    lat,
-    long,
-    range_km: 100
+  console.log('Fetching nearby events for coordinates:', { lat, long });
+  
+  const { data, error } = await supabaseClient.rpc('nearby_events', {
+    p_lat: lat,
+    p_long: long,
+    p_range_km: 100
   });
 
   if (error) {
-    console.error('Raw Supabase error:', error);
+    console.error('Raw Supabase error(getEventsByCoordinates):', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
