@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { getEventsWithRadar } from '@/services/events';
 
 export function useEventsRadar(coords: Coordinates | null) {
-  const [events, setEvents] = useState<MusicEventFetchResult[]>([]);
+  const [events, setEvents] = useState<MusicEventRadarResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +14,7 @@ export function useEventsRadar(coords: Coordinates | null) {
     setError(null);
     try {
       const data = await getEventsWithRadar(coords);
+      console.log("-------------------------DATA RADAR EVENT \n", data)
       setEvents(data || []);
     } catch (e) {
       console.error(`Error fetching Events at position (${coords.lat}, ${coords.long})`, e);

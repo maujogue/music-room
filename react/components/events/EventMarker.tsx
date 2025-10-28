@@ -7,7 +7,7 @@ import { Image } from '@/components/ui/image';
 
 
 type Props = {
-  item: EventRadarResult;
+  item: MusicEventRadarResult;
   selected?: boolean;
   onPress?: (id: string) => void;
 };

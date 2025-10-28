@@ -100,7 +100,7 @@ type TrackVote = {
   voters: string[];
 };
 
-type EventRadarResult = {
+type MusicEventRadarResult = {
   radar: {
     coordinates: Coordinates;
     dist: number;
