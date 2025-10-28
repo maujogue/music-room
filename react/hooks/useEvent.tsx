@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById, getEventById } from '@/services/events';
+import { deleteEventById, getEventById, updateEvent } from '@/services/events';
 
 export function useEvent(id: string) {
   const [data, setData] = useState<MusicEventFetchResult | null>(null);
@@ -51,5 +51,36 @@ export function useEvent(id: string) {
     }
   }, [id]);
 
-  return { data, loading, error, setError, refetch, deleteEvent };
+  const handleUpdateEvent = useCallback(
+    async (payload: MusicEventPayload) => {
+      if (!id) {
+        setError('Event ID is required for update');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+
+      try {
+        await updateEvent(id, payload);
+        refetch();
+      } catch (e: any) {
+        setError(`Update Event error: ${e.message ?? e}`);
+        console.error('Update Event error:', e);
+        throw Error(e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [id]
+  );
+
+  return {
+    data,
+    loading,
+    error,
+    setError,
+    refetch,
+    deleteEvent,
+    updateEvent: handleUpdateEvent,
+  };
 }

@@ -1,5 +1,5 @@
 import { assertRejects, assertEquals } from "https://deno.land/std@0.224.0/testing/asserts.ts";
-import { fetchSpotifyUserProfile } from "../../functions/auth/services/spotify.ts";
+import { fetchSpotifyUserProfile } from "../../../functions/auth/services/spotify.ts";
 
 
 Deno.test("fetchSpotifyUserProfile should throw an error for invalid access token", async () => {

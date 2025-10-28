@@ -1,12 +1,10 @@
-import { Hono } from 'jsr:@hono/hono';
+import { Hono } from '@hono/hono';
 import {
   fetchUserProfile,
   updateProfile,
   fetchUserFollows,
   followUser,
-  unfollowUser,
-  searchUsers,
-  checkFriendship,
+  unfollowUser
 } from './controller.ts';
 
 const router = new Hono();
@@ -19,6 +17,5 @@ router.put('/update', updateProfile);
 router.get('/follows/:userId', fetchUserFollows);
 router.post('/follow/:userId', followUser);
 router.delete('/follow/:userId', unfollowUser);
-router.get('/search', searchUsers);
 
 export default router;

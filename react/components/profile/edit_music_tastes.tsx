@@ -8,7 +8,6 @@ import {
   SelectContent,
   SelectPortal,
   SelectTrigger,
-  SelectInput,
   SelectIcon,
   SelectBackdrop,
   SelectDragIndicator,

@@ -1,4 +1,4 @@
-import { formatDbError } from '../../../utils/postgres_errors_map.tsx';
+import { formatDbError } from '../../../utils/postgres_errors_map.ts';
 
 import { createClient } from '@supabase/supabase-js';
 

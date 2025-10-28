@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -36,9 +36,9 @@ export default function AllPlaylists() {
     return (
       <EmptyState
         source={emptyPng}
-        title="No Playlists"
-        subtitle="A world without playlists… devilish, isn’t it ?"
-        text="Synchronize with your Spotify account, or even create your own playlist from scratch right now !"
+        title='No Playlists'
+        subtitle='A world without playlists… devilish, isn’t it ?'
+        text='Synchronize with your Spotify account, or even create your own playlist from scratch right now !'
         onPressCta={onPlaylistPress}
       />
     );

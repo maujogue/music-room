@@ -21,8 +21,6 @@ import React, { useState } from 'react';
 import { CloseIcon, Icon } from '@/components/ui/icon';
 import { useAppToast } from '@/hooks/useAppToast';
 
-
-
 export default function Invite() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
@@ -56,12 +54,12 @@ export default function Invite() {
         console.log('User invited successfully');
         toast.show({
           title: 'User invited successfully',
-          description :`${selectedUser.username} has been invited as ${role}.`}
-        );
+          description: `${selectedUser.username} has been invited as ${role}.`,
+        });
         handleClose();
       } catch (error) {
         console.error('Error inviting user:', error);
-        toast.error({title : 'Invitation failed'});
+        toast.error({ title: 'Invitation failed' });
       }
     }
   };
@@ -90,8 +88,8 @@ export default function Invite() {
               Invite {selectedUser?.username} to event?
             </Heading>
           </AlertDialogHeader>
-          <AlertDialogCloseButton >
-            <Icon as={CloseIcon} size="md" />
+          <AlertDialogCloseButton>
+            <Icon as={CloseIcon} size='md' />
           </AlertDialogCloseButton>
           <AlertDialogBody className='mt-3 mb-4'>
             <Text size='sm'>

@@ -25,7 +25,6 @@ export interface AuthenticatedUser {
   userEmail: string;
 }
 
-// Authenticate user with token
 export async function authenticateUser(token: string): Promise<AuthenticatedUser | null> {
   try {
     console.log('🔐 ws: validating token (length:', token, ')');
@@ -48,7 +47,6 @@ export async function authenticateUser(token: string): Promise<AuthenticatedUser
   }
 }
 
-// Handle WebSocket connection open
 export function handleConnectionOpen(
   userId: string,
   userEmail: string,
@@ -57,7 +55,6 @@ export function handleConnectionOpen(
 ): void {
   console.log('ws: connection established for user:', { userId, email: userEmail });
 
-  // Close any existing connection for this user (single connection per user)
   const existingSocket = clientsByUser.get(userId);
   if (existingSocket && existingSocket.size > 0) {
     console.log('ws: closing existing connections for user:', userId);
@@ -74,7 +71,6 @@ export function handleConnectionOpen(
 
   addClient(userId, socket, clientsByUser);
 
-  // Send authentication success message
   sendMessage(socket, {
     type: 'connected',
     userId,
@@ -83,7 +79,6 @@ export function handleConnectionOpen(
   });
 }
 
-// Handle WebSocket message
 export async function handleConnectionMessage(
   userId: string,
   userEmail: string,
@@ -101,7 +96,6 @@ export async function handleConnectionMessage(
   }
 }
 
-// Handle WebSocket connection close
 export function handleConnectionClose(
   userId: string,
   event: CloseEvent,
@@ -116,7 +110,6 @@ export function handleConnectionClose(
   removeClient(userId, socket, clientsByUser);
 }
 
-// Handle WebSocket error
 export function handleConnectionError(
   userId: string,
   error: Event,
@@ -129,19 +122,15 @@ export function handleConnectionError(
     timestamp: new Date().toISOString()
   });
 
-  // Tenter de nettoyer la connexion défaillante
   try {
     removeClient(userId, socket, clientsByUser);
 
-    // Optionnel : envoyer un message d'erreur si la socket est encore ouverte
     if (socket.readyState === WebSocket.OPEN) {
       sendErrorMessage(socket, 'Connection error occurred, please reconnect');
     }
   } catch (cleanupError) {
     console.error('ws: error during socket cleanup:', cleanupError);
   }
-
-  // Log détaillé pour debug
   console.error('ws: connection error details:', {
     userId,
     readyState: socket.readyState,

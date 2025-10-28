@@ -9,12 +9,7 @@ interface Props {
   onChange: (filter: string) => void;
 }
 
-export default function FilterChips({
-  filters,
-  defaultActive,
-  active,
-  onChange,
-}: Props) {
+export default function FilterChips({ filters, active, onChange }: Props) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null); // no filter active by default
 
   React.useEffect(() => {

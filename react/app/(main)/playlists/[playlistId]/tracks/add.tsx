@@ -8,8 +8,7 @@ import TrackListItem from '@/components/track/TrackListItem';
 
 export default function AddTrack() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
-  const { onSwipeableOpen, renderLeftAction, renderRightAction } =
-    useAddTrack(playlistId);
+  const { onSwipeableOpen, renderLeftAction } = useAddTrack(playlistId);
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -21,7 +20,6 @@ export default function AddTrack() {
           renderItemTrack={item => (
             <TrackListItem
               renderLeftAction={() => renderLeftAction()}
-              renderRightAction={() => renderRightAction()}
               onSwipeableOpen={() => onSwipeableOpen(item.id)}
               track={item}
               key={item.id}

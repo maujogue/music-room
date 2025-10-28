@@ -1,26 +1,73 @@
-import { SpotifyOwner } from '../../react/types/spotify.d.ts'
+import type { PlaylistRow } from './playlist.ts';
+
+export type EventRole = 'owner' | 'member' | 'inviter' | 'voter' | 'collaborator' | null;
 
 export interface EventResponse {
-  id: string;
-  name: string;
-  image_url?: string;
+  event: {
+    id: string;
+    name: string;
+    image_url?: string;
+    is_private: boolean;
+    everyone_can_vote: boolean;
+    description?: string;
+    playlist_id?: string;
+    playlistId: string;
+    beginning_at: string;
+  }
   owner: SpotifyOwner;
-  is_private: boolean;
-  everyone_can_vote: boolean;
-  description?: string;
-  playlist_id?: string;
-  location: MusicEventLocation;
-
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
-  beginning_at: string;
+  location?: EventLocation;
+  members: EventMember[];
+  playlist?: PlaylistRow;
+  user: {
+    role: EventRole;
+    can_edit: boolean;
+    can_delete: boolean;
+    can_invite: boolean;
+    can_vote: boolean;
+  };
 };
 
-interface Coordinates {
+export interface EventResponseReduced {
+    id: string;
+    name: string;
+    image_url?: string;
+    is_private: boolean;
+    everyone_can_vote: boolean;
+    description?: string;
+    playlist_id?: string;
+    playlistId: string;
+    beginning_at: string;
+    owner: SpotifyOwner;
+}
+
+export interface EventMember {
+  id: string;
+  event_id: string;
+  user_id: string;
+  joined_at: string;
+  profile: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url?: string;
+    music_genre?: string;
+  };
+  role: EventRole;
+}
+
+export interface SpotifyOwner {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+}
+
+export interface Coordinates {
   lat: number;
   long: number;
 }
 
-interface MusicEventLocation {
+export interface EventLocation {
   coordinates?: Coordinates;
   venueName?: string;
   address?: string;
@@ -29,6 +76,13 @@ interface MusicEventLocation {
 }
 
 export interface EventPayload {
-	event?: Event;
-	location?: MusicEventLocation;
+  name: string;
+  image_url?: string;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
+  beginning_at: string;
+  playlistId: string;
+	location?: EventLocation;
 }

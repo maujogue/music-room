@@ -3,9 +3,8 @@ import { Aperture } from 'lucide-react-native';
 
 export default function CollaborativeBadge() {
   return (
-    <Badge className='rounded-full h-10 w-10'>
+    <Badge className='rounded-full h-10 w-10 bg-white/30 border border-white/40'>
       <BadgeIcon as={Aperture} className='h-6 w-6' />
     </Badge>
   );
-
 }
