@@ -107,13 +107,12 @@ export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) 
   if (!playlist) {
     throw new HTTPException(404, { message: 'Playlist not found' });
   }
-
   if (!playlist.is_private) {
     return playlist;
   }
 
   const userRole = getUserRoleInPlaylist(playlist, userId);
-  if (!userRole) {
+  if (!userRole || userRole === 'none') {
     throw new HTTPException(403, { message: 'Access denied to private playlist' });
   }
 }

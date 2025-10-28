@@ -62,9 +62,7 @@ export interface SpotifyOwner {
   avatar_url?: string;
 }
 
-
-
-interface Coordinates {
+export interface Coordinates {
   lat: number;
   long: number;
 }
@@ -86,5 +84,5 @@ export interface EventPayload {
   playlist_id?: string;
   beginning_at: string;
   playlistId: string;
-	location?: MusicEventLocation;
+	location?: EventLocation;
 }
