@@ -169,7 +169,7 @@ export default function EditEventForm({
           complement: location?.street ?? null,
           city: location?.city ?? null,
           country: location?.country ?? null,
-          coordinates: `(${location?.latitude},${location?.longitude})`,
+          coordinates: `POINT(${location?.latitude} ${location?.longitude})`,
         }
       : null;
 
