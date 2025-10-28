@@ -1,14 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
-import MapView, { Marker, MapPressEvent, Region } from "react-native-maps";
-import * as Location from "expo-location";
-import { Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader } from "@/components/ui/modal";
-import { Box } from "@/components/ui/box";
-import { Heading } from "@/components/ui/heading";
-import { Text } from "@/components/ui/text";
-import { Button, ButtonText } from "@/components/ui/button";
-import LoadingSpinner from "@/components/generics/screens/LoadingSpinner";
-import { VStack } from "@/components//ui/vstack";
-
+import { useCallback, useEffect, useState } from 'react';
+import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
+import * as Location from 'expo-location';
+import {
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@/components/ui/modal';
+import { Box } from '@/components/ui/box';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
+import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
+import { VStack } from '@/components//ui/vstack';
 
 type Coords = { latitude: number; longitude: number };
 
@@ -39,8 +46,8 @@ export default function LocationPickerModal({
       setError(null);
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setError("Permission localisation refused.");
+        if (status !== 'granted') {
+          setError('Permission localisation refused.');
         }
 
         let center = initialCoords ?? null;
@@ -62,7 +69,7 @@ export default function LocationPickerModal({
         setPicked(null);
         setAddress(undefined);
       } catch (e: any) {
-        setError(e?.message ?? "Error initializing map.");
+        setError(e?.message ?? 'Error initializing map.');
       } finally {
         setLoading(false);
       }
@@ -76,7 +83,7 @@ export default function LocationPickerModal({
       if (a) {
         const label = [a.name, a.street, a.postalCode, a.city, a.country]
           .filter(Boolean)
-          .join(", ");
+          .join(', ');
         setAddress(label);
       } else {
         setAddress(undefined);
@@ -86,24 +93,24 @@ export default function LocationPickerModal({
     }
   }, []);
 
-   const handlePress = useCallback(async (e: MapPressEvent) => {
-      const { latitude, longitude } = e.nativeEvent.coordinate;
-      const reverse = await Location.reverseGeocodeAsync({ latitude, longitude });
-      const r = reverse?.[0];
-      const place: PickedPlace = {
-        latitude,
-        longitude,
-        address: [r?.name, r?.street, r?.postalCode, r?.city, r?.country]
-          .filter(Boolean)
-          .join(", "),
-        street: r?.street ?? undefined,
-        postalCode: r?.postalCode ?? undefined,
-        city: r?.city ?? undefined,
-        region: r?.region ?? undefined,
-        country: r?.country ?? undefined,
-      };
-      setPicked(place);
-    }, []);
+  const handlePress = useCallback(async (e: MapPressEvent) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    const reverse = await Location.reverseGeocodeAsync({ latitude, longitude });
+    const r = reverse?.[0];
+    const place: PickedPlace = {
+      latitude,
+      longitude,
+      address: [r?.name, r?.street, r?.postalCode, r?.city, r?.country]
+        .filter(Boolean)
+        .join(', '),
+      street: r?.street ?? undefined,
+      postalCode: r?.postalCode ?? undefined,
+      city: r?.city ?? undefined,
+      region: r?.region ?? undefined,
+      country: r?.country ?? undefined,
+    };
+    setPicked(place);
+  }, []);
 
   const handleDragEnd = useCallback(
     async (e: any) => {
@@ -124,62 +131,65 @@ export default function LocationPickerModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalBackdrop />
-      <ModalContent className="w-full min-h-screen-safe p-0">
-        <ModalHeader className="px-3 py-4 border-b border-neutral-200">
-          <Heading size="md">Set event place</Heading>
+      <ModalContent className='w-full min-h-screen-safe p-0'>
+        <ModalHeader className='px-3 py-4 border-b border-neutral-200'>
+          <Heading size='md'>Set event place</Heading>
           <ModalCloseButton />
         </ModalHeader>
 
-        <ModalBody className="p-">
-          <VStack className="w-full h-[640px] border-4 border-primary-500" >
-          {loading ? (
-            <LoadingSpinner text="Loading map…" />
-          ) : (
-            <>
-              {region && (
-                <Box className="h-full w-full">
-                  <MapView
-                    style={{ flex: 1 }}
-                    initialRegion={region}
-                    onPress={handlePress}
-                    onRegionChangeComplete={setRegion}
-                  >
-                    {picked && (
-                      <Marker
-                        coordinate={picked}
-                        draggable
-                        onDragEnd={handleDragEnd}
-                        title="Place"
-                        description={address || "Move marker if needed"}
-                      />
-                    )}
-                  </MapView>
-                </Box>
-              )}
-              <Box className="p-4 gap-1">
-                {picked ? (
-                  <>
-                    <Text size="sm" >Address</Text>
-                    <Text numberOfLines={2}>{address ?? "Seeking address…"}</Text>
-                    <Text size="xs">
-                      {picked.latitude.toFixed(6)}, {picked.longitude.toFixed(6)}
-                    </Text>
-                  </>
-                ) : (
-                  <Text>Tap on map</Text>
+        <ModalBody className='p-'>
+          <VStack className='w-full h-[640px] border-4 border-primary-500'>
+            {loading ? (
+              <LoadingSpinner text='Loading map…' />
+            ) : (
+              <>
+                {region && (
+                  <Box className='h-full w-full'>
+                    <MapView
+                      style={{ flex: 1 }}
+                      initialRegion={region}
+                      onPress={handlePress}
+                      onRegionChangeComplete={setRegion}
+                    >
+                      {picked && (
+                        <Marker
+                          coordinate={picked}
+                          draggable
+                          onDragEnd={handleDragEnd}
+                          title='Place'
+                          description={address || 'Move marker if needed'}
+                        />
+                      )}
+                    </MapView>
+                  </Box>
                 )}
-                {error && <Text>⚠️ {error}</Text>}
-              </Box>
-            </>
-          )}
+                <Box className='p-4 gap-1'>
+                  {picked ? (
+                    <>
+                      <Text size='sm'>Address</Text>
+                      <Text numberOfLines={2}>
+                        {address ?? 'Seeking address…'}
+                      </Text>
+                      <Text size='xs'>
+                        {picked.latitude.toFixed(6)},{' '}
+                        {picked.longitude.toFixed(6)}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text>Tap on map</Text>
+                  )}
+                  {error && <Text>⚠️ {error}</Text>}
+                </Box>
+              </>
+            )}
           </VStack>
         </ModalBody>
 
-        <ModalFooter className="px-4 py-3 border-t border-t-neutral-200 justify-between">
-          <Button variant="outline" action="secondary" onPress={onClose}>
+        <ModalFooter className='px-4 py-3 border-t border-t-neutral-200 justify-between'>
+          <Button variant='outline' action='secondary' onPress={onClose}>
             <ButtonText>Cancel</ButtonText>
           </Button>
-          <Button action="primary" isDisabled={!picked} onPress={confirm}>
+          <Button action='primary' isDisabled={!picked} onPress={confirm}>
             <ButtonText>Validate</ButtonText>
           </Button>
         </ModalFooter>

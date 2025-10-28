@@ -1,6 +1,5 @@
 import { apiFetch } from '@/utils/apiFetch';
 
-
 export async function createEvent(payload: MusicEventPayload) {
   const form = createEventFormData(payload);
 
@@ -96,14 +95,35 @@ export async function getCurrentUserEvents() {
 export async function updateEvent(id: string, payload: MusicEventPayload) {
   const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`;
 
-  const form = createEventFormData(payload);
+  const imageUri = (payload as any)?.image_url;
+  const isLocalFile =
+    typeof imageUri === 'string' &&
+    (imageUri.startsWith('file:') ||
+      imageUri.startsWith('content:') ||
+      imageUri.startsWith('/') ||
+      imageUri.startsWith('data:'));
+
+  if (isLocalFile) {
+    const form = createEventFormData(payload);
+    const res = await apiFetch<MusicEvent>(url, {
+      method: 'PUT',
+      body: form,
+    });
+
+    if (!res.success) {
+      console.error('Error updating Event (form):', res.error);
+      throw res.error;
+    }
+    return res.data;
+  }
+
   const res = await apiFetch<MusicEvent>(url, {
     method: 'PUT',
-    body: form,
+    body: payload,
   });
 
   if (!res.success) {
-    console.error('Error updating Event:', res.error);
+    console.error('Error updating Event (json):', res.error);
     throw res.error;
   }
   return res.data;
@@ -126,11 +146,20 @@ function createEventFormData(payload: MusicEventPayload) {
 
   if (imageUri) {
     const uri = imageUri as string;
-    const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
-    const fileName = `${Date.now()}.${ext}`;
-    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    const isLocalFile =
+      typeof uri === 'string' &&
+      (uri.startsWith('file:') ||
+        uri.startsWith('content:') ||
+        uri.startsWith('/') ||
+        uri.startsWith('data:'));
 
-    form.append('image', { uri, name: fileName, type: mime } as any);
+    if (isLocalFile) {
+      const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+      const fileName = `${Date.now()}.${ext}`;
+      const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+
+      form.append('image', { uri, name: fileName, type: mime } as any);
+    }
   }
 
   return form;

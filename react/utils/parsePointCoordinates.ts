@@ -37,7 +37,9 @@ export function useEventCoordinates(event: any | null) {
   }, [event]);
 }
 
-export function parseLocation(location: MusicEventLocation | undefined | null): PickedPlace | null {
+export function parseLocation(
+  location: MusicEventLocation | undefined | null
+): PickedPlace | null {
   if (!location) return null;
 
   const coords = parsePointCoordinates(location.coordinates || '');
@@ -54,6 +56,6 @@ export function parseLocation(location: MusicEventLocation | undefined | null): 
 }
 
 export function truncateAddress(address?: string, parts = 3): string {
-  if (!address) return "";
-  return address.split(",").slice(0, parts).join(",").trim();
+  if (!address) return '';
+  return address.split(',').slice(0, parts).join(',').trim();
 }

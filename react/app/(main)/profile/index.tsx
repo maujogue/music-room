@@ -9,5 +9,5 @@ export default function ProfilePage() {
     return null;
   }
 
-  return <Profile userId={user.id} variant='own' showBackButton={false} />;
+  return <Profile userId={user.id} />;
 }

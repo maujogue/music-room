@@ -14,6 +14,7 @@ import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
+import FloatButton from '@/components/generics/FloatButton';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -37,12 +38,9 @@ export default function EditPlayListForm({
     initialValues?.is_collaborative ?? false
   );
 
-  const [imageUrl, setImageUrl] = useState(
-    initialValues?.cover_url ?? null
-  );
+  const [imageUrl, setImageUrl] = useState(initialValues?.cover_url ?? null);
 
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
 
@@ -68,12 +66,9 @@ export default function EditPlayListForm({
     };
 
     try {
-      setLoading(true);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -103,8 +98,11 @@ export default function EditPlayListForm({
       const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
       const path = `${Date.now()}.${fileExt}`;
       console.log('Uploading to path:', path);
-      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
-    } catch (error) {
+      toast.show({
+        title: 'uploaded playlist cover',
+        description: `Uploading to ${path}`,
+      });
+    } catch {
       toast.error({ title: 'uploading playlist cover image failed' });
     } finally {
       setUploading(false);
@@ -125,6 +123,7 @@ export default function EditPlayListForm({
                 marginBottom: 10,
               }}
               resizeMode='cover'
+              alt ="Playlist's cover image"
             />
           ) : (
             <Box
@@ -139,7 +138,7 @@ export default function EditPlayListForm({
             disabled={uploading}
             className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-primary-500/70 w-12 h-12 p-1.5'
           >
-            <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
+            <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
           </Button>
 
           <Text>Name</Text>
@@ -212,16 +211,8 @@ export default function EditPlayListForm({
         )}
 
         {/* Submit */}
-        <Button
-          size='md'
-          variant='solid'
-          disabled={loading}
-          onPress={handlePressValid}
-          action='positive'
-        >
-          <Icon as={CheckIcon} color='white' size='sm' />
-        </Button>
+        <FloatButton onPress={handlePressValid} icon={CheckIcon} />
       </VStack>
-    </FormControl >
+    </FormControl>
   );
 }

@@ -1,18 +1,28 @@
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { HTTPException } from '@hono/http-exception';
 import { createClient } from '@supabase/supabase-js';
-import { formatDbError } from '../../utils/postgres_errors_map.tsx';
-import { EventPayload } from '../../../supabase/types/event.ts';
+import { formatDbError } from '@postgres/postgres_errors_map';
+import { 
+  EventPayload, 
+  EventResponse, 
+  EventLocation 
+} from "@event";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-export async function createSupabaseEvent(eventData: EventPayload): Promise<any> {
+export async function createSupabaseEvent(
+  eventData: EventPayload,
+  userId: string
+): Promise<void> {
   const { location, ...eventDetails } = eventData;
 
   const { data, error } = await supabaseClient.from('events')
-    .insert([eventDetails])
-    .select();
+    .insert(
+      [{ ...eventDetails, owner_id: userId }]
+    )
+    .select()
+    .single();
 
   if (error) {
     const pgError = formatDbError(error);
@@ -20,22 +30,19 @@ export async function createSupabaseEvent(eventData: EventPayload): Promise<any>
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
 
-  if (location) {
-    const locationData = { ...location, event_id: data[0].id };
+  if (location && data) {
+    const locationData = { ...location, event_id: data.id };
     const { error: locationError } = await supabaseClient.from('location')
       .insert([locationData])
-      .select();
 
     if (locationError) {
       const pgError = formatDbError(locationError);
       throw new HTTPException(pgError.status, { message: pgError.message });
     }
   }
-
-  return data;
 }
 
-export async function getSupabaseEventById(eventId: string): Promise<any> {
+export async function getSupabaseEventById(eventId: string): Promise<EventResponse | null> {
   const { data, error } = await supabaseClient.rpc('get_complete_event', { p_event_id: eventId });
 
   if (error) {
@@ -47,7 +54,7 @@ export async function getSupabaseEventById(eventId: string): Promise<any> {
   return data;
 }
 
-export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
+export async function getSupabaseEventByOwner(ownerId: string): Promise<EventResponse[]> {
   const { data, error } = await supabaseClient.from('events')
     .select('*')
     .eq('owner_id', ownerId);
@@ -75,14 +82,11 @@ export async function deleteSupabaseEventById(eventId: string): Promise<boolean>
 
 export async function updateSupabaseEventById(
   eventId: string,
-  eventData?: Record<string, any>,
-  locationData?: Record<string, any>
-): Promise<{ event: any; location: any }> {
-  let eventResult = null;
-  let locationResult = null;
-
+  eventData?: EventPayload,
+  locationData?: EventLocation,
+): Promise<void> {
   if (eventData && Object.keys(eventData).length > 0) {
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from('events')
       .update(eventData)
       .eq('id', eventId)
@@ -93,25 +97,20 @@ export async function updateSupabaseEventById(
       const pgError = formatDbError(error);
       throw new HTTPException(pgError.status, { message: pgError.message });
     }
-    eventResult = data;
   }
 
   if (locationData && Object.keys(locationData).length > 0) {
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from('location')
       .update(locationData)
       .eq('event_id', eventId)
-      .select();
 
     if (error) {
       const pgError = formatDbError(error);
       console.error('Supabase location update error:', pgError.message);
       throw new HTTPException(pgError.status, { message: pgError.message });
     }
-    locationResult = data;
   }
-
-  return { event: eventResult, location: locationResult };
 }
 
 export async function uploadEventImage(uploadedFile: File): Promise<string> {
@@ -159,47 +158,43 @@ export async function getPublicUrlForPath(path: string): Promise<string> {
   return publicUrl;
 }
 
-
-export async function addUserToEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
-  const { data, error } = await supabaseClient.from('event_members')
+export async function addUserToEventSupabase(
+  eventId: string, userId: string, role: string): Promise<void> {
+  const { error } = await supabaseClient.from('event_members')
     .insert([{ event_id: eventId, profile_id: userId, role }])
-    .select();
 
   if (error) {
     console.error('Raw Supabase error:', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-
-  return data;
 }
 
-export async function removeUserFromEventSupabase(eventId: string): Promise<boolean> {
+export async function removeUserFromEventSupabase(
+  eventId: string, userId: string
+): Promise<void> {
   const { error } = await supabaseClient.from('event_members')
     .delete()
-    .eq('event_id', eventId);
+    .eq('event_id', eventId)
+    .eq('profile_id', userId);
 
   if (error) {
     console.error('Raw Supabase error:', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-
-  return true;
 }
 
-export async function editUserInEventSupabase(eventId: string, userId: string, role: string): Promise<any> {
-  const { data, error } = await supabaseClient.from('event_members')
+export async function editUserInEventSupabase(
+  eventId: string, userId: string, role: string): Promise<void> {
+  const { error } = await supabaseClient.from('event_members')
     .update({ role })
     .eq('event_id', eventId)
     .eq('profile_id', userId)
-    .select();
 
   if (error) {
     console.error('Raw Supabase error:', error);
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
-
-  return data;
 }
