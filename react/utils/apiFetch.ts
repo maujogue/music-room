@@ -1,4 +1,5 @@
 import { getSession } from '@/services/session';
+import { getDeviceInfo } from '@/utils/deviceInfo';
 
 export type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -17,15 +18,23 @@ export async function apiFetch<T>(
   console.log('apiFetch called with:', { url, method, headers, body, cache });
   try {
     const session = await getSession();
+
+    // Get device info and add as headers
+    const deviceInfo = getDeviceInfo();
+
     const isFormData = body instanceof FormData;
     const sessionHeaders = {
       Authorization: `Bearer ${session?.access_token}`,
+      'X-App-Platform': deviceInfo.platform,
+      'X-App-Device': deviceInfo.deviceModel,
+      'X-App-OS-Version': deviceInfo.osVersion,
+      'X-App-Version': deviceInfo.appVersion,
       ...headers,
     };
     const finalHeaders = isFormData
       ? sessionHeaders
       : {
-          'Content-Type': contentType || 'application/json',
+          'Content-Type': 'application/json',
           ...sessionHeaders,
         };
 
@@ -55,8 +64,10 @@ export async function apiFetch<T>(
 
       return {
         success: false,
-        error: `${errorMessage || message || 'unknown error'}`,
-        status: res.status,
+        error: {
+          message: `${errorMessage || message || 'unknown error'}`,
+          status: res.status,
+        },
       };
     }
 
@@ -73,8 +84,10 @@ export async function apiFetch<T>(
 
     return {
       success: false,
-      error: `${message}`,
-      status: undefined,
+      error: {
+        message: `${message}`,
+        status: undefined,
+      },
     };
   }
 }

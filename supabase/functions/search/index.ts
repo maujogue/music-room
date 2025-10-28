@@ -4,10 +4,14 @@ import { HTTPException } from '@hono/http-exception';
 import { getCurrentUser, getUserSpotifyToken } from '@auth/utils'
 import searchRoutes from './routes.ts'
 import type { StatusCode } from '@hono/hono/utils/http-status'
+import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
+
 
 const app = new Hono.Hono()
 
 serve(app.fetch)
+
+app.use("*", loggingMiddleware);
 
 app.use('*', async (c: Hono.Context, next) => {
   try {

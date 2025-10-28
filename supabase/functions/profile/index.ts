@@ -5,7 +5,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { Context, Hono } from '@hono/hono';
-
+import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
 declare module '@hono/hono' {
   interface ContextVariableMap {
     user: Awaited<ReturnType<typeof getCurrentUser>>;
@@ -21,6 +21,8 @@ import type { StatusCode } from '@hono/hono/utils/http-status'
 const app = new Hono();
 
 serve(app.fetch);
+
+app.use("*", loggingMiddleware);
 
 app.use('*', async (c, next) => {
   try {
