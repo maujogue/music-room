@@ -4,10 +4,14 @@ import { HTTPException } from '@hono/http-exception';
 import { getCurrentUser, getUserSpotifyToken } from '@auth/utils'
 import playlistRoutes from './routes.ts'
 import type { StatusCode } from "@hono/hono/utils/http-status";
+import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
+
 
 const app = new Hono()
 
 serve(app.fetch)
+
+app.use("*", loggingMiddleware);
 
 declare module '@hono/hono' {
   interface ContextVariableMap {
