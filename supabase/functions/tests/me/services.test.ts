@@ -8,17 +8,21 @@ import {
 
 import 'jsr:@std/dotenv/load'
 
+async function getToken() {
+  const res = await fetch('http://127.0.0.1:8888/get_access_token');
+  const data = await res.json();
+  return data.access_token;
+}
 
-const spotifyToken = Deno.env.get('TEST_SPOTIFY_TOKEN') ?? '';
+
+const spotifyToken = await getToken() ?? '';
 if (!spotifyToken) {
     throw new Error('spotifyToken is required.');
 };
 
 
-
 Deno.test('getCurrentUserPlaylists returns playlists', async () => {
   const result = await getCurrentUserPlaylists(spotifyToken);
-  console.log(result.error)
   if (result.error) {
     throw new Error(result.error.message);
   }
@@ -54,11 +58,29 @@ Deno.test('getCurrentUserPlayingTrack returns invalid acces token error', async 
   }
 });
 
-Deno.test('getCurrentUserPlayingTrack returns permission missing error', async () => {
+Deno.test('getCurrentUserPlayingTrack returns valid response', async () => {
   const result = await getCurrentUserPlayingTrack(spotifyToken);
 
-  if (!result.error) {
-    throw new Error('An error code should be return by getCurrentUserPlayingTrack');
+  if (result.error) {
+    throw new Error('An error code should not be return by getCurrentUserPlayingTrack');
+  }
+});
+
+Deno.test('pausePlayback returns valid response', async () => {
+  const result = await pausePlayback(spotifyToken);
+	await result.text();
+
+  if (result.error) {
+    throw new Error('An error code should not be return by pausePlayback');
+  }
+});
+
+Deno.test('skipToNextTrack returns valid response', async () => {
+  const result = await skipToNextTrack(spotifyToken);
+	await result.text();
+
+  if (result.error) {
+    throw new Error('An error code should not be return by skipToNextTrack');
   }
 });
 
