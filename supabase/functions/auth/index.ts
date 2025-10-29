@@ -1,17 +1,16 @@
 import { Hono } from 'jsr:@hono/hono'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getCurrentUser, getUserSpotifyToken } from './utils.ts'
+import { getCurrentUser } from './utils.ts'
 import authRoutes from './routes.ts'
+import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
 const app = new Hono()
 
 serve(app.fetch)
+
+app.use("*", loggingMiddleware);
 
 app.use('*', async (c, next) => {
   try {
