@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getEventsWithRadar } from '@/services/events';
+import { EVENT_RADAR_MOCK_RESULT } from '@/mocks/mockEvents';
 
 export function useEventsRadar(coords: Coordinates | null) {
   const [events, setEvents] = useState<MusicEventRadarResult[]>([]);
@@ -15,7 +16,9 @@ export function useEventsRadar(coords: Coordinates | null) {
     try {
       const data = await getEventsWithRadar(coords);
       console.log("-------------------------DATA RADAR EVENT \n", data)
-      setEvents(data || []);
+
+      setEvents(EVENT_RADAR_MOCK_RESULT)
+      // setEvents(data || []);
     } catch (e) {
       console.error(`Error fetching Events at position (${coords.lat}, ${coords.long})`, e);
       setError('Radar events error');
