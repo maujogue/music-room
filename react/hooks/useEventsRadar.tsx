@@ -14,6 +14,10 @@ export function useEventsRadar(coords: Coordinates | null) {
     setError(null);
     try {
       const data = await getEventsWithRadar(coords);
+
+      for (const ev of data ) {
+        console.log("==============>> EVENT :", ev)
+      }
       setEvents(data || []);
     } catch (e) {
       console.error(`Error fetching Events at position (${coords.lat}, ${coords.long})`, e);

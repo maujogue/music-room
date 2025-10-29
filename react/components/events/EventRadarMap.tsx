@@ -15,8 +15,10 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import EventDatesInfos from "./eventDetail/Dates/EventDatesInfos";
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { Footprints } from 'lucide-react-native';
+import { Footprints, ShellIcon } from 'lucide-react-native';
 import { Heading } from "../ui/heading";
+import CollaborativeBadge from "../generics/CollaborativeBadge";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
 type RadarProps = {
   radiusKm?: number;
@@ -118,13 +120,44 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
                             bottom: 0,
                           }}
                         />
+
+                {selectedItem.event.everyone_can_vote && (
+                  <Box className="absolute bottom-2 right-2">
+                    <CollaborativeBadge />
+                  </Box>
+                  )}
               </VStack>
 
           <VStack className="bg-white/50 rounded-b-xl border border-neutral-300 w-full pt-2 px-2">
-
+                 <HStack className="w-full justify-between">
             <Heading size="lg" className="text-neutral-950 font-semibold"> {selectedItem.event.name} </Heading>
+            <Badge size='md' className='rounded-xl h-6'>
+                    <BadgeIcon as={ShellIcon} size='lg' />
+                    <BadgeText
+                      className='pl-1 font-bold'
+                      ellipsizeMode='tail'
+                      style={{ maxWidth: 200 }}
+                      >
+                      {selectedItem.radar.venuename}
+                    </BadgeText>
+                  </Badge>
+                      </HStack>           
             <Text size="sm" className="text-neutral-600" >{selectedItem.event.description}</Text>
-            <HStack className="w-full my-3 items-top justify-between">
+            <HStack className='items-center px-2'>
+                <Avatar size='sm'>
+                  <AvatarImage
+                    source={{
+                      uri: selectedItem.owner?.avatar_url
+                        ? selectedItem.owner.avatar_url
+                        : 'https://picsum.photos/111',
+                    }}
+                  />
+                </Avatar>
+                <Text size='sm' className='text-typography-400 px-2'>
+                  {selectedItem.owner?.username}
+                </Text>
+              </HStack>
+            <HStack className="w-full my-3 items-center justify-between">
               {!!selectedItem.radar?.dist && (
                   <Badge size='md' className='rounded-xl h-6'>
                     <BadgeIcon as={Footprints} size='lg' />

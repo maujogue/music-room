@@ -104,6 +104,7 @@ type MusicEventRadarResult = {
   radar: {
     coordinates: Coordinates;
     dist: number;
+    venuename: string;
   }
   event: MusicEvent;
   owner: UserInfo;

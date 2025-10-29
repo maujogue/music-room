@@ -101,6 +101,7 @@ export interface EventRadarResult {
   radar: {
     coordinates: Coordinates;
     dist: Number;
+    venuename: string;
   }
   event: Event;
   owner: SpotifyOwner;
