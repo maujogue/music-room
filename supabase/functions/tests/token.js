@@ -1,4 +1,3 @@
-
 var express = require('express');
 var request = require('request');
 var crypto = require('crypto');
@@ -6,10 +5,12 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-var client_id = 'a64800b315a5462bbd151cf23d2b8062'; // your clientId
-var client_secret = '27b23948682b4a51af98fbff56ed4e40'; // Your secret
-var redirect_uri = 'http://127.0.0.1:8888/callback'; // Your redirect uri
+var client_id = process.env.SPOTIFY_CLIENT_ID;
+var client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+var redirect_uri = 'http://127.0.0.1:8888/callback';
 
 var g_token = '';
 
@@ -34,7 +35,6 @@ app.get('/login', function(req, res) {
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
 
-  // your application requests authorization
   var scope = 'user-read-private user-read-email playlist-read-private user-modify-playback-state user-read-playback-state';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -48,8 +48,6 @@ app.get('/login', function(req, res) {
 
 app.get('/callback', function(req, res) {
 
-  // your application requests refresh and access tokens
-  // after checking the state parameter
 
   var code = req.query.code || null;
   var state = req.query.state || null;
@@ -88,15 +86,12 @@ app.get('/callback', function(req, res) {
           json: true
         };
 
-        // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           console.log(body);
         });
 
-        console.log(access_token);
         g_token = access_token;
 
-        // we can also pass the token to the browser to make requests from there
         res.redirect('/#' +
           querystring.stringify({
             access_token: access_token,
@@ -155,4 +150,3 @@ app.get('/get_access_token', (req, res) => {
 
 console.log('Listening on 8888');
 app.listen(8888);
-
