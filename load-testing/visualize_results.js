@@ -27,7 +27,16 @@ function createInteractiveHTML(
   outputDir,
   baseName
 ) {
-  const htmlPath = path.join(outputDir, `${baseName}_report.html`);
+  const htmlPath = path.join(outputDir, `report.html`);
+
+  // Extract test name from folder name for title
+  const folderName = path.basename(outputDir);
+  const testTitle = folderName
+    .split("_")
+    .slice(0, -2)
+    .join("_")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
 
   // Serialize data for JavaScript
   const dataScript = `
@@ -47,7 +56,7 @@ function createInteractiveHTML(
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Profile Load Test Results - Interactive</title>
+  <title>${testTitle} Load Test Results - Interactive</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     body {
@@ -134,7 +143,7 @@ function createInteractiveHTML(
 </head>
 <body>
   <div class="header">
-    <h1>Profile Load Test Results - HTTP Metrics vs VU Count</h1>
+    <h1>${testTitle} Load Test Results - HTTP Metrics vs VU Count</h1>
     <div class="controls">
       <div class="control-group">
         <label for="thresholdInput">Threshold (seconds):</label>
@@ -586,7 +595,8 @@ function createPlots(resultsDict, outputPath) {
   const reqsCount = sortedVUs.map((vu) => resultsDict[vu].reqs.count);
 
   const outputDir = path.dirname(outputPath);
-  const baseName = path.basename(outputPath, path.extname(outputPath));
+  // Use simple base name without route prefix (route is in folder name)
+  const baseName = "metrics";
 
   const width = 1600;
   const height = 1200;
@@ -891,79 +901,11 @@ function createPlots(resultsDict, outputPath) {
           "failed_rate",
           "total_requests",
         ];
-        const chartPath = path.join(
-          outputDir,
-          `${baseName}_${chartNames[index]}.png`
-        );
+        const chartPath = path.join(outputDir, `${chartNames[index]}.png`);
         fs.writeFileSync(chartPath, buffer);
         console.log(`✓ Chart saved: ${chartPath}`);
       });
 
-      // Also create a static HTML report with all charts side by side
-      const staticHtmlPath = path.join(outputDir, `${baseName}_static.html`);
-      const staticHtmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Profile Load Test Results</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    h1 {
-      color: #333;
-      text-align: center;
-    }
-    .charts-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      max-width: 1600px;
-      margin: 0 auto;
-    }
-    .chart-wrapper {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .chart-wrapper img {
-      width: 100%;
-      height: auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>Profile Load Test Results - HTTP Metrics vs VU Count</h1>
-  <div class="charts-container">
-    <div class="chart-wrapper">
-      <img src="${path.basename(
-        `${baseName}_duration_stats.png`
-      )}" alt="Duration Statistics" />
-    </div>
-    <div class="chart-wrapper">
-      <img src="${path.basename(
-        `${baseName}_duration_percentiles.png`
-      )}" alt="Duration Percentiles" />
-    </div>
-    <div class="chart-wrapper">
-      <img src="${path.basename(
-        `${baseName}_failed_rate.png`
-      )}" alt="Failed Rate" />
-    </div>
-    <div class="chart-wrapper">
-      <img src="${path.basename(
-        `${baseName}_total_requests.png`
-      )}" alt="Total Requests" />
-    </div>
-  </div>
-</body>
-</html>
-    `;
-      fs.writeFileSync(staticHtmlPath, staticHtmlContent);
-      console.log(`✓ Static HTML report saved: ${staticHtmlPath}`);
       console.log(`✓ Visualization complete!`);
     })
     .catch((error) => {
@@ -1091,8 +1033,11 @@ function main() {
     process.exit(1);
   }
 
+  // Use simple filename without route prefix (route is in folder name)
+  const metricsFileName = "metrics.png";
+
   // Create visualization
-  const outputPath = path.join(resultsDir, "profile_test_metrics.png");
+  const outputPath = path.join(resultsDir, metricsFileName);
   createPlots(resultsDict, outputPath);
 }
 

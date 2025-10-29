@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Run any k6 load test script with different VU counts and generate visualizations
-# Usage: ./run_profile_tests.sh <script_name> [vu_count1] [vu_count2] [vu_count3] ...
-#        ./run_profile_tests.sh --visualize <folder_path>
-# Example: ./run_profile_tests.sh profile 25 50 75 100 125 150
-# Example: ./run_profile_tests.sh event_create 50 100 150
-# Example: ./run_profile_tests.sh --visualize results/run_2025-10-29_13-56-27
+# Usage: ./run_k6_test.sh <script_name> [vu_count1] [vu_count2] [vu_count3] ...
+#        ./run_k6_test.sh --visualize <folder_path>
+# Example: ./run_k6_test.sh profile 25 50 75 100 125 150
+# Example: ./run_k6_test.sh event_create 50 100 150
+# Example: ./run_k6_test.sh --visualize results/run_2025-10-29_13-56-27
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${SCRIPT_DIR}/scripts"
