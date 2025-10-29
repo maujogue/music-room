@@ -53,7 +53,7 @@ type Coordinates = {
 type MusicEventLocation = {
   id: string;
   event_id: string;
-  coordinates?: string;
+  coordinates?: Coordinates;
   venuename?: string;
   address?: string;
   complement?: string;

@@ -15,10 +15,14 @@ export function useEventsRadar(coords: Coordinates | null) {
     setError(null);
     try {
       const data = await getEventsWithRadar(coords);
-      console.log("-------------------------DATA RADAR EVENT \n", data)
 
-      setEvents(EVENT_RADAR_MOCK_RESULT)
-      // setEvents(data || []);
+      for (const event of data) {
+
+        console.log("-------------------------DATA RADAR EVENT.radar.coordinates \n", event.radar.coordinates)
+      }
+
+      // setEvents(EVENT_RADAR_MOCK_RESULT)
+      setEvents(data || []);
     } catch (e) {
       console.error(`Error fetching Events at position (${coords.lat}, ${coords.long})`, e);
       setError('Radar events error');

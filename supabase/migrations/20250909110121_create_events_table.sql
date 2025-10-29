@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS public.event_members (
 CREATE TABLE IF NOT EXISTS public.location (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID REFERENCES events(id) ON DELETE CASCADE UNIQUE,
-  coordinates gis.geography(POINT) not null,
+  coordinates gis.geography(POINT),
   venueName TEXT,
   complement TEXT,
   address TEXT,
@@ -85,7 +85,17 @@ BEGIN
   LIMIT 1;
 
   -- Location: single row_to_json if exists
-  SELECT row_to_json(l.*) INTO location_json
+  SELECT jsonb_build_object(
+    'venuename', l.venuename,
+    'coordinates', jsonb_build_object(
+      'lat', gis.ST_Y(l.coordinates::gis.geometry),
+      'long', gis.ST_X(l.coordinates::gis.geometry)
+    ),
+    'complement', l.complement,
+    'city', l.city,
+    'country', l.country,
+    'address', l.address
+  ) INTO location_json 
   FROM location l
   WHERE l.event_id = p_event_id
   LIMIT 1;
@@ -498,5 +508,6 @@ AS $$
     l.coordinates,
     gis.st_setsrid(gis.st_makepoint(p_long, p_lat), 4326)::gis.geography
   ) <= p_range_km * 1000
+  AND NOT e.is_private
   ORDER BY l.coordinates operator(gis.<->) gis.st_point(p_long, p_lat)::gis.geography;
 $$;

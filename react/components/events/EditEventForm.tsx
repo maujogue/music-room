@@ -169,7 +169,7 @@ export default function EditEventForm({
           complement: location?.street ?? null,
           city: location?.city ?? null,
           country: location?.country ?? null,
-          coordinates: `POINT(${location?.latitude} ${location?.longitude})`,
+          coordinates: `POINT(${location?.longitude} ${location?.latitude})`,
         }
       : null;
 
@@ -445,7 +445,6 @@ export default function EditEventForm({
         isOpen={isLocationOpen}
         onClose={() => setLocationOpen(false)}
         onConfirm={val => {
-          console.log('Lieu choisi détaillé :', val);
           setLocation(val);
         }}
         initialCoords={

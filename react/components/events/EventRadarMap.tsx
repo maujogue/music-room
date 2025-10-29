@@ -132,7 +132,7 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
             
               <EventDatesInfos
                 event={selectedItem.event}
-                coordinates={selectedItem.radar.coordinates.lat + " " + selectedItem.radar.coordinates.long}
+                coordinates={selectedItem.radar.coordinates}
                 />
 
               <Button

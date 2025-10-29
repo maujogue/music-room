@@ -45,7 +45,6 @@ export async function getEventsWithRadar(coord: Coordinates): Promise<MusicEvent
     console.error(`Error fetching Events at position (${coord.lat}, ${coord.long})`, res.error);
     throw res.error;
   }
-  console.log("🖐️ radars res:", res.data);
   return res.data;
 }
 
