@@ -7,7 +7,7 @@ import { useEventsRadar } from "@/hooks/useEventsRadar";
 import EventMarker from "@/components/events/EventMarker";
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText } from '@/components/ui/button';
 import { Box } from "@/components/ui/box";
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
@@ -15,7 +15,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import EventDatesInfos from "./eventDetail/Dates/EventDatesInfos";
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { ShellIcon, Footprints } from 'lucide-react-native';
+import { Footprints } from 'lucide-react-native';
 import { Heading } from "../ui/heading";
 
 type RadarProps = {
@@ -49,6 +49,14 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
 
   function clearSelection() {
     setSelectedId(null);
+  }
+
+  function displayDistance(distance: number) {
+    if (distance < 1000) {
+      return `~ ${distance.toFixed(1)} m`
+    } else {
+      return `~ ${(distance / 1000).toFixed(1) } km`
+    }
   }
 
 
@@ -125,7 +133,7 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
                       ellipsizeMode='tail'
                       style={{ maxWidth: 200 }}
                     >
-                      ~ {selectedItem.radar.dist.toFixed(1)} km
+                      {displayDistance(selectedItem.radar.dist)}
                     </BadgeText>
                   </Badge>
                 )}
