@@ -52,6 +52,7 @@ install:
 	cd ${REACT_APP_DIR} && npx expo install
 	cd ${REACT_APP_DIR} && npm install --save-dev babel-plugin-module-resolver
 	@echo "✅ Dependencies installed successfully!"
+	cd ${SUPABASE_DIR}/functions/tests && npm install
 
 # Initialize Supabase (run from project root)
 setup-supabase:
@@ -233,14 +234,14 @@ test-cloud: test-react test-supabase-cloud test-supabase-sql-cloud
 test-react:
 	cd ${REACT_APP_DIR} && npm test
 
-test-init:
-	cd ${SUPABASE_DIR} && npm install && node functions/tests/token.js
+test-server:
+	cd ${SUPABASE_DIR} && node functions/tests/token.js
 
-test-supabase-cloud:
+test-supabase-cloud: 
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
 	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net --import-map=import_map.json functions/tests/**/*.test.ts --env-file=functions/.env
 
-test-supabase-local:
+test-supabase-local: 
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net --import-map=import_map.json functions/tests/**/*.test.ts --env-file=functions/.env
 
