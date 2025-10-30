@@ -25,7 +25,6 @@ import PrivateBadge from '@/components/generics/PrivateBadge';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import EventDoneBadge from '@/components/generics/EventDoneBadge';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -59,7 +58,9 @@ export default function EditEventForm({
   const [spatio_licence, setSpatioLicence] = useState(
     initialValues.event?.spatio_licence ?? false
   );
-  const [done, setDone] = useState(initialValues.event?.done ?? false);
+  const [done, setDone] = useState(
+    initialValues.event?.done ?? false
+  );
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
   );
@@ -193,7 +194,7 @@ export default function EditEventForm({
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
       spatio_licence,
-      done,
+      done
     } as any;
 
     try {
@@ -285,13 +286,13 @@ export default function EditEventForm({
                   </VStack>
                 )}
 
-                <HStack className='px-4 justify-between'>
+                <HStack className='items-between'>
                   <VStack className=''>
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
                         value={is_private}
                         onToggle={() => {
                           setIsPrivate(prev => !prev);
@@ -305,8 +306,8 @@ export default function EditEventForm({
                       <Switch
                         value={everyone_can_vote}
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
                         onToggle={() => {
                           setEveryoneCanVote(prev => !prev);
                         }}
@@ -319,8 +320,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
                         value={spatio_licence}
                         onToggle={() => {
                           setSpatioLicence(prev => !prev);
@@ -332,8 +333,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
                         value={done}
                         onToggle={() => {
                           setDone(prev => !prev);
@@ -343,6 +344,8 @@ export default function EditEventForm({
                       <Text>Event is done</Text>
                     </HStack>
                   </VStack>
+                  
+
                 </HStack>
 
                 <Text className='mt-2 font-semibold'>

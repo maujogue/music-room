@@ -68,8 +68,6 @@ type MusicEventSection = {
 
 type MusicEventPayload = {
   name: string;
-
-  // TODO : complete here from backend shape
   // id: string;
   name: string;
   image_url?: string;
