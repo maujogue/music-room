@@ -9,8 +9,7 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { HStack } from '@/components/ui/hstack';
 import { useEventDate } from '@/hooks/useEventDate';
 import { LinearGradient } from 'expo-linear-gradient';
-import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
-import PrivateBadge from '@/components/generics/PrivateBadge';
+import EventAllBadges from '@/components/generics/EventAllBadges';
 
 type Props = {
   event: MusicEvent;
@@ -83,8 +82,7 @@ export default function EventListItem({ event, owner }: Props) {
                 </Text>
               </HStack>
               <HStack className='items-center gap-2'>
-                {event.is_private && <PrivateBadge />}
-                {event.everyone_can_vote && <CollaborativeBadge />}
+                  <EventAllBadges event={event} />
               </HStack>
             </HStack>
           </Box>

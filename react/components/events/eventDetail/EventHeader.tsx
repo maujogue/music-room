@@ -1,6 +1,5 @@
 import { Card } from '@/components/ui/card';
 import { Image } from '@/components/ui/image';
-import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
@@ -20,11 +19,10 @@ import EventDatesInfos from './Dates/EventDatesInfos';
 import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { useState } from 'react';
 import { addUserToEvent, removeUserFromEvent } from '@/services/events';
-import PrivateBadge from '@/components/generics/PrivateBadge';
-import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import { Box } from '@/components/ui/box';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Badge, BadgeIcon } from '@/components/ui/badge';
+import EventAllBadges from '@/components/generics/EventAllBadges';
 
 interface Props {
   eventData: MusicEventFetchResult;
@@ -135,10 +133,7 @@ export default function EventHeader({
                       <Box />
                     )}
                     <HStack className='gap-1'>
-                      {eventData.event.is_private && <PrivateBadge />}
-                      {eventData.event.everyone_can_vote && (
-                        <CollaborativeBadge />
-                      )}
+                      <EventAllBadges event={eventData.event} />
                       <HStack className='gap-2 ml-2 items-center'>
                         <Button
                           variant='link'
