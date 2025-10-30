@@ -27,6 +27,8 @@ export interface Event {
   playlist_id?: string;
   playlistId: string;
   beginning_at: string;
+  spatio_licence: boolean;
+  done: boolean;
 }
 
 export interface EventResponseReduced {
