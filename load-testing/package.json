@@ -1,0 +1,12 @@
+{
+  "name": "music-room-load-testing",
+  "version": "1.0.0",
+  "description": "Load testing scripts for music-room",
+  "main": "visualize_results.js",
+  "scripts": {
+    "visualize": "node visualize_results.js"
+  },
+  "dependencies": {
+    "chartjs-node-canvas": "latest"
+  }
+}

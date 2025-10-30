@@ -1,11 +1,13 @@
 import { View, Text } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HStack } from '@/components/ui/hstack';
-import TrackListItem from '@/components/track/TrackListItem';
-import PlayerControls from '@/components/player/PlayerControl';
+import { Play, Pause, SkipForward } from 'lucide-react-native';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Image } from '@/components/ui/image';
+import { white } from 'tailwindcss/colors';
 
 type PlayerProps = {
-  track: SpotifyTrack | null;
+  track: SpotifyTrack;
   isPlaying: boolean;
   onPlayPause: () => void;
   onNext: () => void;
@@ -19,6 +21,8 @@ const Player = ({
   onNext,
   showControls,
 }: PlayerProps) => {
+  console.log('Player track:', track);
+  console.log('image url:', track?.album?.images[0]?.url);
   if (!track) {
     return (
       <View>
@@ -27,18 +31,39 @@ const Player = ({
     );
   }
   return (
-    <GestureHandlerRootView>
-      <HStack>
-        <TrackListItem track={track} />
+    <Card
+      style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+      className='h-25 p-2 px-4 m-2 rounded-2xl flex justify-center items-center overflow-hidden blurred-bg'
+    >
+      <HStack className='items-center justify-between space-x-4 w-full'>
         {showControls && (
-          <PlayerControls
-            isPlaying={isPlaying}
-            onPlayPause={onPlayPause}
-            onNext={onNext}
-          />
+          <Button
+            onPress={onPlayPause} 
+            variant='link'
+            className='rounded-full px-3'>
+            {isPlaying ? <Pause size={30} color={white}/> : <Play size={30} color={white} />}
+          </Button>
         )}
-      </HStack>
-    </GestureHandlerRootView>
+        {track?.album?.images?.[0]?.url && (
+          <Image source={{ uri: track.album.images[0].url }} alt={track.name} className='rounded-md' />
+        )}
+        <View className='ml-4 flex-1 justify-center w-25'>
+          <Text className='text-white font-semibold'>{track.name}</Text>
+          <Text className='text-gray-200'>{track.artists.map(artist => artist.name).join(', ')}</Text>
+        </View>
+        {showControls && (
+          <Button 
+            onPress={onNext} 
+            className='rounded-full p-3.5'
+            variant='link'
+          >
+            <SkipForward 
+              size={30} 
+              color={white} />
+          </Button>
+        )}
+    </HStack>
+  </Card>
   );
 };
 

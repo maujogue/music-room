@@ -12,13 +12,15 @@ CREATE TABLE IF NOT EXISTS public.events (
   name text UNIQUE,
   image_url text,
   description text,
-  playlist_id text,
+  playlist_id text NOT NULL,
   owner_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
   constraint name_length CHECK (char_length(name) >= 3),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
   beginning_at timestamp with time zone NOT NULL,
   is_private boolean DEFAULT false,
-  everyone_can_vote boolean DEFAULT true
+  everyone_can_vote boolean DEFAULT true,
+  spatio_licence boolean DEFAULT false,
+  done boolean DEFAULT false
 );
 
 -- Junction table for event members
@@ -36,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.event_members (
 CREATE TABLE IF NOT EXISTS public.location (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID REFERENCES events(id) ON DELETE CASCADE UNIQUE,
-  coordinates gis.geography(POINT),
+  coordinates gis.geography(POINT) NOT NULL,
   venueName TEXT,
   complement TEXT,
   address TEXT,
@@ -481,6 +483,8 @@ RETURNS TABLE (
   venuename TEXT,
   everyone_can_vote BOOLEAN,
   image_url TEXT,
+  spatio_licence BOOLEAN,
+  done BOOLEAN,
   lat FLOAT,
   long FLOAT,
   dist_meters FLOAT,
@@ -498,6 +502,8 @@ AS $$
     l.venuename,
     e.everyone_can_vote,
     e.image_url,
+    e.spatio_licence,
+    e.done,
     gis.st_y(l.coordinates::gis.geometry) AS lat,
     gis.st_x(l.coordinates::gis.geometry) AS long,
     gis.st_distance(
