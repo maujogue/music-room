@@ -19,8 +19,12 @@ import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
-import LocationPickerModal from '../generics/LocationPickerModal';
+import LocationPickerModal from '@/components/generics/LocationPickerModal';
 import { parseLocation } from '@/utils/parsePointCoordinates';
+import PrivateBadge from '@/components/generics/PrivateBadge';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
+import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
+import EventDoneBadge from '@/components/generics/EventDoneBadge';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -50,6 +54,12 @@ export default function EditEventForm({
   );
   const [is_private, setIsPrivate] = useState(
     initialValues.event?.is_private ?? false
+  );
+  const [spatio_licence, setSpatioLicence] = useState(
+    initialValues.event?.spatio_licence ?? false
+  );
+  const [done, setDone] = useState(
+    initialValues.event?.done ?? false
   );
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
@@ -183,6 +193,8 @@ export default function EditEventForm({
       is_private,
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
+      spatio_licence,
+      done
     } as any;
 
     try {
@@ -274,27 +286,67 @@ export default function EditEventForm({
                   </VStack>
                 )}
 
-                <VStack className='items-start'>
-                  <HStack className='items-center'>
-                    <Switch
-                      value={is_private}
-                      onToggle={() => {
-                        setIsPrivate(prev => !prev);
-                      }}
-                    />
-                    <Text>Private</Text>
-                  </HStack>
+                <HStack className='items-between'>
+                  <VStack className=''>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={is_private}
+                        onToggle={() => {
+                          setIsPrivate(prev => !prev);
+                        }}
+                      />
+                      <PrivateBadge />
+                      <Text>Private</Text>
+                    </HStack>
 
-                  <HStack className='items-center'>
-                    <Switch
-                      value={everyone_can_vote}
-                      onToggle={() => {
-                        setEveryoneCanVote(prev => !prev);
-                      }}
-                    />
-                    <Text>Everyone can vote</Text>
-                  </HStack>
-                </VStack>
+                    <HStack className='items-center'>
+                      <Switch
+                        value={everyone_can_vote}
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        onToggle={() => {
+                          setEveryoneCanVote(prev => !prev);
+                        }}
+                      />
+                      <CollaborativeBadge />
+                      <Text>Collaborative</Text>
+                    </HStack>
+                  </VStack>
+                  <VStack className=''>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={spatio_licence}
+                        onToggle={() => {
+                          setSpatioLicence(prev => !prev);
+                        }}
+                      />
+                      <SpatioLicenceBadge />
+                      <Text>Spatio temporal</Text>
+                    </HStack>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={done}
+                        onToggle={() => {
+                          setDone(prev => !prev);
+                        }}
+                      />
+                      <EventDoneBadge light />
+                      <Text>Event is done</Text>
+                    </HStack>
+                  </VStack>
+                  
+
+                </HStack>
 
                 <Text className='mt-2 font-semibold'>
                   Beginning Date & Time

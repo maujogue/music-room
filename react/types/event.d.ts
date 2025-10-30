@@ -83,6 +83,7 @@ type MusicEventPayload = {
 
   /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
+  spatio_license: boolean
 };
 
 type EventDateLabels = {
