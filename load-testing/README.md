@@ -1,260 +1,228 @@
 # Load Testing with k6
 
-This directory contains k6 scripts for load testing the music-room application.
+This directory contains comprehensive load testing scripts for the Music Room application, designed to test individual endpoints and determine concurrent user capacity.
 
 ## Setup
 
 1. Install k6: https://k6.io/docs/getting-started/installation/
-2. Set environment variables:
+2. Set environment variables or populate a .env file at load-testing root:
    ```bash
    export SUPABASE_URL="https://your-project.supabase.co"
    export SUPABASE_KEY="your-anon-key"
    ```
+3. Install visualization dependencies:
+   ```bash
+   cd load-testing
+   npm install
+   ```
 
-## Configuration
+## Folder Structure
 
-All load test parameters are centralized in `utils/config.js`.
+```
+load-testing/
+├── scripts/           # Individual endpoint test scripts
+├── functions/         # Supabase Edge Functions for testing
+├── utils/            # Configuration and utility functions
+├── reports/          # Generated HTML reports
+├── temp/             # Temporary test results (JSON files)
+├── run_k6_test.sh    # Main test runner script
+├── visualize_results.js # Results visualization generator
+└── max-load.md       # Comprehensive load testing analysis
+```
+
+## Available Test Scripts
+
+### Individual Endpoint Tests
+
+- `event_create.js` - Test event creation performance
+- `event_read.js` - Test event fetching performance
+- `playlist_create.js` - Test playlist creation performance
+- `profile_fetch.js` - Test profile retrieval performance
+- `profile_update.js` - Test profile update performance
+- `me_events.js` - Test user events fetching performance
+- `me_playlists.js` - Test user playlists fetching performance
+- `mixed_workload.js` - Test realistic user behavior patterns
 
 ## Running Tests
 
-### 1. Create Test Users
+### Quick Test (Single Endpoint)
 
-First, create the test users that will be used for load testing:
-
-```bash
-k6 run functions/setup_test_users.js
-```
-
-This will create all users needed for capacity testing (default: 100, configurable in `config.js` via `capacityTest.maxVUs`).
-
-### 2. Capacity Test (Find Maximum Concurrent Users)
-
-**This is the test you want for finding capacity!**
-
-The capacity test pre-creates all bearer tokens before running to avoid rate limiting.
-
-**Step 1: Create users for capacity test**
+Test a specific endpoint with multiple VU counts:
 
 ```bash
-k6 run functions/setup_test_users.js
+./run_k6_test.sh <script_name> <vu_count1> <vu_count2> <vu_count3> ...
 ```
 
-This creates all users needed (up to maxVUs configured in `config.js`, default: 100).
-
-**Step 2: Run the capacity test**
+**Examples:**
 
 ```bash
-k6 run functions/capacity_test.js
+# Test profile fetching with 25, 50, 75, 100 VUs
+./run_k6_test.sh profile_fetch 25 50 75 100
+
+# Test event creation with 50, 100, 150 VUs
+./run_k6_test.sh event_create 50 100 150
+
+# Test mixed workload with 25, 50, 100, 150 VUs
+./run_k6_test.sh mixed_workload 25 50 100 150
 ```
 
-The test will:
+### Visualize Existing Results
 
-- **Pre-create all bearer tokens** (once, before the test starts - shown in console)
-- Start with 5 VUs
-- Increase by 5 VUs every 20 seconds
-- Continue until thresholds fail or max VUs (100) is reached
-- **Fail when performance degrades below your thresholds**
-- Each VU uses a pre-created token (no login during test = no rate limiting!)
+Generate HTML reports from existing test data:
 
-Look at the output to see which VU count caused the failure. The last successful stage indicates your maximum capacity.
-
-## Understanding Capacity Test Results
-
-When the capacity test runs, k6 will report:
-
-```
-✓ Check: http_req_duration...: p(95)=1500ms < 2000ms
-✓ Check: http_req_failed...: rate=0.02 < 0.05
-
-... (continues until failure)
-
-✗ Check: http_req_duration...: p(95)=2100ms > 2000ms
+```bash
+./run_k6_test.sh --visualize temp/event_create_2025-10-30_13-21-59
 ```
 
-**The VU count at the stage BEFORE failure is your maximum capacity.**
+## Test Outputs
 
-For example, if it fails at 50 VUs, your app can handle **45 concurrent users** before performance degrades.
+### 1. Console Output
 
-## Customizing Capacity Test
+Real-time metrics during test execution:
 
-Edit `utils/config.js` to adjust capacity test parameters:
+- Response times (avg, min, max, p90, p95)
+- Request counts and throughput
+- Error rates and failure counts
+- VU utilization
+
+### 2. JSON Results
+
+Detailed metrics saved to `temp/<test_name>_<timestamp>/`:
+
+- `result_<vu>vu.json` - Complete metrics for each VU level
+- Includes HTTP request details, timing data, and error information
+
+### 3. HTML Reports
+
+Interactive visualizations saved to `reports/`:
+
+- **Response Time Charts**: Average, median, min/max, percentiles
+- **Error Rate Analysis**: Failed request percentages
+- **Throughput Metrics**: Total requests and request rates
+- **Interactive Controls**: Adjustable thresholds and data filtering
+
+## Configuration
+
+All test parameters are centralized in `utils/config.js`:
 
 ```javascript
-capacityTest: {
-  startVUs: 5,        // Starting number of VUs
-  maxVUs: 100,       // Maximum VUs to test up to
-  vuIncrement: 5,    // Increase by this many VUs per stage
-  stageDuration: "30s",  // How long to run at each VU level
-  rampUpDuration: "10s", // Initial ramp-up time
-}
+// Test configuration
+const config = {
+  // API endpoints
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseKey: process.env.SUPABASE_KEY,
+
+  // Test duration and iterations
+  testDuration: "30s",
+  iterations: 100,
+
+  // Performance thresholds
+  thresholds: {
+    http_req_duration: ["p(95)<2000"], // 95th percentile < 2s
+    http_req_failed: ["rate<0.05"], // Error rate < 5%
+  },
+};
 ```
 
-### Example: More Granular Test
+## Understanding Results
 
-To find capacity more precisely (smaller increments):
+### Performance Metrics
 
-```javascript
-capacityTest: {
-  startVUs: 10,
-  maxVUs: 100,
-  vuIncrement: 2,    // Increase by 2 instead of 5
-  stageDuration: "20s",  // Shorter stages
-  rampUpDuration: "5s",
-}
-```
+- **Response Time**: Time from request start to response completion
 
-### Example: Test Higher Capacity
+  - Average: Mean response time across all requests
+  - Median: 50th percentile response time
+  - P90: 90th percentile (90% of requests faster than this)
+  - P95: 95th percentile (95% of requests faster than this)
+  - Min/Max: Fastest and slowest response times
 
-To test up to 500 concurrent users:
+- **Error Rate**: Percentage of failed requests
+- **Throughput**: Requests per second (RPS)
+- **VU Utilization**: How effectively virtual users are utilized
 
-```javascript
-capacityTest: {
-  startVUs: 10,
-  maxVUs: 500,       // Test up to 500 VUs
-  vuIncrement: 10,   // Increase by 10 per stage
-  stageDuration: "30s",
-  rampUpDuration: "10s",
-}
-```
+### Performance Thresholds
 
-## Performance Thresholds
+Tests use these default thresholds (configurable):
 
-The capacity test uses these thresholds (configurable in `config.js`):
+- **Response Time P95 < 2 seconds**
+- **Error Rate < 5%**
+- **Individual endpoint thresholds** (e.g., profile fetch < 1.5s)
 
-- **Overall p95 latency < 2s**
-- **Profile fetches p95 < 1.5s**
-- **Login p95 < 1s**
-- **Error rate < 5%**
+When thresholds are exceeded, the test reports failures.
 
-When any threshold is exceeded, the test fails.
+## Test Scenarios
 
-## Dealing with Rate Limiting
+### 1. Individual Endpoint Testing
 
-The load tests use token caching to avoid rate limiting:
-
-- Tokens are cached per VU
-- Login only happens once per VU (first iteration)
-- Subsequent iterations reuse cached tokens
-
-If you still hit rate limits:
-
-1. Reduce `vuIncrement` in capacity test config
-2. Increase `stageDuration` to spread requests over time
-3. Test during off-peak hours
-
-## Files
-
-- `utils/config.js` - **Centralized configuration** for all load tests
-- `utils/create_vu.js` - Utility functions for creating users
-- `utils/login_vu.js` - Utility functions for logging in users
-- `functions/setup_test_users.js` - Script to create test users
-- `functions/capacity_test.js` - **Capacity test that finds max concurrent users**
-
-## Example Output
-
-### Capacity Test Success (within limits)
-
-```
-✓ Check: http_req_duration...: p(95)=1200ms < 2000ms (at 30 VUs)
-✓ Check: http_req_duration...: p(95)=1800ms < 2000ms (at 45 VUs)
-✗ Check: http_req_duration...: p(95)=2100ms > 2000ms (at 50 VUs) ← FAILED
-
-Result: Maximum capacity is 45 concurrent users
-```
-
-### Capacity Test - All Stages Pass
-
-```
-✓ All thresholds passed up to 100 VUs
-Result: Application can handle at least 100 concurrent users
-```
-
-### Batch Capacity Testing (Compare Multiple Configurations)
-
-To test multiple maxVUs values and compare results, use the batch testing script:
+Test specific API endpoints in isolation to identify bottlenecks:
 
 ```bash
-cd load-testing
-./run_batch_capacity_tests.sh
+./run_k6_test.sh profile_fetch 25 50 75 100 150
 ```
 
-This will:
+### 2. Mixed Workload Testing
 
-- Run capacity tests for maxVUs values: 50, 100, and 150 (configurable in the script)
-- Save individual result files to `load-testing/results/`
-- Generate a comparison table in the console
-- Create an interactive HTML report at `load-testing/results/comparison_report.html`
-
-The HTML report includes:
-
-- **Capacity comparison chart**: Shows last successful concurrent users for each configuration
-- **Response time charts**: Compares profile fetch and overall p95 latencies
-- **Error rate visualization**: Shows error rates across different maxVUs
-- **Detailed results table**: Complete metrics for all test runs
-
-**Customizing maxVUs values:**
-
-Edit `load-testing/run_batch_capacity_tests.sh` and modify the `MAX_VUS_VALUES` array:
+Simulate realistic user behavior with multiple endpoint calls:
 
 ```bash
-MAX_VUS_VALUES=(25 50 75 100 125 150)
+./run_k6_test.sh mixed_workload 25 50 100 150
 ```
 
-**Viewing results:**
+### 3. Stress Testing
 
-1. **Console output**: See summary comparison immediately after tests complete
-2. **HTML report**: Open `load-testing/results/comparison_report.html` in your browser
-3. **Individual JSON files**: Each test creates `result_max<value>.json` with detailed metrics
-
-### Fixed Load Comparison (Response Time & Success Rate Analysis)
-
-To compare how response times and success rates change with different concurrent user counts, use the fixed load comparison:
+Push endpoints to their limits to find breaking points:
 
 ```bash
-cd load-testing
-./run_fixed_load_comparison.sh
+./run_k6_test.sh event_create 200 300 400 500
 ```
 
-This will:
+### Debug Mode
 
-- Run tests with **same total requests** (1000 by default) and **different VU counts** (50, 100, 150)
-- Ensure fair comparison: same workload, different concurrency levels
-- Generate charts showing:
-  - **Response times (p95) with threshold lines** - Shows how latency increases with more concurrent users
-  - **Success rate vs Error rate** - Shows how error rates increase under higher load
-  - **Average response time trends** - Shows overall performance degradation
-
-**Key insights from this test:**
-
-- As VU count increases, you'll see response times increase (lines trending up)
-- Error rates typically increase with more concurrent users
-- Threshold violations become visible on the charts (red dashed lines show limits)
-
-**Customizing test parameters:**
-
-Edit `load-testing/run_fixed_load_comparison.sh` to change:
+Enable detailed logging:
 
 ```bash
-VU_COUNTS=(25 50 75 100)  # Different VU counts to test
+K6_LOG_LEVEL=debug ./run_k6_test.sh profile_fetch 25 50
 ```
 
-Edit `load-testing/utils/config.js` to change:
+## Files Reference
 
-```javascript
-targetTotalRequests: 2000,  // Total requests for all tests
-```
+- `utils/config.js` - Centralized configuration
+- `utils/setup_bearer_tokens.js` - Token management utilities
+- `run_k6_test.sh` - Main test runner with visualization
+- `visualize_results.js` - HTML report generator
+- `scripts/*.js` - Individual endpoint test scripts
+- `functions/*.js` - Supabase Edge Functions for testing
 
-**Results:**
+---
 
-- Console comparison table with response times and success rates
-- Interactive HTML report at `load-testing/results/fixed_load_comparison.html`
-- Individual JSON files: `result_fixed_<vu>vu.json`
+## Load Testing Analysis Summary
 
-## Tips
+Based on comprehensive load testing across all Music Room endpoints, here are the key findings:
 
-1. **Run capacity test multiple times** to ensure consistent results
-2. **Monitor your Supabase dashboard** during the test to see actual load
-3. **Check for rate limiting** - if failures happen early, it might be rate limits, not capacity
-4. **Adjust thresholds** based on your application's requirements
-5. **Test incrementally** - start with lower maxVUs and increase if needed
-6. **Use batch testing** to compare performance across different configurations
+### **Concurrent User Capacity Recommendations**
+
+- **Conservative Production Limit**: **50-75 concurrent users**
+
+  - Response Time: <2 seconds average
+  - Failure Rate: <1%
+  - Recommended for: Production launch, MVP phase
+
+- **Moderate Growth Limit**: **75-100 concurrent users**
+
+  - Response Time: 1-3 seconds average
+  - Failure Rate: 0-5% depending on endpoint
+  - Recommended for: Growth phase with monitoring
+
+### **Critical Performance Issues**
+
+1. **User Events Endpoint** - Response times >10 seconds at 100 VUs (immediate optimization required)
+2. **Profile Fetch** - 13.7% failure rate at 150 VUs
+3. **User Playlists** - 10.5% failure rate at 100 VUs
+
+### **Well-Performing Endpoints**
+
+- Event Create: Maintains good performance up to 150 VUs
+- Event Read: Stable performance up to 100 VUs
+- Playlist Create: Consistent performance across all tested VU levels
+- Profile Update: Good performance up to 100 VUs
+
