@@ -12,7 +12,8 @@ export const options = {
 export function setup() {
   return setup_bearer_tokens(
     loadTestConfig.bearerTokens,
-    loadTestConfig.password
+    loadTestConfig.password,
+    true
   );
 }
 

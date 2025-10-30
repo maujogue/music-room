@@ -13,7 +13,8 @@ export const options = {
 export function setup() {
   const authData = setup_bearer_tokens(
     loadTestConfig.bearerTokens,
-    loadTestConfig.password
+    loadTestConfig.password,
+    true
   );
 
   // Create playlists for each user so they have data to fetch
