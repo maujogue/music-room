@@ -32,7 +32,8 @@ export interface WebSocketActions {
   disconnect: () => void;
 }
 
-export default function useWebSocketClient(event_id: string): WebSocketActions {
+export default function useWebSocketClient(event_id: string, opts?: { enabled?: boolean }): WebSocketActions {
+  const { enabled = true } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
@@ -84,6 +85,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
   const initWebSocket = useCallback(async () => {
     try {
+      if (!enabled) return;
       if (!shouldReconnectRef.current) {
         console.log('ws: init aborted — reconnection disabled');
         return;
@@ -218,7 +220,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       setLastError('Failed to initialize WebSocket connection');
       setConnected(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     initWebSocket();
@@ -246,7 +248,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         setWebSocket(null);
       }
     };
-  }, [initWebSocket]);
+  }, [initWebSocket, enabled]);
 
   // Listen to app state and close websocket when app is backgrounded to avoid reconnect loops
   useEffect(() => {
@@ -289,7 +291,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
     const sub = AppState.addEventListener('change', handleAppStateChange);
     return () => sub.remove();
-  }, [initWebSocket]);
+  }, [initWebSocket, enabled]);
 
   const sendRequestUserInfo = useCallback(
     (ws?: WebSocket) => {

@@ -25,8 +25,9 @@ interface Props {
 
 export default function VotesRoom({ eventId }: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
-  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
+  const started = isEventStarted(data?.event?.beginning_at);
   const {
     connected,
     disconnect,
@@ -38,7 +39,7 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId);
+  } = useWebSocketClient(eventId, {enabled: started});
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
@@ -127,6 +128,13 @@ export default function VotesRoom({ eventId }: Props) {
       });
     }
   };
+
+  function isEventStarted(beginning_at?: string | null) {
+    if (!beginning_at) return false;
+    const start = new Date(beginning_at);
+    if (isNaN(start.getTime())) return false;
+    return Date.now() >= start.getTime();
+  }
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -225,6 +233,14 @@ export default function VotesRoom({ eventId }: Props) {
   }
 
   const onTrackSwipe = (dir: string, trackId: string) => {
+    if (!started) {
+      toast.error({
+        title: 'Too impulsive !',
+        description: "The event hasn't started yet.",
+        duration: 3000,
+      });
+      return;
+    }
     if (!connected) {
       toast.error({
         title: 'Cannot vote',

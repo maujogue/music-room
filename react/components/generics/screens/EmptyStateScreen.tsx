@@ -68,10 +68,12 @@ export default function EmptyState({
                 <ButtonIcon size='xl' className='w-10 h-10' as={AddIcon} />
               </Button>
             </Box>
-            <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
-              {addedCTA}
-            </Box>
-          </HStack>
+            {addedCTA && (
+              <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
+                {addedCTA}
+              </Box>
+            )}
+            </HStack>
         ) : null}
       </VStack>
     </Center>

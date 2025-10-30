@@ -68,20 +68,15 @@ type MusicEventSection = {
 
 type MusicEventPayload = {
   name: string;
-  // id: string;
-  name: string;
   image_url?: string;
-  // owner: SpotifyOwner;
   is_private: boolean;
   everyone_can_vote: boolean;
   description?: string;
   playlist_id?: string;
-  // playlistId: string;
   location: MusicEventLocation;
-
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
-  spatio_license: boolean;
+  done: boolean;
+  spatio_licence: boolean;
 };
 
 type EventDateLabels = {
