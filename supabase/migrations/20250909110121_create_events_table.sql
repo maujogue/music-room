@@ -483,6 +483,8 @@ RETURNS TABLE (
   venuename TEXT,
   everyone_can_vote BOOLEAN,
   image_url TEXT,
+  spatio_licence BOOLEAN,
+  done BOOLEAN,
   lat FLOAT,
   long FLOAT,
   dist_meters FLOAT,
@@ -500,6 +502,8 @@ AS $$
     l.venuename,
     e.everyone_can_vote,
     e.image_url,
+    e.spatio_licence,
+    e.done,
     gis.st_y(l.coordinates::gis.geometry) AS lat,
     gis.st_x(l.coordinates::gis.geometry) AS long,
     gis.st_distance(

@@ -26,7 +26,7 @@ export default function EventDatesInfos({
         <BadgeIcon as={Calendar1Icon} size='lg' />
         <BadgeText className='pl-1 font-bold'>{startFull}</BadgeText>
       </Badge>
-      {coordinates && (
+      {coordinates && coordinates.lat && coordinates.long && (
         <Badge size='md' action='muted' className='rounded-full h-6'>
           <BadgeIcon as={MapPinIcon} size='lg' />
           <BadgeText className='pl-1'>

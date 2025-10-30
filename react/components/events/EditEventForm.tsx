@@ -66,13 +66,6 @@ export default function EditEventForm({
   const [venueName, setVenueName] = useState(
     initialValues?.location?.venuename ?? ''
   );
-  // const [complement, setComplement] = useState(
-  //   initialLocation.complement ?? ''
-  // );
-  // const [address, setAddress] = useState(initialLocation.address ?? '');
-  // const [city, setCity] = useState(initialLocation.city ?? '');
-  // const [country, setCountry] = useState(initialLocation.country ?? '');
-
   const [error, setError] = useState<string | null>(null);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -347,7 +340,7 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
-                  {location ? (
+                  {(location && location.latitude && location.longitude) ? (
                     <Box>
                       <Text>{location.address ?? 'No address place'}</Text>
                       <Text size='xs'>
@@ -368,42 +361,6 @@ export default function EditEventForm({
                     </ButtonText>
                   </Button>
                 </Box>
-
-                {/*
-                <Text className='mt-2'>Complement</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Suite, floor...'
-                    value={complement}
-                    onChangeText={setComplement}
-                  />
-                </Input>
-                <Text className='mt-2'>Address</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Street address'
-                    value={address}
-                    onChangeText={setAddress}
-                  />
-                </Input>
-
-                <Text className='mt-2'>City</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='City'
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                </Input>
-
-                <Text className='mt-2'>Country</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Country'
-                    value={country}
-                    onChangeText={setCountry}
-                  />
-                </Input> */}
               </Box>
             </Box>
             {error ? (
@@ -448,7 +405,7 @@ export default function EditEventForm({
           setLocation(val);
         }}
         initialCoords={
-          location
+          (location && location.latitude && location.longitude)
             ? { latitude: location.latitude, longitude: location.longitude }
             : undefined
         }

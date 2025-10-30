@@ -120,4 +120,6 @@ export interface EventRadarFromDb {
   long: number
   lat: number
   dist_meters: number
+  done: boolean
+  spatio_licence: boolean
 }

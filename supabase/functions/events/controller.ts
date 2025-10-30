@@ -330,6 +330,8 @@ async function formatEventsRadars(event: EventRadarFromDb) {
     beginning_at,
     name,
     image_url,
+    spatio_licence,
+    done,
     owner_id,
     owner_username,
     owner_avatar_url,
@@ -344,7 +346,7 @@ async function formatEventsRadars(event: EventRadarFromDb) {
   const publicUrl = image_url ? await getPublicUrlForPath(image_url): null
   
   return {
-    event: { id, name, beginning_at, image_url: publicUrl, description,
+    event: { id, name, beginning_at, image_url: publicUrl, description, spatio_licence, done,
     everyone_can_vote },
     owner: { id: owner_id, username: owner_username, avatar_url: owner_avatar_url },
     radar: { coordinates: { lat, long }, dist: dist_meters, venuename }
