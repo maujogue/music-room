@@ -1,7 +1,6 @@
 import { VStack } from '@/components/ui/vstack';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Calendar1Icon } from 'lucide-react-native';
-import { parsePointCoordinates } from '@/utils/parsePointCoordinates';
 import { MapPinIcon } from 'lucide-react-native';
 
 interface Props {
@@ -26,7 +25,7 @@ export default function EventDatesInfos({
         <BadgeIcon as={Calendar1Icon} size='lg' />
         <BadgeText className='pl-1 font-bold'>{startFull}</BadgeText>
       </Badge>
-      {coordinates && (
+      {coordinates && coordinates.lat && coordinates.long && (
         <Badge size='md' action='muted' className='rounded-full h-6'>
           <BadgeIcon as={MapPinIcon} size='lg' />
           <BadgeText className='pl-1'>

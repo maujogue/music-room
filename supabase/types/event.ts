@@ -27,6 +27,8 @@ export interface Event {
   playlist_id?: string;
   playlistId: string;
   beginning_at: string;
+  spatio_licence: boolean;
+  done: boolean;
 }
 
 export interface EventResponseReduced {
@@ -118,4 +120,6 @@ export interface EventRadarFromDb {
   long: number
   lat: number
   dist_meters: number
+  done: boolean
+  spatio_licence: boolean
 }

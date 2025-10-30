@@ -45,6 +45,7 @@ export default function VotesRoom({ eventId }: Props) {
   );
   const isFocused = useIsFocused();
 
+
   const {
     playlist,
     loading: ploading,

@@ -10,7 +10,7 @@ import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ScrollView, Image } from 'react-native';
-import { Pen, Save } from 'lucide-react-native';
+import { MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
@@ -19,8 +19,13 @@ import FloatButton from '@/components/generics/FloatButton';
 import { Switch } from '@/components/ui/switch';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
-import LocationPickerModal from '../generics/LocationPickerModal';
+import LocationPickerModal from '@/components/generics/LocationPickerModal';
 import { parseLocation } from '@/utils/parsePointCoordinates';
+import PrivateBadge from '@/components/generics/PrivateBadge';
+import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
+import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
+import EventDoneBadge from '@/components/generics/EventDoneBadge';
+import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -51,6 +56,12 @@ export default function EditEventForm({
   const [is_private, setIsPrivate] = useState(
     initialValues.event?.is_private ?? false
   );
+  const [spatio_licence, setSpatioLicence] = useState(
+    initialValues.event?.spatio_licence ?? false
+  );
+  const [done, setDone] = useState(
+    initialValues.event?.done ?? false
+  );
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
   );
@@ -66,13 +77,6 @@ export default function EditEventForm({
   const [venueName, setVenueName] = useState(
     initialValues?.location?.venuename ?? ''
   );
-  // const [complement, setComplement] = useState(
-  //   initialLocation.complement ?? ''
-  // );
-  // const [address, setAddress] = useState(initialLocation.address ?? '');
-  // const [city, setCity] = useState(initialLocation.city ?? '');
-  // const [country, setCountry] = useState(initialLocation.country ?? '');
-
   const [error, setError] = useState<string | null>(null);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -190,6 +194,8 @@ export default function EditEventForm({
       is_private,
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
+      spatio_licence,
+      done
     } as any;
 
     try {
@@ -281,27 +287,67 @@ export default function EditEventForm({
                   </VStack>
                 )}
 
-                <VStack className='items-start'>
-                  <HStack className='items-center'>
-                    <Switch
-                      value={is_private}
-                      onToggle={() => {
-                        setIsPrivate(prev => !prev);
-                      }}
-                    />
-                    <Text>Private</Text>
-                  </HStack>
+                <HStack className='px-4 justify-between'>
+                  <VStack className=''>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={is_private}
+                        onToggle={() => {
+                          setIsPrivate(prev => !prev);
+                        }}
+                      />
+                      <PrivateBadge />
+                      <Text>Private</Text>
+                    </HStack>
 
-                  <HStack className='items-center'>
-                    <Switch
-                      value={everyone_can_vote}
-                      onToggle={() => {
-                        setEveryoneCanVote(prev => !prev);
-                      }}
-                    />
-                    <Text>Everyone can vote</Text>
-                  </HStack>
-                </VStack>
+                    <HStack className='items-center'>
+                      <Switch
+                        value={everyone_can_vote}
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        onToggle={() => {
+                          setEveryoneCanVote(prev => !prev);
+                        }}
+                      />
+                      <CollaborativeBadge />
+                      <Text>Collaborative</Text>
+                    </HStack>
+                  </VStack>
+                  <VStack className=''>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={spatio_licence}
+                        onToggle={() => {
+                          setSpatioLicence(prev => !prev);
+                        }}
+                      />
+                      <SpatioLicenceBadge />
+                      <Text>Spatio temporal</Text>
+                    </HStack>
+                    <HStack className='items-center'>
+                      <Switch
+                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
+                        thumbColor="#FFFFFF"
+                        ios_backgroundColor="#d4d4d4"
+                        value={done}
+                        onToggle={() => {
+                          setDone(prev => !prev);
+                        }}
+                      />
+                      <EventDoneBadge light />
+                      <Text>Event is done</Text>
+                    </HStack>
+                  </VStack>
+                  
+
+                </HStack>
 
                 <Text className='mt-2 font-semibold'>
                   Beginning Date & Time
@@ -347,14 +393,15 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
-                  {location ? (
-                    <Box>
-                      <Text>{location.address ?? 'No address place'}</Text>
-                      <Text size='xs'>
-                        {location.latitude.toFixed(6)},{' '}
-                        {location.longitude.toFixed(6)}
-                      </Text>
-                    </Box>
+                  <Text size='sm' className='text-neutral-700'>{location?.address ?? 'No address place'}</Text>
+                  {(location && location.latitude && location.longitude) ? (
+
+                    <Badge size='md' action='muted' className='rounded-full h-6 my-2'>
+                      <BadgeIcon as={MapPinIcon} size='lg' />
+                      <BadgeText className='pl-1'>
+                        {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+                      </BadgeText>
+                    </Badge>
                   ) : (
                     <Text>No location selected</Text>
                   )}
@@ -368,42 +415,6 @@ export default function EditEventForm({
                     </ButtonText>
                   </Button>
                 </Box>
-
-                {/*
-                <Text className='mt-2'>Complement</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Suite, floor...'
-                    value={complement}
-                    onChangeText={setComplement}
-                  />
-                </Input>
-                <Text className='mt-2'>Address</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Street address'
-                    value={address}
-                    onChangeText={setAddress}
-                  />
-                </Input>
-
-                <Text className='mt-2'>City</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='City'
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                </Input>
-
-                <Text className='mt-2'>Country</Text>
-                <Input className='bg-white'>
-                  <InputField
-                    placeholder='Country'
-                    value={country}
-                    onChangeText={setCountry}
-                  />
-                </Input> */}
               </Box>
             </Box>
             {error ? (
@@ -448,7 +459,7 @@ export default function EditEventForm({
           setLocation(val);
         }}
         initialCoords={
-          location
+          (location && location.latitude && location.longitude)
             ? { latitude: location.latitude, longitude: location.longitude }
             : undefined
         }

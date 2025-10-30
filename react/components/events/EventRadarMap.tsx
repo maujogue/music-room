@@ -17,8 +17,8 @@ import EventDatesInfos from "./eventDetail/Dates/EventDatesInfos";
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Footprints, ShellIcon } from 'lucide-react-native';
 import { Heading } from "../ui/heading";
-import CollaborativeBadge from "../generics/CollaborativeBadge";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import EventAllBadges from "@/components/generics/EventAllBadges";
 
 type RadarProps = {
   radiusKm?: number;
@@ -122,9 +122,9 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
                         />
 
                 {selectedItem.event.everyone_can_vote && (
-                  <Box className="absolute bottom-2 right-2">
-                    <CollaborativeBadge />
-                  </Box>
+                  <HStack className="absolute bottom-2 right-2 gap-1">
+                    <EventAllBadges event={selectedItem.event} />
+                  </HStack>
                   )}
               </VStack>
 
