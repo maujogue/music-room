@@ -42,7 +42,6 @@ export default function ProfileContent({
   actions,
 }: ProfileContentProps) {
   const router = useRouter();
-
   return (
     <VStack className='gap-4'>
       <HStack className='items-center'>
@@ -56,17 +55,15 @@ export default function ProfileContent({
 
         {/* Username */}
         <VStack className='flex-1 self-start pt-6'>
+            {/* Subscription Badge - only show on own profile */}
+            {permissions.canEdit && <SubscriptionBadge />}
           <HStack className='items-center gap-3'>
             <EditProfileTextFeature
               type='username'
               currentText={profile?.username || 'toto'}
               size='3xl'
               isEdit={permissions.canEdit && editProfile}
-            />
-            {/* Subscription Badge - only show on own profile */}
-            {permissions.canEdit && (
-              <SubscriptionBadge showMemberSince={false} />
-            )}
+              />
           </HStack>
           {/* Music Genre */}
           {permissions.canViewMusicGenre && (
@@ -74,10 +71,6 @@ export default function ProfileContent({
               currentText={profile?.music_genre || []}
               isEdit={permissions.canEdit && editProfile}
             />
-          )}
-          {/* Member since info for own profile */}
-          {permissions.canEdit && (
-            <SubscriptionBadge showMemberSince={true} />
           )}
         </VStack>
       </HStack>

@@ -2,7 +2,7 @@ import { Hono } from '@hono/hono'
 import { serve } from '@deno/server'
 import { HTTPException } from '@hono/http-exception';
 import { getCurrentUser, getUserSpotifyToken } from '@auth/utils'
-import { requirePremiumSubscription } from '../../utils/subscription'
+import { requirePremiumSubscription } from '../me/services/supabase.ts'
 import playlistRoutes from './routes.ts'
 import type { StatusCode } from "@hono/hono/utils/http-status";
 import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
