@@ -59,7 +59,6 @@ export default function SubscriptionBadge({
                 size='md'
                 color={isPremium ? '#10B981' : '#F59E0B'}
                 style={{ marginLeft: 8 }}
-                accessibilityLabel="Subscription Settings"
               />
             </Pressable>
           </HStack>
