@@ -6,12 +6,15 @@ import {
 	updateEventById,
 	addUserToEvent,
 	removeUserFromEvent,
-	editUserInEvent
+	editUserInEvent,
+	getEventsByCoordinates
 } from './controller.ts'
 
 const router = new Hono()
 
 router.post('/', createEvent)
+
+router.get('/radar', getEventsByCoordinates)
 
 router.get('/:id', fetchEvent)
 

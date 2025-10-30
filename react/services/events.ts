@@ -33,6 +33,21 @@ export async function getEventById(id: string) {
   return res.data;
 }
 
+export async function getEventsWithRadar(coord: Coordinates): Promise<MusicEventRadarResult[]> {
+  const res = await apiFetch<MusicEventRadarResult[]>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/radar?lat=${coord.lat}&long=${coord.long}`,
+    {
+      method: 'GET',
+    }
+  );
+
+  if (!res.success) {
+    console.error(`Error fetching Events at position (${coord.lat}, ${coord.long})`, res.error);
+    throw res.error;
+  }
+  return res.data;
+}
+
 export async function getVotesEventById(id: string) {
   const res = await apiFetch<EventVote[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}/votes`,

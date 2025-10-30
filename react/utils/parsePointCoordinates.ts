@@ -42,12 +42,12 @@ export function parseLocation(
 ): PickedPlace | null {
   if (!location) return null;
 
-  const coords = parsePointCoordinates(location.coordinates || '');
+  const coords = location.coordinates
   if (!coords) return null;
 
   return {
-    latitude: coords.y,
-    longitude: coords.x,
+    latitude: coords.lat,
+    longitude: coords.long,
     address: location.address || undefined,
     street: location.complement || undefined,
     city: location.city || undefined,

@@ -3,7 +3,6 @@ import { Text } from '@/components/ui/text';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { ShellIcon } from 'lucide-react-native';
 import {
-  // parsePointCoordinates,
   truncateAddress,
 } from '@/utils/parsePointCoordinates';
 
@@ -21,10 +20,6 @@ export default function EventLocationInfo({ location }: Props) {
   if (!coordinates && !venuename && !address && !city && !country) {
     return null;
   }
-
-  // const parsedCoordinates = coordinates
-  //   ? parsePointCoordinates(coordinates)
-  //   : null;
 
   return (
     <VStack className='gap-2'>

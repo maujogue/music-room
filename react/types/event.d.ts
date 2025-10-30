@@ -53,7 +53,7 @@ type Coordinates = {
 type MusicEventLocation = {
   id: string;
   event_id: string;
-  coordinates?: string;
+  coordinates?: Coordinates;
   venuename?: string;
   address?: string;
   complement?: string;
@@ -98,4 +98,14 @@ type TrackVote = {
   trackId: string;
   voteCount: number;
   voters: string[];
+};
+
+type MusicEventRadarResult = {
+  radar: {
+    coordinates: Coordinates;
+    dist: number;
+    venuename: string;
+  }
+  event: MusicEvent;
+  owner: UserInfo;
 };

@@ -1,3 +1,4 @@
+import CancelButton from '@/components/generics/CancelButton';
 import { Stack } from 'expo-router';
 
 export default function EventLayout() {
@@ -18,15 +19,14 @@ export default function EventLayout() {
           headerShown: false,
         }}
       />
-      {/*
-      <Stack.Screen name='add'
+      <Stack.Screen
+        name='radar'
         options={{
+          headerShown: true,
           presentation: 'modal',
-          title: 'New Playlist',
-          headerBackVisible: false,
-          headerRight: () => <CancelButton />,
+          title: 'Events Radar',
         }}
-      /> */}
+      />
     </Stack>
   );
 }

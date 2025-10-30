@@ -6,7 +6,6 @@ import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/ui/icon';
-import { Badge, BadgeIcon } from '@/components/ui/badge';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -25,6 +24,7 @@ import PrivateBadge from '@/components/generics/PrivateBadge';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import { Box } from '@/components/ui/box';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Badge, BadgeIcon } from '@/components/ui/badge';
 
 interface Props {
   eventData: MusicEventFetchResult;

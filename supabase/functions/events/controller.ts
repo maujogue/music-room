@@ -9,7 +9,8 @@ import {
   uploadEventImage,
   addUserToEventSupabase,
   removeUserFromEventSupabase,
-  editUserInEventSupabase
+  editUserInEventSupabase,
+  getSupabaseEventByCoordinates
 } from './service.ts'
 import {
   validateEventPayload,
@@ -25,7 +26,8 @@ import {
 import type { 
   EventPayload, 
   EventResponse,
-  EventMember
+  EventMember,
+  EventRadarFromDb
  } from '@event';
 import type { User } from '@supabase/supabase-js';
 
@@ -309,4 +311,42 @@ export async function editUserInEvent(c: Context): Promise<Response> {
   return c.json({ message: 'User edited in event successfully' })
 }
 
+export async function getEventsByCoordinates(c: Context): Promise<Response> {
+  const lat = c.req.query('lat')
+  const long = c.req.query('long')
 
+  if (!lat || !long) {
+    throw new HTTPException(400, { message: 'Missing latitude or longitude' })
+  }
+
+  const eventsRaw = await getSupabaseEventByCoordinates(Number(lat), Number(long));
+  const events = await Promise.all(eventsRaw.map((event: EventRadarFromDb) => formatEventsRadars(event)));
+  return c.json(events)
+}
+
+async function formatEventsRadars(event: EventRadarFromDb) {
+  const {
+    id,
+    beginning_at,
+    name,
+    image_url,
+    owner_id,
+    owner_username,
+    owner_avatar_url,
+    long,
+    lat,
+    dist_meters,
+    venuename,
+    description,
+    everyone_can_vote,
+  } = event
+
+  const publicUrl = image_url ? await getPublicUrlForPath(image_url): null
+  
+  return {
+    event: { id, name, beginning_at, image_url: publicUrl, description,
+    everyone_can_vote },
+    owner: { id: owner_id, username: owner_username, avatar_url: owner_avatar_url },
+    radar: { coordinates: { lat, long }, dist: dist_meters, venuename }
+  }
+}
