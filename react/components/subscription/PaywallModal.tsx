@@ -7,18 +7,18 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  Text,
-  VStack,
-  HStack,
-  Button,
-  ButtonText,
-  Badge,
-  BadgeText,
-  Divider,
-  Box,
-  CheckIcon,
-  XIcon,
-} from '@/components/ui';
+} from '@/components/ui/modal';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Button } from '@/components/ui/button';
+import { ButtonText } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BadgeText } from '@/components/ui/badge';
+import { Divider } from '@/components/ui/divider';
+import { Box } from '@/components/ui/box';
+import { CheckIcon } from '@/components/ui/icon';
+import { Icon, CloseIcon } from '@/components/ui/icon';
 import { useSubscription } from '@/contexts/subscriptionCtx';
 import { useAppToast } from '@/hooks/useAppToast';
 
@@ -38,13 +38,15 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         throw error;
       }
       
-      toast.success({
-        title: isPremium ? 'Subscription Cancelled' : 'Welcome to Premium!',
-        description: isPremium 
-          ? 'Your subscription has been cancelled. You can upgrade again anytime.'
-          : 'You now have access to all premium features.',
+      isPremium ? toast.info({
+        title: 'Subscription Cancelled',
+        description: 'You can upgrade again anytime.',
         duration: 3000,
-      });
+      }) : toast.success({
+          title: 'Welcome to Premium!',
+          description: 'You now have access to all premium features.',
+          duration: 3000,
+        });
       
       onClose();
     } catch (error) {
@@ -82,20 +84,20 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             </Text>
           </VStack>
           <ModalCloseButton>
-            <XIcon size="md" />
+            <Icon as={CloseIcon} size="md" />
           </ModalCloseButton>
         </ModalHeader>
 
         <ModalBody>
           <VStack space="lg">
             {/* Pricing */}
-            <Box className="bg-primary-50 p-4 rounded-lg">
+            <Box className="p-4 rounded-lg">
               <VStack space="sm" className="items-center">
                 <Text className="text-3xl font-bold text-primary-600">
                   {isPremium ? 'Premium' : '€25'}
                 </Text>
                 <Text className="text-typography-600">
-                  {isPremium ? 'Member since your subscription' : 'per month'}
+                  {isPremium ? 'Member since' : 'per month'}
                 </Text>
               </VStack>
             </Box>
@@ -135,25 +137,25 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
               <Text className="text-lg font-semibold">Premium Benefits</Text>
               <VStack space="xs">
                 <HStack space="sm" className="items-start">
-                  <CheckIcon size="sm" className="text-success-500 mt-1" />
+                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
                   <Text className="flex-1 text-sm">
                     Full playlist creation and editing capabilities
                   </Text>
                 </HStack>
                 <HStack space="sm" className="items-start">
-                  <CheckIcon size="sm" className="text-success-500 mt-1" />
+                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
                   <Text className="flex-1 text-sm">
                     Add and remove tracks from any playlist
                   </Text>
                 </HStack>
                 <HStack space="sm" className="items-start">
-                  <CheckIcon size="sm" className="text-success-500 mt-1" />
+                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
                   <Text className="flex-1 text-sm">
                     Invite friends to collaborate on playlists
                   </Text>
                 </HStack>
                 <HStack space="sm" className="items-start">
-                  <CheckIcon size="sm" className="text-success-500 mt-1" />
+                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
                   <Text className="flex-1 text-sm">
                     Delete playlists you no longer need
                   </Text>
@@ -166,16 +168,11 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         <ModalFooter>
           <HStack space="md" className="w-full">
             <Button
-              variant="outline"
-              onPress={onClose}
-              className="flex-1"
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
-            <Button
               onPress={handleUpgrade}
               className="flex-1"
               isDisabled={isLoading}
+
+              action={isPremium ? 'negative' : 'primary'}
             >
               <ButtonText>
                 {isLoading 

@@ -52,3 +52,10 @@ export async function getUserSubscription(userId: string): Promise<any | null> {
 
   return data;
 }
+
+export async function requirePremiumSubscription(userId: string): Promise<void> {
+  const subscription = await getUserSubscription(userId);
+  if (!subscription) {
+    throw JSON.stringify({ subscription_required: true });
+  }
+}
