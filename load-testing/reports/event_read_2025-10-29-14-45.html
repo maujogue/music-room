@@ -1,64 +1,7 @@
-#!/usr/bin/env node
-/**
- * Parse k6 JSON results and create visualizations showing HTTP metrics vs VU count
- */
-
-const fs = require("fs");
-const path = require("path");
-
-function calculatePercentile(sortedValues, percentile) {
-  if (sortedValues.length === 0) return 0;
-  const index = Math.ceil((sortedValues.length - 1) * (percentile / 100));
-  return sortedValues[index];
-}
-
-function createInteractiveHTML(
-  resultsDict,
-  vuCounts,
-  durationAvg,
-  durationMin,
-  durationMed,
-  durationMax,
-  durationP90,
-  durationP95,
-  failedRate,
-  reqsCount,
-  outputDir,
-  baseName,
-  reportsDir,
-  reportFileName
-) {
-  // Save HTML report to reports folder with folder name format
-  const htmlPath = path.join(reportsDir, reportFileName);
-
-  // Extract test name from folder name for title
-  const folderName = path.basename(outputDir);
-  const testTitle = folderName
-    .split("_")
-    .slice(0, -2)
-    .join("_")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
-
-  // Serialize data for JavaScript
-  const dataScript = `
-    const chartData = {
-      vuCounts: ${JSON.stringify(vuCounts)},
-      durationAvg: ${JSON.stringify(durationAvg)},
-      durationMin: ${JSON.stringify(durationMin)},
-      durationMed: ${JSON.stringify(durationMed)},
-      durationMax: ${JSON.stringify(durationMax)},
-      durationP90: ${JSON.stringify(durationP90)},
-      durationP95: ${JSON.stringify(durationP95)},
-      failedRate: ${JSON.stringify(failedRate)},
-      reqsCount: ${JSON.stringify(reqsCount)}
-    };
-  `;
-
-  const htmlContent = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>${testTitle} Load Test Results - Interactive</title>
+  <title>Event Read Load Test Results - Interactive</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     body {
@@ -145,7 +88,7 @@ function createInteractiveHTML(
 </head>
 <body>
   <div class="header">
-    <h1>${testTitle} Load Test Results - HTTP Metrics vs VU Count</h1>
+    <h1>Event Read Load Test Results - HTTP Metrics vs VU Count</h1>
     <div class="controls">
       <div class="control-group">
         <label for="thresholdInput">Threshold (seconds):</label>
@@ -179,7 +122,19 @@ function createInteractiveHTML(
   </div>
 
   <script>
-    ${dataScript}
+    
+    const chartData = {
+      vuCounts: [25,50,75,100,200],
+      durationAvg: [0.22963677474892397,0.22642165586753044,0.2135428139971819,0.19977008908145574,0.5698693136219639],
+      durationMin: [0.134184,0.130942,0.040826,0.12857400000000002,0.18579900000000002],
+      durationMed: [0.182055,0.18979,0.19382,0.17809899999999998,0.43367],
+      durationMax: [1.7938450000000001,0.9208010000000001,0.952044,0.725482,3.213118],
+      durationP90: [0.334666,0.276589,0.27939800000000004,0.252484,0.922615],
+      durationP95: [0.505005,0.576387,0.34883800000000004,0.30706700000000003,1.289415],
+      failedRate: [0,0,0.046970408642555195,0,0],
+      reqsCount: [697,1389,2129,2885,3788]
+    };
+  
 
     let chart1, chart2, chart3, chart4;
     let currentThreshold = 1.5;
@@ -205,7 +160,7 @@ function createInteractiveHTML(
 
     function getThresholdDataset() {
       return {
-        label: \`Threshold (\${currentThreshold}s)\`,
+        label: `Threshold (${currentThreshold}s)`,
         data: chartData.vuCounts.map(() => currentThreshold),
         borderColor: 'rgb(255, 0, 0)',
         borderDash: [10, 5],
@@ -475,290 +430,4 @@ function createInteractiveHTML(
     window.addEventListener('DOMContentLoaded', initCharts);
   </script>
 </body>
-</html>`;
-
-  fs.writeFileSync(htmlPath, htmlContent);
-  console.log(`✓ Interactive HTML report saved: ${htmlPath}`);
-}
-
-function parseK6Json(filePath) {
-  try {
-    // k6 outputs NDJSON (newline-delimited JSON) format
-    const content = fs.readFileSync(filePath, "utf8");
-    const lines = content.split("\n").filter((line) => line.trim());
-
-    // Collect data points
-    const durationValues = [];
-    let totalReqs = 0;
-    let failedReqs = 0;
-
-    for (const line of lines) {
-      try {
-        const obj = JSON.parse(line);
-
-        // Only process Point type entries (skip Metric type definitions)
-        if (obj.type !== "Point") continue;
-
-        // Skip setup requests
-        const isSetup = obj.data?.tags?.group === "::setup";
-        if (isSetup) continue;
-
-        // Collect http_req_duration values (in ms)
-        if (
-          obj.metric === "http_req_duration" &&
-          obj.data &&
-          obj.data.value !== undefined
-        ) {
-          durationValues.push(obj.data.value);
-        }
-
-        // Count total requests (each http_reqs point with value=1 represents one request)
-        if (
-          obj.metric === "http_reqs" &&
-          obj.data &&
-          obj.data.value !== undefined
-        ) {
-          totalReqs += obj.data.value;
-        }
-
-        // Count failed requests (value > 0 means failed)
-        if (
-          obj.metric === "http_req_failed" &&
-          obj.data &&
-          obj.data.value !== undefined
-        ) {
-          if (obj.data.value > 0) {
-            failedReqs++;
-          }
-        }
-      } catch (parseError) {
-        // Skip invalid JSON lines
-        continue;
-      }
-    }
-
-    // Calculate statistics
-    if (durationValues.length === 0) {
-      console.warn(`Warning: No duration data found in ${filePath}`);
-      return null;
-    }
-
-    // Sort for percentile calculation
-    const sortedDuration = [...durationValues].sort((a, b) => a - b);
-
-    const avg =
-      durationValues.reduce((sum, val) => sum + val, 0) / durationValues.length;
-    const min = sortedDuration[0];
-    const max = sortedDuration[sortedDuration.length - 1];
-    const med = calculatePercentile(sortedDuration, 50);
-    const p90 = calculatePercentile(sortedDuration, 90);
-    const p95 = calculatePercentile(sortedDuration, 95);
-
-    // Calculate failure rate
-    const failureRate = totalReqs > 0 ? (failedReqs / totalReqs) * 100 : 0;
-
-    return {
-      duration: {
-        avg: avg / 1000, // Convert ms to seconds
-        min: min / 1000,
-        med: med / 1000,
-        max: max / 1000,
-        p90: p90 / 1000,
-        p95: p95 / 1000,
-      },
-      failed: {
-        rate: failureRate,
-      },
-      reqs: {
-        count: totalReqs,
-      },
-    };
-  } catch (error) {
-    console.error(`Error parsing ${filePath}: ${error.message}`);
-    return null;
-  }
-}
-
-function createPlots(resultsDict, outputPath) {
-  // Sort by VU count
-  const sortedVUs = Object.keys(resultsDict).sort(
-    (a, b) => parseInt(a) - parseInt(b)
-  );
-  const vuCounts = sortedVUs.map((vu) => parseInt(vu));
-
-  // Prepare data
-  const durationAvg = sortedVUs.map((vu) => resultsDict[vu].duration.avg);
-  const durationMin = sortedVUs.map((vu) => resultsDict[vu].duration.min);
-  const durationMed = sortedVUs.map((vu) => resultsDict[vu].duration.med);
-  const durationMax = sortedVUs.map((vu) => resultsDict[vu].duration.max);
-  const durationP90 = sortedVUs.map((vu) => resultsDict[vu].duration.p90);
-  const durationP95 = sortedVUs.map((vu) => resultsDict[vu].duration.p95);
-  const failedRate = sortedVUs.map((vu) => resultsDict[vu].failed.rate);
-  const reqsCount = sortedVUs.map((vu) => resultsDict[vu].reqs.count);
-
-  const outputDir = path.dirname(outputPath);
-  // Use simple base name without route prefix (route is in folder name)
-  const baseName = "metrics";
-
-  // Extract folder name to create report filename (e.g., "event_create_2025-10-29_16-02-30")
-  const folderName = path.basename(outputDir);
-  const reportFileName = `${folderName}.html`;
-
-  // Determine reports directory (parent of temp folder)
-  const loadTestingDir = path.resolve(outputDir, "..", "..");
-  const reportsDir = path.join(loadTestingDir, "reports");
-
-  // Ensure reports directory exists
-  if (!fs.existsSync(reportsDir)) {
-    fs.mkdirSync(reportsDir, { recursive: true });
-  }
-
-  // Create interactive HTML report with Chart.js
-  createInteractiveHTML(
-    resultsDict,
-    vuCounts,
-    durationAvg,
-    durationMin,
-    durationMed,
-    durationMax,
-    durationP90,
-    durationP95,
-    failedRate,
-    reqsCount,
-    outputDir,
-    baseName,
-    reportsDir,
-    reportFileName
-  );
-
-  console.log(`✓ Visualization complete!`);
-}
-
-function findJsonFilesInFolder(folderPath) {
-  const resolvedPath = path.resolve(folderPath);
-
-  if (!fs.existsSync(resolvedPath)) {
-    console.error(`Error: Folder not found: ${folderPath}`);
-    return [];
-  }
-
-  const stats = fs.statSync(resolvedPath);
-  if (!stats.isDirectory()) {
-    console.error(`Error: Path is not a directory: ${folderPath}`);
-    return [];
-  }
-
-  const files = fs.readdirSync(resolvedPath);
-  const jsonFiles = files
-    .filter((file) => file.toLowerCase().endsWith(".json"))
-    .map((file) => path.join(resolvedPath, file));
-
-  return jsonFiles;
-}
-
-function main() {
-  if (process.argv.length < 3) {
-    console.error(
-      "Usage: visualize_results.js <folder_path> | <json_file1> [json_file2] [json_file3] ..."
-    );
-    console.error(
-      "  - If a folder path is provided, all JSON files in that folder will be processed"
-    );
-    console.error("  - Otherwise, provide individual JSON file paths");
-    process.exit(1);
-  }
-
-  const resultsDict = {};
-  let jsonFiles = [];
-  let resultsDir = null;
-
-  // Check if first argument is a folder
-  const firstArg = process.argv[2];
-  const firstArgPath = path.resolve(firstArg);
-
-  if (fs.existsSync(firstArgPath)) {
-    const stats = fs.statSync(firstArgPath);
-    if (stats.isDirectory()) {
-      // It's a folder - find all JSON files in it
-      console.log(`Processing folder: ${firstArg}`);
-      jsonFiles = findJsonFilesInFolder(firstArgPath);
-
-      if (jsonFiles.length === 0) {
-        console.error(`Error: No JSON files found in folder: ${firstArg}`);
-        process.exit(1);
-      }
-
-      console.log(`Found ${jsonFiles.length} JSON file(s) in folder`);
-      resultsDir = firstArgPath;
-    } else {
-      // It's a file - process individual files
-      jsonFiles = process.argv.slice(2).map((file) => path.resolve(file));
-    }
-  } else {
-    // Path doesn't exist - try as individual files
-    jsonFiles = process.argv.slice(2).map((file) => path.resolve(file));
-  }
-
-  // Parse each JSON file
-  for (const jsonPath of jsonFiles) {
-    if (!fs.existsSync(jsonPath)) {
-      console.warn(`Warning: File not found: ${jsonPath}`);
-      continue;
-    }
-
-    // Use the directory of the first valid JSON file as output directory
-    if (resultsDir === null) {
-      resultsDir = path.dirname(jsonPath);
-      // Ensure the directory exists
-      if (!fs.existsSync(resultsDir)) {
-        fs.mkdirSync(resultsDir, { recursive: true });
-      }
-    }
-
-    // Extract VU count from filename (e.g., result_50vu.json -> 50)
-    const filename = path.basename(jsonPath, path.extname(jsonPath));
-    let vuMatch = null;
-
-    for (const part of filename.split("_")) {
-      if (part.toLowerCase().includes("vu")) {
-        vuMatch = part.toLowerCase().replace("vu", "");
-        break;
-      }
-    }
-
-    if (!vuMatch) {
-      console.warn(
-        `Warning: Could not extract VU count from filename: ${path.basename(
-          jsonPath
-        )}`
-      );
-      continue;
-    }
-
-    const vuCount = vuMatch;
-    const result = parseK6Json(jsonPath);
-
-    if (result) {
-      resultsDict[vuCount] = result;
-    }
-  }
-
-  if (Object.keys(resultsDict).length === 0) {
-    console.error("Error: No valid results found");
-    process.exit(1);
-  }
-
-  if (resultsDir === null) {
-    console.error("Error: No valid JSON files found");
-    process.exit(1);
-  }
-
-  // Create visualization
-  // Use a dummy output path for createPlots (it will determine reports dir itself)
-  const outputPath = path.join(resultsDir, "dummy");
-  createPlots(resultsDict, outputPath);
-}
-
-if (require.main === module) {
-  main();
-}
+</html>

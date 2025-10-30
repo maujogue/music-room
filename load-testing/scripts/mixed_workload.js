@@ -10,7 +10,6 @@ import { createEvent } from "../functions/create_event.js";
 import { fetchEvent } from "../functions/fetch_event.js";
 import { fetchUserEvents } from "../functions/fetch_user_events.js";
 import { createPlaylist } from "../functions/create_playlist.js";
-import { fetchPlaylist } from "../functions/fetch_playlist.js";
 import { fetchUserPlaylists } from "../functions/fetch_user_playlists.js";
 
 // Get total VUs from environment variable (set by bash script via K6_VUS)
@@ -20,10 +19,10 @@ const totalVUs = parseInt(__ENV.K6_VUS || __ENV.VUS || loadTestConfig.vus);
 
 export const options = {
   scenarios: {
-    // Profile operations - 35% of traffic (typical: mostly reads)
+    // Profile operations - 45% of traffic (typical: mostly reads)
     profile_read: {
       executor: "constant-vus",
-      vus: Math.floor(totalVUs * 0.3),
+      vus: Math.floor(totalVUs * 0.4),
       duration: loadTestConfig.duration,
       exec: "profileRead",
     },
@@ -34,13 +33,13 @@ export const options = {
       exec: "profileUpdate",
     },
 
-    // Event operations - 30% of traffic
+    // Event operations - 40% of traffic
     event_read: {
       executor: "constant-vus",
-      vus: Math.floor(totalVUs * 0.2),
+      vus: Math.floor(totalVUs * 0.3),
       duration: loadTestConfig.duration,
       exec: "eventRead",
-      startTime: "2s", // Start after some events are created
+      startTime: "2s",
     },
     event_create: {
       executor: "constant-vus",
@@ -56,14 +55,8 @@ export const options = {
       startTime: "1s",
     },
 
-    // Playlist operations - 35% of traffic
-    playlist_read: {
-      executor: "constant-vus",
-      vus: Math.floor(totalVUs * 0.20),
-      duration: loadTestConfig.duration,
-      exec: "playlistRead",
-      startTime: "2s", // Start after some playlists are created
-    },
+    // Playlist operations - 15% of traffic
+    // Note: playlist_read excluded - requires Spotify account connection
     playlist_create: {
       executor: "constant-vus",
       vus: Math.floor(totalVUs * 0.05),
@@ -72,7 +65,7 @@ export const options = {
     },
     playlist_list: {
       executor: "constant-vus",
-      vus: Math.floor(totalVUs * 0.10),
+      vus: Math.floor(totalVUs * 0.1),
       duration: loadTestConfig.duration,
       exec: "playlistList",
       startTime: "1s",
@@ -213,22 +206,6 @@ export function playlistCreate(data) {
     }
   }
   expect.soft(response.status).toBe(201);
-  sleep(loadTestConfig.requestDelay);
-}
-
-export function playlistRead(data) {
-  const tokenPool = data.tokenPool;
-  if (sharedState.playlistIds.length === 0) {
-    // No playlists available yet, skip
-    sleep(loadTestConfig.requestDelay);
-    return;
-  }
-  const playlistId =
-    sharedState.playlistIds[
-      Math.floor(Math.random() * sharedState.playlistIds.length)
-    ];
-  const response = fetchPlaylist(playlistId, tokenPool);
-  expect.soft(response.status).toBe(200);
   sleep(loadTestConfig.requestDelay);
 }
 

@@ -5,11 +5,12 @@
 #        ./run_k6_test.sh --visualize <folder_path>
 # Example: ./run_k6_test.sh profile 25 50 75 100 125 150
 # Example: ./run_k6_test.sh event_create 50 100 150
-# Example: ./run_k6_test.sh --visualize results/run_2025-10-29_13-56-27
+# Example: ./run_k6_test.sh --visualize temp/run_2025-10-29_13-56-27
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${SCRIPT_DIR}/scripts"
-RESULTS_BASE_DIR="${SCRIPT_DIR}/results"
+RESULTS_BASE_DIR="${SCRIPT_DIR}/temp"
+REPORTS_DIR="${SCRIPT_DIR}/reports"
 
 if [ -f "${SCRIPT_DIR}/.env" ]; then
     # Read lines not starting with #, then export them
@@ -22,7 +23,7 @@ if [ $# -eq 0 ]; then
     echo "        $0 --visualize <folder_path>"
     echo "Example: $0 profile 25 50 75 100 125 150"
     echo "Example: $0 event_create 50 100 150"
-    echo "Example: $0 --visualize results/run_2025-10-29_13-56-27"
+    echo "Example: $0 --visualize temp/run_2025-10-29_13-56-27"
     exit 1
 fi
 
@@ -88,7 +89,9 @@ fi
 # Create timestamped results directory for this run
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RESULTS_DIR="${RESULTS_BASE_DIR}/${SCRIPT_BASENAME}_${TIMESTAMP}"
+REPORT_NAME="${SCRIPT_BASENAME}_${TIMESTAMP}.html"
 mkdir -p "${RESULTS_DIR}"
+mkdir -p "${REPORTS_DIR}"
 
 echo "Running ${SCRIPT_BASENAME} load test with VU counts: ${VU_COUNTS[*]}"
 echo "Results will be saved to: ${RESULTS_DIR}"
@@ -138,9 +141,10 @@ fi
 
 # Run visualization script with all JSON files
 echo "Visualizing results from ${#json_files[@]} test run(s)..."
-node "${SCRIPT_DIR}/visualize_results.js" "${json_files[@]}"
+node "${SCRIPT_DIR}/visualize_results.js" "${RESULTS_DIR}"
 
 echo ""
 echo "All load tests completed!"
 echo "Results saved in: ${RESULTS_DIR}"
-open "${RESULTS_DIR}/report.html"
+echo "Report saved in: ${REPORTS_DIR}/${REPORT_NAME}"
+open "${REPORTS_DIR}/${REPORT_NAME}"
