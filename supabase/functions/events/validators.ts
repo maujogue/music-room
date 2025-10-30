@@ -1,4 +1,11 @@
-export function validateEventPayload(payload: unknown, opts: { requireName: boolean, requireDateTime?: boolean } = { requireName: true }): { valid: boolean, message?: string } {
+export function validateEventPayload(
+  payload: unknown, opts: 
+  { 
+    requireName: boolean, 
+    requireDateTime?: boolean, 
+    requireLocation?: boolean,
+    requirePlaylist?: boolean
+  } = { requireName: true }): { valid: boolean, message?: string } {
   const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
@@ -10,6 +17,20 @@ export function validateEventPayload(payload: unknown, opts: { requireName: bool
   } else if (p.name !== undefined) {
     if (p.name !== null && (typeof p.name !== 'string' || p.name.trim().length < 3)) {
       return { valid: false, message: 'If provided, name must be at least 3 characters long' }
+    }
+  }
+
+  if (opts.requireLocation && !p.location.coordinates) {
+    return {
+      valid: false,
+      message: 'Coordinates is required'
+    }
+  }
+
+  if (opts.requirePlaylist && !p.playlist_id) {
+    return {
+      valid: false,
+      message: 'Playlist is required'
     }
   }
 

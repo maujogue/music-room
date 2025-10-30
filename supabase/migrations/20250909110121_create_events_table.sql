@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.events (
   name text UNIQUE,
   image_url text,
   description text,
-  playlist_id text,
+  playlist_id text NOT NULL,
   owner_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
   constraint name_length CHECK (char_length(name) >= 3),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.event_members (
 CREATE TABLE IF NOT EXISTS public.location (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID REFERENCES events(id) ON DELETE CASCADE UNIQUE,
-  coordinates gis.geography(POINT),
+  coordinates gis.geography(POINT) NOT NULL,
   venueName TEXT,
   complement TEXT,
   address TEXT,

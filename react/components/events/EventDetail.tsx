@@ -16,6 +16,9 @@ import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { ScrollView } from 'react-native';
 import EventActions from '@/components/events/EventActions';
+import Player from '@/components/player/Player';
+import { Box } from '@/components/ui/box';
+import { usePlayer } from '@/hooks/usePlayer';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -25,6 +28,8 @@ export default function EventDetail() {
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
+  const { track, isPlaying, handlePlayPause, handleNext } = usePlayer();
+  const [isActive, setIsActive] = useState<boolean>(false)
 
   useFocusEffect(
     useCallback(() => {
@@ -34,7 +39,11 @@ export default function EventDetail() {
 
   useEffect(() => {
     setDisplayInviteButton(data?.user?.can_invite ?? false);
-    console.log('event data changed:', data);
+    if (data?.event?.beginning_at) {
+      console.log('Event is active:', data.event.beginning_at > new Date().toISOString());
+      const eventStart = new Date(data.event.beginning_at);
+      setIsActive(eventStart >= new Date());
+    }
   }, [data]);
 
   useEffect(() => {
@@ -99,12 +108,26 @@ export default function EventDetail() {
           itemType='event'
         />
       </ScrollView>
-      <EventActions
-        displayInviteButton={displayInviteButton}
-        eventId={eventId}
-        eventData={data}
-        onUpdated={refetch}
-      />
+      <Box className='absolute w-full h-full pointer-events-none' style={{ zIndex: 9999, elevation: 30 }}>
+        <EventActions
+          displayInviteButton={displayInviteButton}
+          eventId={eventId}
+          eventData={data}
+          onUpdated={refetch}
+          abovePlayer={(isActive && !!track)}
+        />
+      </Box>
+      {track && isActive && (
+        <Box className='absolute bottom-0 right-18 w-full pointer-events-auto'>
+          <Player
+            track={track}
+            isPlaying={isPlaying}
+            onPlayPause={handlePlayPause}
+            onNext={handleNext}
+            showControls={true}
+          />
+        </Box>
+      )}
     </>
   );
 }

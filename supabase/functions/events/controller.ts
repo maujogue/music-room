@@ -45,7 +45,14 @@ export async function createEvent(c: Context): Promise<Response> {
     payload = await c.req.json()
   }
 
-  const validation = validateEventPayload(payload, { requireName: true })
+  const validation = validateEventPayload(
+    payload, { 
+      requireName: true, 
+      requireDateTime: true, 
+      requireLocation: true,
+      requirePlaylist: true
+    })
+
   if (!validation.valid) {
     return c.json({ error: validation.message }, 400)
   }
