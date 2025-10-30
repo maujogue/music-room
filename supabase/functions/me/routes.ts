@@ -7,7 +7,10 @@ import {
     skipToNextUserTrack,
     fetchCurrentUserEvents,
     syncSpotifyPlaylists,
-    fetchCurrentUserProfile
+    fetchCurrentUserProfile,
+    getMySubscription,
+    createMySubscription,
+    deleteMySubscription
 } from './controller.ts'
 
 const router = new Hono()
@@ -20,5 +23,8 @@ router.put('/player/play', startUserPlayback)
 router.put('/player/pause', pauseUserPlayback)
 router.post('/player/next', skipToNextUserTrack)
 router.post('/playlists/sync', syncSpotifyPlaylists)
+router.get('/subscription', getMySubscription)
+router.post('/subscription', createMySubscription)
+router.delete('/subscription', deleteMySubscription)
 
 export default router
