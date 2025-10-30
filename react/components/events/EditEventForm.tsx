@@ -389,21 +389,14 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
-                  <Text size='sm' className='text-neutral-700'>
-                    {location?.address ?? 'No address place'}
-                  </Text>
-                  {location && location.latitude && location.longitude ? (
-                    <Badge
-                      size='md'
-                      action='muted'
-                      className='rounded-full h-6 my-2'
-                    >
-                      <BadgeIcon as={MapPinIcon} size='lg' />
-                      <BadgeText className='pl-1'>
-                        {location.latitude.toFixed(5)},{' '}
-                        {location.longitude.toFixed(5)}
-                      </BadgeText>
-                    </Badge>
+                  {(location && location.latitude && location.longitude) ? (
+                    <Box>
+                      <Text>{location.address ?? 'No address place'}</Text>
+                      <Text size='xs'>
+                        {location.latitude.toFixed(6)},{' '}
+                        {location.longitude.toFixed(6)}
+                      </Text>
+                    </Box>
                   ) : (
                     <Text>No location selected</Text>
                   )}
@@ -461,7 +454,7 @@ export default function EditEventForm({
           setLocation(val);
         }}
         initialCoords={
-          location && location.latitude && location.longitude
+          (location && location.latitude && location.longitude)
             ? { latitude: location.latitude, longitude: location.longitude }
             : undefined
         }
