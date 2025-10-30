@@ -1,0 +1,2 @@
+CREATE OR REPLACE FUNCTION end_track_vote()
+RETURN JSON
