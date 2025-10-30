@@ -18,7 +18,7 @@ import { ScrollView } from 'react-native';
 import EventActions from '@/components/events/EventActions';
 import Player from '@/components/player/Player';
 import { Box } from '@/components/ui/box';
-import { usePlayer } from '@/hooks/usePlayer';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -28,7 +28,7 @@ export default function EventDetail() {
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
-  const { track, isPlaying, handlePlayPause, handleNext } = usePlayer();
+  const { track } = usePlayer();
   const [isActive, setIsActive] = useState<boolean>(false);
 
   useFocusEffect(
@@ -40,10 +40,6 @@ export default function EventDetail() {
   useEffect(() => {
     setDisplayInviteButton(data?.user?.can_invite ?? false);
     if (data?.event?.beginning_at) {
-      console.log(
-        'Event is active:',
-        data.event.beginning_at > new Date().toISOString()
-      );
       const eventStart = new Date(data.event.beginning_at);
       setIsActive(eventStart >= new Date());
     }
@@ -96,11 +92,9 @@ export default function EventDetail() {
             onRefresh={refetch}
           />
 
-          {/* Votes / Guests tabs */}
           <Center className='flex-1'>
             <VotesRoom eventId={eventId} />
           </Center>
-          {/* ------------------ */}
         </VStack>
 
         <DeleteAlert
@@ -122,10 +116,6 @@ export default function EventDetail() {
       {track && isActive && (
         <Box className='absolute bottom-0 right-18 w-full pointer-events-auto'>
           <Player
-            track={track}
-            isPlaying={isPlaying}
-            onPlayPause={handlePlayPause}
-            onNext={handleNext}
             showControls={true}
           />
         </Box>

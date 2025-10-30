@@ -20,6 +20,7 @@ import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
 import { useAuth } from '@/contexts/authCtx';
 import StartAndStopButton from '@/components/events/StartAndStopButton';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 interface Props {
   eventId: string;
@@ -48,6 +49,9 @@ export default function VotesRoom({ eventId }: Props) {
     new Map()
   );
   const isFocused = useIsFocused();
+  const {
+    track
+  } = usePlayer()
 
   const {
     playlist,

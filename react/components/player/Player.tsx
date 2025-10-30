@@ -5,24 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Image } from '@/components/ui/image';
 import { white } from 'tailwindcss/colors';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 type PlayerProps = {
-  track: SpotifyTrack;
-  isPlaying: boolean;
-  onPlayPause: () => void;
-  onNext: () => void;
   showControls?: boolean;
 };
 
 const Player = ({
-  track,
-  isPlaying,
-  onPlayPause,
-  onNext,
   showControls,
 }: PlayerProps) => {
-  console.log('Player track:', track);
-  console.log('image url:', track?.album?.images[0]?.url);
+  const { track, isPlaying, playTrack, pauseTrack, skipToNextTrack } = usePlayer();
   if (!track) {
     return (
       <View>
@@ -38,7 +30,7 @@ const Player = ({
       <HStack className='items-center justify-between space-x-4 w-full'>
         {showControls && (
           <Button
-            onPress={onPlayPause}
+            onPress={isPlaying ? pauseTrack : playTrack}
             variant='link'
             className='rounded-full px-3'
           >
@@ -49,22 +41,16 @@ const Player = ({
             )}
           </Button>
         )}
-        {track?.album?.images?.[0]?.url && (
-          <Image
-            source={{ uri: track.album.images[0].url }}
-            alt={track.name}
-            className='rounded-md'
-          />
+        {track?.item?.album.images?.[0]?.url && (
+          <Image source={{ uri: track.item.album.images[0].url }} alt={track.item.name} className='rounded-md' />
         )}
         <View className='ml-4 flex-1 justify-center w-25'>
-          <Text className='text-white font-semibold'>{track.name}</Text>
-          <Text className='text-gray-200'>
-            {track.artists.map(artist => artist.name).join(', ')}
-          </Text>
+          <Text className='text-white font-semibold'>{track.item?.name}</Text>
+          <Text className='text-gray-200'>{track.item?.artists.map(artist => artist.name).join(', ')}</Text>
         </View>
         {showControls && (
-          <Button
-            onPress={onNext}
+          <Button 
+            onPress={skipToNextTrack} 
             className='rounded-full p-3.5'
             variant='link'
           >
