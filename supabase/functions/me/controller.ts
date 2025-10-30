@@ -16,7 +16,6 @@ import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import { getUserProfile } from '@profile/service';
 import { getUserSubscription } from './services/supabase.ts';
 import type { ProfileResponse } from '@profile';
-import type { Subscription } from '../../types/subscription';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,

@@ -72,10 +72,6 @@ export default function ProfileContent({
               isEdit={permissions.canEdit && editProfile}
             />
           )}
-          {/* Member since info for own profile */}
-          {permissions.canEdit && (
-            <SubscriptionBadge showMemberSince={true} />
-          )}
         </VStack>
       </HStack>
 
