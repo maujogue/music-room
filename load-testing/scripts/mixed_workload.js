@@ -84,8 +84,7 @@ export const options = {
 let sharedState = {
   eventIds: [],
   playlistIds: [],
-  eventIdsMutex: null,
-  playlistIdsMutex: null,
+  tokenPool: [],
 };
 
 export function setup() {

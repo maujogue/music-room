@@ -11,6 +11,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${SCRIPT_DIR}/scripts"
 RESULTS_BASE_DIR="${SCRIPT_DIR}/results"
 
+if [ -f "${SCRIPT_DIR}/.env" ]; then
+    # Read lines not starting with #, then export them
+    export $(grep -v '^#' "${SCRIPT_DIR}/.env" | xargs)
+fi
+
 # Check if any arguments provided
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <script_name> [vu_count1] [vu_count2] [vu_count3] ..."
