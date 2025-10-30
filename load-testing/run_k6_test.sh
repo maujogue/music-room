@@ -103,7 +103,7 @@ for vu_count in "${VU_COUNTS[@]}"; do
     json_file="${RESULTS_DIR}/result_${vu_count}vu.json"
     
     echo "=== Running with ${vu_count} VUs ==="
-    k6 run --vus "${vu_count}" --out json="${json_file}" "${K6_SCRIPT}"
+    K6_VUS="${vu_count}" k6 run --vus "${vu_count}" --out json="${json_file}" "${K6_SCRIPT}"
     
     # Check if the test ran successfully
     if [ -f "${json_file}" ]; then

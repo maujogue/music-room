@@ -7,9 +7,10 @@ export function createPlaylist(vuId, tokenPool) {
   const tokenData = tokenPool[(vuId - 1) % tokenPool.length];
   const accessToken = tokenData.accessToken;
 
-  // Generate unique playlist name with timestamp and VU ID
+  // Generate unique playlist name with timestamp, VU ID, and random component
   const timestamp = Date.now();
-  const uniqueName = `Load Test Playlist ${vuId}-${timestamp}`;
+  const randomSuffix = Math.random().toString(36).substring(2, 9); // Random alphanumeric
+  const uniqueName = `Load Test Playlist ${vuId}-${timestamp}-${randomSuffix}`;
 
   const payload = JSON.stringify({
     name: uniqueName,

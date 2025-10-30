@@ -12,9 +12,10 @@ export function createEvent(vuId, tokenPool) {
   futureDate.setDate(futureDate.getDate() + 30); // 30 days from now
   const isoDate = futureDate.toISOString();
 
-  // Generate unique event name with timestamp and VU ID
+  // Generate unique event name with timestamp, VU ID, and random component
   const timestamp = Date.now();
-  const uniqueName = `Load Test Event ${vuId}-${timestamp}`;
+  const randomSuffix = Math.random().toString(36).substring(2, 9); // Random alphanumeric
+  const uniqueName = `Load Test Event ${vuId}-${timestamp}-${randomSuffix}`;
 
   const payload = JSON.stringify({
     name: uniqueName,
