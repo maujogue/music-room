@@ -195,7 +195,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
               console.log('📋 Subscribed to event:', data.eventId);
               break;
             case 'error':
-              setLastError(data.message);
+              setLastError(data.message ?? 'some error');
               break;
             case 'pong':
               console.log('🏓 Pong received - connection alive');

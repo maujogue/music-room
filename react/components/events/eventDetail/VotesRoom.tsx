@@ -241,6 +241,14 @@ export default function VotesRoom({ eventId }: Props) {
       });
       return;
     }
+    if (!data?.location || !data?.location?.coordinates?.lat || !data?.location?.coordinates?.long) {
+      toast.error({
+        title: 'Event is nowhere ?',
+        description: 'The event need a location to allow votes.',
+        duration: 3000,
+      });
+      return;
+    }
     if (!connected) {
       toast.error({
         title: 'Cannot vote',

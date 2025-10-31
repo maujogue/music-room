@@ -80,7 +80,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
     }
 
     if (res.data.spatio_licence) {
-      if (!res.data.location) {
+      if (!res.data.location || !res.data.location.lat || !res.data.location.long) {
         return {
           success: false,
           message: 'Event has no location'
