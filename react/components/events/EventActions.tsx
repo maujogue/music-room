@@ -37,7 +37,7 @@ export default function EventActions({
   return (
     <>
     {isOwner() && (
-        <StartAndStopButton data={eventData}/>
+        <StartAndStopButton data={eventData} eventId={eventId}/>
       )}
       {displayInviteButton && (
         <FloatButton

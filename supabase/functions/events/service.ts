@@ -113,6 +113,37 @@ export async function updateSupabaseEventById(
   }
 }
 
+export async function supabaseStartEvent(eventId: string): Promise<void> {
+  const { error } = await supabaseClient
+    .from('events')
+    .update({
+      done: false,
+      beginning_at: new Date().toISOString(),
+    })
+    .eq('id', eventId)
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+
+export async function supabaseStopEvent(eventId: string): Promise<void> {
+  const { error } = await supabaseClient
+    .from('events')
+    .update({
+      done: true,
+    })
+    .eq('id', eventId)
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+
 export async function uploadEventImage(uploadedFile: File): Promise<string> {
   const arrayBuffer = await uploadedFile.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);

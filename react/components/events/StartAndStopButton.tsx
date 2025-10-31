@@ -2,14 +2,20 @@ import { Button, ButtonIcon } from '@/components/ui/button';
 import { Play, Square } from 'lucide-react-native';
 import { useState } from 'react';
 import ConfirmModal from '@/components/generics/ConfirmModal';
+import { useRouter } from 'expo-router';
+import { useEvent } from '@/hooks/useEvent';
 
 type Props = {
   data: MusicEventFetchResult;
+  eventId: string;
 };
 
 
 
-export default function StartAndStopButton({data} : Props) {
+export default function StartAndStopButton({data, eventId} : Props) {
+
+  const router = useRouter()
+  const { startEvent, stopEvent } = useEvent(eventId);
 
   function isInProgress(event: MusicEvent) {
     if (event.done) { return false }
@@ -32,6 +38,30 @@ export default function StartAndStopButton({data} : Props) {
 
   const [startModal, setStartModal] = useState(false)
   const [stopModal, setStopModal] = useState(false)
+
+  function reload() {
+    router.push(`(main)/events/${eventId}`);
+  }
+
+  async function submitStartEvent() {
+    console.log("START EVENT CONFIRMATION");
+    try {
+      await startEvent(eventId)
+    } catch(e) {
+
+    }
+    reload()
+  }
+
+  async function submitStopEvent() {
+    console.log("STOP EVENT CONFIRMATION");
+    try {
+      await stopEvent(eventId)
+    } catch(e) {
+      
+    }
+    reload()
+  }
 
 
   return (
@@ -63,9 +93,7 @@ export default function StartAndStopButton({data} : Props) {
       description="If everything is ready, let's get the event started."
       confirmText="Start"
       confirmIcon={Play}
-      onConfirm={async () => {
-        console.log("START EVENT CONFIRMATION");
-      }}
+      onConfirm={submitStartEvent}
     />
 
     <ConfirmModal
@@ -76,9 +104,7 @@ export default function StartAndStopButton({data} : Props) {
       confirmText="Stop"
       destructive
       confirmIcon={Square}
-      onConfirm={async () => {
-        console.log("STOP EVENT CONFIRMATION");
-      }}
+      onConfirm={submitStopEvent}
     />
   </>
   )
