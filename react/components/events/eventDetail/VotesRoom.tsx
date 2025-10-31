@@ -39,7 +39,7 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId, {enabled: started});
+  } = useWebSocketClient(eventId, {enabled: started, spatio_licence: data?.event?.spatio_licence});
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
@@ -232,7 +232,7 @@ export default function VotesRoom({ eventId }: Props) {
     );
   }
 
-  const onTrackSwipe = (dir: string, trackId: string) => {
+  const onTrackSwipe = async (dir: string, trackId: string) => {
     if (!started) {
       toast.error({
         title: 'Too impulsive !',
@@ -269,11 +269,12 @@ export default function VotesRoom({ eventId }: Props) {
         return;
       }
 
-      sendVote(eventId, trackId);
+      await sendVote(eventId, trackId);
     } else {
       if (eventUserData?.voted_tracks[trackId]) {
-        sendUnvote(eventId, trackId);
-      } else {
+        await sendUnvote(eventId, trackId);
+      }
+      else {
         toast.show({
           title: 'Cannot unvote',
           description: 'You have not voted for this track',

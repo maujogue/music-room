@@ -20,19 +20,19 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
       setStatus(status);
       if (status === Location.PermissionStatus.GRANTED) {
         
-        console.log("Using mock data position...  Android emulator getCurrentPositionAsync broken yet")
-        setCoords({
-          lat: 37.42205, // google Fallback
-          long: -122.0853,
-        });
-
-        // const position = await Location.getCurrentPositionAsync({
-        //   accuracy: Location.Accuracy.Balanced,
-        // });
+        // console.log("Using mock data position...  Android emulator getCurrentPositionAsync broken yet")
         // setCoords({
-        //   lat: position.coords.latitude,
-        //   long: position.coords.longitude,
+        //   lat: 37.42205, // google Fallback
+        //   long: -122.0853,
         // });
+        
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setCoords({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
         
       } else {
         setError('Localisation authorization required.');

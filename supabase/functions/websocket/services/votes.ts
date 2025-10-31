@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { getEventSupabase } from './events.ts';
 import { formatDbError } from '../../../utils/postgres_errors_map.ts';
+import { distanceMeters } from '../utils/geoloc.ts';
+
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -22,11 +24,17 @@ interface RealtimePayload {
   old?: TrackVoteRecord;
 }
 
+type Coordinates = {
+  lat: number;
+  long: number;
+};
+
 export interface VoteMessage {
   type: 'vote';
   eventId: string;
   trackId: string;
   [key: string]: unknown;
+  coordinates: Coordinates;
 }
 
 export interface Response {
@@ -45,6 +53,9 @@ export interface VoteResponse {
   };
 }
 
+const DISTANCE_MIN = 500;
+
+
 // Handle vote from client
 export async function handleVote(userId: string, msg: VoteMessage): Promise<VoteResponse> {
   try {
@@ -59,13 +70,31 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
 
     console.log('ws: processing vote', { userId, eventId, trackId });
 
-    const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name');
+    const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name, spatio_licence');
 
     if (!res.success) {
       return {
         success: false,
         message: res.message || 'Event not found'
       };
+    }
+
+    if (res.data.spatio_licence) {
+      if (!res.data.location) {
+        return {
+          success: false,
+          message: 'Event has no location'
+        };
+      }
+      const eventCoords = {lat: res.data.location.lat, long: res.data.location.long}
+      const distance = distanceMeters(eventCoords, msg.coordinates)
+
+      if (distance > DISTANCE_MIN) {
+        return {
+          success: false,
+          message: `Votes too far from event are forbidden (${(distance / 1000).toFixed(1)} km)`
+        };
+      }
     }
 
     const resCanVote = await checkIfUserCanVote(eventId, userId);

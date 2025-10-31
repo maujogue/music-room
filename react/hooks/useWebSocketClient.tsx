@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { getSession } from '@/services/session';
+import { useCurrentPosition } from './useCurrentPosition';
 
 export interface TrackVote {
   eventId: string;
@@ -20,8 +21,8 @@ export interface eventUserData {
 
 export interface WebSocketActions {
   connected: boolean;
-  sendVote: (eventId: string, trackId: string) => boolean;
-  sendUnvote: (eventId: string, trackId: string) => boolean;
+  sendVote: (eventId: string, trackId: string) => Promise<boolean>;
+  sendUnvote: (eventId: string, trackId: string) => Promise<boolean>;
   sendPing: () => boolean;
   trackVotes: Map<string, TrackVote>;
   eventUserData: eventUserData | null;
@@ -32,8 +33,13 @@ export interface WebSocketActions {
   disconnect: () => void;
 }
 
-export default function useWebSocketClient(event_id: string, opts?: { enabled?: boolean }): WebSocketActions {
-  const { enabled = true } = opts ?? {};
+type Options = {
+  enabled?: boolean, 
+  spatio_licence? : boolean 
+}
+
+export default function useWebSocketClient(event_id: string, opts?: Options): WebSocketActions {
+  const { enabled = true, spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
@@ -57,6 +63,13 @@ export default function useWebSocketClient(event_id: string, opts?: { enabled?: 
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
   const pingInterval = 60000;
+
+  const { coords, loading, error } = useCurrentPosition({radiusKm: 50})
+
+  const hasPosition = useCallback(async () => {
+    if (loading || error) { return false }
+    if (coords) { return true }
+  }, [coords])
 
   const checkTokenValidity = useCallback(async () => {
     try {
@@ -324,10 +337,18 @@ export default function useWebSocketClient(event_id: string, opts?: { enabled?: 
     return false;
   };
 
-  const sendVote = (eventId: string, trackId: string): boolean => {
+  const sendVote = async (eventId: string, trackId: string): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send vote, socket not open');
       return false;
+    }
+
+    if (spatio_licence) {
+      const isOk = await hasPosition()
+      if (!isOk) {
+        console.warn('ws: cannot send vote, need user position');
+        return false;
+      }
     }
 
     console.log(`ws: sending vote for track ${trackId} in event ${eventId}`);
@@ -337,6 +358,7 @@ export default function useWebSocketClient(event_id: string, opts?: { enabled?: 
         eventId,
         trackId,
         timestamp: Date.now(),
+        coordinates: coords
       };
 
       webSocket.send(JSON.stringify(message));
@@ -348,10 +370,18 @@ export default function useWebSocketClient(event_id: string, opts?: { enabled?: 
     }
   };
 
-  const sendUnvote = (eventId: string, trackId: string): boolean => {
+  const sendUnvote = async (eventId: string, trackId: string): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send unvote, socket not open');
       return false;
+    }
+
+    if (spatio_licence) {
+      const isOk = await hasPosition()
+      if (!isOk) {
+        console.warn('ws: cannot send vote, need user position');
+        return false;
+      }
     }
 
     try {
@@ -360,6 +390,7 @@ export default function useWebSocketClient(event_id: string, opts?: { enabled?: 
         eventId,
         trackId,
         timestamp: Date.now(),
+        coordinates: coords
       };
 
       webSocket.send(JSON.stringify(message));
