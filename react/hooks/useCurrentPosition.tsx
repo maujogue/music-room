@@ -19,7 +19,7 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
       const permission = await Location.requestForegroundPermissionsAsync();
       setStatus(permission.status);
 
-      if (status === Location.PermissionStatus.GRANTED) {
+      if (permission.status === Location.PermissionStatus.GRANTED) {
         const position = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
