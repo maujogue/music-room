@@ -46,15 +46,16 @@ export default function AllEvents() {
 
   const radarEventButon = () => {
     return (
-      <Button size='lg'
-              className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
-              action='primary'
-              onPress={handlePressEventRadar}
-            >
+      <Button
+        size='lg'
+        className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
+        action='primary'
+        onPress={handlePressEventRadar}
+      >
         <ButtonIcon size='xl' className='w-14 h-14' as={Radar} />
       </Button>
-    )
-  } 
+    );
+  };
 
   if (events.length === 0) {
     return (

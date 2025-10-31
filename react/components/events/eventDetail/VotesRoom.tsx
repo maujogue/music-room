@@ -45,7 +45,6 @@ export default function VotesRoom({ eventId }: Props) {
   );
   const isFocused = useIsFocused();
 
-
   const {
     playlist,
     loading: ploading,
@@ -258,8 +257,7 @@ export default function VotesRoom({ eventId }: Props) {
     } else {
       if (eventUserData?.voted_tracks[trackId]) {
         sendUnvote(eventId, trackId);
-      }
-      else {
+      } else {
         toast.show({
           title: 'Cannot unvote',
           description: 'You have not voted for this track',

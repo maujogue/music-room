@@ -42,13 +42,24 @@ export default function ForgottenPassword() {
         }}
       >
         <VStack space='md' style={{ width: '100%', maxWidth: 400 }}>
-          <Text size='2xl' bold style={{ textAlign: 'center', marginBottom: 16 }}>
+          <Text
+            size='2xl'
+            bold
+            style={{ textAlign: 'center', marginBottom: 16 }}
+          >
             Check Your Email
           </Text>
           <Text style={{ textAlign: 'center', marginBottom: 16 }}>
             We've sent a password reset link to {email}
           </Text>
-          <Text style={{ textAlign: 'center', marginBottom: 16, fontSize: 12, color: '#666' }}>
+          <Text
+            style={{
+              textAlign: 'center',
+              marginBottom: 16,
+              fontSize: 12,
+              color: '#666',
+            }}
+          >
             Click the link in the email to reset your password.
           </Text>
           <Button onPress={() => router.back()} style={{ marginTop: 16 }}>
@@ -73,7 +84,8 @@ export default function ForgottenPassword() {
           Reset Password
         </Text>
         <Text style={{ textAlign: 'center', marginBottom: 16 }}>
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we'll send you a link to reset your
+          password.
         </Text>
 
         {error ? (
@@ -100,10 +112,16 @@ export default function ForgottenPassword() {
           disabled={isLoading}
           style={{ marginTop: 16 }}
         >
-          <ButtonText>{isLoading ? 'Sending...' : 'Send Reset Link'}</ButtonText>
+          <ButtonText>
+            {isLoading ? 'Sending...' : 'Send Reset Link'}
+          </ButtonText>
         </Button>
 
-        <Button variant='link' onPress={() => router.back()} style={{ marginTop: 8 }}>
+        <Button
+          variant='link'
+          onPress={() => router.back()}
+          style={{ marginTop: 8 }}
+        >
           <ButtonText>Back to Login</ButtonText>
         </Button>
       </VStack>

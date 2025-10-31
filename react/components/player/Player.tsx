@@ -38,32 +38,41 @@ const Player = ({
       <HStack className='items-center justify-between space-x-4 w-full'>
         {showControls && (
           <Button
-            onPress={onPlayPause} 
+            onPress={onPlayPause}
             variant='link'
-            className='rounded-full px-3'>
-            {isPlaying ? <Pause size={30} color={white}/> : <Play size={30} color={white} />}
+            className='rounded-full px-3'
+          >
+            {isPlaying ? (
+              <Pause size={30} color={white} />
+            ) : (
+              <Play size={30} color={white} />
+            )}
           </Button>
         )}
         {track?.album?.images?.[0]?.url && (
-          <Image source={{ uri: track.album.images[0].url }} alt={track.name} className='rounded-md' />
+          <Image
+            source={{ uri: track.album.images[0].url }}
+            alt={track.name}
+            className='rounded-md'
+          />
         )}
         <View className='ml-4 flex-1 justify-center w-25'>
           <Text className='text-white font-semibold'>{track.name}</Text>
-          <Text className='text-gray-200'>{track.artists.map(artist => artist.name).join(', ')}</Text>
+          <Text className='text-gray-200'>
+            {track.artists.map(artist => artist.name).join(', ')}
+          </Text>
         </View>
         {showControls && (
-          <Button 
-            onPress={onNext} 
+          <Button
+            onPress={onNext}
             className='rounded-full p-3.5'
             variant='link'
           >
-            <SkipForward 
-              size={30} 
-              color={white} />
+            <SkipForward size={30} color={white} />
           </Button>
         )}
-    </HStack>
-  </Card>
+      </HStack>
+    </Card>
   );
 };
 

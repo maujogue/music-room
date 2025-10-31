@@ -1,4 +1,3 @@
-import CancelButton from '@/components/generics/CancelButton';
 import { Stack } from 'expo-router';
 
 export default function EventLayout() {

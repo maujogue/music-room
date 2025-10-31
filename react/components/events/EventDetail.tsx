@@ -29,7 +29,7 @@ export default function EventDetail() {
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const { track, isPlaying, handlePlayPause, handleNext } = usePlayer();
-  const [isActive, setIsActive] = useState<boolean>(false)
+  const [isActive, setIsActive] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -40,7 +40,10 @@ export default function EventDetail() {
   useEffect(() => {
     setDisplayInviteButton(data?.user?.can_invite ?? false);
     if (data?.event?.beginning_at) {
-      console.log('Event is active:', data.event.beginning_at > new Date().toISOString());
+      console.log(
+        'Event is active:',
+        data.event.beginning_at > new Date().toISOString()
+      );
       const eventStart = new Date(data.event.beginning_at);
       setIsActive(eventStart >= new Date());
     }
@@ -108,13 +111,16 @@ export default function EventDetail() {
           itemType='event'
         />
       </ScrollView>
-      <Box className='absolute w-full h-full pointer-events-none' style={{ zIndex: 9999, elevation: 30 }}>
+      <Box
+        className='absolute w-full h-full pointer-events-none'
+        style={{ zIndex: 9999, elevation: 30 }}
+      >
         <EventActions
           displayInviteButton={displayInviteButton}
           eventId={eventId}
           eventData={data}
           onUpdated={refetch}
-          abovePlayer={(isActive && !!track)}
+          abovePlayer={isActive && !!track}
         />
       </Box>
       {track && isActive && (

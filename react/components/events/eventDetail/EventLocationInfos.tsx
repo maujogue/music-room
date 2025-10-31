@@ -2,9 +2,7 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { ShellIcon } from 'lucide-react-native';
-import {
-  truncateAddress,
-} from '@/utils/parsePointCoordinates';
+import { truncateAddress } from '@/utils/parsePointCoordinates';
 
 type Props = {
   location?: MusicEventLocation;

@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { getSession } from '@/services/session';
-import { useAppToast } from '@/hooks/useAppToast';
-
 
 export interface TrackVote {
   eventId: string;
@@ -55,7 +53,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
   const connectionAttemptsRef = useRef<number>(0);
-  const toast = useAppToast();
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
   const pingInterval = 60000;

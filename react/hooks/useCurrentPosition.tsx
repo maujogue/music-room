@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import * as Location from "expo-location";
-import type { Region } from "react-native-maps";
-
+import { useEffect, useMemo, useState } from 'react';
+import * as Location from 'expo-location';
+import type { Region } from 'react-native-maps';
 
 type Props = {
   radiusKm?: number;
 };
 
-
-export function useCurrentPosition({ radiusKm = 50 }: Props) {  
+export function useCurrentPosition({ radiusKm = 50 }: Props) {
   const [status, setStatus] = useState<Location.PermissionStatus | null>(null);
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,8 +16,8 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
     (async () => {
       setLoading(true);
       setError(null);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setStatus(status);
+      const permission = await Location.requestForegroundPermissionsAsync();
+      setStatus(permission.status);
 
       if (status === Location.PermissionStatus.GRANTED) {
         const position = await Location.getCurrentPositionAsync({
@@ -30,7 +28,7 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
           long: position.coords.longitude,
         });
       } else {
-        setError("Localisation authorization required.")
+        setError('Localisation authorization required.');
       }
 
       setLoading(false);
@@ -53,7 +51,6 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
       longitudeDelta,
     };
   }, [coords, radiusKm]);
-
 
   return {
     coords,

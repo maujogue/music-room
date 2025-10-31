@@ -26,7 +26,6 @@ import { Divider } from '@/components/ui/divider';
 import { Box } from '@/components/ui/box';
 import { useProfile } from '@/contexts/profileCtx';
 import { Text } from '@/components/ui/text';
-import UpdatePassword from '@/components/auth/UpdatePassword';
 import { router } from 'expo-router';
 
 interface ProfileActionsProps {

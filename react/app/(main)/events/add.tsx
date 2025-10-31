@@ -10,7 +10,6 @@ export default function AddNewEvent() {
   const { profile } = useProfile();
 
   const onSubmit = async (payload: MusicEventPayload) => {
-
     if (!profile) {
       setError('Authentification error, try reconnect with Spotify please');
       return;

@@ -70,7 +70,7 @@ export default function VotedTrack({
           <Image
             source={{ uri: track.details.album.images[0]?.url }}
             style={{ width: 40, height: 40 }}
-            alt="Track album art"
+            alt='Track album art'
           />
           <Box className='flex-1 flex-row justify-between items-center'>
             <VStack className='ml-3'>

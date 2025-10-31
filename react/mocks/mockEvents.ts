@@ -25,7 +25,7 @@ export const MOCK_VOTES: EventVote[] = [
 export const EVENT_RADAR_MOCK_RESULT = [
   {
     radar: {
-      coordinates: { lat: 45.7336, long: 4.8220 },
+      coordinates: { lat: 45.7336, long: 4.822 },
       dist: 3.42,
     },
     event: {
@@ -71,7 +71,7 @@ export const EVENT_RADAR_MOCK_RESULT = [
   },
   {
     radar: {
-      coordinates: { lat: 45.7666, long: 4.8790 },
+      coordinates: { lat: 45.7666, long: 4.879 },
       dist: 3.12,
     },
     event: {
@@ -93,7 +93,6 @@ export const EVENT_RADAR_MOCK_RESULT = [
     },
   },
 ];
-
 
 export const MOCK_EVENTS: MusicEvent[] = [
   {

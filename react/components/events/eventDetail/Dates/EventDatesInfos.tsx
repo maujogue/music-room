@@ -8,10 +8,7 @@ interface Props {
   coordinates?: Coordinates;
 }
 
-export default function EventDatesInfos({
-  event,
-  coordinates,
-}: Props) {
+export default function EventDatesInfos({ event, coordinates }: Props) {
   if (!event.beginning_at) {
     return null;
   }
