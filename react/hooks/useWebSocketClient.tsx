@@ -426,12 +426,10 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   );
 
   const handleTrackPlay = useCallback((track: SpotifyCurrentlyPlayingTrack) => {
-    console.log('▶️ Received track play data:', track);
     setTrack(track);
   }, []);
 
   const handleVoteList = useCallback((votes: any[]) => {
-    console.log('📋 Processing vote list with', votes.length, 'entries');
     const newMap = new Map<string, TrackVote>();
 
     votes.forEach(vote => {

@@ -86,10 +86,14 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
 async function handlePing(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
   try {
     const eventId = message.eventId as string;
-    const ownerTrack = await getOwnerCurrentPlayingTrack(eventId);
+    const res = await getOwnerCurrentPlayingTrack(eventId);
+    if (res.error) {
+      sendErrorMessage(socket, `Failed to fetch owner's currently playing track: ${res.error.message}`);
+      return;
+    }
     sendSuccessMessage(socket, {
       type: 'pong',
-      track: ownerTrack,
+      track: res.data,
     });
   } catch (error) {
     console.error('ws: error sending pong:', error);
