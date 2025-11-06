@@ -62,10 +62,10 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  const handlePlayTrack = async (track: any) => {
+  const handlePlayTrack = async () => {
     setTrack(track);
     setIsPlaying(true);
-    playTrack(track);
+    playTrack();
   };
 
   const handlePauseTrack = async () => {
