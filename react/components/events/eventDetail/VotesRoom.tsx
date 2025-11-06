@@ -34,6 +34,7 @@ export default function VotesRoom({ eventId }: Props) {
   const { user: currentUser } = useAuth();
   const {
     connected,
+    track,
     disconnect,
     sendVote,
     sendUnvote,
@@ -49,9 +50,7 @@ export default function VotesRoom({ eventId }: Props) {
     new Map()
   );
   const isFocused = useIsFocused();
-  const {
-    track
-  } = usePlayer()
+  const { setTrack } = usePlayer();
 
   const {
     playlist,
@@ -81,6 +80,12 @@ export default function VotesRoom({ eventId }: Props) {
 
     return unsubscribe;
   }, [data?.event?.id, subscribeToVotes]);
+
+  useEffect(() => {
+    if (track) {
+      setTrack(track);
+    }
+  }, [track]);
 
   useEffect(() => {
     if (!connected && connectionAttempts > 0) {

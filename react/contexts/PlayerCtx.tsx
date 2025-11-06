@@ -12,6 +12,7 @@ const REFRESH_INTERVAL = 5000;
 
 interface PlayerContextType {
   track: SpotifyCurrentlyPlayingTrack;
+  setTrack: (track: SpotifyCurrentlyPlayingTrack) => void;
   isPlaying: boolean;
   playTrack: (track: any) => Promise<void>;
   pauseTrack: () => Promise<void>;
@@ -78,6 +79,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
 
   const value: PlayerContextType = {
     track,
+    setTrack,
     isPlaying,
     playTrack: handlePlayTrack,
     pauseTrack: handlePauseTrack,

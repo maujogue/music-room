@@ -1,3 +1,5 @@
+import type { SpotifyCurrentlyPlayingTrack } from '@/types/track';
+
 export async function getCurrentUserPlaylists(spotify_token: string): Promise<any> {
   const response = await fetch('https://api.spotify.com/v1/me/playlists', {
     method: 'GET',

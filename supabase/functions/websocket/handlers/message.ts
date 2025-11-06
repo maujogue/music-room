@@ -5,6 +5,7 @@ import {
 } from '../services/votes.ts';
 import { getEventMemberDetails } from '../services/events.ts';
 import { sendErrorMessage, sendSuccessMessage } from './error.ts';
+import { getOwnerCurrentPlayingTrack } from "../services/player.ts";
 
 export interface WebSocketMessage {
   type: string;
@@ -28,7 +29,7 @@ export async function handleMessage(
 
     switch (message.type) {
       case 'ping':
-        handlePing(userEmail, socket);
+        handlePing(userId, socket, message);
         break;
 
       case 'vote':
@@ -82,14 +83,14 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
   }
 }
 
-function handlePing(userEmail: string, socket: WebSocket): void {
+async function handlePing(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
   try {
-    socket.send(JSON.stringify({
+    const eventId = message.eventId as string;
+    const ownerTrack = await getOwnerCurrentPlayingTrack(eventId);
+    sendSuccessMessage(socket, {
       type: 'pong',
-      timestamp: Date.now(),
-      serverTime: new Date().toISOString(),
-      email: userEmail
-    }));
+      track: ownerTrack,
+    });
   } catch (error) {
     console.error('ws: error sending pong:', error);
   }

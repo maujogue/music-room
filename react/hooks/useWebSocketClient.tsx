@@ -21,8 +21,9 @@ export interface EventUserData {
 
 export interface WebSocketActions {
   connected: boolean;
-  sendVote: (eventId: string, trackId: string) => Promise<boolean>;
-  sendUnvote: (eventId: string, trackId: string) => Promise<boolean>;
+  track: SpotifyCurrentlyPlayingTrack | null;
+  sendVote: (eventId: string, trackId: string) => boolean;
+  sendUnvote: (eventId: string, trackId: string) => boolean;
   sendPing: () => boolean;
   trackVotes: Map<string, TrackVote>;
   eventUserData: EventUserData | null;
@@ -57,13 +58,14 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   );
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [track, setTrack] = useState<SpotifyCurrentlyPlayingTrack | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
   const connectionAttemptsRef = useRef<number>(0);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
-  const pingInterval = 60000;
+  const pingInterval = 10000;
 
   const { coords, loading, error } = useCurrentPosition({radiusKm: 50})
 
@@ -131,8 +133,8 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
         }
         pingIntervalRef.current = window.setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
-            console.log('🏓 Auto-ping sent');
+            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now(), eventId: event_id }));
+            console.log('🏓 Auto-ping sent (with eventId)', { eventId: event_id });
           }
         }, pingInterval);
 
@@ -195,7 +197,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
               setLastError(data.message ?? 'some error');
               break;
             case 'pong':
-              console.log('🏓 Pong received - connection alive');
+              handleTrackPlay(data.track);
               break;
             case 'track_vote:update':
               handleTrackVoteUpdate(data);
@@ -323,7 +325,10 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-      webSocket.send(JSON.stringify({ type: 'ping' }));
+      webSocket.send(JSON.stringify({ 
+        type: 'ping',
+        eventId: event_id
+      }));
       console.log('ws: ping sent');
       return true;
     }
@@ -419,6 +424,11 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
     },
     []
   );
+
+  const handleTrackPlay = useCallback((track: SpotifyCurrentlyPlayingTrack) => {
+    console.log('▶️ Received track play data:', track);
+    setTrack(track);
+  }, []);
 
   const handleVoteList = useCallback((votes: any[]) => {
     console.log('📋 Processing vote list with', votes.length, 'entries');
@@ -561,6 +571,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
 
   return {
     connected,
+    track,
     sendPing,
     sendVote,
     sendUnvote,
