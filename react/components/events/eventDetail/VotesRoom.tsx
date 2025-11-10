@@ -50,7 +50,7 @@ export default function VotesRoom({ eventId }: Props) {
     new Map()
   );
   const isFocused = useIsFocused();
-  const { setTrack } = usePlayer();
+  const { setTrack, setTracksToPlay } = usePlayer();
 
   const {
     playlist,
@@ -64,6 +64,13 @@ export default function VotesRoom({ eventId }: Props) {
       disconnect();
     }
   }, [isFocused, disconnect]);
+
+  useEffect(() => {
+    if (data?.event?.playlist?.tracks) {
+      const trackIds = data.event.playlist.tracks.map((track) => track.track_id);
+      setTracksToPlay(trackIds);
+    }
+  }, [data?.event?.playlist?.tracks, setTracksToPlay]);
 
   useEffect(() => {
     if (!data?.event?.id) return;

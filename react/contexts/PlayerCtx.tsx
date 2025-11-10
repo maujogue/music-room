@@ -13,6 +13,8 @@ const REFRESH_INTERVAL = 5000;
 interface PlayerContextType {
   track: SpotifyCurrentlyPlayingTrack;
   setTrack: (track: SpotifyCurrentlyPlayingTrack) => void;
+  tracksToPlay: string[];
+  setTracksToPlay: (tracks: string[]) => void;
   isPlaying: boolean;
   playTrack: (track: any) => Promise<void>;
   pauseTrack: () => Promise<void>;
@@ -33,6 +35,7 @@ export function usePlayer() {
 
 export function PlayerProvider({ children }: PropsWithChildren) {
   const [track, setTrack] = useState<any>(null);
+  const [tracksToPlay, setTracksToPlay] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -62,10 +65,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  const handlePlayTrack = async () => {
-    setTrack(track);
+  const handlePlayTrack = async (tracks: string[]) => {
     setIsPlaying(true);
-    playTrack();
+    playTrack(tracks);
   };
 
   const handlePauseTrack = async () => {
@@ -80,6 +82,8 @@ export function PlayerProvider({ children }: PropsWithChildren) {
   const value: PlayerContextType = {
     track,
     setTrack,
+    tracksToPlay,
+    setTracksToPlay,
     isPlaying,
     playTrack: handlePlayTrack,
     pauseTrack: handlePauseTrack,

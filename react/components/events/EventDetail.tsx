@@ -41,9 +41,6 @@ export default function EventDetail() {
     setDisplayInviteButton(data?.user?.can_invite ?? false);
     if (data?.event?.beginning_at) {
       const eventStart = new Date(data.event.beginning_at);
-      console.log('Event start date:', eventStart);
-      console.log('Current date:', new Date());
-      console.log('Is event active?', eventStart >= new Date());
       setIsActive(eventStart <= new Date());
     }
   }, [data]);
@@ -117,7 +114,7 @@ export default function EventDetail() {
         abovePlayer={isActive && !!track} />
 
       {track && isActive && (
-        <Box className='absolute bottom-0 right-18 w-full pointer-events-auto'>
+        <Box className='absolute bottom-0 right-18 w-full' pointerEvents={'auto'}>
           <Player
             showControls={true}
           />

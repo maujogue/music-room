@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import FloatButton from '@/components/generics/FloatButton';
-import { Users, UserPlus } from 'lucide-react-native';
+import { Users, UserPlus, Play } from 'lucide-react-native';
 import EventMembersDrawer from './EventMembersDrawer';
 import { useRouter } from 'expo-router';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 type Props = {
   displayInviteButton: boolean;
@@ -21,6 +22,7 @@ export default function EventActions({
   abovePlayer = false,
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { playTrack, tracksToPlay } = usePlayer();
   const router = useRouter();
 
   const handleOpenInvite = () => {
@@ -58,13 +60,24 @@ export default function EventActions({
       {displayInviteButton && !abovePlayer && (
         <>
           <FloatButton
-            onPress={handleOpenInvite}
+            onPress={() => {
+              console.log('open invite');
+              handleOpenInvite();
+            }}
             icon={UserPlus}
             className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
           />
-          <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
+          <FloatButton
+            onPress={() => setIsDrawerOpen(true)}
+            icon={Users}
+          />
         </>
       )}
+      <FloatButton
+        onPress={() => playTrack(tracksToPlay)}
+        icon={Play}
+        className={'absolute bottom-36 right-4 rounded-full p-4 blurred-bg'}
+      />
       <EventMembersDrawer
         eventData={eventData}
         isOpen={isDrawerOpen}
