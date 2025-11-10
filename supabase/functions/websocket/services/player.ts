@@ -48,7 +48,6 @@ export async function getOwnerCurrentPlayingTrack(
 
     const accessToken = data[0].spotify_access_token as string | null | undefined;
 
-    console.log('player:getOwnerCurrentPlayingTrack fetched access token', { eventId, accessToken });
     if (!accessToken) {
       return {
         data: null,
@@ -60,14 +59,13 @@ export async function getOwnerCurrentPlayingTrack(
     }
 
     const spotifyResp = await getCurrentUserPlayingTrack(accessToken);
-    console.log('player:getOwnerCurrentPlayingTrack fetched spotify playing track', { eventId, hasTrack: !!spotifyResp });
     // normalize 204 / empty responses
     if (!spotifyResp) {
       return {
         data: null,
         error: {
           status: 404,
-          message: 'No active Spotify track found',
+          message: '1 No active Spotify track found 1',
         }
       };
     }
@@ -75,10 +73,7 @@ export async function getOwnerCurrentPlayingTrack(
       const r = spotifyResp as Response;
       if (r.status === 204) return {
         data: null,
-        error: {
-          status: 404,
-          message: 'No active Spotify track found',
-        }
+        error: null,
       };
       try {
         const json = await r.json();
