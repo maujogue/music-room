@@ -9,6 +9,30 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
+export async function addItemToSpotifyOwnerQueue(item: string, spotify_token: string): Promise<boolean> {
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player/queue', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${spotify_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ uri: item })
+    });
+
+    if (!response.ok) {
+      console.error('Failed to add item to queue:', response.statusText);
+      return false;
+    }
+
+    console.log('Item added to queue successfully');
+    return true;
+  } catch (error) {
+    console.error('Error adding item to queue:', error);
+    return false;
+  }
+}
+
 export async function getOwnerCurrentPlayingTrack(
   eventId?: string | undefined
 ): Promise<
