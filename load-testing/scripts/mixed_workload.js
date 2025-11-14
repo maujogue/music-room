@@ -83,7 +83,8 @@ let sharedState = {
 export function setup() {
   const authData = setup_bearer_tokens(
     loadTestConfig.bearerTokens,
-    loadTestConfig.password
+    loadTestConfig.password,
+    true
   );
 
   // Initialize shared state

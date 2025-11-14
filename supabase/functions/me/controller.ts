@@ -14,6 +14,7 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import { getUserProfile } from '@profile/service';
+import { getUserSubscription } from './services/supabase.ts';
 import type { ProfileResponse } from '@profile';
 
 const supabase = createClient(
@@ -197,4 +198,84 @@ export async function syncSpotifyPlaylists(c: Context): Promise<Response> {
 
   c.status(200)
   return c.json({ message: 'No playlists to synchronize', syncedCount: 0 })
+}
+
+export async function getMySubscription(c: Context): Promise<Response> {
+  const user = c.get('user');
+  
+  try {
+    const subscription = await getUserSubscription(user.id);
+    
+    c.status(200);
+    return c.json(subscription); // Returns null for free users, subscription object for premium
+  } catch (error) {
+    console.error('Error fetching user subscription:', error);
+    throw new HTTPException(500, { message: 'Failed to fetch subscription' });
+  }
+}
+
+export async function createMySubscription(c: Context): Promise<Response> {
+  const user = c.get('user');
+  
+  try {
+    // Check if user already has a subscription
+    const existingSubscription = await getUserSubscription(user.id);
+    if (existingSubscription) {
+      c.status(400);
+      return c.json({ error: 'User already has an active subscription' });
+    }
+    
+    // Create new subscription with renewal date 30 days from now
+    const now = new Date();
+    const renewalDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .insert({
+        user_id: user.id,
+        started_at: now.toISOString(),
+        renewal_date: renewalDate.toISOString()
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating subscription:', error);
+      throw new HTTPException(500, { message: 'Failed to create subscription' });
+    }
+    
+    c.status(201);
+    return c.json(data);
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error('Error creating subscription:', error);
+    throw new HTTPException(500, { message: 'Failed to create subscription' });
+  }
+}
+
+export async function deleteMySubscription(c: Context): Promise<Response> {
+  const user = c.get('user');
+  
+  try {
+    const { error } = await supabase
+      .from('subscriptions')
+      .delete()
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error deleting subscription:', error);
+      throw new HTTPException(500, { message: 'Failed to cancel subscription' });
+    }
+    
+    c.status(200);
+    return c.json({ message: 'Subscription cancelled successfully' });
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error('Error deleting subscription:', error);
+    throw new HTTPException(500, { message: 'Failed to cancel subscription' });
+  }
 }

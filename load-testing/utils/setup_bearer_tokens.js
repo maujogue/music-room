@@ -4,6 +4,18 @@ import http from "k6/http";
 const supabaseUrl = __ENV.SUPABASE_URL;
 const supabaseKey = __ENV.SUPABASE_KEY;
 
+// Validate environment variables
+if (!supabaseUrl || supabaseUrl === "undefined") {
+  throw new Error(
+    "SUPABASE_URL environment variable is not set. Please set it before running tests."
+  );
+}
+if (!supabaseKey || supabaseKey === "undefined") {
+  throw new Error(
+    "SUPABASE_KEY environment variable is not set. Please set it before running tests."
+  );
+}
+
 /**
  * Logs in a user by email and password, returns access token
  * @param {string} email - User email
@@ -65,12 +77,76 @@ export function createUser(vuId) {
       },
     }
   );
-  return JSON.parse(signUpResponse.body);
+
+  if (signUpResponse.status === 0) {
+    throw new Error(
+      `Failed to reach Supabase API. Check that SUPABASE_URL is set correctly. URL attempted: ${supabaseUrl}`
+    );
+  }
+
+  try {
+    return JSON.parse(signUpResponse.body);
+  } catch (error) {
+    console.error(
+      `Failed to parse signup response for ${email}: ${signUpResponse.body}`
+    );
+    throw error;
+  }
 }
 
-export function setup_bearer_tokens(maxVUs, password) {
+/**
+ * Creates a premium subscription for a user
+ * @param {string} accessToken - User's access token
+ * @param {string} userId - User's ID (optional, for logging)
+ * @returns {boolean} - true if subscription was created successfully or already exists, false otherwise
+ */
+export function createSubscription(accessToken, userId = null) {
+  const response = http.post(
+    `${supabaseUrl}/functions/v1/me/subscription`,
+    "",
+    {
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+      tags: { name: "create_subscription" },
+    }
+  );
+
+  // Subscription already exists (400) or created successfully (201) are both fine
+  if (response.status === 201) {
+    return true;
+  } else if (response.status === 400) {
+    // User already has a subscription - this is fine
+    return true;
+  } else {
+    console.error(
+      `Failed to create subscription for user ${userId || "unknown"} - Status ${
+        response.status
+      } - ${response.body}`
+    );
+    return false;
+  }
+}
+
+/**
+ * Sets up bearer tokens for load testing users
+ * @param {number} maxVUs - Maximum number of virtual users
+ * @param {string} password - Password for test users
+ * @param {boolean} createSubscriptions - Whether to create premium subscriptions for users (default: false)
+ * @returns {{tokenPool: Array}} - Object containing the token pool
+ */
+export function setup_bearer_tokens(
+  maxVUs,
+  password,
+  createSubscriptions = false
+) {
   const tokenPool = [];
   console.log(`Pre-creating ${maxVUs} bearer tokens...`);
+  if (createSubscriptions) {
+    console.log("Premium subscriptions will be created for all users");
+  }
 
   for (let i = 1; i <= maxVUs; i++) {
     const email = `testuser${i}@example.com`;
@@ -104,6 +180,20 @@ export function setup_bearer_tokens(maxVUs, password) {
     }
 
     if (authResult) {
+      // Create subscription if requested
+      if (createSubscriptions) {
+        const subscriptionResult = createSubscription(
+          authResult.accessToken,
+          authResult.userId
+        );
+        if (!subscriptionResult) {
+          console.warn(
+            `Warning: Failed to create subscription for ${email}, but continuing...`
+          );
+        }
+        sleep(0.05);
+      }
+
       tokenPool.push({
         vuId: i,
         email: email,
@@ -122,6 +212,9 @@ export function setup_bearer_tokens(maxVUs, password) {
   }
 
   console.log(`Successfully created ${tokenPool.length}/${maxVUs} tokens`);
+  if (createSubscriptions) {
+    console.log("Premium subscriptions created for all users");
+  }
 
   // Return tokens - this will be passed to all VUs
   return { tokenPool: tokenPool };
