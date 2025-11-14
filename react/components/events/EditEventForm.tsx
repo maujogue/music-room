@@ -59,9 +59,7 @@ export default function EditEventForm({
   const [spatio_licence, setSpatioLicence] = useState(
     initialValues.event?.spatio_licence ?? false
   );
-  const [done, setDone] = useState(
-    initialValues.event?.done ?? false
-  );
+  const [done, setDone] = useState(initialValues.event?.done ?? false);
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
   );
@@ -195,7 +193,7 @@ export default function EditEventForm({
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
       spatio_licence,
-      done
+      done,
     } as any;
 
     try {
@@ -225,7 +223,7 @@ export default function EditEventForm({
                     marginBottom: 10,
                   }}
                   resizeMode='cover'
-                  alt ="Event's image"
+                  alt="Event's image"
                 />
               ) : (
                 <Box
@@ -292,8 +290,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={is_private}
                         onToggle={() => {
                           setIsPrivate(prev => !prev);
@@ -307,8 +305,8 @@ export default function EditEventForm({
                       <Switch
                         value={everyone_can_vote}
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         onToggle={() => {
                           setEveryoneCanVote(prev => !prev);
                         }}
@@ -321,8 +319,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={spatio_licence}
                         onToggle={() => {
                           setSpatioLicence(prev => !prev);
@@ -334,8 +332,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={done}
                         onToggle={() => {
                           setDone(prev => !prev);
@@ -345,8 +343,6 @@ export default function EditEventForm({
                       <Text>Event is done</Text>
                     </HStack>
                   </VStack>
-                  
-
                 </HStack>
 
                 <Text className='mt-2 font-semibold'>
@@ -393,13 +389,19 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
-                  <Text size='sm' className='text-neutral-700'>{location?.address ?? 'No address place'}</Text>
-                  {(location && location.latitude && location.longitude) ? (
-
-                    <Badge size='md' action='muted' className='rounded-full h-6 my-2'>
+                  <Text size='sm' className='text-neutral-700'>
+                    {location?.address ?? 'No address place'}
+                  </Text>
+                  {location && location.latitude && location.longitude ? (
+                    <Badge
+                      size='md'
+                      action='muted'
+                      className='rounded-full h-6 my-2'
+                    >
                       <BadgeIcon as={MapPinIcon} size='lg' />
                       <BadgeText className='pl-1'>
-                        {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+                        {location.latitude.toFixed(5)},{' '}
+                        {location.longitude.toFixed(5)}
                       </BadgeText>
                     </Badge>
                   ) : (
@@ -459,7 +461,7 @@ export default function EditEventForm({
           setLocation(val);
         }}
         initialCoords={
-          (location && location.latitude && location.longitude)
+          location && location.latitude && location.longitude
             ? { latitude: location.latitude, longitude: location.longitude }
             : undefined
         }

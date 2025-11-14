@@ -42,7 +42,7 @@ export function parseLocation(
 ): PickedPlace | null {
   if (!location) return null;
 
-  const coords = location.coordinates
+  const coords = location.coordinates;
   if (!coords) return null;
 
   return {

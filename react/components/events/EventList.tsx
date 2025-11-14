@@ -38,7 +38,11 @@ export default function EventList({ sections }: Props) {
         />
       </ScrollView>
       <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
-      <FloatButton onPress={handlePressEventRadar} className="absolute bottom-4 right-20 rounded-full p-4 blurred-bg" icon={Radar} />
+      <FloatButton
+        onPress={handlePressEventRadar}
+        className='absolute bottom-4 right-20 rounded-full p-4 blurred-bg'
+        icon={Radar}
+      />
     </>
   );
 }

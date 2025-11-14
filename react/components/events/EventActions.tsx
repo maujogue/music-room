@@ -42,30 +42,27 @@ export default function EventActions({
               pointerEvents: 'auto',
             }}
           />
-        <FloatButton
-          onPress={() => setIsDrawerOpen(true)}
-          icon={Users}
-          className={'absolute right-4 rounded-full p-4 blurred-bg'}
-          style={{
-            bottom: 100,
-            zIndex: 9998,
-            elevation: 18,
-            pointerEvents: 'auto',
-          }}
-        />
+          <FloatButton
+            onPress={() => setIsDrawerOpen(true)}
+            icon={Users}
+            className={'absolute right-4 rounded-full p-4 blurred-bg'}
+            style={{
+              bottom: 100,
+              zIndex: 9998,
+              elevation: 18,
+              pointerEvents: 'auto',
+            }}
+          />
         </>
       )}
       {displayInviteButton && !abovePlayer && (
         <>
-        <FloatButton
-          onPress={handleOpenInvite}
-          icon={UserPlus}
-          className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
-        />
-        <FloatButton
-          onPress={() => setIsDrawerOpen(true)}
-          icon={Users}
-        />
+          <FloatButton
+            onPress={handleOpenInvite}
+            icon={UserPlus}
+            className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
+          />
+          <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
         </>
       )}
       <EventMembersDrawer

@@ -7,6 +7,7 @@ import {
   LogOut,
   UserPlus,
   UserMinus,
+  KeyRound,
 } from 'lucide-react-native';
 import {
   Drawer,
@@ -25,6 +26,7 @@ import { Divider } from '@/components/ui/divider';
 import { Box } from '@/components/ui/box';
 import { useProfile } from '@/contexts/profileCtx';
 import { Text } from '@/components/ui/text';
+import { router } from 'expo-router';
 
 interface ProfileActionsProps {
   isOwner: boolean;
@@ -120,6 +122,21 @@ export default function ProfileActions({
                     </Button>
                   </HStack>
                   <Divider />
+                  <Button
+                    variant='link'
+                    className='w-full justify-start'
+                    onPress={() => {
+                      router.push('/update-password');
+                      setShowDrawer(false);
+                    }}
+                  >
+                    <HStack className='items-center justify-between w-full'>
+                      <HStack className='items-center gap-3'>
+                        <KeyRound />
+                        <ButtonText>Edit password</ButtonText>
+                      </HStack>
+                    </HStack>
+                  </Button>
                   <Button
                     variant='link'
                     className='w-full justify-start'

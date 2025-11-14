@@ -59,19 +59,19 @@ export default function EmptyState({
         {onPressCta ? (
           <HStack className='gap-8 justify-center w-full'>
             <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
-                <Button
-                  size='lg'
-                  className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
-                  action='primary'
-                  onPress={onPressCta}
-                >
-                  <ButtonIcon size='xl' className='w-10 h-10' as={AddIcon} />
-                </Button>
+              <Button
+                size='lg'
+                className='rounded-full bg-primary-500/70 w-20 h-20 p-3.5'
+                action='primary'
+                onPress={onPressCta}
+              >
+                <ButtonIcon size='xl' className='w-10 h-10' as={AddIcon} />
+              </Button>
             </Box>
-              <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
+            <Box className='bg-neutral-300/50 rounded-full border border-neutral-300 p-0.5'>
               {addedCTA}
-              </Box>
-            </HStack>
+            </Box>
+          </HStack>
         ) : null}
       </VStack>
     </Center>
