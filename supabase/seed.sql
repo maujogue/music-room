@@ -97,8 +97,7 @@ SELECT
   event_data.playlist_id,
   event_data.beginning_at,
   event_data.is_private,
-  event_data.everyone_can_vote,
-  (SELECT id FROM public.playlists WHERE name = event_data.playlist_name LIMIT 1)
+  event_data.everyone_can_vote
 FROM (
   VALUES
     (
