@@ -1,5 +1,5 @@
 import { Button, ButtonIcon } from '@/components/ui/button';
-import { Play, Square } from 'lucide-react-native';
+import { Star, StarOff } from 'lucide-react-native';
 import { useState } from 'react';
 import ConfirmModal from '@/components/generics/ConfirmModal';
 import { useRouter } from 'expo-router';
@@ -68,21 +68,21 @@ export default function StartAndStopButton({data, eventId} : Props) {
   <>
     { showStart() && (
       <Button size='lg'
-              className='absolute bottom-4 left-4 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-emerald-200'
+              className='absolute top-[240px] right-2 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-emerald-300'
               action='primary'
               onPress={() => setStartModal(true)}
             >
-        <ButtonIcon size='xl' className='w-12 h-12 text-emerald-200' as={Play} />
+        <ButtonIcon size='xl' className='w-12 h-12 text-emerald-300' as={Star} />
       </Button>
     )}
 
     { showStop() && (
         <Button size='lg'
-                className='absolute bottom-4 left-4 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-orange-200'
+                className='absolute top-[240px] right-2 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-orange-300'
                 action='primary'
                 onPress={() => setStopModal(true)}
               >
-          <ButtonIcon size='xl' className='w-12 h-12 text-orange-200' as={Square} />
+          <ButtonIcon size='xl' className='w-12 h-12 text-orange-300' as={StarOff} />
         </Button>
     )}
 
@@ -92,7 +92,7 @@ export default function StartAndStopButton({data, eventId} : Props) {
       title="Start the event?"
       description="If everything is ready, let's get the event started."
       confirmText="Start"
-      confirmIcon={Play}
+      confirmIcon={Star}
       onConfirm={submitStartEvent}
     />
 
@@ -103,7 +103,7 @@ export default function StartAndStopButton({data, eventId} : Props) {
       description="No more things to eat or drink ? Music getting weird ?"
       confirmText="Stop"
       destructive
-      confirmIcon={Square}
+      confirmIcon={StarOff}
       onConfirm={submitStopEvent}
     />
   </>
