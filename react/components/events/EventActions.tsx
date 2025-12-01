@@ -39,12 +39,42 @@ export default function EventActions({
     {isOwner() && (
         <StartAndStopButton data={eventData} eventId={eventId}/>
       )}
-      {displayInviteButton && (
-        <FloatButton
-          onPress={handleOpenInvite}
-          icon={UserPlus}
-          className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
-        />
+
+    {displayInviteButton && abovePlayer && (
+        <>
+          <FloatButton
+            onPress={handleOpenInvite}
+            icon={UserPlus}
+            className={'absolute right-4 rounded-full p-4 blurred-bg'}
+            style={{
+              bottom: 160,
+              zIndex: 9999,
+              elevation: 20,
+              pointerEvents: 'auto',
+            }}
+          />
+          <FloatButton
+            onPress={() => setIsDrawerOpen(true)}
+            icon={Users}
+            className={'absolute right-4 rounded-full p-4 blurred-bg'}
+            style={{
+              bottom: 100,
+              zIndex: 9998,
+              elevation: 18,
+              pointerEvents: 'auto',
+            }}
+          />
+        </>
+      )}
+      {displayInviteButton && !abovePlayer && (
+        <>
+          <FloatButton
+            onPress={handleOpenInvite}
+            icon={UserPlus}
+            className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
+          />
+          <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
+        </>
       )}
       <EventMembersDrawer
         eventData={eventData}
