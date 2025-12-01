@@ -6,40 +6,99 @@ type Props = {
   radiusKm?: number;
 };
 
-export function useCurrentPosition({ radiusKm = 50 }: Props) {
+const googleFallback = { lat: 37.4221, long: -122.0581 }
+
+async function getSafeCurrentCoords(): Promise<Coordinates | null> {
+  try {
+    const position = await Promise.race([
+      Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout GPS")), 5000)
+      ),
+    ]);
+
+    return {
+      lat: position.coords.latitude,
+      long: position.coords.longitude,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function getInitialCoords(): Promise<Coordinates> {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== Location.PermissionStatus.GRANTED) {
+    throw new Error("Localisation authorization required.");
+  }
+
+  const current = await getSafeCurrentCoords();
+  if (current) return current;
+
+  try {
+    const last = await Location.getLastKnownPositionAsync();
+    if (last) {
+      return {
+        lat: last.coords.latitude,
+        long: last.coords.longitude,
+      };
+    }
+  } catch {
+  }
+
+  return googleFallback;
+}
+
+
+export function useCurrentPosition({ radiusKm = 50 }: Props) {  
   const [status, setStatus] = useState<Location.PermissionStatus | null>(null);
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+    useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       setLoading(true);
       setError(null);
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setStatus(status);
-      if (status === Location.PermissionStatus.GRANTED) {
-        
-        // console.log("Using mock data position...  Android emulator getCurrentPositionAsync broken yet")
-        // setCoords({
-        //   lat: 37.42205, // google Fallback
-        //   long: -122.0853,
-        // });
-        
-        const position = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        setCoords({
-          lat: position.coords.latitude,
-          long: position.coords.longitude,
-        });
-        
-      } else {
-        setError('Localisation authorization required.');
-      }
 
-      setLoading(false);
+      try {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        setStatus(status);
+
+        if (status !== Location.PermissionStatus.GRANTED) {
+          const { status: requestedStatus } =
+            await Location.requestForegroundPermissionsAsync();
+          setStatus(requestedStatus);
+
+          if (requestedStatus !== Location.PermissionStatus.GRANTED) {
+            throw new Error("Localisation authorization required.");
+          }
+        }
+
+        const c = await getInitialCoords();
+
+        if (!cancelled) {
+          setCoords(c);
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          setError(e?.message ?? "Error while getting location.");
+          setCoords(googleFallback);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const region: Region | undefined = useMemo(() => {
