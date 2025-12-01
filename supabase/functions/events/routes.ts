@@ -23,8 +23,8 @@ router.get('/:id', fetchEvent)
 router.delete('/:id', deleteEventById)
 
 router.put('/:id', updateEventById)
-router.put('/:id/start', startEvent)
-router.put('/:id/stop', stopEvent)
+router.post('/:id/start', startEvent)
+router.post('/:id/stop', stopEvent)
 
 router.post('/:id/invite', addUserToEvent)
 
