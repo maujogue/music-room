@@ -42,7 +42,7 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId, {enabled: started, spatio_licence: data?.event?.spatio_licence});
+  } = useWebSocketClient(eventId, {enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence});
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()

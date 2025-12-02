@@ -11,7 +11,7 @@ export interface TrackVote {
   voters: string[];
 }
 
-export interface eventUserData {
+export interface EventUserData {
   userId: string;
   vote_remaining: number;
   voteCount: number;
@@ -25,7 +25,7 @@ export interface WebSocketActions {
   sendUnvote: (eventId: string, trackId: string) => Promise<boolean>;
   sendPing: () => boolean;
   trackVotes: Map<string, TrackVote>;
-  eventUserData: eventUserData | null;
+  eventUserData: EventUserData | null;
   subscribeToVotes: (callback: (vote: TrackVote) => void) => () => void;
   connectionAttempts: number;
   lastError: string | null;
@@ -35,11 +35,12 @@ export interface WebSocketActions {
 
 type Options = {
   enabled?: boolean, 
-  spatio_licence? : boolean 
+  spatio_licence? : boolean
+  done? : boolean
 }
 
 export default function useWebSocketClient(event_id: string, opts?: Options): WebSocketActions {
-  const { enabled = true, spatio_licence = false } = opts ?? {};
+  const { enabled = true, done = false,  spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
@@ -51,7 +52,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   const [voteCallbacks, setVoteCallbacks] = useState<
     Set<(vote: TrackVote) => void>
   >(new Set());
-  const [eventUserData, setEventUserData] = useState<eventUserData | null>(
+  const [eventUserData, setEventUserData] = useState<EventUserData | null>(
     null
   );
   const [connectionAttempts, setConnectionAttempts] = useState(0);
@@ -78,7 +79,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
         return false;
       }
 
-      // Vérifier si le token expire bientôt (dans les 5 prochaines minutes)
       if (session.expires_at) {
         const expirationTime = new Date(session.expires_at).getTime();
         const currentTime = Date.now();
@@ -98,7 +98,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
 
   const initWebSocket = useCallback(async () => {
     try {
-      if (!enabled) return;
+      if (!enabled || done) return;
       if (!shouldReconnectRef.current) {
         console.log('ws: init aborted — reconnection disabled');
         return;
@@ -122,11 +122,10 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
       ws.onopen = () => {
         console.log('✅ ws: connection established successfully');
         setConnected(true);
-        setConnectionAttempts(0); // Reset attempts on success
+        setConnectionAttempts(0);
         connectionAttemptsRef.current = 0;
         setLastError(null);
 
-        // Démarrer le ping automatique
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
         }
@@ -153,13 +152,11 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
         });
         setConnected(false);
 
-        // Arrêter le ping
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
 
-        // Reconnexion automatique si ce n'est pas une fermeture intentionnelle
         if (
           event.code !== 1000 &&
           shouldReconnectRef.current &&
@@ -233,12 +230,11 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
       setLastError('Failed to initialize WebSocket connection');
       setConnected(false);
     }
-  }, [enabled]);
+  }, [enabled, done]);
 
   useEffect(() => {
     initWebSocket();
 
-    // Cleanup lors du démontage
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -255,13 +251,12 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
           shouldReconnectRef.current = false;
           webSocketRef.current.close(1000, 'Component unmounted');
         } catch {
-          /* ignore */
         }
         webSocketRef.current = null;
         setWebSocket(null);
       }
     };
-  }, [initWebSocket, enabled]);
+  }, [initWebSocket, enabled, done]);
 
   // Listen to app state and close websocket when app is backgrounded to avoid reconnect loops
   useEffect(() => {
@@ -287,7 +282,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
           try {
             webSocketRef.current.close(1000, 'App backgrounded');
           } catch {
-            /* ignore */
           }
           webSocketRef.current = null;
           setWebSocket(null);
@@ -304,7 +298,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
 
     const sub = AppState.addEventListener('change', handleAppStateChange);
     return () => sub.remove();
-  }, [initWebSocket, enabled]);
+  }, [initWebSocket, enabled, done]);
 
   const sendRequestUserInfo = useCallback(
     (ws?: WebSocket) => {
@@ -506,7 +500,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   const reconnect = useCallback(async () => {
     console.log('ws: manual reconnection requested');
 
-    // Vérifier la validité du token avant la reconnexion
     const tokenValid = await checkTokenValidity();
     if (!tokenValid) {
       setLastError('Session expired. Please login again.');
@@ -524,7 +517,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
       return;
     }
 
-    // Nettoyer les timers existants
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -544,16 +536,13 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   const disconnect = useCallback(() => {
     console.log('ws: manual disconnect requested');
 
-    // disable reconnect attempts
     shouldReconnectRef.current = false;
 
-    // clear any pending reconnect timer
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
 
-    // stop ping interval
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
