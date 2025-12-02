@@ -70,7 +70,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
 
     console.log('ws: processing vote', { userId, eventId, trackId });
 
-    const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name, spatio_licence');
+    const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name, spatio_licence, done');
 
     if (!res.success) {
       return {
@@ -95,6 +95,13 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
           message: `Votes too far from event are forbidden (${(distance / 1000).toFixed(1)} km)`
         };
       }
+    }
+
+    if (res.data.done) {
+      return {
+        success: false,
+        message: `Event is done ! Time to bring back your friends, no votes anymore`
+      };
     }
 
     const resCanVote = await checkIfUserCanVote(eventId, userId);
