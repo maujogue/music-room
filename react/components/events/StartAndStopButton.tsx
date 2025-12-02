@@ -68,21 +68,21 @@ export default function StartAndStopButton({data, eventId} : Props) {
   <>
     { showStart() && (
       <Button size='lg'
-              className='absolute top-[240px] right-2 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-emerald-300'
+              className=' rounded-full bg-primary-500 size-14 border-2 border-primary-400 p-1.5'
               action='primary'
               onPress={() => setStartModal(true)}
             >
-        <ButtonIcon size='xl' className='w-12 h-12 text-emerald-300' as={Star} />
+        <ButtonIcon size='xl' className='h-8 w-8 text-emerald-300' as={Star} />
       </Button>
     )}
 
     { showStop() && (
         <Button size='lg'
-                className='absolute top-[240px] right-2 rounded-full bg-primary-500/70 w-20 h-20 p-3.5 border-4 border-orange-300'
+                className='rounded-full bg-primary-500 size-14 border-2 border-primary-400'
                 action='primary'
                 onPress={() => setStopModal(true)}
               >
-          <ButtonIcon size='xl' className='w-12 h-12 text-orange-300' as={StarOff} />
+          <ButtonIcon size='xl' className='h-8 w-8 text-orange-300' as={StarOff} />
         </Button>
     )}
 

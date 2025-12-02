@@ -3,8 +3,6 @@ import FloatButton from '@/components/generics/FloatButton';
 import { Users, UserPlus } from 'lucide-react-native';
 import EventMembersDrawer from './EventMembersDrawer';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/authCtx';
-import StartAndStopButton from '@/components/events/StartAndStopButton';
 
 type Props = {
   displayInviteButton: boolean;
@@ -24,22 +22,13 @@ export default function EventActions({
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const router = useRouter();
-  const { user: currentUser } = useAuth();
 
   const handleOpenInvite = () => {
     router.push(`(main)/events/${eventId}/invite`);
   };
 
-  const isOwner = () => {
-    return eventData.owner.id === currentUser?.id
-  }
-
   return (
     <>
-    {isOwner() && (
-        <StartAndStopButton data={eventData} eventId={eventId}/>
-      )}
-
     {displayInviteButton && abovePlayer && (
         <>
           <FloatButton

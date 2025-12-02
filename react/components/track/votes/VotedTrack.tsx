@@ -7,6 +7,7 @@ import { CircleMinus, CirclePlus } from 'lucide-react-native';
 import { Card } from '@/components/ui/card';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
+import { padding } from 'aes-js';
 
 type Props = {
   track: PlaylistTrack;
@@ -37,14 +38,12 @@ export default function VotedTrack({
     try {
       const result = await onSwipeableOpen(direction);
 
-      // Fermer le swipeable après l'action, que ce soit réussi ou échoué
       if (swipeableRef.current) {
         swipeableRef.current.close();
       }
 
       return result;
     } catch (error) {
-      // Fermer même en cas d'erreur
       if (swipeableRef.current) {
         swipeableRef.current.close();
       }
@@ -54,41 +53,37 @@ export default function VotedTrack({
   };
 
   return (
-    <ReanimatedSwipeable
-      ref={swipeableRef}
-      onSwipeableOpen={handleSwipeableOpen}
-      renderLeftActions={renderLeftAction}
-      renderRightActions={renderRightAction}
-      leftThreshold={75}
-      rightThreshold={75}
-    >
-      <Card
-        key={track.track_id}
-        className='bg-white rounded border-l-4 border-blue-500'
+    <VStack className='p-0'>
+      <ReanimatedSwipeable
+        ref={swipeableRef}
+        onSwipeableOpen={handleSwipeableOpen}
+        renderLeftActions={renderLeftAction}
+        renderRightActions={renderRightAction}
+        leftThreshold={75}
+        rightThreshold={75}
       >
-        <HStack>
-          <Image
-            source={{ uri: track.details.album.images[0]?.url }}
-            style={{ width: 40, height: 40 }}
-            alt='Track album art'
-          />
-          <Box className='flex-1 flex-row justify-between items-center'>
-            <VStack className='ml-3'>
-              <Text className='text-gray-800 font-medium'>
-                {track.details.name}
-              </Text>
-              <Text className='text-xs text-gray-500'>
-                {track.details.artists
-                  ?.map((artist: any) => artist.name)
-                  .join(', ')}
-              </Text>
-              <Text className='text-xs text-blue-600 mt-1'>
-                Your votes: {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-              </Text>
-            </VStack>
-          </Box>
-        </HStack>
-      </Card>
-    </ReanimatedSwipeable>
+        <Card
+          key={track.track_id}
+          className='bg-white p-0 rounded-lg'
+        >
+          <HStack className='w-full rounded-lg justify-between items-center'>
+            <HStack className='w-full justify-start gap-2 items-center'>
+            <HStack  className='items-center gap-1.5'>
+              <Image className='h-10 rounded-l-lg'
+                source={{ uri: track.details.album.images[0]?.url }}
+                alt='Track album art'
+              />
+ { voteCount && (<Text className=' text-xs font-bold text-sky-500'>
+                  {voteCount}
+                </Text>)}
+            </HStack>
+                <Text className='font-medium line-clamp-1'>
+                  {track.details.name}
+                </Text>
+              </HStack>
+          </HStack>
+        </Card>
+      </ReanimatedSwipeable>
+    </VStack>
   );
 }

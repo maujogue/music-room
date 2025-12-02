@@ -87,7 +87,7 @@ export default function EventDetail() {
 
   return (
     <>
-      <ScrollView>
+      <ScrollView className='bg-primary-500'>
         <VStack className='flex-1' >
           <EventHeader
             eventData={data}
