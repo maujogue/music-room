@@ -53,8 +53,6 @@ export default function TrackListVotes({
     error: errorV,
   } = useVoteCountIndex(eventId);
 
-  // --------------------------------------------------
-  // CONTINUE DEBUG HERE TO GET WHAT IS WITH VOTES RETREIVED
   useEffect(() => {
     if (!playlistTracks) return;
 
@@ -70,8 +68,6 @@ export default function TrackListVotes({
 
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
-  // --------------------------------------------------
-  // --------------------------------------------------
 
   const getRealtimeVoteCount = (trackId: string): number => {
     const realtimeVote = realtimeVotes?.get(trackId);

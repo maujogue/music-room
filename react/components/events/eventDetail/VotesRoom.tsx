@@ -18,6 +18,8 @@ import { useProfile } from '@/contexts/profileCtx';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
+import { useAuth } from '@/contexts/authCtx';
+import StartAndStopButton from '@/components/events/StartAndStopButton';
 
 interface Props {
   eventId: string;
@@ -25,8 +27,10 @@ interface Props {
 
 export default function VotesRoom({ eventId }: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
-  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
+  const started = isEventStarted(data?.event?.beginning_at);
+  const { user: currentUser } = useAuth();
   const {
     connected,
     disconnect,
@@ -38,7 +42,7 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId);
+  } = useWebSocketClient(eventId, {enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence});
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
@@ -127,6 +131,19 @@ export default function VotesRoom({ eventId }: Props) {
       });
     }
   };
+
+  function isEventStarted(beginning_at?: string | null) {
+    if (!beginning_at) return false;
+    const start = new Date(beginning_at);
+    if (isNaN(start.getTime())) return false;
+    return Date.now() >= start.getTime();
+  }
+
+  const isOwner = () => {
+    return data?.owner.id === currentUser?.id
+  }
+
+
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -224,7 +241,23 @@ export default function VotesRoom({ eventId }: Props) {
     );
   }
 
-  const onTrackSwipe = (dir: string, trackId: string) => {
+  const onTrackSwipe = async (dir: string, trackId: string) => {
+    if (!started) {
+      toast.error({
+        title: 'Too impulsive !',
+        description: "The event hasn't started yet.",
+        duration: 3000,
+      });
+      return;
+    }
+    if (!data?.location || !data?.location?.coordinates?.lat || !data?.location?.coordinates?.long) {
+      toast.error({
+        title: 'Event is nowhere ?',
+        description: 'The event need a location to allow votes.',
+        duration: 3000,
+      });
+      return;
+    }
     if (!connected) {
       toast.error({
         title: 'Cannot vote',
@@ -253,11 +286,12 @@ export default function VotesRoom({ eventId }: Props) {
         return;
       }
 
-      sendVote(eventId, trackId);
+      await sendVote(eventId, trackId);
     } else {
       if (eventUserData?.voted_tracks[trackId]) {
-        sendUnvote(eventId, trackId);
-      } else {
+        await sendUnvote(eventId, trackId);
+      }
+      else {
         toast.show({
           title: 'Cannot unvote',
           description: 'You have not voted for this track',
@@ -270,34 +304,38 @@ export default function VotesRoom({ eventId }: Props) {
   return (
     <>
       <VStack className='flex-1 w-full'>
-        {eventUserData && (
+        {eventUserData ? (
           <>
-            <View className='bg-gray-100 p-3 rounded-lg mb-4'>
-              <Text className='text-sm text-gray-600'>
-                Votes left:{' '}
-                <Text className='font-bold text-blue-600'>
-                  {eventUserData.vote_remaining}
-                </Text>{' '}
-                / {eventUserData.voteMax}
-              </Text>
-              <Text className='text-xs text-gray-500'>
-                Total votes: {eventUserData.voteCount}
-              </Text>
+            <View className='bg-primary-500 min-h-12 py-1.5 px-3'>
+              <HStack className='justify-between items-end'>
+                <HStack className='gap-1 items-center border-2 h-10 border-primary-400 rounded-xl py-1.5 px-3 '>
+                  <Text className='font-bold text-primary-200'>
+                    My votes
+                  </Text>
+                  <Text className='font-bold text-sky-500'>
+                    {eventUserData.vote_remaining}
+                  </Text>
+                  <Text className='text-primary-200'>
+                  / {eventUserData.voteMax}
+                </Text>
+                </HStack>
+             {isOwner() && data && (
+                <StartAndStopButton data={data} eventId={eventId}/>
+              )}
+              </HStack>
+
             </View>
             {eventUserData.voted_tracks &&
               Object.keys(eventUserData.voted_tracks).length > 0 && (
-                <Box className='mb-4'>
-                  <Text className='font-bold text-gray-700 mb-2'>
-                    Tracks you voted for: (
-                    {Object.keys(eventUserData.voted_tracks).length})
-                  </Text>
+                <Box className='mb-3 px-3'>
                   <GestureHandlerRootView>
+                    <VStack className='p-1.5 gap-1.5 border-2 border-primary-400 rounded-xl'>
                     {Object.entries(eventUserData.voted_tracks).map(
                       ([trackId, voteCount]) => {
                         const track = playlist?.tracks?.find(
                           (t: PlaylistTrack) => t.track_id === trackId
                         );
-                        return track ? (
+                        return track && (
                           <VotedTrack
                             key={trackId}
                             track={track}
@@ -307,27 +345,18 @@ export default function VotesRoom({ eventId }: Props) {
                               return Promise.resolve(true);
                             }}
                           />
-                        ) : (
-                          <Box
-                            key={trackId}
-                            className='p-2 bg-gray-100 rounded mb-1'
-                          >
-                            <Text className='text-gray-500 text-xs'>
-                              Track not found (ID: {trackId})
-                            </Text>
-                            <Text className='text-xs text-blue-600'>
-                              Your votes: {voteCount}{' '}
-                              {voteCount === 1 ? 'vote' : 'votes'}
-                            </Text>
-                          </Box>
-                        );
+                        )
                       }
                     )}
+                    </VStack>
                   </GestureHandlerRootView>
                 </Box>
               )}
           </>
-        )}
+        ) : isOwner() && (<HStack className='py-1.5 px-3 justify-end'>
+          <StartAndStopButton data={data} eventId={eventId} />
+          </HStack>
+          )}
 
         <TrackListVotes
           eventId={eventId}

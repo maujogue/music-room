@@ -16,9 +16,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import EventDatesInfos from './eventDetail/Dates/EventDatesInfos';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { Footprints, ShellIcon } from 'lucide-react-native';
-import { Heading } from '../ui/heading';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import EventAllBadges from '@/components/generics/EventAllBadges';
+import { Heading } from "@/components/ui/heading";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import EventAllBadges from "@/components/generics/EventAllBadges";
 
 type RadarProps = {
   radiusKm?: number;
@@ -128,12 +128,12 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
                 }}
               />
 
-              {selectedItem.event.everyone_can_vote && (
-                <HStack className='absolute bottom-2 right-2 gap-1'>
-                  <EventAllBadges event={selectedItem.event} />
-                </HStack>
-              )}
-            </VStack>
+                {selectedItem.event.everyone_can_vote && (
+                  <HStack className="absolute bottom-2 right-2 gap-1">
+                    <EventAllBadges event={selectedItem.event} />
+                  </HStack>
+                  )}
+              </VStack>
 
             <VStack className='bg-white/50 rounded-b-xl border border-neutral-300 w-full pt-2 px-2'>
               <HStack className='w-full justify-between'>

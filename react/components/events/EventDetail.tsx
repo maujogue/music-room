@@ -87,8 +87,8 @@ export default function EventDetail() {
 
   return (
     <>
-      <ScrollView>
-        <VStack className='flex-1'>
+      <ScrollView className='bg-primary-500'>
+        <VStack className='flex-1' >
           <EventHeader
             eventData={data}
             expanded={expanded}
@@ -111,18 +111,14 @@ export default function EventDetail() {
           itemType='event'
         />
       </ScrollView>
-      <Box
-        className='absolute w-full h-full pointer-events-none'
-        style={{ zIndex: 9999, elevation: 30 }}
-      >
-        <EventActions
-          displayInviteButton={displayInviteButton}
-          eventId={eventId}
-          eventData={data}
-          onUpdated={refetch}
-          abovePlayer={isActive && !!track}
-        />
-      </Box>
+
+      <EventActions
+        displayInviteButton={displayInviteButton}
+        eventId={eventId}
+        eventData={data}
+        onUpdated={refetch}
+        abovePlayer={isActive && !!track} />
+
       {track && isActive && (
         <Box className='absolute bottom-0 right-18 w-full pointer-events-auto'>
           <Player

@@ -13,9 +13,9 @@ export async function getEventSupabase(eventId: string, selectFields = '*') {
     try {
         const { data, error } = await supabase
         .from('events')
-        .select(selectFields)
+        .select(selectFields + ', location:location(id, venuename, lat:locations_lat, long:locations_long)')
         .eq('id', eventId)
-        .single();
+        .maybeSingle();
 
         if (error) {
             console.error('Error fetching event:', error);

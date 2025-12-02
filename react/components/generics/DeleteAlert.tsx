@@ -11,6 +11,7 @@ import { Heading } from '@/components/ui/heading';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { CloseIcon, TrashIcon } from '@/components/ui/icon';
 
+
 type Props = {
   itemType?: string;
   itemName?: string;
@@ -19,10 +20,7 @@ type Props = {
   onDelete: () => void;
 };
 
-/**
- * Parent View should store the state this way :
- * const [showAlertDialog, setShowAlertDialog] = useState(false)
- **/
+
 export default function DeleteAlert({
   showAlertDialog,
   setShowAlertDialog,

@@ -29,7 +29,7 @@ export default function EventActions({
 
   return (
     <>
-      {displayInviteButton && abovePlayer && (
+    {displayInviteButton && abovePlayer && (
         <>
           <FloatButton
             onPress={handleOpenInvite}

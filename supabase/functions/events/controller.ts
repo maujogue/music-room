@@ -10,7 +10,9 @@ import {
   addUserToEventSupabase,
   removeUserFromEventSupabase,
   editUserInEventSupabase,
-  getSupabaseEventByCoordinates
+  getSupabaseEventByCoordinates,
+  supabaseStartEvent,
+  supabaseStopEvent
 } from './service.ts'
 import {
   validateEventPayload,
@@ -96,6 +98,12 @@ function createPayloadFromFormData(
         break;
       case 'everyone_can_vote':
         payload.everyone_can_vote = (value === 'true' || value === '1');
+        break;
+      case 'done':
+        payload.done = (value === 'true' || value === '1');
+        break;
+      case 'spatio_licence':
+        payload.spatio_licence = (value === 'true' || value === '1');
         break;
       case 'name':
         payload.name = value as string;
@@ -259,6 +267,51 @@ export async function updateEventById(c: Context): Promise<Response> {
   await updateSupabaseEventById(id, eventData as EventPayload, location)
 
   return c.json({ message: 'Event updated successfully' })
+}
+
+
+export async function startEvent(c: Context): Promise<Response> {
+  const id = c.req.param('id')
+  const user = c.get('user')
+
+  await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
+
+  const data = await getSupabaseEventById(id)
+  if (!data) {
+    c.status(404)
+    return c.json({ error: 'Event not found' })
+  }
+
+  if (data.owner.id !== user.id) {
+    c.status(403)
+    return c.json({ error: 'Only owner can start an event' })
+  }
+
+  await supabaseStartEvent(id)
+
+  return c.json({ message: 'Event started successfully' })
+}
+
+export async function stopEvent(c: Context): Promise<Response> {
+  const id = c.req.param('id')
+  const user = c.get('user')
+
+  await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
+
+  const data = await getSupabaseEventById(id)
+  if (!data) {
+    c.status(404)
+    return c.json({ error: 'Event not found' })
+  }
+
+  if (data.owner.id !== user.id) {
+    c.status(403)
+    return c.json({ error: 'Only owner can start an event' })
+  }
+
+  await supabaseStopEvent(id)
+
+  return c.json({ message: 'Event started successfully' })
 }
 
 export async function addUserToEvent(c: Context): Promise<Response> {

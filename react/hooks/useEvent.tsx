@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById, getEventById, updateEvent } from '@/services/events';
+import { deleteEventById, getEventById, startEvent, stopEvent, updateEvent,  } from '@/services/events';
 
 export function useEvent(id: string) {
   const [data, setData] = useState<MusicEventFetchResult | null>(null);
@@ -74,6 +74,48 @@ export function useEvent(id: string) {
     [id]
   );
 
+  const handleStartEvent = useCallback(
+    async (id: string) => {
+      if (!id) {
+        setError('Event ID is required for start');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        await startEvent(id);
+      } catch (e: any) {
+        setError(`Start event error: ${e.message ?? e}`);
+        console.error('Start event error:', e);
+        throw Error(e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [id]
+  );
+
+  const handleStopEvent = useCallback(
+    async (id: string) => {
+      if (!id) {
+        setError('Event ID is required for stop');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        await stopEvent(id);
+      } catch (e: any) {
+        setError(`Stop event error: ${e.message ?? e}`);
+        console.error('Stop event error:', e);
+        throw Error(e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [id]
+  );
+
   return {
     data,
     loading,
@@ -82,5 +124,7 @@ export function useEvent(id: string) {
     refetch,
     deleteEvent,
     updateEvent: handleUpdateEvent,
+    startEvent: handleStartEvent,
+    stopEvent: handleStopEvent,
   };
 }

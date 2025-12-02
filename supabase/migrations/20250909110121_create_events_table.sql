@@ -523,3 +523,27 @@ AS $$
   AND NOT e.is_private
   ORDER BY l.coordinates operator(gis.<->) gis.st_point(p_long, p_lat)::gis.geography;
 $$;
+
+
+-- To convert lat & long from geography --
+CREATE OR REPLACE FUNCTION locations_long(l location)
+RETURNS double precision
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT CASE
+           WHEN l.coordinates IS NULL THEN NULL
+           ELSE gis.st_x(l.coordinates::gis.geometry)
+         END
+$$;
+
+CREATE OR REPLACE FUNCTION locations_lat(l location)
+RETURNS double precision
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT CASE
+           WHEN l.coordinates IS NULL THEN NULL
+           ELSE gis.st_y(l.coordinates::gis.geometry)
+         END
+$$;

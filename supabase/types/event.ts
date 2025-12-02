@@ -84,6 +84,8 @@ export interface EventPayload {
   image_url?: string;
   is_private: boolean;
   everyone_can_vote: boolean;
+  done: boolean;
+  spatio_licence: boolean;
   description?: string;
   playlist_id?: string;
   beginning_at: string;
