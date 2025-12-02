@@ -99,6 +99,12 @@ function createPayloadFromFormData(
       case 'everyone_can_vote':
         payload.everyone_can_vote = (value === 'true' || value === '1');
         break;
+      case 'done':
+        payload.done = (value === 'true' || value === '1');
+        break;
+      case 'spatio_licence':
+        payload.spatio_licence = (value === 'true' || value === '1');
+        break;
       case 'name':
         payload.name = value as string;
         break;

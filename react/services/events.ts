@@ -3,7 +3,7 @@ import { apiFetch } from '@/utils/apiFetch';
 export async function createEvent(payload: MusicEventPayload) {
   const form = createEventFormData(payload);
 
-  const res = await apiFetch<Event>(
+  const res = await apiFetch<MusicEvent>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
     {
       method: 'POST',
@@ -187,6 +187,8 @@ function createEventFormData(payload: MusicEventPayload) {
   form.append('beginning_at', payload.beginning_at ?? '');
   form.append('location', JSON.stringify((payload as any).location ?? {}));
   form.append('is_private', String((payload as any).is_private ?? false));
+  form.append('done', String((payload as any).done ?? false));
+  form.append('spatio_licence', String((payload as any).spatio_licence ?? false));
   form.append(
     'everyone_can_vote',
     String((payload as any).everyone_can_vote ?? true)
