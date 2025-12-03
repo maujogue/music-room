@@ -9,6 +9,7 @@ export default function PlaylistDetailLayout() {
           title: '',
           headerShown: true,
           headerTransparent: true,
+          headerTintColor: '#aeaeae'
         }}
       />
       <Stack.Screen
