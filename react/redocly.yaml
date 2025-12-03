@@ -1,0 +1,9 @@
+apis:
+  main:
+    root: ../supabase/docs/openapi.yml
+
+extends:
+  - recommended
+
+rules:
+  no-server-example.com: off

@@ -1,4 +1,5 @@
 import { apiFetch } from '@/utils/apiFetch';
+import { convertPOINT, isValidCoordinateObject } from '@/utils/parsePointCoordinates';
 
 export async function createEvent(payload: MusicEventPayload) {
   const form = createEventFormData(payload);
@@ -18,6 +19,27 @@ export async function createEvent(payload: MusicEventPayload) {
   return res.data;
 }
 
+function normalizeEventCoordinates(
+  event: MusicEventFetchResult
+): MusicEventFetchResult {
+  if (!event.location) return event;
+
+  const coords = event.location.coordinates;
+
+  if (isValidCoordinateObject(coords)) return event;
+
+  const parsed = convertPOINT(coords as any);
+  if (!parsed) return event;
+
+  return {
+    ...event,
+    location: {
+      ...event.location,
+      coordinates: parsed,
+    },
+  };
+}
+
 export async function getEventById(id: string) {
   const res = await apiFetch<MusicEventFetchResult>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`,
@@ -30,7 +52,10 @@ export async function getEventById(id: string) {
     console.error('Error fetching Event:', res.error);
     throw res.error;
   }
-  return res.data;
+  
+   const normalized = normalizeEventCoordinates(res.data);
+
+  return normalized;
 }
 
 export async function startEvent(id: string) {
@@ -163,6 +188,15 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
       throw res.error;
     }
     return res.data;
+  }
+
+  if (typeof payload.location.coordinates === 'string') {
+    const coordConverted = convertPOINT(payload.location.coordinates)
+    if (isValidCoordinateObject(coordConverted)) {
+      payload.location.coordinates = coordConverted
+    } else {
+      payload.location.coordinates = undefined
+    }
   }
 
   const res = await apiFetch<MusicEvent>(url, {

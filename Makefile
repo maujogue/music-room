@@ -1,7 +1,7 @@
 # Music Room Project Makefile
 # This Makefile automates the setup and development workflow
 
-.PHONY: help install setup-supabase start-supabase stop-supabase setup-env setup-frontend-env setup-backend-env setup-prod-env start-app clean reset migrate reset-db
+.PHONY: help install setup-supabase start-supabase stop-supabase setup-env setup-frontend-env setup-backend-env redocly api setup-prod-env start-app clean reset migrate reset-db
 
 # Shortcuts
 COMPOSE_FILE := docker-compose.yml
@@ -9,6 +9,7 @@ REACT_APP_DIR := react
 SUPABASE_DIR := supabase
 WS_SERVER_DIR := ${SUPABASE_DIR}/ws-server
 SUPABASE_FUNCTIONS_DIR := ${SUPABASE_DIR}/functions
+SUPABASE_SCRIPTS_DIR := ${SUPABASE_DIR}/scripts
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
     IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
@@ -35,6 +36,7 @@ help:
 	@echo "  migrate          Apply database migrations"
 	@echo "  dev              Start development server"
 	@echo "  dev-tunnel       Start development server with tunnel"
+	@echo "  api              Include the last version of the openapi.yml file"
 
 	@echo ""
 	@echo "🧹 Maintenance Commands:"
@@ -155,6 +157,14 @@ dev-tunnel:
 	cd ${REACT_APP_DIR} && cp .env.dev .env
 	npx supabase functions serve --no-verify-jwt& \
 	cd ${REACT_APP_DIR} && npm start --tunnel
+
+api: redocly
+	@echo "🧾 Generating openapi-file.ts from docs/openapi.yml..."
+	@cd ${SUPABASE_SCRIPTS_DIR} && node generate-openapi-file.cjs
+
+redocly:
+	@echo "🔍 Validating OpenAPI spec with Redocly..."
+	@cd ${REACT_APP_DIR} && npx redocly lint ../supabase/docs/openapi.yml
 
 # Clean up build files and node_modules
 clean:
