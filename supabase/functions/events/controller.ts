@@ -32,6 +32,7 @@ import type {
   EventRadarFromDb
  } from '@event';
 import type { User } from '@supabase/supabase-js';
+import { safeJsonFromContext } from '@utils/parsing';
 
 export async function createEvent(c: Context): Promise<Response> {
   const contentTypeHeader = c.req.header('content-type') || ''
@@ -220,20 +221,20 @@ export async function updateEventById(c: Context): Promise<Response> {
   const user = c.get('user')
 
   await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
-
+  
   const contentTypeHeader = c.req.header('content-type') || ''
   let body: any = {}
   let uploadedFile: File | null = null
-
+  
   if (contentTypeHeader.includes('multipart/form-data')) {
     const form = await c.req.raw.formData()
     const result = createPayloadFromFormData(form)
     body = result.payload
     uploadedFile = result.uploadedFile
   } else {
-    body = await c.req.json()
+    body = await safeJsonFromContext(c)
   }
-
+  
   const validation = validateEventPayload(body, { requireName: false })
   if (!validation.valid) {
     c.status(400)

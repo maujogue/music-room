@@ -66,7 +66,7 @@ export interface SpotifyOwner {
   avatar_url?: string;
 }
 
-interface Coordinates {
+export interface Coordinates {
   lat: number;
   long: number;
 }

@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "hono": "jsr:@hono/hono",
+    "@hono/hono": "jsr:@hono/hono",
+    "@postgres/postgres_errors_map": "../../utils/postgres_errors_map.ts",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "@hono/http-exception": "https://deno.land/x/hono@v3.2.3/http-exception.ts",
+    "@deno/server": "https://deno.land/std@0.177.0/http/server.ts",
+    "@profile": "../../types/profile.ts",
+    "@profile/service": "../profile/service.ts",
+    "@auth/utils": "../auth/utils.ts"
+  }
+}

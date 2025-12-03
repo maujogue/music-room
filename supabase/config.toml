@@ -370,6 +370,12 @@ entrypoint = "./functions/playlists/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/playlists/*.html" ]
 
+[functions.openapi]
+enabled = true
+verify_jwt = false
+import_map = "./functions/openapi/deno.json"
+entrypoint = "./functions/openapi/index.ts"
+
 [functions.events]
 enabled = true
 verify_jwt = true

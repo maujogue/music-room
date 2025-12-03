@@ -75,6 +75,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.3",
     "@eslint/js": "^9.33.0",
+    "@redocly/cli": "^2.12.2",
     "@types/aes-js": "^3.1.4",
     "@types/luxon": "^3.7.1",
     "@types/react": "~19.0.10",
