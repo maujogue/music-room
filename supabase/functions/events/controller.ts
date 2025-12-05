@@ -45,7 +45,7 @@ export async function createEvent(c: Context): Promise<Response> {
     payload = result.payload
     uploadedFile = result.uploadedFile
   } else {
-    payload = await c.req.json()
+    payload = await safeJsonFromContext(c)
   }
 
   const validation = validateEventPayload(
@@ -317,7 +317,7 @@ export async function stopEvent(c: Context): Promise<Response> {
 
 export async function addUserToEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   if (body.user_id === '') {
@@ -336,7 +336,7 @@ export async function addUserToEvent(c: Context): Promise<Response> {
 
 export async function removeUserFromEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   if (body.user_id === '') {
@@ -358,7 +358,7 @@ export async function removeUserFromEvent(c: Context): Promise<Response> {
 
 export async function editUserInEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   const validation = validateEditUserPayload(body)

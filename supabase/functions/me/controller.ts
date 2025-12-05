@@ -16,6 +16,7 @@ import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
 import { getUserProfile } from '@profile/service';
 import { getUserSubscription } from './services/supabase.ts';
 import type { ProfileResponse } from '@profile';
+import { safeJsonFromContext } from '@utils/parsing';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -67,7 +68,7 @@ export async function fetchCurrentUserPlayingTrack(c: Context): Promise<Response
 
 export async function startUserPlayback(c: Context): Promise<Response> {
     const spotify_token = c.get('spotify_token')
-    const body = await c.req.json()
+    const body = await safeJsonFromContext(c)
     const res = await startPlayback(spotify_token, body)
 
     if (!res) {
