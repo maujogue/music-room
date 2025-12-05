@@ -8,7 +8,11 @@
     "@event": "../../types/event.ts",
     "@track": "../../types/track.ts",
     "@error": "../../types/error.ts",
+
+    "@utils/parsing": "../../utils/parsing.ts",
+    "@utils/geometry": "../../utils/geometry.ts",
     "@postgres/postgres_errors_map": "../../utils/postgres_errors_map.ts",
+    
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
     "@hono/hono": "jsr:@hono/hono",
     "@hono/http-exception": "https://deno.land/x/hono@v3.2.3/http-exception.ts",

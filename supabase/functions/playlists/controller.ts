@@ -37,11 +37,12 @@ PlaylistCollaborator,
 } from '@playlist';
 import type { User } from '@supabase/supabase-js';
 import type { StatusCode } from "@hono/hono/utils/http-status";
+import { safeJsonFromContext } from '@utils/parsing';
 
 
 export async function deleteItemsFromPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const { uris } = validateDeleteTracksPayload(body)
   const user = c.get('user')
 
@@ -58,7 +59,7 @@ export async function deleteItemsFromPlaylist(c: Context): Promise<Response> {
 
 export async function addItemsToPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const { uris } = validateAddTracksPayload(body)
   const user = c.get('user')
 
@@ -157,7 +158,7 @@ function setUserPlaylistPermissions(playlist: PlaylistResponse, user: User): Pla
 
 export async function createPlaylist(c: Context): Promise<Response> {
   const user = c.get('user');
-  const body = await c.req.json();
+  const body = await safeJsonFromContext(c)
 
   const validatedPayload = validateCreatePlaylistPayload(body);
 
@@ -184,7 +185,7 @@ export async function deletePlaylist(c: Context): Promise<Response> {
 
 export async function updatePlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   const validatedPayload = validateEditPlaylistPayload(body);
@@ -197,7 +198,7 @@ export async function updatePlaylist(c: Context): Promise<Response> {
 
 export async function addUserToPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
   const { user_id, role } = validateAddUserPayload(body)
 
@@ -210,7 +211,7 @@ export async function addUserToPlaylist(c: Context): Promise<Response> {
 
 export async function removeUserFromPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
   const { user_id, role } = validateRemoveUserPayload(body)
 
