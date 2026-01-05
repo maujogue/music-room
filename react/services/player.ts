@@ -16,6 +16,9 @@ export async function getCurrentUserCurrentlyPlayingTrack() {
 }
 
 export async function playTrack(uris?: string[]) {
+  if (uris) {
+    uris = uris.map(uri => uri.startsWith('spotify:track:') ? uri : `spotify:track:${uri}`);
+  }
   const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/play`,
     {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FloatButton from '@/components/generics/FloatButton';
 import { Users, UserPlus, Play } from 'lucide-react-native';
 import EventMembersDrawer from './EventMembersDrawer';
@@ -22,8 +22,13 @@ export default function EventActions({
   abovePlayer = false,
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { playTrack, tracksToPlay } = usePlayer();
+  const { playTrack, tracksToPlay, setTracksToPlay } = usePlayer();
   const router = useRouter();
+
+  useEffect(() => {
+    const tracksIds = eventData.playlist.tracks.map((track) => track.track_id);
+    setTracksToPlay(tracksIds);
+  }, []);
 
   const handleOpenInvite = () => {
     router.push(`(main)/events/${eventId}/invite`);

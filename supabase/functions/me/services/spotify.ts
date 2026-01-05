@@ -28,10 +28,11 @@ export async function startPlayback(spotify_token: string, body?: {uris: string[
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${spotify_token}`,
-    }
-    // body: JSON.stringify(body),
+    },
+    body: JSON.stringify(body),
   });
 
+  console.log('response startPlayback', JSON.stringify(response, null, 2))
   return response;
 }
 
