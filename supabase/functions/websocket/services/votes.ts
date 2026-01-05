@@ -192,25 +192,6 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       };
     }
 
-    try {
-      const newTop = await getTopTrackForEvent(eventId);
-      const prevLeaderId = prevTop.trackId;
-      const newLeaderId = newTop.trackId;
-      if (newLeaderId && newLeaderId !== prevLeaderId) {
-        const token = await getOwnerSpotifyToken(eventId);
-        if (token) {
-          const pushed = await addItemToSpotifyOwnerQueue(newLeaderId, token);
-          console.log('Auto-pushed leader to owner queue:', { eventId, newLeaderId, pushed });
-        } else {
-          console.log('Owner spotify token not available, skipping push');
-        }
-      }
-    } catch (err) {
-      console.warn('Error during leader push after vote:', err);
-    }
-
-    console.log(`✅ Vote processed: ${userId} voted for track ${trackId} in event ${eventId}`);
-
     return {
       success: true,
       message: `Your vote has been recorded for track ${trackId}`,
@@ -348,24 +329,6 @@ export async function handleUnvote(
         success: false,
         message: res.message ? res.message : 'Failed to unvote'
       };
-    }
-
-    // After successful update, check top track and push to owner's Spotify queue if leader changed
-    try {
-      const newTop = await getTopTrackForEvent(eventId);
-      const prevLeaderId = prevTop.trackId;
-      const newLeaderId = newTop.trackId;
-      if (newLeaderId && newLeaderId !== prevLeaderId) {
-        const token = await getOwnerSpotifyToken(eventId);
-        if (token) {
-          const pushed = await addItemToSpotifyOwnerQueue(newLeaderId, token);
-          console.log('Auto-pushed leader to owner queue after unvote:', { eventId, newLeaderId, pushed });
-        } else {
-          console.log('Owner spotify token not available, skipping push after unvote');
-        }
-      }
-    } catch (err) {
-      console.warn('Error during leader push after unvote:', err);
     }
 
     const { voters, voteCount } = res;
