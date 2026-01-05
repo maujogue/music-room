@@ -173,7 +173,7 @@ export default function EditEventForm({
           complement: location?.street ?? null,
           city: location?.city ?? null,
           country: location?.country ?? null,
-          coordinates: location && location.latitude && location.longitude ? `POINT(${location?.longitude} ${location?.latitude})` : null,
+          coordinates: location && location.latitude && location.longitude ?  { lat: location?.latitude, long: location?.longitude } : null,
         }
       : null;
 
@@ -199,7 +199,7 @@ export default function EditEventForm({
     } as any;
 
     try {
-      console.log('Submitting payload:', payload);
+      console.log('[Event creation] Submitting payload:', payload);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
