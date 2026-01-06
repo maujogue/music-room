@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { SpotifyCurrentlyPlayingTrack } from '@track';
 import { getCurrentUserPlayingTrack } from '@me/services/spotify';
 import { getEventSupabase } from './events.ts';
+import { clearTrackVotes } from './votes.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -145,7 +146,18 @@ export async function getOwnerCurrentPlayingTrack(
 
     try {
       if (eventId && current && current.is_playing && typeof current.progress_ms === 'number' && current.item && typeof current.item.duration_ms === 'number') {
-        await resolveVoteCount(eventId, current, accessToken, userId);
+        const res = await supabase
+          .from('event_current_track')
+          .select('vote_resolved')
+          .eq('event_id', eventId)
+          .single();
+        
+        if (res.error) {
+          console.warn('Error fetching vote_resolved status:', res.error);
+        }
+        if (res.data && !res.data.vote_resolved) {
+          await resolveVoteCount(eventId, current, accessToken, userId);
+        }
       }
     } catch (err) {
       console.warn('Error during leader push in getOwnerCurrentPlayingTrack:', err);
@@ -203,7 +215,8 @@ async function resolveVoteCount(
 
   try {
     const pushed = await addItemToSpotifyOwnerQueue(`spotify:track:${topId}`, accessToken);
-    console.log('Auto-pushed top voted to owner queue (resolveVoteCount):', { eventId, topId, pushed });
+    await updateEventCurrentTrackVoteResolved(eventId, true);
+    await clearTrackVotes(eventId, topId);
     return { pushed, topId };
   } catch (err) {
     console.warn('Failed to push top voted track to owner queue:', err);
@@ -231,5 +244,26 @@ async function upsertEventCurrentTrack(
     }
   } catch (err) {
     console.error('Exception upserting event current track:', err);
+  }
+}
+
+async function updateEventCurrentTrackVoteResolved(
+  eventId: string,
+  voteResolved: boolean
+): Promise<{ updatedAt: string | null }> {
+  try {
+    const updatedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from('event_current_track')
+      .update({ vote_resolved: voteResolved, updated_at: updatedAt })
+      .eq('event_id', eventId);
+    if (error) {
+      console.error('Error updating event current track vote resolved:', error);
+      return { updatedAt: null };
+    }
+    return { updatedAt };
+  } catch (err) {
+    console.error('Exception updating event current track vote resolved:', err);
+    return { updatedAt: null };
   }
 }

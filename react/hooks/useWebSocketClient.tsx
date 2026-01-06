@@ -21,7 +21,7 @@ export interface EventUserData {
 
 export interface WebSocketActions {
   connected: boolean;
-  track: SpotifyCurrentlyPlayingTrack | null;
+  track: PlayerTrack | null;
   sendVote: (eventId: string, trackId: string) => boolean;
   sendUnvote: (eventId: string, trackId: string) => boolean;
   sendPing: () => boolean;
@@ -201,6 +201,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
             case 'pong':
               break;
             case 'track_vote:update':
+              console.log('ws: track_vote:update received', data);
               handleTrackVoteUpdate(data);
               break;
             case 'vote:confirmed':
@@ -569,10 +570,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
     connectionAttemptsRef.current = 0;
     setConnectionAttempts(0);
     setLastError(null);
-  }, []);
-
-  const handleCurrentTrackUpdate = useCallback( (data: any) => {
-    
   }, []);
 
   return {

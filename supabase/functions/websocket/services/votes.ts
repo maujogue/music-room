@@ -584,3 +584,24 @@ async function getVote(eventId: string, trackId: string): Promise<{
     data
   };
 }
+
+export async function clearTrackVotes(eventId: string, trackId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('track_votes')
+      .upsert({
+        event_id: eventId,
+        track_id: trackId,
+        voters: [],
+        vote_count: 0,
+      }, { onConflict: 'event_id,track_id' });
+
+    if (error) {
+      console.error('Error clearing track votes:', error);
+    } else {
+      console.log(`Cleared votes for track ${trackId} in event ${eventId}`);
+    }
+  } catch (err) {
+    console.error('Exception clearing track votes:', err);
+  }
+}
