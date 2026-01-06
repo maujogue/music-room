@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SpotifyCurrentlyPlayingTrack } from '@track';
 import { getCurrentUserPlayingTrack } from '@me/services/spotify';
-import { getEventSupabase } from './events';
+import { getEventSupabase } from './events.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -58,8 +58,8 @@ export async function addItemToSpotifyOwnerQueue(item: string, spotify_token: st
 }
 
 export async function getOwnerCurrentPlayingTrack(
-  eventId?: string | undefined,
-  userId: string
+  userId: string,
+  eventId?: string | undefined
 ): Promise<
   {
     data: SpotifyCurrentlyPlayingTrack | null;
@@ -140,6 +140,7 @@ export async function getOwnerCurrentPlayingTrack(
       }
     } else {
       current = spotifyResp as SpotifyCurrentlyPlayingTrack;
+      await upsertEventCurrentTrack(eventId, current.item);
     }
 
     try {
@@ -207,5 +208,28 @@ async function resolveVoteCount(
   } catch (err) {
     console.warn('Failed to push top voted track to owner queue:', err);
     return { pushed: false, topId };
+  }
+}
+
+async function upsertEventCurrentTrack(
+  eventId: string,
+  track: SpotifyTrack | null
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('event_current_track')
+      .upsert({ 
+        event_id: eventId, 
+        track_id: track?.id ?? null, 
+        title: track?.name ?? null, 
+        cover_url: track?.album?.images?.[0]?.url ?? null, 
+        artists_names: track?.artists.map(artist => artist.name) ?? [] 
+      })
+      .eq('event_id', eventId);
+    if (error) {
+      console.error('Error upserting event current track:', error);
+    }
+  } catch (err) {
+    console.error('Exception upserting event current track:', err);
   }
 }

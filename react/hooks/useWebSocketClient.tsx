@@ -40,7 +40,7 @@ type Options = {
   done? : boolean
 }
 
-export default function useWebSocketClient(event_id: string, opts?: Options): WebSocketActions {
+export default function useWebSocketClient(event_id: string, opts?: Options, isPing?: boolean): WebSocketActions {
   const { enabled = true, done = false,  spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
@@ -58,7 +58,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   );
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
-  const [track, setTrack] = useState<SpotifyCurrentlyPlayingTrack | null>(null);
+  const [track, setTrack] = useState<PlayerTrack| null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
@@ -132,7 +132,9 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
           clearInterval(pingIntervalRef.current);
         }
         pingIntervalRef.current = window.setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
+          console.log('🏓 Auto-ping interval triggered');
+          console.log('if', JSON.stringify((isPing), null, 2))
+          if (ws.readyState === WebSocket.OPEN && isPing) {
             ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now(), eventId: event_id }));
             console.log('🏓 Auto-ping sent (with eventId)', { eventId: event_id });
           }
@@ -197,7 +199,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
               setLastError(data.message ?? 'some error');
               break;
             case 'pong':
-              handleTrackPlay(data.track);
               break;
             case 'track_vote:update':
               handleTrackVoteUpdate(data);
@@ -216,6 +217,9 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
               break;
             case 'user:info:response':
               handleUserInfo(data);
+              break;
+            case 'event_current_track:update':
+              handleTrackPlay(data);
               break;
             default:
               console.log('ws: unhandled message type:', data.type);
@@ -425,8 +429,8 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
     []
   );
 
-  const handleTrackPlay = useCallback((track: SpotifyCurrentlyPlayingTrack) => {
-    setTrack(track);
+  const handleTrackPlay = useCallback((data) => {
+    setTrack(data.track);
   }, []);
 
   const handleVoteList = useCallback((votes: any[]) => {
@@ -565,6 +569,10 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
     connectionAttemptsRef.current = 0;
     setConnectionAttempts(0);
     setLastError(null);
+  }, []);
+
+  const handleCurrentTrackUpdate = useCallback( (data: any) => {
+    
   }, []);
 
   return {

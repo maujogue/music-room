@@ -22,6 +22,8 @@ const Player = ({
       </View>
     );
   }
+
+  console.log('Rendering Player with track: (ici)', track);
   return (
     <Card
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
@@ -41,13 +43,15 @@ const Player = ({
             )}
           </Button>
         )}
-        {track?.item?.album.images?.[0]?.url && (
-          <Image source={{ uri: track.item.album.images[0].url }} alt={track.item.name} className='rounded-md' />
+        {track?.cover_url && (
+          <Image source={{ uri: track.cover_url }} alt={track.title} className='rounded-md' />
         )}
         <View className='ml-4 flex-1 justify-center w-25'>
-          <Text className='text-white font-semibold'>{track.item?.name}</Text>
-          <Text className='text-gray-200'>{track.item?.artists.map(artist => artist.name).join(', ')}</Text>
-        </View>
+          <Text className='text-white font-semibold'>{track.title}</Text>
+          {track?.artists_names &&
+            <Text className='text-gray-200'>{track?.artists_names.join(', ')}</Text>
+          }
+          </View>
         {showControls && (
           <Button 
             onPress={skipToNextTrack} 

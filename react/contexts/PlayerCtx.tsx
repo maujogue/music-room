@@ -11,7 +11,7 @@ import { pauseTrack, playTrack, skipToNextTrack, getCurrentUserCurrentlyPlayingT
 const REFRESH_INTERVAL = 5000;
 
 interface PlayerContextType {
-  track: SpotifyCurrentlyPlayingTrack;
+  track: PlayerTrack | null;
   setTrack: (track: SpotifyCurrentlyPlayingTrack) => void;
   tracksToPlay: string[];
   setTracksToPlay: (tracks: string[]) => void;

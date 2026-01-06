@@ -183,7 +183,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       track_id: trackId,
       vote_count: 0,
       voters: []
-    }: existingVote, voters, voteCount);
+    } : existingVote, voters, voteCount);
 
     if (!upsertRes.success) {
       return {
@@ -285,6 +285,76 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
 
   await trackVotesChannel.subscribe();
   console.log('✅ Realtime track votes subscription started');
+
+  // Also subscribe to changes on event_current_track to notify clients when the current track changes
+  const currentTrackChannel = supabase.channel('realtime-event-current-track');
+
+  currentTrackChannel.on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'event_current_track'
+  }, async (payload: any) => {
+    try {
+      const row = payload.new ?? payload.old;
+      if (!row) return;
+
+      const eventId = row.event_id;
+      const trackId = row.track_id;
+      const voteResolved = row.vote_resolved ?? false;
+      const updatedAt = row.updated_at ?? new Date().toISOString();
+
+      const { data: event } = await supabase
+        .from('events')
+        .select('owner_id, name')
+        .eq('id', eventId)
+        .single();
+
+      const { data: members } = await supabase
+        .from('event_members')
+        .select('profile_id')
+        .eq('event_id', eventId);
+
+      const recipients = new Set<string>();
+      if (event?.owner_id) recipients.add(event.owner_id);
+      for (const m of members ?? []) if (m.profile_id) recipients.add(m.profile_id);
+
+      const message = JSON.stringify({
+        type: 'event_current_track:update',
+        op: payload.eventType,
+        eventId,
+        eventName: event?.name,
+        track: {
+          id: trackId,
+          title: row.title,
+          cover_url: row.cover_url,
+          artists_names: row.artists_names
+        },
+        voteResolved,
+        updatedAt,
+        timestamp: new Date().toISOString()
+      });
+
+      let sentCount = 0;
+      for (const uid of recipients) {
+        const userSockets = clientsByUser.get(uid);
+        if (!userSockets) continue;
+        for (const socket of userSockets) {
+          try {
+            socket.send(message);
+            sentCount++;
+          } catch (err) {
+            console.error(`❌ Error sending current track update to ${uid}:`, err);
+          }
+        }
+      }
+      console.log(`✅ event_current_track update sent to ${sentCount} socket connections`);
+    } catch (err) {
+      console.warn('realtime event_current_track handler error', err);
+    }
+  });
+
+  await currentTrackChannel.subscribe();
+  console.log('✅ Realtime event_current_track subscription started');
 }
 
 export async function handleUnvote(
@@ -359,7 +429,8 @@ export async function getVotesForEvent(
   Promise<{
     success: boolean;
     data?: TrackVoteRecord[];
-    message?: string }> {
+    message?: string
+  }> {
   try {
     const { data: event } = await supabase
       .from('events')

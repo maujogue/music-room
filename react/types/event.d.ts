@@ -103,3 +103,10 @@ type MusicEventRadarResult = {
   event: MusicEvent;
   owner: UserInfo;
 };
+
+type PlayerTrack = {
+  id: string;
+  title: string;
+  cover_url: string;
+  artists_names: string[];
+};

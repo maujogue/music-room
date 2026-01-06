@@ -24,9 +24,10 @@ import { usePlayer } from '@/contexts/PlayerCtx';
 
 interface Props {
   eventId: string;
+  isOwner?: boolean;
 }
 
-export default function VotesRoom({ eventId }: Props) {
+export default function VotesRoom({ eventId, isOwner}: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
@@ -44,7 +45,7 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId, {enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence});
+  } = useWebSocketClient(eventId, { enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence }, isOwner || false);
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
@@ -154,12 +155,6 @@ export default function VotesRoom({ eventId }: Props) {
     if (isNaN(start.getTime())) return false;
     return Date.now() >= start.getTime();
   }
-
-  const isOwner = () => {
-    return data?.owner.id === currentUser?.id
-  }
-
-
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -335,7 +330,7 @@ export default function VotesRoom({ eventId }: Props) {
                   / {eventUserData.voteMax}
                 </Text>
                 </HStack>
-             {isOwner() && data && (
+             {isOwner && data && (
                 <StartAndStopButton data={data} eventId={eventId}/>
               )}
               </HStack>
@@ -369,7 +364,7 @@ export default function VotesRoom({ eventId }: Props) {
                 </Box>
               )}
           </>
-        ) : isOwner() && (<HStack className='py-1.5 px-3 justify-end'>
+        ) : isOwner && (<HStack className='py-1.5 px-3 justify-end'>
           <StartAndStopButton data={data} eventId={eventId} />
           </HStack>
           )}

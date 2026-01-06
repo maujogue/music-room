@@ -19,6 +19,7 @@ import EventActions from '@/components/events/EventActions';
 import Player from '@/components/player/Player';
 import { Box } from '@/components/ui/box';
 import { usePlayer } from '@/contexts/PlayerCtx';
+import { useProfile } from '@/contexts/profileCtx';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -30,6 +31,7 @@ export default function EventDetail() {
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const { track } = usePlayer();
   const [isActive, setIsActive] = useState<boolean>(false);
+  const { profile } = useProfile();
 
   useFocusEffect(
     useCallback(() => {
@@ -93,7 +95,7 @@ export default function EventDetail() {
           />
 
           <Center className='flex-1'>
-            <VotesRoom eventId={eventId} />
+            <VotesRoom eventId={eventId} isOwner={data?.event?.owner_id === profile?.id} />
           </Center>
         </VStack>
 
