@@ -86,7 +86,7 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
 async function handlePing(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
   try {
     const eventId = message.eventId as string;
-    const res = await getOwnerCurrentPlayingTrack(eventId);
+    const res = await getOwnerCurrentPlayingTrack(eventId, userId);
     if (res.error) {
       sendErrorMessage(socket, `Failed to fetch owner's currently playing track: ${res.error.message}`);
       return;

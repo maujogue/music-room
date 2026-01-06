@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SpotifyCurrentlyPlayingTrack } from '@track';
 import { getCurrentUserPlayingTrack } from '@me/services/spotify';
+import { getEventSupabase } from './events';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -57,7 +58,8 @@ export async function addItemToSpotifyOwnerQueue(item: string, spotify_token: st
 }
 
 export async function getOwnerCurrentPlayingTrack(
-  eventId?: string | undefined
+  eventId?: string | undefined,
+  userId: string
 ): Promise<
   {
     data: SpotifyCurrentlyPlayingTrack | null;
@@ -140,29 +142,9 @@ export async function getOwnerCurrentPlayingTrack(
       current = spotifyResp as SpotifyCurrentlyPlayingTrack;
     }
 
-    // If the currently playing track will finish in <= 5s, push the top voted track
     try {
       if (eventId && current && current.is_playing && typeof current.progress_ms === 'number' && current.item && typeof current.item.duration_ms === 'number') {
-        const remainingMs = (current.item.duration_ms ?? 0) - (current.progress_ms ?? 0);
-        if (remainingMs <= 5000) {
-          const top = await getTopTrackForEvent(eventId);
-          const topId = top.trackId;
-          if (topId) {
-            const currentTrackId = current.item?.id ?? null;
-            if (currentTrackId !== topId) {
-              try {
-                const pushed = await addItemToSpotifyOwnerQueue(`spotify:track:${topId}`, accessToken);
-                console.log('Auto-pushed top voted to owner queue (player):', { eventId, topId, pushed });
-              } catch (err) {
-                console.warn('Failed to push top voted track to owner queue:', err);
-              }
-            } else {
-              console.log('Top voted track is already playing, skipping push');
-            }
-          } else {
-            console.log('No top voted track found, skipping push');
-          }
-        }
+        await resolveVoteCount(eventId, current, accessToken, userId);
       }
     } catch (err) {
       console.warn('Error during leader push in getOwnerCurrentPlayingTrack:', err);
@@ -180,5 +162,50 @@ export async function getOwnerCurrentPlayingTrack(
         message: 'Internal server error',
       }
     };
+  }
+}
+
+async function resolveVoteCount(
+  eventId: string,
+  current: SpotifyCurrentlyPlayingTrack,
+  accessToken: string,
+  userId: string
+): Promise<{ pushed: boolean; topId?: string } | null> {
+  const event = await getEventSupabase(eventId);
+  if (!event.success) {
+    console.warn('Failed to fetch event for leader push:', event.message);
+    return null;
+  }
+
+  if (event.data.owner_id !== userId) {
+    // Only the owner can trigger an automated push
+    return null;
+  }
+
+  const remainingMs = (current.item?.duration_ms ?? 0) - (current.progress_ms ?? 0);
+  if (remainingMs > 5000) {
+    return null;
+  }
+
+  const top = await getTopTrackForEvent(eventId);
+  const topId = top.trackId;
+  if (!topId) {
+    console.log('No top voted track found, skipping push');
+    return { pushed: false };
+  }
+
+  const currentTrackId = current.item?.id ?? null;
+  if (currentTrackId === topId) {
+    console.log('Top voted track is already playing, skipping push');
+    return { pushed: false, topId };
+  }
+
+  try {
+    const pushed = await addItemToSpotifyOwnerQueue(`spotify:track:${topId}`, accessToken);
+    console.log('Auto-pushed top voted to owner queue (resolveVoteCount):', { eventId, topId, pushed });
+    return { pushed, topId };
+  } catch (err) {
+    console.warn('Failed to push top voted track to owner queue:', err);
+    return { pushed: false, topId };
   }
 }

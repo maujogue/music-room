@@ -65,7 +65,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options): We
   const connectionAttemptsRef = useRef<number>(0);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
-  const pingInterval = 10000;
+  const pingInterval = 1000;
 
   const { coords, loading, error } = useCurrentPosition({radiusKm: 50})
 
