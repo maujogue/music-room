@@ -3,6 +3,7 @@ import { getEventSupabase } from './events.ts';
 import { formatDbError } from '../../../utils/postgres_errors_map.ts';
 import { distanceMeters } from '../utils/geoloc.ts';
 
+import { addItemToSpotifyOwnerQueue } from './player.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -10,6 +11,47 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
+
+// Helper: get current top track for an event (track_id) or null
+async function getTopTrackForEvent(eventId: string): Promise<{ trackId: string | null; voteCount: number | null }> {
+  try {
+    const { data, error } = await supabase
+      .from('track_votes')
+      .select('track_id, vote_count')
+      .eq('event_id', eventId)
+      .order('vote_count', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error fetching top track:', error);
+      return { trackId: null, voteCount: null };
+    }
+    if (!data || !Array.isArray(data) || data.length === 0) return { trackId: null, voteCount: null };
+    const top = data[0] as { track_id: string; vote_count: number };
+    return { trackId: top.track_id ?? null, voteCount: top.vote_count ?? null };
+  } catch (err) {
+    console.error('Exception getting top track:', err);
+    return { trackId: null, voteCount: null };
+  }
+}
+
+// Helper: get owner's spotify access token for an event (via rpc)
+async function getOwnerSpotifyToken(eventId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_spotify_token_from_event_owner', { p_event_id: eventId });
+    if (error) {
+      console.error('Error fetching owner spotify token via rpc:', error);
+      return null;
+    }
+    if (!data || !Array.isArray(data) || data.length === 0) return null;
+    // rpc may return array of rows; token field name expected spotify_access_token
+    const token = (data[0] as any).spotify_access_token as string | null | undefined;
+    return token ?? null;
+  } catch (err) {
+    console.error('Exception getting owner spotify token:', err);
+    return null;
+  }
+}
 
 interface TrackVoteRecord {
   event_id: string;
@@ -68,7 +110,6 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       };
     }
 
-    console.log('ws: processing vote', { userId, eventId, trackId });
 
     const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name, spatio_licence, done');
 
@@ -106,12 +147,14 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
 
     const resCanVote = await checkIfUserCanVote(eventId, userId);
     if (!resCanVote.success) {
-      console.log('ws: user cannot vote:', { userId, eventId, reason: resCanVote.message });
+      // user cannot vote (permission/limit)
       return {
         success: false,
         message: resCanVote.message || 'You do not have permission to vote in this event or have reached your vote limit'
       };
     }
+
+    const prevTop = await getTopTrackForEvent(eventId);
 
     const voteRes = await getVote(eventId, trackId);
     if (!voteRes.success) {
@@ -139,7 +182,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       track_id: trackId,
       vote_count: 0,
       voters: []
-    }: existingVote, voters, voteCount);
+    } : existingVote, voters, voteCount);
 
     if (!upsertRes.success) {
       return {
@@ -147,8 +190,6 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
         message: upsertRes.message
       };
     }
-
-    console.log(`✅ Vote processed: ${userId} voted for track ${trackId} in event ${eventId}`);
 
     return {
       success: true,
@@ -225,7 +266,7 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
           console.warn(`⚠️ No sockets found for user ${uid}`);
           continue;
         }
-        console.log(`📤 Sending to user ${uid} (${userSockets.size} sockets)`);
+        // sending update to user sockets
         for (const socket of userSockets) {
           try {
             socket.send(message);
@@ -235,14 +276,84 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
           }
         }
       }
-      console.log(`✅ Update sent to ${sentCount} socket connections`)
+      // updates sent count: %d
     } catch (err) {
       console.warn('realtime track votes handler error', err);
     }
   });
 
   await trackVotesChannel.subscribe();
-  console.log('✅ Realtime track votes subscription started');
+  console.info('Realtime track votes subscription started');
+
+  // Also subscribe to changes on event_current_track to notify clients when the current track changes
+  const currentTrackChannel = supabase.channel('realtime-event-current-track');
+
+  currentTrackChannel.on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'event_current_track'
+  }, async (payload: any) => {
+    try {
+      const row = payload.new ?? payload.old;
+      if (!row) return;
+
+      const eventId = row.event_id;
+      const trackId = row.track_id;
+      const voteResolved = row.vote_resolved ?? false;
+      const updatedAt = row.updated_at ?? new Date().toISOString();
+
+      const { data: event } = await supabase
+        .from('events')
+        .select('owner_id, name')
+        .eq('id', eventId)
+        .single();
+
+      const { data: members } = await supabase
+        .from('event_members')
+        .select('profile_id')
+        .eq('event_id', eventId);
+
+      const recipients = new Set<string>();
+      if (event?.owner_id) recipients.add(event.owner_id);
+      for (const m of members ?? []) if (m.profile_id) recipients.add(m.profile_id);
+
+      const message = JSON.stringify({
+        type: 'event_current_track:update',
+        op: payload.eventType,
+        eventId,
+        eventName: event?.name,
+        track: {
+          id: trackId,
+          title: row.title,
+          cover_url: row.cover_url,
+          artists_names: row.artists_names
+        },
+        voteResolved,
+        updatedAt,
+        timestamp: new Date().toISOString()
+      });
+
+      let sentCount = 0;
+      for (const uid of recipients) {
+        const userSockets = clientsByUser.get(uid);
+        if (!userSockets) continue;
+        for (const socket of userSockets) {
+          try {
+            socket.send(message);
+            sentCount++;
+          } catch (err) {
+            console.error(`❌ Error sending current track update to ${uid}:`, err);
+          }
+        }
+      }
+      // event_current_track update sent
+    } catch (err) {
+      console.warn('realtime event_current_track handler error', err);
+    }
+  });
+
+  await currentTrackChannel.subscribe();
+  console.info('Realtime event_current_track subscription started');
 }
 
 export async function handleUnvote(
@@ -251,6 +362,8 @@ export async function handleUnvote(
   eventId: string,
 ): Promise<VoteResponse> {
   try {
+    // Get previous top track before applying this unvote
+    const prevTop = await getTopTrackForEvent(eventId);
     const { data: existingVote, error: fetchError } = await supabase
       .from('track_votes')
       .select('*')
@@ -315,7 +428,8 @@ export async function getVotesForEvent(
   Promise<{
     success: boolean;
     data?: TrackVoteRecord[];
-    message?: string }> {
+    message?: string
+  }> {
   try {
     const { data: event } = await supabase
       .from('events')
@@ -468,4 +582,25 @@ async function getVote(eventId: string, trackId: string): Promise<{
     success: true,
     data
   };
+}
+
+export async function clearTrackVotes(eventId: string, trackId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('track_votes')
+      .upsert({
+        event_id: eventId,
+        track_id: trackId,
+        voters: [],
+        vote_count: 0,
+      }, { onConflict: 'event_id,track_id' });
+
+    if (error) {
+      console.error('Error clearing track votes:', error);
+    } else {
+      console.log(`Cleared votes for track ${trackId} in event ${eventId}`);
+    }
+  } catch (err) {
+    console.error('Exception clearing track votes:', err);
+  }
 }

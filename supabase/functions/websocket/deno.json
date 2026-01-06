@@ -3,6 +3,7 @@
     "strict": true
   },
   "imports": {
+    "@me/services/spotify": "../me/services/spotify.ts",
     "@playlist": "../../types/playlist.ts",
     "@profile": "../../types/profile.ts",
     "@event": "../../types/event.ts",

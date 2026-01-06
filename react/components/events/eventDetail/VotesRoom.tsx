@@ -20,12 +20,14 @@ import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
 import { useAuth } from '@/contexts/authCtx';
 import StartAndStopButton from '@/components/events/StartAndStopButton';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 interface Props {
   eventId: string;
+  isOwner?: boolean;
 }
 
-export default function VotesRoom({ eventId }: Props) {
+export default function VotesRoom({ eventId, isOwner}: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
@@ -33,6 +35,7 @@ export default function VotesRoom({ eventId }: Props) {
   const { user: currentUser } = useAuth();
   const {
     connected,
+    track,
     disconnect,
     sendVote,
     sendUnvote,
@@ -42,12 +45,13 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId, {enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence});
+  } = useWebSocketClient(eventId, { enabled: started, done: data?.event?.done, spatio_licence: data?.event?.spatio_licence }, isOwner || false);
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
   );
   const isFocused = useIsFocused();
+  const { setTrack, setTracksToPlay } = usePlayer();
 
   const {
     playlist,
@@ -61,6 +65,13 @@ export default function VotesRoom({ eventId }: Props) {
       disconnect();
     }
   }, [isFocused, disconnect]);
+
+  useEffect(() => {
+    if (data?.event?.playlist?.tracks) {
+      const trackIds = data.event.playlist.tracks.map((track) => track.track_id);
+      setTracksToPlay(trackIds);
+    }
+  }, [data?.event?.playlist?.tracks, setTracksToPlay]);
 
   useEffect(() => {
     if (!data?.event?.id) return;
@@ -77,6 +88,12 @@ export default function VotesRoom({ eventId }: Props) {
 
     return unsubscribe;
   }, [data?.event?.id, subscribeToVotes]);
+
+  useEffect(() => {
+    if (track) {
+      setTrack(track);
+    }
+  }, [track]);
 
   useEffect(() => {
     if (!connected && connectionAttempts > 0) {
@@ -138,12 +155,6 @@ export default function VotesRoom({ eventId }: Props) {
     if (isNaN(start.getTime())) return false;
     return Date.now() >= start.getTime();
   }
-
-  const isOwner = () => {
-    return data?.owner.id === currentUser?.id
-  }
-
-
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -319,7 +330,7 @@ export default function VotesRoom({ eventId }: Props) {
                   / {eventUserData.voteMax}
                 </Text>
                 </HStack>
-             {isOwner() && data && (
+             {isOwner && data && (
                 <StartAndStopButton data={data} eventId={eventId}/>
               )}
               </HStack>
@@ -353,7 +364,7 @@ export default function VotesRoom({ eventId }: Props) {
                 </Box>
               )}
           </>
-        ) : isOwner() && (<HStack className='py-1.5 px-3 justify-end'>
+        ) : isOwner && (<HStack className='py-1.5 px-3 justify-end'>
           <StartAndStopButton data={data} eventId={eventId} />
           </HStack>
           )}

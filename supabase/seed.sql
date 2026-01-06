@@ -89,23 +89,53 @@ FROM (
     ('Chill & Relax', 'Peaceful music for meditation and relaxation', (SELECT id FROM auth.users WHERE email = 'judy@example.com' LIMIT 1), false, false, 'https://picsum.photos/300/300?random=10')
 ) AS playlist_data(name, description, owner_id, is_private, is_collaborative, cover_url);
 
-INSERT INTO public.events (name, description, owner_id, beginning_at, is_private, everyone_can_vote, playlist_id)
+INSERT INTO public.events (name, description, owner_id, playlist_id, beginning_at, is_private, everyone_can_vote)
 SELECT
   event_data.name,
   event_data.description,
   event_data.owner_id,
+  event_data.playlist_id,
   event_data.beginning_at,
   event_data.is_private,
-  event_data.everyone_can_vote,
-  (SELECT id FROM public.playlists WHERE name = event_data.playlist_name LIMIT 1)
+  event_data.everyone_can_vote
 FROM (
   VALUES
-    ('Summer Bash 2024', 'Join us for an unforgettable summer party with great music!', (SELECT id FROM auth.users WHERE email = 'alice@example.com' LIMIT 1), NOW(), false, true, 'Summer Vibes 2024'),
-    ('Jazz Night', 'An evening of smooth jazz and good vibes.', (SELECT id FROM auth.users WHERE email = 'bob@example.com' LIMIT 1), NOW(), false, true, 'Jazz Classics'),
-    ('Electronic Music Festival', 'Experience the best of electronic music with top DJs.', (SELECT id FROM auth.users WHERE email = 'carol@example.com' LIMIT 1), NOW(), false, true, 'Electronic Dreams'),
-    ('Acoustic Evening', 'Enjoy intimate acoustic performances by talented artists.', (SELECT id FROM auth.users WHERE email = 'dave@example.com' LIMIT 1), NOW(), false, true, 'Acoustic Sessions'),
-    ('Rock Concert', 'Get ready to rock with some of the best rock bands.', (SELECT id FROM auth.users WHERE email = 'eve@example.com' LIMIT 1), NOW(), false, true, 'Rock Anthems')
-) AS event_data(name, description, owner_id, beginning_at, is_private, everyone_can_vote, playlist_name);
+    (
+      'Summer Bash 2024',
+      'Join us for an unforgettable summer party with great music!',
+      (SELECT id FROM auth.users WHERE email = 'alice@example.com' LIMIT 1),
+      (SELECT id FROM public.playlists WHERE name = 'Summer Vibes 2024' LIMIT 1),
+      NOW(), false, true
+    ),
+    (
+      'Jazz Night',
+      'An evening of smooth jazz and good vibes.',
+      (SELECT id FROM auth.users WHERE email = 'bob@example.com' LIMIT 1),
+      (SELECT id FROM public.playlists WHERE name = 'Jazz Classics' LIMIT 1),
+      NOW(), false, true
+    ),
+    (
+      'Electronic Music Festival',
+      'Experience the best of electronic music with top DJs.',
+      (SELECT id FROM auth.users WHERE email = 'carol@example.com' LIMIT 1),
+      (SELECT id FROM public.playlists WHERE name = 'Electronic Dreams' LIMIT 1),
+      NOW(), false, true
+    ),
+    (
+      'Acoustic Evening',
+      'Enjoy intimate acoustic performances by talented artists.',
+      (SELECT id FROM auth.users WHERE email = 'dave@example.com' LIMIT 1),
+      (SELECT id FROM public.playlists WHERE name = 'Acoustic Sessions' LIMIT 1),
+      NOW(), false, true
+    ),
+    (
+      'Rock Concert',
+      'Get ready to rock with some of the best rock bands.',
+      (SELECT id FROM auth.users WHERE email = 'eve@example.com' LIMIT 1),
+      (SELECT id FROM public.playlists WHERE name = 'Rock Anthems' LIMIT 1),
+      NOW(), false, true
+    )
+) AS event_data(name, description, owner_id, playlist_id, beginning_at, is_private, everyone_can_vote);
 
 -- Insert locations for the events around a given point (lat 37.387183, lon -122.078489)
 -- Use small offsets so events are spread around the point for testing nearby queries

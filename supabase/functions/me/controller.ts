@@ -76,8 +76,7 @@ export async function startUserPlayback(c: Context): Promise<Response> {
       return c.json({ error: 'Failed to start Spotify playback' })
     }
 
-    console.log('Response from startPlayback:', res);
-    if (res.error || !res.ok) {
+    if (res.error) {
       console.error('Error from Spotify API:', res.error);
       if (res.error) {
         c.status(res.status || 500)
