@@ -12,7 +12,7 @@ const REFRESH_INTERVAL = 5000;
 
 interface PlayerContextType {
   track: PlayerTrack | null;
-  setTrack: (track: SpotifyCurrentlyPlayingTrack) => void;
+  setTrack: (track: PlayerTrack | null) => void;
   tracksToPlay: string[];
   setTracksToPlay: (tracks: string[]) => void;
   isPlaying: boolean;

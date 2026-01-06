@@ -44,13 +44,11 @@ export async function addItemToSpotifyOwnerQueue(item: string, spotify_token: st
       },
     });
 
-    console.log('JSON.stringify({ uri: item }):', JSON.stringify({ uri: item }));
     if (!response.ok) {
       console.error('Failed to add item to queue:', response.statusText);
       return false;
     }
-
-    console.log('Item added to queue successfully');
+    // item added to queue
     return true;
   } catch (error) {
     console.error('Error adding item to queue:', error);
@@ -151,7 +149,7 @@ export async function getOwnerCurrentPlayingTrack(
           .select('vote_resolved')
           .eq('event_id', eventId)
           .single();
-        
+
         if (res.error) {
           console.warn('Error fetching vote_resolved status:', res.error);
         }
@@ -203,13 +201,13 @@ async function resolveVoteCount(
   const top = await getTopTrackForEvent(eventId);
   const topId = top.trackId;
   if (!topId) {
-    console.log('No top voted track found, skipping push');
+    // no top voted track
     return { pushed: false };
   }
 
   const currentTrackId = current.item?.id ?? null;
   if (currentTrackId === topId) {
-    console.log('Top voted track is already playing, skipping push');
+    // top voted track already playing
     return { pushed: false, topId };
   }
 
@@ -231,12 +229,12 @@ async function upsertEventCurrentTrack(
   try {
     const { error } = await supabase
       .from('event_current_track')
-      .upsert({ 
-        event_id: eventId, 
-        track_id: track?.id ?? null, 
-        title: track?.name ?? null, 
-        cover_url: track?.album?.images?.[0]?.url ?? null, 
-        artists_names: track?.artists.map(artist => artist.name) ?? [] 
+      .upsert({
+        event_id: eventId,
+        track_id: track?.id ?? null,
+        title: track?.name ?? null,
+        cover_url: track?.album?.images?.[0]?.url ?? null,
+        artists_names: track?.artists.map(artist => artist.name) ?? []
       })
       .eq('event_id', eventId);
     if (error) {

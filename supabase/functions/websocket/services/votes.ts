@@ -110,7 +110,6 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
       };
     }
 
-    console.log('ws: processing vote', { userId, eventId, trackId });
 
     const res = await getEventSupabase(eventId, 'owner_id, everyone_can_vote, name, spatio_licence, done');
 
@@ -148,7 +147,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
 
     const resCanVote = await checkIfUserCanVote(eventId, userId);
     if (!resCanVote.success) {
-      console.log('ws: user cannot vote:', { userId, eventId, reason: resCanVote.message });
+      // user cannot vote (permission/limit)
       return {
         success: false,
         message: resCanVote.message || 'You do not have permission to vote in this event or have reached your vote limit'
@@ -267,7 +266,7 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
           console.warn(`⚠️ No sockets found for user ${uid}`);
           continue;
         }
-        console.log(`📤 Sending to user ${uid} (${userSockets.size} sockets)`);
+        // sending update to user sockets
         for (const socket of userSockets) {
           try {
             socket.send(message);
@@ -277,14 +276,14 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
           }
         }
       }
-      console.log(`✅ Update sent to ${sentCount} socket connections`)
+      // updates sent count: %d
     } catch (err) {
       console.warn('realtime track votes handler error', err);
     }
   });
 
   await trackVotesChannel.subscribe();
-  console.log('✅ Realtime track votes subscription started');
+  console.info('Realtime track votes subscription started');
 
   // Also subscribe to changes on event_current_track to notify clients when the current track changes
   const currentTrackChannel = supabase.channel('realtime-event-current-track');
@@ -347,14 +346,14 @@ export async function startVoteRealtime(clientsByUser: Map<string, Set<WebSocket
           }
         }
       }
-      console.log(`✅ event_current_track update sent to ${sentCount} socket connections`);
+      // event_current_track update sent
     } catch (err) {
       console.warn('realtime event_current_track handler error', err);
     }
   });
 
   await currentTrackChannel.subscribe();
-  console.log('✅ Realtime event_current_track subscription started');
+  console.info('Realtime event_current_track subscription started');
 }
 
 export async function handleUnvote(

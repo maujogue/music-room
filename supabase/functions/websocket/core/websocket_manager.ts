@@ -9,7 +9,6 @@ export function addClient(
     clientsByUser.set(userId, userSockets);
   }
   userSockets.add(ws);
-  console.log(`ws: client added for user ${userId}. Total connections: ${userSockets.size}`);
 }
 
 export function removeClient(
@@ -21,11 +20,9 @@ export function removeClient(
   if (!userSockets) return;
 
   userSockets.delete(ws);
-  console.log(`ws: client removed for user ${userId}. Remaining connections: ${userSockets.size}`);
 
   if (userSockets.size === 0) {
     clientsByUser.delete(userId);
-    console.log(`ws: all connections closed for user ${userId}`);
   }
 }
 

@@ -25,7 +25,7 @@ export async function handleMessage(
   socket: WebSocket
 ): Promise<void> {
   try {
-    console.log('ws: message from user', { userId, msgType: message.type });
+    // incoming websocket message
 
     switch (message.type) {
       case 'ping':
@@ -49,7 +49,6 @@ export async function handleMessage(
         break;
 
       default:
-        console.log('ws: unhandled message type:', message.type);
         sendErrorMessage(socket, 'Unknown message type');
     }
   } catch (error) {
@@ -176,24 +175,24 @@ async function handleVoteMessage(
 }
 
 function isVoteMessage(message: WebSocketMessage): message is VoteMessage {
-  console.log('Checking if message is a vote message:', message);
+  // validate vote message
   return message.type === 'vote' &&
-         typeof message.eventId === 'string' &&
-         typeof message.trackId === 'string';
+    typeof message.eventId === 'string' &&
+    typeof message.trackId === 'string';
 }
 
 function isUnvoteMessage(message: WebSocketMessage): message is { type: 'unvote'; eventId: string; trackId: string; } {
   return message.type === 'unvote' &&
-         typeof message.eventId === 'string' &&
-         typeof message.trackId === 'string';
+    typeof message.eventId === 'string' &&
+    typeof message.trackId === 'string';
 }
 
-function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string;} {
+function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string; } {
   return message.type === 'vote:get' &&
-         typeof message.eventId === 'string';
+    typeof message.eventId === 'string';
 }
 
-function isUserInfoMessage(message: WebSocketMessage): message is { type: 'user:info'; eventId: string;} {
+function isUserInfoMessage(message: WebSocketMessage): message is { type: 'user:info'; eventId: string; } {
   return message.type === 'user:info' &&
-         typeof message.eventId === 'string';
+    typeof message.eventId === 'string';
 }
