@@ -340,7 +340,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.auth]
 enabled = true
 verify_jwt = false
-import_map = "./functions/auth/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/auth/index.ts"
@@ -351,7 +351,7 @@ entrypoint = "./functions/auth/index.ts"
 [functions.search]
 enabled = true
 verify_jwt = true
-import_map = "./functions/search/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/search/index.ts"
@@ -362,7 +362,7 @@ entrypoint = "./functions/search/index.ts"
 [functions.playlists]
 enabled = true
 verify_jwt = true
-import_map = "./functions/playlists/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/playlists/index.ts"
@@ -373,13 +373,13 @@ entrypoint = "./functions/playlists/index.ts"
 [functions.openapi]
 enabled = true
 verify_jwt = false
-import_map = "./functions/openapi/deno.json"
+import_map = "./functions/deno.json"
 entrypoint = "./functions/openapi/index.ts"
 
 [functions.events]
 enabled = true
 verify_jwt = true
-import_map = "./functions/events/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/events/index.ts"
@@ -390,10 +390,23 @@ entrypoint = "./functions/events/index.ts"
 [functions.websocket]
 enabled = true
 verify_jwt = false
-import_map = "./functions/websocket/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/websocket/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/websocket/*.html" ]
+
+[functions.me]
+enabled = true
+verify_jwt = true
+import_map = "./functions/deno.json"
+entrypoint = "./functions/me/index.ts"
+
+[functions.profile]
+enabled = true
+verify_jwt = true
+import_map = "./functions/deno.json"
+entrypoint = "./functions/profile/index.ts"
+
