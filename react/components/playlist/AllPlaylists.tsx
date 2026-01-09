@@ -8,7 +8,7 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { useRouter } from 'expo-router';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
 import FloatButton from '@/components/generics/FloatButton';
-import { RefreshCw } from 'lucide-react-native';
+import { RefreshCw, Plus } from 'lucide-react-native';
 import { syncSpotifyPlaylists } from '@/services/playlist';
 import { useAppToast } from '@/hooks/useAppToast';
 
@@ -50,7 +50,7 @@ export default function AllPlaylists() {
     return (
       <EmptyState
         title='No Playlists'
-        subtitle="Create or sync playlists to get started."
+        subtitle='Create or sync playlists to get started.'
         text='Synchronize with your Spotify account, or even create your own playlist from scratch right now !'
         onPressCta={onPlaylistPress}
       />
@@ -67,6 +67,11 @@ export default function AllPlaylists() {
   return (
     <View style={{ flex: 1 }}>
       <PlaylistList sections={sections} />
+      <FloatButton
+        icon={Plus}
+        onPress={onPlaylistPress}
+        className='absolute bottom-24 right-4 rounded-full p-4 blurred-bg'
+      />
       <FloatButton
         icon={RefreshCw}
         onPress={handleSyncSpotifyPress}
