@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
@@ -78,14 +77,6 @@ export default function Profile({
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
       >
-        <ProfileActions
-          profile={profile}
-          canEdit={permissions.canEdit}
-          editProfile={editProfile}
-          isFollowing={otherUserData?.is_following}
-          actions={actions}
-        />
-
         <ProfileContent
           profile={profile}
           userId={userId}
@@ -97,6 +88,12 @@ export default function Profile({
           actions={actions}
         />
       </ScrollView>
+      <ProfileActions
+        isOwner={isOwnProfile}
+        editProfile={editProfile}
+        isFollowing={otherUserData?.is_following || false}
+        actions={actions}
+      />
     </View>
   );
 }

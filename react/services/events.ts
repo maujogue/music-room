@@ -1,22 +1,77 @@
 import { apiFetch } from '@/utils/apiFetch';
-
+import { convertPOINT, isValidCoordinateObject } from '@/utils/parsePointCoordinates';
 
 export async function createEvent(payload: MusicEventPayload) {
-  const form = createEventFormData(payload);
+  const imageUri = (payload as any)?.image_url;
+  const isLocalFile =
+    typeof imageUri === 'string' &&
+    (imageUri.startsWith('file:') ||
+      imageUri.startsWith('content:') ||
+      imageUri.startsWith('/') ||
+      imageUri.startsWith('data:'));
 
-  const res = await apiFetch<Event>(
+  if (isLocalFile) {
+    const form = createEventFormData(payload);
+
+    const res = await apiFetch<MusicEvent>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
+      {
+        method: 'POST',
+        body: form,
+      }
+    );
+
+    if (!res.success) {
+      console.error('Error creating Event (form):', res.error);
+      throw res.error;
+    }
+    return res.data;
+  }
+
+  // Ensure coordinates are properly formatted if string (copied from updateEvent)
+  if (typeof (payload.location as any)?.coordinates === 'string') {
+    const coordConverted = convertPOINT((payload.location as any).coordinates);
+    if (isValidCoordinateObject(coordConverted)) {
+      (payload.location as any).coordinates = coordConverted;
+    } else {
+      (payload.location as any).coordinates = undefined;
+    }
+  }
+
+  const res = await apiFetch<MusicEvent>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
     {
       method: 'POST',
-      body: form,
+      body: payload,
     }
   );
 
   if (!res.success) {
-    console.error('Error creating Event:', res.error);
+    console.error('Error creating Event (json):', res.error);
     throw res.error;
   }
   return res.data;
+}
+
+function normalizeEventCoordinates(
+  event: MusicEventFetchResult
+): MusicEventFetchResult {
+  if (!event.location) return event;
+
+  const coords = event.location.coordinates;
+
+  if (isValidCoordinateObject(coords)) return event;
+
+  const parsed = convertPOINT(coords as any);
+  if (!parsed) return event;
+
+  return {
+    ...event,
+    location: {
+      ...event.location,
+      coordinates: parsed,
+    },
+  };
 }
 
 export async function getEventById(id: string) {
@@ -29,6 +84,57 @@ export async function getEventById(id: string) {
 
   if (!res.success) {
     console.error('Error fetching Event:', res.error);
+    throw res.error;
+  }
+  
+   const normalized = normalizeEventCoordinates(res.data);
+
+  return normalized;
+}
+
+export async function startEvent(id: string) {
+  const res = await apiFetch<void>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}/start`,
+    {
+      method: 'POST',
+    }
+  );
+
+  if (!res.success) {
+    console.error('Error Starting Event:', res.error);
+    throw res.error;
+  }
+  return res.data;
+}
+
+export async function stopEvent(id: string) {
+  const res = await apiFetch<void>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}/stop`,
+    {
+      method: 'POST',
+    }
+  );
+
+  if (!res.success) {
+    console.error('Error Stoping Event:', res.error);
+    throw res.error;
+  }
+  return res.data;
+}
+
+export async function getEventsWithRadar(coord: Coordinates): Promise<MusicEventRadarResult[]> {
+  const res = await apiFetch<MusicEventRadarResult[]>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/radar?lat=${coord.lat}&long=${coord.long}`,
+    {
+      method: 'GET',
+    }
+  );
+
+  if (!res.success) {
+    console.error(
+      `Error fetching Events at position (${coord.lat}, ${coord.long})`,
+      res.error
+    );
     throw res.error;
   }
   return res.data;
@@ -96,15 +202,44 @@ export async function getCurrentUserEvents() {
 export async function updateEvent(id: string, payload: MusicEventPayload) {
   const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${id}`;
 
-  const form = createEventFormData(payload);
+  const imageUri = (payload as any)?.image_url;
+  const isLocalFile =
+    typeof imageUri === 'string' &&
+    (imageUri.startsWith('file:') ||
+      imageUri.startsWith('content:') ||
+      imageUri.startsWith('/') ||
+      imageUri.startsWith('data:'));
+
+  if (isLocalFile) {
+    const form = createEventFormData(payload);
+    const res = await apiFetch<MusicEvent>(url, {
+      method: 'PUT',
+      body: form,
+    });
+
+    if (!res.success) {
+      console.error('Error updating Event (form):', res.error);
+      throw res.error;
+    }
+    return res.data;
+  }
+
+  if (typeof payload.location.coordinates === 'string') {
+    const coordConverted = convertPOINT(payload.location.coordinates)
+    if (isValidCoordinateObject(coordConverted)) {
+      payload.location.coordinates = coordConverted
+    } else {
+      payload.location.coordinates = undefined
+    }
+  }
 
   const res = await apiFetch<MusicEvent>(url, {
     method: 'PUT',
-    body: form,
+    body: payload,
   });
 
   if (!res.success) {
-    console.error('Error updating Event:', res.error);
+    console.error('Error updating Event (json):', res.error);
     throw res.error;
   }
   return res.data;
@@ -120,6 +255,8 @@ function createEventFormData(payload: MusicEventPayload) {
   form.append('beginning_at', payload.beginning_at ?? '');
   form.append('location', JSON.stringify((payload as any).location ?? {}));
   form.append('is_private', String((payload as any).is_private ?? false));
+  form.append('done', String((payload as any).done ?? false));
+  form.append('spatio_licence', String((payload as any).spatio_licence ?? false));
   form.append(
     'everyone_can_vote',
     String((payload as any).everyone_can_vote ?? true)
@@ -127,11 +264,20 @@ function createEventFormData(payload: MusicEventPayload) {
 
   if (imageUri) {
     const uri = imageUri as string;
-    const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
-    const fileName = `${Date.now()}.${ext}`;
-    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    const isLocalFile =
+      typeof uri === 'string' &&
+      (uri.startsWith('file:') ||
+        uri.startsWith('content:') ||
+        uri.startsWith('/') ||
+        uri.startsWith('data:'));
 
-    form.append('image', { uri, name: fileName, type: mime } as any);
+    if (isLocalFile) {
+      const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+      const fileName = `${Date.now()}.${ext}`;
+      const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+
+      form.append('image', { uri, name: fileName, type: mime } as any);
+    }
   }
 
   return form;

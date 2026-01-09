@@ -7,9 +7,7 @@ export async function getCurrentUserPlaylists() {
       method: 'GET',
     }
   );
-  console.log('API response:', res);
   if (!res.success) {
-    console.error('Error fetching user playlists:', res.error);
     throw res.error;
   }
   return res.data;
@@ -17,7 +15,7 @@ export async function getCurrentUserPlaylists() {
 
 export async function getPlaylistById(id: string) {
   if (!id) {
-    throw new Error("no playlist found, no id given");
+    throw new Error('no playlist found, no id given');
   }
   const res = await apiFetch<Playlist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${id}`,
@@ -25,11 +23,7 @@ export async function getPlaylistById(id: string) {
       method: 'GET',
     }
   );
-
-  console.log('API response:', res);
-
   if (!res.success) {
-    console.error('Error fetching playlist:', res.error);
     throw res.error;
   }
   return res.data;
@@ -57,7 +51,6 @@ export async function deleteItemFromPlaylist(
   playlistId: string,
   uris: string[]
 ) {
-  console.log(`Deleting items from playlist ${playlistId}:`, uris);
   const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/tracks`,
     {

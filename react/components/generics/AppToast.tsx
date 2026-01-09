@@ -8,9 +8,19 @@ type AppToastProps = {
   variant?: 'solid' | 'outline';
 };
 
-export function AppToast({ id, title, description, action, variant = 'solid' }: AppToastProps) {
+export function AppToast({
+  id,
+  title,
+  description,
+  action,
+  variant = 'solid',
+}: AppToastProps) {
   return (
-    <Toast nativeID={id} action={action} variant={variant}>
+    <Toast
+      nativeID={id}
+      action={action}
+      variant={variant}
+    >
       <ToastTitle>{title}</ToastTitle>
       {description ? <ToastDescription>{description}</ToastDescription> : null}
     </Toast>

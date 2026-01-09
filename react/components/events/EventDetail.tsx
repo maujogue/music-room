@@ -15,14 +15,22 @@ import EventHeader from './eventDetail/EventHeader';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { ScrollView } from 'react-native';
+import EventActions from '@/components/events/EventActions';
+import Player from '@/components/player/Player';
+import { Box } from '@/components/ui/box';
+import { usePlayer } from '@/contexts/PlayerCtx';
+import { useProfile } from '@/contexts/profileCtx';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const [expanded, setIsExpanded] = useState<boolean>(false);
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);
+  const [displayInviteButton, setDisplayInviteButton] = useState(false);
+  const { track } = usePlayer();
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const { profile } = useProfile();
 
   useFocusEffect(
     useCallback(() => {
@@ -31,15 +39,27 @@ export default function EventDetail() {
   );
 
   useEffect(() => {
+    setDisplayInviteButton(data?.user?.can_invite ?? false);
+    if (data?.event?.beginning_at) {
+      const eventStart = new Date(data.event.beginning_at);
+      setIsActive(eventStart <= new Date());
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (!data) return;
+    const isOwner = data?.event?.owner_id === profile?.id;
     navigation.setOptions({
       headerRight: () => (
         <Event3DotMenu
           callDelete={() => setShowAlertDialog(true)}
           callEdit={onEditEvent}
+          eventData={data}
+          isOwner={isOwner}
         />
       ),
     });
-  }, [navigation]);
+  }, [navigation, data, profile]);
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
@@ -54,10 +74,6 @@ export default function EventDetail() {
     router.push(`(main)/events/${eventId}/edit`);
   };
 
-  const onToggleHeader = () => {
-    setIsExpanded(v => !v);
-  };
-
   if (!data || loading) {
     return <LoadingSpinner text='Loading Events' />;
   }
@@ -67,29 +83,47 @@ export default function EventDetail() {
   }
 
   return (
-    <ScrollView>
-      <VStack className='flex-1'>
-        <EventHeader
-          eventData={data}
-          expanded={expanded}
-          onToggle={onToggleHeader}
-          onRefresh={refetch}
+    <>
+      <ScrollView>
+        <VStack className='flex-1'>
+          <EventHeader
+            eventData={data}
+            onRefresh={refetch}
+          />
+
+          <Center className='flex-1'>
+            <VotesRoom
+              eventId={eventId}
+              isOwner={data?.event?.owner_id === profile?.id}
+            />
+          </Center>
+        </VStack>
+
+        <DeleteAlert
+          showAlertDialog={showAlertDialog}
+          setShowAlertDialog={setShowAlertDialog}
+          onDelete={onDeleteEvent}
+          itemName={data.event.name ?? 'event'}
+          itemType='event'
         />
+      </ScrollView>
 
-        {/* Votes / Guests tabs */}
-        <Center className='flex-1'>
-          <VotesRoom eventId={eventId} />
-        </Center>
-        {/* ------------------ */}
-      </VStack>
-
-      <DeleteAlert
-        showAlertDialog={showAlertDialog}
-        setShowAlertDialog={setShowAlertDialog}
-        onDelete={onDeleteEvent}
-        itemName={data.event.name ?? 'event'}
-        itemType='event'
+      <EventActions
+        displayInviteButton={displayInviteButton}
+        eventId={eventId}
+        eventData={data}
+        onUpdated={refetch}
+        abovePlayer={isActive && !!track}
       />
-    </ScrollView>
+
+      {track && isActive && (
+        <Box
+          className='absolute bottom-0 right-18 w-full'
+          pointerEvents={'auto'}
+        >
+          <Player showControls={true} />
+        </Box>
+      )}
+    </>
   );
 }

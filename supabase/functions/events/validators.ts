@@ -1,95 +1,126 @@
-export function validateEventPayload(payload: any, opts: { requireName: boolean, requireDateTime?: boolean } = { requireName: true }): { valid: boolean, message?: string } {
+export function validateEventPayload(
+  payload: unknown, opts: 
+  { 
+    requireName: boolean, 
+    requireDateTime?: boolean, 
+    requireLocation?: boolean,
+    requirePlaylist?: boolean
+  } = { requireName: true }): { valid: boolean, message?: string } {
+  const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
   }
-
   if (opts.requireName) {
-    if (!payload.name || typeof payload.name !== 'string' || payload.name.trim().length < 3) {
+    if (!p.name || typeof p.name !== 'string' || p.name.trim().length < 3) {
       return { valid: false, message: 'Event name must be at least 3 characters long' }
     }
-  } else if (payload.name !== undefined) {
-    if (payload.name !== null && (typeof payload.name !== 'string' || payload.name.trim().length < 3)) {
+  } else if (p.name !== undefined) {
+    if (p.name !== null && (typeof p.name !== 'string' || p.name.trim().length < 3)) {
       return { valid: false, message: 'If provided, name must be at least 3 characters long' }
     }
   }
 
+  if (opts.requireLocation && !p.location.coordinates) {
+    return {
+      valid: false,
+      message: 'Coordinates is required'
+    }
+  }
+
+  if (opts.requirePlaylist && !p.playlist_id) {
+    return {
+      valid: false,
+      message: 'Playlist is required'
+    }
+  }
+
   if (opts.requireDateTime) {
-    if (!payload.beginning_at) {
+    if (!p.beginning_at) {
       return { valid: false, message: 'beginning_at is required' }
     }
   }
 
-  const begin = payload.beginning_at
+  const begin = p.beginning_at
   if (begin !== undefined && begin !== null && begin !== '') {
     const b = Date.parse(begin)
     if (isNaN(b)) return { valid: false, message: 'beginning_at must be a valid ISO date string' }
   }
 
-  if (payload.playlist_id !== undefined && payload.playlist_id !== null && payload.playlist_id !== '') {
-    if (typeof payload.playlist_id !== 'string') return { valid: false, message: 'playlist_id must be a string or null' }
+  if (p.playlist_id !== undefined && p.playlist_id !== null && p.playlist_id !== '') {
+    if (typeof p.playlist_id !== 'string') return { valid: false, message: 'playlist_id must be a string or null' }
   }
 
-  if (payload.location !== undefined && payload.location !== null) {
-    if (typeof payload.location !== 'object') return { valid: false, message: 'location must be an object' }
+  if (p.location !== undefined && p.location !== null) {
+    if (typeof p.location !== 'object') return { valid: false, message: 'location must be an object' }
   }
 
-  if (payload.description !== undefined && payload.description !== null) {
-    if (typeof payload.description !== 'string') return { valid: false, message: 'description must be a string or null' }
+  if (p.description !== undefined && p.description !== null) {
+    if (typeof p.description !== 'string') return { valid: false, message: 'description must be a string or null' }
   }
 
-  if (payload.image !== undefined && payload.image !== null) {
-    if (!(payload.image instanceof File)) return { valid: false, message: 'image must be a File or null' }
+  if (p.image !== undefined && p.image !== null) {
+    if (!(p.image instanceof File)) return { valid: false, message: 'image must be a File or null' }
   }
 
-  if (payload.is_private !== undefined && payload.is_private !== null) {
-    if (typeof payload.is_private !== 'boolean') return { valid: false, message: 'is_private must be a boolean or null' }
+  if (p.is_private !== undefined && p.is_private !== null) {
+    if (typeof p.is_private !== 'boolean') return { valid: false, message: 'is_private must be a boolean or null' }
   }
 
-  if (payload.everyone_can_vote !== undefined && payload.everyone_can_vote !== null) {
-    if (typeof payload.everyone_can_vote !== 'boolean') return { valid: false, message: 'everyone_can_vote must be a boolean or null' }
+  if (p.everyone_can_vote !== undefined && p.everyone_can_vote !== null) {
+    if (typeof p.everyone_can_vote !== 'boolean') return { valid: false, message: 'everyone_can_vote must be a boolean or null' }
+  }
+
+  if (p.done !== undefined && p.done !== null) {
+    if (typeof p.done !== 'boolean') return { valid: false, message: 'done must be a boolean or null' }
+  }
+
+  if (p.spatio_licence !== undefined && p.spatio_licence !== null) {
+    if (typeof p.spatio_licence !== 'boolean') return { valid: false, message: 'spatio_licence must be a boolean or null' }
   }
 
   return { valid: true }
 }
 
-export function validateAddUserPayload(payload: any) {
+export function validateAddUserPayload(payload: unknown) {
+  const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
   }
 
-  if (!payload.user_id || typeof payload.user_id !== 'string' || payload.user_id.trim().length === 0) {
+  if (!p.user_id || typeof p.user_id !== 'string' || p.user_id.trim().length === 0) {
     return { valid: false, message: 'user_id is required and must be a non-empty string' }
   }
 
-  if (!payload.role || typeof payload.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(payload.role)) {
+  if (!p.role || typeof p.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(p.role)) {
     return { valid: false, message: "role is required and must be one of 'inviter', 'voter', 'member', or 'collaborator'" }
   }
 
   return { valid: true }
 }
 
-export function validateRemoveUserPayload(payload: any) {
+export function validateRemoveUserPayload(payload: unknown) {
+  const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
   }
-
-  if (typeof payload.user_id !== 'string') {
+  if (typeof p.user_id !== 'string') {
     return { valid: false, message: 'user_id must be a string' }
   }
 
   return { valid: true }
 }
 
-export function validateEditUserPayload(payload: any) {
+export function validateEditUserPayload(payload: unknown) {
+  const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
   }
 
-  if (!payload.user_id || typeof payload.user_id !== 'string' || payload.user_id.trim().length === 0) {
+  if (!p.user_id || typeof p.user_id !== 'string' || p.user_id.trim().length === 0) {
     return { valid: false, message: 'user_id is required and must be a non-empty string' }
   }
 
-  if (!payload.role || typeof payload.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(payload.role)) {
+  if (!p.role || typeof p.role !== 'string' || !['inviter', 'voter', 'member', 'collaborator'].includes(p.role)) {
     return { valid: false, message: "role is required and must be one of 'inviter', 'voter', 'member', or 'collaborator'" }
   }
 

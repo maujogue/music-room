@@ -28,15 +28,21 @@ export default function EditEvent() {
         router.back();
       }
     } catch (error) {
-      console.error('Error creating event:', error);
-      setError(`Error creating event: ${error}`);
+      console.error('Error editing event:', error);
+      setError(`Error editing event: ${error}`);
       return;
     }
   };
 
-  if (loading) { return (<LoadingSpinner text="Loading event..." />); }
-  if (error) { return (<ErrorScreen error={error} />); }
-  if (!data) { return (<ErrorScreen error={"impossible to retrieve event data yet."} />); }
+  if (loading) {
+    return <LoadingSpinner text='Loading event...' />;
+  }
+  if (error) {
+    return <ErrorScreen error={error} />;
+  }
+  if (!data) {
+    return <ErrorScreen error={'impossible to retrieve event data yet.'} />;
+  }
 
   return (
     <EditEventForm

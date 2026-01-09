@@ -1,7 +1,7 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import TrackListItem from '@/components/track/TrackListItem';
 import { Icon } from '@/components/ui/icon';
-import { PlusCircleIcon } from 'lucide-react-native';
+import { PlusCircleIcon, CircleMinus } from 'lucide-react-native';
 import { usePlaylistItems } from '@/hooks/usePlaylistItems';
 import Reanimated from 'react-native-reanimated';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
@@ -11,15 +11,24 @@ import { Pressable } from '@/components/ui/pressable';
 import { Box } from '@/components/ui/box';
 import colors from 'tailwindcss/colors';
 import { useVoteCountIndex } from '@/hooks/useEventVotesCount';
-import { Heading } from '@/components/ui/heading';
 import { VStack } from '@/components/ui/vstack';
-import TopVotesTracks from '@/components/track/votes/TopVotes';
 import { useEffect } from 'react';
+import { Button, ButtonText } from '@/components/ui/button';
+import { useRouter } from 'expo-router';
+
+interface TrackVote {
+  eventId: string;
+  eventName?: string;
+  trackId: string;
+  voteCount: number;
+  voters: string[];
+}
 
 interface Props {
   eventId: string;
   playlistId: string;
   playlistTitle?: string;
+  realtimeVotes?: Map<string, TrackVote>;
   playlistTracks: PlaylistTrack[];
   onTrackSwiping?: (dir: SwipeDirection, trackId: string) => void;
 }
@@ -27,55 +36,51 @@ interface Props {
 export default function TrackListVotes({
   eventId,
   playlistId,
-  playlistTitle,
+  playlistTitle: _playlistTitle,
   playlistTracks,
   onTrackSwiping,
+  realtimeVotes,
 }: Props) {
+  const router = useRouter();
   const { tracks, loading, error } = usePlaylistItems(
     playlistId,
     playlistTracks
   );
   const {
     getVoteCount,
-    getTopTracksFrom,
     getTrackId,
     loading: loadingV,
     error: errorV,
   } = useVoteCountIndex(eventId);
 
-  // --------------------------------------------------
-  // CONTINUE DEBUG HERE TO GET WHAT IS WITH VOTES RETREIVED
   useEffect(() => {
     if (!playlistTracks) return;
 
-    playlistTracks?.forEach(t => {
-      console.log('playlistTracks', t.details.name);
-      console.log('ID :', t.spotify_id);
-    });
-
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
+
+  useEffect(() => {
+    console.log('Realtime votes updated:', realtimeVotes);
+  }, [realtimeVotes]);
 
   useEffect(() => {
     if (!tracks) return;
 
-    tracks?.forEach(t => {
-      console.log('Track in PL:', t.details.name);
-      console.log('ID :', t.spotify_id, 'Votes:', getVoteCount(t.spotify_id));
-    });
-
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
-  // --------------------------------------------------
-  // --------------------------------------------------
+
+  const getRealtimeVoteCount = (trackId: string): number => {
+    const realtimeVote = realtimeVotes?.get(trackId);
+    if (realtimeVote) {
+      return realtimeVote.voteCount;
+    }
+
+    const fallbackVotes = getVoteCount(trackId);
+    return fallbackVotes;
+  };
 
   const handleSwipeableOpen = async (dir: SwipeDirection, trackId: string) => {
     try {
-      console.log(
-        `Implement vote for track(${trackId}) in playlist(${playlistId}) and direction(${dir})`
-      );
-      // await voteForTrack(eventId, trackId);
-
       if (onTrackSwiping) {
         onTrackSwiping(dir, trackId);
       }
@@ -97,65 +102,77 @@ export default function TrackListVotes({
     return <ErrorScreen error={'no tracks to load'} />;
   }
   if (tracks.length === 0) {
-    return <InfoScreen text={'Playlist chosen for event is empty'} />;
+    return (
+      <InfoScreen
+        title={'No Tracks Available'}
+        text={'Playlist chosen for event is empty'}
+        actionButton={
+          <Button
+            onPress={() => {
+              router.push(`(main)/playlists/${playlistId}`);
+            }}
+          >
+            <ButtonText className='text-center'>Go to Playlist</ButtonText>
+          </Button>
+        }
+      />
+    );
   }
 
   return (
     <VStack className='flex-1'>
-      <TopVotesTracks topTracks={getTopTracksFrom(tracks)} />
-
-      <Heading className='mt-2'>Votes-room</Heading>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {
-            const va = getVoteCount(getTrackId(a));
-            const vb = getVoteCount(getTrackId(b));
+            const va = getRealtimeVoteCount(getTrackId(a));
+            const vb = getRealtimeVoteCount(getTrackId(b));
             if (vb !== va) return vb - va;
             return a.details.name.localeCompare(b.details.name);
           })
           .map((track: PlaylistTrack) => {
-            const voteCount = getVoteCount(getTrackId(track));
+            const trackId = getTrackId(track);
+            const voteCount = getRealtimeVoteCount(trackId);
 
             return (
-              <Pressable key={track.added_at}>
+                <Pressable key={trackId}>
                 <TrackListItem
                   track={track.details}
                   voteCount={voteCount}
                   renderRightAction={() => (
-                    <Reanimated.View
-                      style={{
-                        flex: 1,
-                        backgroundColor: colors.indigo[500],
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: 80,
-                      }}
-                    >
-                      <Box className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
-                      </Box>
-                    </Reanimated.View>
+                  <Reanimated.View
+                    style={{
+                    flex: 1,
+                    backgroundColor: colors.red[600],
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: 80,
+                    }}
+                  >
+                    <Box className='flex-1 justify-center items-end w-full p-4'>
+                    <Icon as={CircleMinus} color='white' size='xl' />
+                    </Box>
+                  </Reanimated.View>
                   )}
                   renderLeftAction={() => (
-                    <Reanimated.View
-                      style={{
-                        flex: 1,
-                        backgroundColor: colors.indigo[500],
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: 80,
-                      }}
-                    >
-                      <Box className='flex-1 justify-center items-start w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size={'lg'} />
-                      </Box>
-                    </Reanimated.View>
+                  <Reanimated.View
+                    style={{
+                    flex: 1,
+                    backgroundColor: colors.green[600],
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: 80,
+                    }}
+                  >
+                    <Box className='flex-1 justify-center items-start w-full p-4'>
+                    <Icon as={PlusCircleIcon} color='white' size='xl' />
+                    </Box>
+                  </Reanimated.View>
                   )}
                   onSwipeableOpen={dir =>
-                    handleSwipeableOpen(dir, getTrackId(track))
+                  handleSwipeableOpen(dir, getTrackId(track))
                   }
                 />
-              </Pressable>
+                </Pressable>
             );
           })}
       </GestureHandlerRootView>

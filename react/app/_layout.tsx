@@ -26,6 +26,10 @@ function RootNavigator() {
         <Stack.Protected guard={!session}>
           <Stack.Screen name='(auth)' options={{ headerShown: false }} />
         </Stack.Protected>
+        <Stack.Screen
+          name='update-password'
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
       </Stack>
     </GluestackUIProvider>
   );

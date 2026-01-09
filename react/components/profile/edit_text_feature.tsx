@@ -28,7 +28,6 @@ import {
 import { HStack } from '../ui/hstack';
 import { VStack } from '../ui/vstack';
 import { useProfile } from '@/contexts/profileCtx';
-import { UserInfo } from '@/types/user';
 
 export default function EditProfileTextFeature({
   type,
@@ -72,9 +71,11 @@ export default function EditProfileTextFeature({
         className={`w-full gap-2 items-center ${size === 'md' ? 'h-10' : 'h-15'}`}
       >
         {currentText.length > 0 ? (
-          <Heading size={size} className='my-1 mx-3 flex-1'>
-            {currentText}
-          </Heading>
+          <HStack>
+            <Heading size={size} className='my-1 mx-3 flex-1'>
+              {currentText}
+            </Heading>
+          </HStack>
         ) : (
           <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>
             No {type} yet

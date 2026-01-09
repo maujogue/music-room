@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { SpotifyPlaylist } from '@/types/spotify';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   playlist: SpotifyPlaylist;
@@ -12,16 +13,17 @@ export default function PlaylistListItem({ playlist }: Props) {
       playlist.images.length > 0 &&
       playlist.images[0]?.url;
 
-    return {
-      uri: hasValidImage
-        ? playlist.images[0]!.url
-        : 'https://picsum.photos/205',
-    };
+    return hasValidImage ? { uri: playlist.images[0]!.url } : getRandomImage();
   };
 
   return (
     <View style={styles.container}>
-      <Image source={getImage()} style={styles.image} resizeMode='cover' />
+      <Image
+        source={getImage()}
+        style={styles.image}
+        resizeMode='cover'
+        alt='Playlist image cover'
+      />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{playlist.name}</Text>
         {playlist.owner?.display_name && (

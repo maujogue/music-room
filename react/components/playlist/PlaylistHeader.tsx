@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
-import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Box } from '@/components/ui/box';
 import {
   Avatar,
@@ -11,16 +10,16 @@ import {
 import { Image } from '@/components/ui/image';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
-import { UserRoundPlus } from 'lucide-react-native';
-import { Button, ButtonIcon } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
+import { getRandomImage } from '@/utils/randomImage';
 import { Pressable } from '@/components/ui/pressable';
 import { useState } from 'react';
 import PlaylistMembersDrawer from './PlaylistMembersDrawer';
 import LikeButton from '@/components/generics/LikeButton';
 import { addUserToPlaylist, removeUserFromPlaylist } from '@/services/playlist';
-import { useProfileData } from '@/hooks/useProfileData';
+import { useAuth } from '@/contexts/authCtx';
 import {
   AlertDialog,
   AlertDialogBackdrop,
@@ -41,7 +40,7 @@ type Props = {
 
 export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   const router = useRouter();
-  const { currentUser } = useProfileData();
+  const { user: currentUser } = useAuth();
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [showCollaboratorAlert, setShowCollaboratorAlert] = useState(false);
   const handleRefresh = () => {
@@ -50,9 +49,9 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
     setTimeout(() => setShowMembersDrawer(true), 50);
   };
 
-  const imageUri =
-    playlist.cover_url ??
-    'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
+  const imageSource = playlist.cover_url
+    ? { uri: playlist.cover_url }
+    : getRandomImage();
 
   const playlistDescription =
     playlist.description ?? 'No description available';
@@ -103,17 +102,18 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   return (
     <>
       <Image
-        source={{ uri: imageUri }}
-        className='w-full aspect-square h-100'
+        source={imageSource}
+        className='w-full h-[300px]'
         alt='Playlist image'
+        resizeMode='cover'
       />
       <Card>
         <VStack>
           <HStack className='justify-between items-center'>
             <Heading size='4xl'>{playlist.name}</Heading>
             <HStack className='gap-2'>
-              {playlist.is_collaborative && (<CollaborativeBadge />)}
-              {playlist.is_private ? (<PrivateBadge />) : null}
+              {playlist.is_collaborative && <CollaborativeBadge />}
+              {playlist.is_private ? <PrivateBadge /> : null}
             </HStack>
           </HStack>
           {playlist?.description ? (
@@ -136,16 +136,6 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
               </Text>
             </HStack>
             <HStack>
-              {playlist.user.can_invite && (
-                <Button
-                  size='lg'
-                  className='rounded-full p-3.5 w-10'
-                  variant='outline'
-                  onPress={handleInviteUserPress}
-                >
-                  <ButtonIcon as={UserRoundPlus} size='sm' />
-                </Button>
-              )}
               {(() => {
                 const allUsers = [
                   ...(playlist.members || []),

@@ -5,7 +5,11 @@ node_modules/
 .keep
 app/android
 react/coverage
+.expo
+deno.lock
 supabase/functions/.env.dev
 supabase/functions/.env.prod
 react/.env.dev
 react/.env.prod
+*.log
+.expo

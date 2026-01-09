@@ -38,7 +38,7 @@ type PlaylistMember = {
 };
 
 type PlaylistTrack = {
-  spotify_id: string;
+  track_id: string;
   position: number;
   added_by: string;
   added_at: string;

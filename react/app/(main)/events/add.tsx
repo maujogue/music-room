@@ -1,4 +1,3 @@
-import { apiFetch } from '@/utils/apiFetch';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useProfile } from '@/contexts/profileCtx';
@@ -11,8 +10,6 @@ export default function AddNewEvent() {
   const { profile } = useProfile();
 
   const onSubmit = async (payload: MusicEventPayload) => {
-    console.log('HERE IMPLEMENT POST NEW EVENT TO BACK');
-
     if (!profile) {
       setError('Authentification error, try reconnect with Spotify please');
       return;

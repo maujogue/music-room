@@ -1,20 +1,20 @@
-
 // Note: naming 'Event' would conflict with built-in DOM Event
+type UserRole = 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
+
 type MusicEvent = {
   id: string;
   name: string;
   owner_id: string;
   owner: SpotifyOwner;
-  isPublic: boolean;
   playlist: Playlist;
   is_private: boolean;
   everyone_can_vote: boolean;
   description?: string;
   image_url?: string;
   created_at: string;
-
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
-  beginning_at: string;
+  beginning_at: string;  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
+  spatio_licence: boolean;
+  done: boolean;
 };
 
 type MusicEventFetchResult = {
@@ -28,11 +28,12 @@ type MusicEventFetchResult = {
 
 type EventUser = {
   // Info: UserInfo;
-  role: 'owner' | 'member' | 'voter' | 'inviter' | 'collaborator';
-  can_delete: boolean,
+  role: UserRole;
+  can_delete: boolean;
   can_edit: boolean;
   can_invite: boolean;
   can_vote: boolean;
+  profile: UserInfo;
 };
 
 type EventVote = {
@@ -52,7 +53,7 @@ type Coordinates = {
 type MusicEventLocation = {
   id: string;
   event_id: string;
-  coordinates?: string;
+  coordinates?: Coordinates;
   venuename?: string;
   address?: string;
   complement?: string;
@@ -67,30 +68,45 @@ type MusicEventSection = {
 
 type MusicEventPayload = {
   name: string;
-
-  // TODO : complete here from backend shape
-  // id: string;
-  name: string;
   image_url?: string;
-  // owner: SpotifyOwner;
   is_private: boolean;
   everyone_can_vote: boolean;
   description?: string;
   playlist_id?: string;
-  // playlistId: string;
   location: MusicEventLocation;
-
-  /* format ISO 8601 (ex. "2025-09-15T19:30:00Z") */
   beginning_at: string;
+  done: boolean;
+  spatio_licence: boolean;
 };
 
 type EventDateLabels = {
   start: { date: string; time?: string; full: string };
-  end: { date: string; time?: string; full: string };
-  rangeLabel: string;
-  duration: { ms: number; minutes: number; hours: number; human: string };
-  isSameDay: boolean;
   isCurrentYear: boolean;
   timezone: string;
   locale: string;
+};
+
+type TrackVote = {
+  eventId: string;
+  eventName?: string;
+  trackId: string;
+  voteCount: number;
+  voters: string[];
+};
+
+type MusicEventRadarResult = {
+  radar: {
+    coordinates: Coordinates;
+    dist: number;
+    venuename: string;
+  };
+  event: MusicEvent;
+  owner: UserInfo;
+};
+
+type PlayerTrack = {
+  id: string;
+  title: string;
+  cover_url: string;
+  artists_names: string[];
 };

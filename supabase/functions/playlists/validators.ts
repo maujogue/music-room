@@ -1,4 +1,5 @@
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
+import { HTTPException } from '@hono/http-exception';
+import type { CreatePlaylistPayload } from '@playlist';
 
 export function validateCreatePlaylistPayload(body: any): CreatePlaylistPayload {
   // Vérifier les champs requis
@@ -74,7 +75,6 @@ export function validateEditPlaylistPayload(body: any): Partial<CreatePlaylistPa
 }
 
 export function validateDeleteTracksPayload(body: any): { uris: string[] } {
-  console.log('Validating delete tracks payload:', body);
   if (!body.uris || !Array.isArray(body.uris) || body.uris.some((uri: any) => typeof uri !== 'string')) {
     throw new HTTPException(400, { message: 'uris is required and must be an array of strings' });
   }
@@ -89,7 +89,7 @@ export function validateAddUserPayload(body: any): { user_id: string, role: stri
   if (!body.role || (body.role !== 'member' && body.role !== 'collaborator')) {
     throw new HTTPException(400, { message: 'role must be either "member" or "collaborator"' });
   }
-  return { user_id: body.user_id, role: body.role};
+  return { user_id: body.user_id, role: body.role };
 }
 
 export function validateRemoveUserPayload(body: any): { user_id: string, role?: string } {
@@ -103,7 +103,6 @@ export function validateRemoveUserPayload(body: any): { user_id: string, role?: 
 }
 
 export function validateAddTracksPayload(body: any): { uris: string[] } {
-  console.log('Validating add tracks payload:', body);
   if (!body.uris || !Array.isArray(body.uris) || body.uris.some((uri: any) => typeof uri !== 'string')) {
     throw new HTTPException(400, { message: 'uris is required and must be an array of strings' });
   }

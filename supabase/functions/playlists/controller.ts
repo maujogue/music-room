@@ -1,18 +1,15 @@
-import { Hono } from 'jsr:@hono/hono'
-import { Context } from 'https://deno.land/x/hono@v3.2.3/mod.ts'
+import { Context } from '@hono/hono';
 import {
   checkPermission,
   checkPlaylistAccess,
   PERMISSIONS,
   getUserRoleInPlaylist
 } from './permissions.ts'
-import { getCurrentUser, getUserToken } from '../auth.ts'
 import {
   fetchSpotifyTracks,
   fetchSpotifyPlaylistTracksIds
 } from './services/spotify.ts'
 import {
-  getSupabasePlaylistByOwner,
   createPlaylistInSupabase,
   getSupabasePlaylistById,
   deletePlaylistInSupabase,
@@ -30,12 +27,22 @@ import {
   validateRemoveUserPayload,
   validateAddTracksPayload
 } from './validators.ts';
-import { refreshSpotifyToken } from '../auth.ts';
+import { refreshSpotifyToken } from '@auth/utils';
+import type {
+  PlaylistCollaborator,
+  PlaylistMember,
+  PlaylistResponse,
+  PlaylistTrack,
+  SpotifyTrackDetails
+} from '@playlist';
+import type { User } from '@supabase/supabase-js';
+import type { StatusCode } from "@hono/hono/utils/http-status";
+import { safeJsonFromContext } from '@utils/parsing';
 
 
-export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
+export async function deleteItemsFromPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const { uris } = validateDeleteTracksPayload(body)
   const user = c.get('user')
 
@@ -47,11 +54,12 @@ export async function deleteItemsFromPlaylist(c: Context): Promise<any> {
   )
 
   c.status(200)
+  return c.json({ message: 'Tracks deleted successfully' })
 }
 
-export async function addItemsToPlaylist(c: Context): Promise<any> {
+export async function addItemsToPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const { uris } = validateAddTracksPayload(body)
   const user = c.get('user')
 
@@ -59,18 +67,25 @@ export async function addItemsToPlaylist(c: Context): Promise<any> {
 
   await addTracksToPlaylistInSupabase(
     id,
-    uris
+    uris,
+    user.id
   )
 
   c.status(201)
   return c.json({ message: 'Tracks added successfully' })
 }
 
-export async function fetchPlaylistItems(c: Context): Promise<any> {
+export async function fetchPlaylistItems(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
+  const spotify_token = c.get('spotify_token')
 
-  let playlist = await getSupabasePlaylistById(id)
+  if (!spotify_token) {
+    c.status(401)
+    return c.json({ error: 'Please connect your Spotify account' })
+  }
+
+  let playlist: PlaylistResponse = await getSupabasePlaylistById(id)
 
   checkPlaylistAccess(playlist, user.id)
 
@@ -80,28 +95,27 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   }
 
   if (playlist.is_spotify_sync && playlist.spotify_id) {
-    await refreshSpotifyToken(playlist.owner_id)
-    const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, c.get('spotify_token'))
+    await refreshSpotifyToken(user.id)
+    const tracksIds = await fetchSpotifyPlaylistTracksIds(playlist, spotify_token)
     if (tracksIds) {
-      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, playlist.owner_id)
+      await addTracksToPlaylistInSupabase(playlist.id, tracksIds, user.id)
       playlist = await getSupabasePlaylistById(playlist.id)
     }
   }
 
   if (playlist.tracks && playlist.tracks.length !== 0) {
-    const spotify_token = c.get('spotify_token')
-    const trackIds = playlist.tracks.map((track: any) => track.spotify_id)
+    const trackIds = playlist.tracks.map((track: PlaylistTrack) => track.track_id)
     await refreshSpotifyToken(user.id)
     const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
 
 
     if (spotifyTracksData.error) {
-      c.status(spotifyTracksData.error.status || 500)
+      c.status(spotifyTracksData.error.status as StatusCode || 500)
       return c.json({ error: spotifyTracksData.error.message || 'Unknown error from Spotify API' })
     }
 
-    playlist.tracks = playlist.tracks.map((track: any) => {
-      const spotifyTrack = spotifyTracksData.tracks.find((t: any) => t.uri === track.spotify_id || t.id === track.spotify_id);
+    playlist.tracks = playlist.tracks.map((track: PlaylistTrack) => {
+      const spotifyTrack = spotifyTracksData.data.find((t: SpotifyTrackDetails) => t.uri === track.track_id || t.id === track.track_id);
       return {
         ...track,
         details: spotifyTrack || null
@@ -114,23 +128,24 @@ export async function fetchPlaylistItems(c: Context): Promise<any> {
   return c.json(playlist)
 }
 
-function setUserPlaylistPermissions(playlist: any, user: any) {
-  playlist.user = {}
-  playlist.user.can_edit = false
-  playlist.user.can_invite = false
-  playlist.user.is_following = true
-  playlist.user.role = getUserRoleInPlaylist(playlist, user.id)
+function setUserPlaylistPermissions(playlist: PlaylistResponse, user: User): PlaylistResponse {
+  playlist.user = {
+    can_edit: false,
+    can_invite: false,
+    is_following: true,
+    role: getUserRoleInPlaylist(playlist, user.id)
+  };
 
-  if (playlist.is_collaborative || playlist.collaborators.find((collab: any) => collab.id === user.id)) {
+  if (playlist.is_collaborative || playlist.collaborators.find((collab: PlaylistCollaborator) => collab.id === user.id)) {
     playlist.user.can_edit = true
   }
-  if (playlist.user.role === 'owner' || !playlist.is_private || playlist.collaborators.find((collab: any) => collab.id === user.id)) {
+  if (playlist.user.role === 'owner' || !playlist.is_private || playlist.collaborators.find((collab: PlaylistCollaborator) => collab.id === user.id)) {
     playlist.user.can_invite = true
   }
 
   const is_owner = playlist.owner.id === user.id
-  const is_member = playlist.members.find((member: any) => member.id === user.id)
-  const is_collaborator = playlist.collaborators.find((collab: any) => collab.id === user.id)
+  const is_member = playlist.members.find((member: PlaylistMember) => member.id === user.id)
+  const is_collaborator = playlist.collaborators.find((collab: PlaylistCollaborator) => collab.id === user.id)
   if (!is_owner && !is_member && !is_collaborator) {
     playlist.user.is_following = false
     playlist.user.can_edit = false
@@ -139,22 +154,23 @@ function setUserPlaylistPermissions(playlist: any, user: any) {
   return playlist
 }
 
-export async function createPlaylist(c: Context): Promise<any> {
+export async function createPlaylist(c: Context): Promise<Response> {
   const user = c.get('user');
-  const body = await c.req.json();
+  const body = await safeJsonFromContext(c)
 
   const validatedPayload = validateCreatePlaylistPayload(body);
 
   const res = await createPlaylistInSupabase(user.id, validatedPayload);
   if (!res) {
-    throw new HTTPException(500, { message: 'Failed to create playlist in Supabase' });
+    c.status(500);
+    return c.text('Failed to create playlist');
   }
 
   c.status(201);
   return c.json(res);
 }
 
-export async function deletePlaylist(c: Context): Promise<any> {
+export async function deletePlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
   const user = c.get('user')
 
@@ -165,9 +181,9 @@ export async function deletePlaylist(c: Context): Promise<any> {
   return c.json({ message: 'Playlist deleted successfully' })
 }
 
-export async function updatePlaylist(c: Context): Promise<any> {
+export async function updatePlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   const validatedPayload = validateEditPlaylistPayload(body);
@@ -178,9 +194,9 @@ export async function updatePlaylist(c: Context): Promise<any> {
   return c.json({ message: 'Playlist updated successfully' })
 }
 
-export async function addUserToPlaylist(c: Context): Promise<any> {
+export async function addUserToPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
   const { user_id, role } = validateAddUserPayload(body)
 
@@ -191,9 +207,9 @@ export async function addUserToPlaylist(c: Context): Promise<any> {
   return c.json({ message: `User added successfully as ${role}` })
 }
 
-export async function removeUserFromPlaylist(c: Context): Promise<any> {
+export async function removeUserFromPlaylist(c: Context): Promise<Response> {
   const id = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
   const { user_id, role } = validateRemoveUserPayload(body)
 
@@ -203,7 +219,6 @@ export async function removeUserFromPlaylist(c: Context): Promise<any> {
 
   await removeUserFromPlaylistInSupabase(id, user_id, role)
 
-  console.log('User removed successfully from playlist:', { playlist_id: id, user_id, role });
   c.status(200)
   return c.json({ message: 'User removed successfully from playlist' })
 }

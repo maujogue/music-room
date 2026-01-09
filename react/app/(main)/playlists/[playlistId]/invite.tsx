@@ -40,10 +40,11 @@ export default function Invite() {
         await addUserToPlaylist(playlistId, selectedUser.id, role);
         toast.show({
           title: 'User invited successfully',
-          description :`${selectedUser.username} has been invited as ${role}.`});
+          description: `${selectedUser.username} has been invited as ${role}.`,
+        });
         handleClose();
-      } catch (error) {
-        toast.error({title : 'Invitation failed'});
+      } catch {
+        toast.error({ title: 'Invitation failed' });
       }
     }
   };
@@ -71,8 +72,8 @@ export default function Invite() {
             <Heading className='text-typography-950 font-semibold' size='md'>
               Invite {selectedUser?.username} to playlist?
             </Heading>
-            <AlertDialogCloseButton >
-              <Icon as={CloseIcon} size="md" />
+            <AlertDialogCloseButton>
+              <Icon as={CloseIcon} size='md' />
             </AlertDialogCloseButton>
           </AlertDialogHeader>
           <AlertDialogBody className='mt-3 mb-4'>

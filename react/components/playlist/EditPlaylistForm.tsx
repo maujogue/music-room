@@ -4,7 +4,6 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
 import { Image } from 'react-native';
-import { Switch } from '@/components/ui/switch';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
@@ -14,6 +13,11 @@ import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
+import FloatButton from '@/components/generics/FloatButton';
+import { uploadImageToSupabase } from '@/utils/uploadImage';
+import { getRandomImage } from '@/utils/randomImage';
+import SwitchRow from '../generics/SwitchRow';
+import { Users, Lock } from 'lucide-react-native';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -37,12 +41,9 @@ export default function EditPlayListForm({
     initialValues?.is_collaborative ?? false
   );
 
-  const [imageUrl, setImageUrl] = useState(
-    initialValues?.cover_url ?? null
-  );
+  const [imageUrl, setImageUrl] = useState(initialValues?.cover_url ?? null);
 
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
 
@@ -59,21 +60,39 @@ export default function EditPlayListForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
+    let finalCoverUrl = imageUrl;
+
+    // If no cover URL is provided, use a random default image (same logic as events)
+    if (!finalCoverUrl) {
+      try {
+        const randomImageAsset = getRandomImage();
+        const resolvedAsset = Image.resolveAssetSource(randomImageAsset);
+        if (resolvedAsset?.uri) {
+          // Upload the default image to storage
+          finalCoverUrl = await uploadImageToSupabase(
+            resolvedAsset.uri,
+            'avatars',
+            'playlists'
+          );
+        }
+      } catch (err) {
+        console.error('Failed to upload default playlist image:', err);
+        // Continue without cover_url if upload fails
+      }
+    }
+
     const payload: PlaylistPayload = {
       name: name.trim(),
       is_private: isPrivate,
       is_collaborative: isCollaborative,
       description: description.trim() || undefined,
-      cover_url: imageUrl || undefined,
+      cover_url: finalCoverUrl || undefined,
     };
 
     try {
-      setLoading(true);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -98,21 +117,30 @@ export default function EditPlayListForm({
         throw new Error('No image uri!');
       }
 
-      setImageUrl(image.uri);
+      const publicUrl = await uploadImageToSupabase(
+        image.uri,
+        'avatars',
+        'playlists'
+      );
 
-      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const path = `${Date.now()}.${fileExt}`;
-      console.log('Uploading to path:', path);
-      toast.show({ title: 'uploaded playlist cover', description: `Uploading to ${path}` });
-    } catch (error) {
-      toast.error({ title: 'uploading playlist cover image failed' });
+      setImageUrl(publicUrl);
+
+      toast.show({
+        title: 'uploaded playlist cover',
+        description: 'Image uploaded successfully',
+      });
+    } catch (err: any) {
+      toast.error({
+        title: 'uploading playlist cover image failed',
+        description: err.message,
+      });
     } finally {
       setUploading(false);
     }
   }
 
   return (
-    <FormControl className='p-4 border rounded-lg border-outline-300'>
+    <FormControl className='border rounded-lg border-outline-300'>
       <VStack space='md'>
         <Box>
           {imageUrl ? (
@@ -121,17 +149,20 @@ export default function EditPlayListForm({
               style={{
                 width: '100%',
                 height: 300,
+                margin: 0,
+                padding: 0,
                 marginTop: 0,
                 marginBottom: 10,
               }}
               resizeMode='cover'
+              alt="Playlist's cover image"
             />
           ) : (
             <Box
-              className='bg-gray-200 items-center justify-center'
+              className='bg-white items-center justify-center'
               style={{ width: '100%', height: 300, marginTop: 0 }}
             >
-              <Text className='text-gray-500'>No image selected</Text>
+              <Text className='text-typography-500'>No image selected</Text>
             </Box>
           )}
           <Button
@@ -139,9 +170,12 @@ export default function EditPlayListForm({
             disabled={uploading}
             className='mb-2 absolute right-2 top-2 z-10 rounded-full bg-primary-500/70 w-12 h-12 p-1.5'
           >
-            <ButtonIcon size="lg" className="w-7 h-7" as={Pen} />
+            <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
           </Button>
 
+        </Box>
+
+        <VStack space='sm' className='px-4'>
           <Text>Name</Text>
           <Input>
             <InputField
@@ -151,42 +185,44 @@ export default function EditPlayListForm({
               autoCapitalize='sentences'
             />
           </Input>
-        </Box>
+          <Box>
 
-        <Box>
-          <Text>Description</Text>
-          <Textarea className=''>
-            <TextareaInput
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-              textAlignVertical='top'
-              autoCapitalize='sentences'
-            />
-          </Textarea>
-        </Box>
+            <Text>Description</Text>
+            <Textarea className=''>
+              <TextareaInput
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={3}
+                textAlignVertical='top'
+                autoCapitalize='sentences'
+              />
+            </Textarea>
+          </Box>
 
-        <VStack className='items-start'>
-          <HStack className='items-center'>
-            <Switch
-              value={isPrivate}
-              onToggle={() => {
-                setIsPrivate(prev => !prev);
-              }}
-            />
-            <Text>Private</Text>
-          </HStack>
+          <VStack className='items-start py-2 w-full'>
+            <Box className='py-4'>
+              <SwitchRow
+                value={isPrivate}
+                onToggle={() => {
+                  setIsPrivate(prev => !prev);
+                }}
+                label='Private'
+                helper='Only you can see this playlist.'
+                leading={<Lock size={16} />}
+              />
+            </Box>
 
-          <HStack className='items-center'>
-            <Switch
+            <SwitchRow
               value={isCollaborative}
               onToggle={() => {
                 setIsCollaborative(prev => !prev);
               }}
+              label='Collaborative'
+              helper='Allow others to add songs to this playlist.'
+              leading={<Users size={16} />}
             />
-            <Text>Collaborative</Text>
-          </HStack>
+          </VStack>
         </VStack>
 
         {error ? (
@@ -212,16 +248,8 @@ export default function EditPlayListForm({
         )}
 
         {/* Submit */}
-        <Button
-          size='md'
-          variant='solid'
-          disabled={loading}
-          onPress={handlePressValid}
-          action='positive'
-        >
-          <Icon as={CheckIcon} color='white' size='sm' />
-        </Button>
+        <FloatButton onPress={handlePressValid} icon={CheckIcon} />
       </VStack>
-    </FormControl >
+    </FormControl>
   );
 }

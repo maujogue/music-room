@@ -34,7 +34,6 @@ export default function TrackListItem({
   renderLeftAction,
   renderRightAction,
 }: TrackListItemProps) {
-  console.log('Rendering TrackListItem for track:', track);
   const swipeableRef = useRef<SwipeableMethods>(null);
 
   const getImage = () => {
@@ -75,7 +74,7 @@ export default function TrackListItem({
         }, 500);
       }}
     >
-      <Card className='flex-row gap-2 p-2'>
+      <Card className='flex-row gap-2 p-2 px-5 rounded-none'>
         <Image
           source={getImage()}
           className='rounded-md h-[60px] w-[60px]'

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { getVotesEventById } from '@/services/events';
 import { MOCK_VOTES } from '@/mocks/mockEvents';
 
 export function useEventVotes(eventId: string) {

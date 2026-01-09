@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ScrollView } from 'react-native';
 import useSearchGlobal from '@/hooks/useSearchGlobal';
@@ -8,6 +8,7 @@ import TrackListItem from '@/components/track/TrackListItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import UserListItem from '@/components/profile/UserListItem';
 import EventListItem from '@/components/events/EventListItem';
+import { useAppToast } from '@/hooks/useAppToast';
 
 interface Props {
   placeholder?: string;
@@ -17,6 +18,7 @@ interface Props {
   renderItemPlaylist?: (item: any) => React.ReactNode;
   renderItemUser?: (item: any) => React.ReactNode;
   renderItemEvent?: (item: any) => React.ReactNode;
+  noHorizontalPadding?: boolean;
 }
 
 export default function Search({
@@ -28,24 +30,54 @@ export default function Search({
     <PlaylistListItem playlist={item} key={item.id} />
   ),
   renderItemUser = (item: any) => (
-    <UserListItem user={item} key={item.id} showFollowButtons={false} />
+    <UserListItem user={item} key={item.id} showActionButtons={false} />
   ),
   renderItemEvent = (item: any) => (
     <EventListItem event={item} owner={item.owner} key={item.id} />
   ),
+  noHorizontalPadding = false,
 }: Props) {
-  const { query, setQuery, filter, setFilter, onChangeFilter, results } =
+  const { query, setQuery, filter, setFilter, onChangeFilter, results, error } =
     useSearchGlobal(defaultType);
 
-  const users = results.userResults ?? [];
-  const playlists =
-    results.playlistResults?.playlists?.items ?? results.playlistResults ?? [];
-  const tracks =
-    results.trackResults?.tracks?.items ?? results.trackResults ?? [];
-  const events = results.eventResults?.events ?? results.eventResults ?? [];
+  const normalizeItems = <T,>(payload: any): T[] => {
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload as T[];
+    if (payload.items && Array.isArray(payload.items))
+      return payload.items as T[];
+    if (
+      payload.tracks &&
+      payload.tracks.items &&
+      Array.isArray(payload.tracks.items)
+    )
+      return payload.tracks.items as T[];
+    if (
+      payload.playlists &&
+      payload.playlists.items &&
+      Array.isArray(payload.playlists.items)
+    )
+      return payload.playlists.items as T[];
+    if (payload.events && Array.isArray(payload.events))
+      return payload.events as T[];
+    return [];
+  };
 
-  console.log('Search results events:', events);
+  const users = normalizeItems<any>(results.userResults ?? []);
+  const playlists = normalizeItems<any>(results.playlistResults ?? []);
+  const tracks = normalizeItems<any>(results.trackResults ?? []);
+  const events = normalizeItems<any>(results.eventResults ?? []);
+  const toast = useAppToast();
   const limit = filter === 'all' ? 3 : undefined;
+
+  useEffect(() => {
+    if (error) {
+      toast.error({
+        title: 'Search Error',
+        description: error.message,
+        duration: 3000,
+      });
+    }
+  }, [error]);
 
   return (
     <GestureHandlerRootView>
@@ -61,10 +93,11 @@ export default function Search({
         />
 
         <ResultsSection
-          title='Tracks'
+          title={defaultType === 'All' ? 'Tracks' : undefined}
           items={tracks}
           limit={limit}
           renderItem={renderItemTrack}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -73,9 +106,9 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemPlaylist}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -84,9 +117,9 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemEvent}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -95,9 +128,9 @@ export default function Search({
           limit={limit}
           onShowMore={label => {
             setFilter(label);
-            console.log('filter:', filter);
           }}
           renderItem={renderItemUser}
+          noHorizontalPadding={noHorizontalPadding}
         />
       </ScrollView>
     </GestureHandlerRootView>

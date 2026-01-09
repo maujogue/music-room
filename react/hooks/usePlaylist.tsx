@@ -11,6 +11,7 @@ export function usePlaylist(id: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [canEdit, setCanEdit] = useState(false);
+  const [canInvite, setCanInvite] = useState(false);
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
@@ -18,7 +19,8 @@ export function usePlaylist(id: string | null) {
   const fetchPlaylist = useCallback(async () => {
     if (!id) {
       setLoading(false);
-      setError("no playlist found, no id given");
+      setError(null);
+      setPlaylist(null);
       return;
     }
     try {
@@ -27,8 +29,8 @@ export function usePlaylist(id: string | null) {
       const data = await getPlaylistById(id);
       setPlaylist(data);
       setCanEdit(data.user.can_edit ?? false);
+      setCanInvite(data.user.can_invite ?? false);
     } catch (err) {
-      console.error('Fetch playlist error:', err);
       setError(getErrorMsg(err));
     } finally {
       setLoading(false);
@@ -47,6 +49,8 @@ export function usePlaylist(id: string | null) {
   // Remove Playlist (DELETE)
   // ---------------------------------------------------------------
   const deletePlaylist = useCallback(async () => {
+    if (!id) return;
+
     setLoading(true);
     setError(null);
 
@@ -61,5 +65,13 @@ export function usePlaylist(id: string | null) {
     }
   }, [id]);
 
-  return { playlist, loading, error, refetch, deletePlaylist, canEdit };
+  return {
+    playlist,
+    loading,
+    error,
+    refetch,
+    deletePlaylist,
+    canEdit,
+    canInvite,
+  };
 }

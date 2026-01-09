@@ -1,3 +1,6 @@
+-- Enable pgTAP extension for database testing
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
 -- Create a table for public profiles
 create table if not exists public.profiles (
   id uuid not null primary key references auth.users(id) on delete cascade,

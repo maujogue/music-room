@@ -8,15 +8,16 @@ import {
 import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
 import {
-  getUserProfile,
+  getCurrentUserProfile,
   updateProfile as updateProfileAPI,
   followUser,
   unfollowUser,
-  searchUsers,
 } from '@/services/profile';
+import { connectToSpotify } from '@/services/auth';
 
 interface ProfileContextType {
   profile: UserInfo | null;
+  isConnectedToSpotify?: boolean;
   isLoading: boolean;
   followers: any[];
   following: any[];
@@ -27,7 +28,7 @@ interface ProfileContextType {
   clearProfile: () => void;
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
-  searchUsers: (query: string) => Promise<{ data: any[]; error: any }>;
+  connectSpotify: () => Promise<{ error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -46,6 +47,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnectedToSpotify, setIsConnectedToSpotify] =
+    useState<boolean>(false);
 
   // Fetch profile and subscribe to realtime changes when user is authenticated
   useEffect(() => {
@@ -119,16 +122,17 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     setIsLoading(true);
     try {
-      const data = await getUserProfile('me');
+      const data = await getCurrentUserProfile();
 
       if (!data) {
-        console.error('Error fetching profile:', error);
         setProfile(null);
         setFollowers([]);
         setFollowing([]);
       } else {
         // The data now includes both profile and follow information
-        setProfile(data?.profile || data);
+        console.log('Fetched profile data:', data);
+        setIsConnectedToSpotify(!!data.is_connected_to_spotify);
+        setProfile(data);
         setFollowers(data?.followers || []);
         setFollowing(data?.following || []);
       }
@@ -152,19 +156,12 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const { error } = await updateProfileAPI(updates);
-
-      if (error) {
-        console.error('Error updating profile:', error);
-        return { error };
-      } else {
-        // Update local state with new data
-        setProfile(prev => (prev ? { ...prev, ...updates } : null));
-        return { error: null };
-      }
+      await updateProfileAPI(updates);
+      setProfile(prev => (prev ? { ...prev, ...updates } : null));
+      return { error: null };
     } catch (error) {
       console.error('Unexpected error updating profile:', error);
-      return { error: { message: 'An unexpected error occurred' } };
+      return { error: { message: error || 'An unexpected error occurred' } };
     } finally {
       setIsLoading(false);
     }
@@ -207,19 +204,20 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
-  const handleSearchUsers = async (
-    query: string
-  ): Promise<{ data: any[]; error: any }> => {
+  const connectSpotify = async (): Promise<{ error: any }> => {
     try {
-      return await searchUsers(query);
+      await connectToSpotify();
+      return { error: null };
     } catch (error) {
-      console.error('Unexpected error searching users:', error);
-      return { data: [], error: { message: 'An unexpected error occurred' } };
+      console.error('Error during Spotify OAuth:', error);
+      return { error };
     }
   };
 
   const value: ProfileContextType = {
     profile,
+    isConnectedToSpotify,
+    connectSpotify,
     isLoading,
     followers,
     following,
@@ -230,7 +228,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     clearProfile,
     followUser: handleFollowUser,
     unfollowUser: handleUnfollowUser,
-    searchUsers: handleSearchUsers,
   };
 
   return (

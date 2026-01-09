@@ -10,16 +10,27 @@ import { Button } from '@/components/ui/button';
 import { ButtonText } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/services/supabase';
+import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
+import { useAuth } from '@/contexts/authCtx';
+import React from 'react';
+
 interface Props {
   error: string | null;
   text?: string;
+  actionButton?: React.ReactNode;
 }
 
 export default function ErrorScreen({
   error,
   text = 'Please try again later.',
+  actionButton,
 }: Props) {
   const router = useRouter();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+  };
 
   return (
     <Center className='flex-1 p-24'>
@@ -32,6 +43,7 @@ export default function ErrorScreen({
           <Heading className='text-red-700 text-center'>
             There is a wrong note in your music room
           </Heading>
+
           <Badge size='sm' action={'error'} className='rounded-full h-6'>
             <BadgeIcon size='lg' as={Music2Icon} />
             <BadgeIcon size='lg' as={TriangleAlertIcon} />
@@ -48,6 +60,8 @@ export default function ErrorScreen({
           >
             <ButtonText>Log out</ButtonText>
           </Button>
+        <HStack space='md' className='items-start pb-8'>
+          <VStack>
             <Text size='md' className='font-semibold'>
               {error ? error : 'Unknown error broke the music'}
             </Text>
@@ -56,6 +70,18 @@ export default function ErrorScreen({
             </Text>
           </VStack>
         </HStack>
+        <VStack space='md' className='mt-6 w-full'>
+          <Button
+            action='negative'
+            variant='solid'
+            onPress={handleLogout}
+            className='w-full'
+          >
+            <ButtonIcon size='sm' />
+            <ButtonText>Logout</ButtonText>
+          </Button>
+        </VStack>
+        {actionButton}
       </Card>
     </Center>
   );
