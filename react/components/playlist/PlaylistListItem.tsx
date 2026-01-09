@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import PrivateBadge from '@/components/generics/PrivateBadge';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   playlist: Playlist;
@@ -17,11 +18,9 @@ type Props = {
 export default function PlaylistListItem({ playlist, onPress }: Props) {
   const router = useRouter();
   const getImage = () => {
-    return {
-      uri: playlist.cover_url
-        ? playlist.cover_url
-        : 'https://picsum.photos/205',
-    };
+    return playlist.cover_url
+      ? { uri: playlist.cover_url }
+      : getRandomImage();
   };
 
   const onPlaylistPress = () => {

@@ -238,10 +238,10 @@ export default function EditEventForm({
                 />
               ) : (
                 <Box
-                  className='bg-gray-200 items-center justify-center'
+                  className='bg-white items-center justify-center'
                   style={{ width: '100%', height: 200, marginTop: 0 }}
                 >
-                  <Text className='text-gray-500'>No image selected</Text>
+                  <Text className='text-typography-500'>No image selected</Text>
                 </Box>
               )}
 

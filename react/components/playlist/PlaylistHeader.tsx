@@ -13,12 +13,13 @@ import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'expo-router';
 import { AvatarGroup } from '@/components/generics/AvatarGroup';
+import { getRandomImage } from '@/utils/randomImage';
 import { Pressable } from '@/components/ui/pressable';
 import { useState } from 'react';
 import PlaylistMembersDrawer from './PlaylistMembersDrawer';
 import LikeButton from '@/components/generics/LikeButton';
 import { addUserToPlaylist, removeUserFromPlaylist } from '@/services/playlist';
-import { useProfileData } from '@/hooks/useProfileData';
+import { useAuth } from '@/contexts/authCtx';
 import {
   AlertDialog,
   AlertDialogBackdrop,
@@ -39,7 +40,7 @@ type Props = {
 
 export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   const router = useRouter();
-  const { currentUser } = useProfileData();
+  const { user: currentUser } = useAuth();
   const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [showCollaboratorAlert, setShowCollaboratorAlert] = useState(false);
   const handleRefresh = () => {
@@ -48,9 +49,9 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
     setTimeout(() => setShowMembersDrawer(true), 50);
   };
 
-  const imageUri =
-    playlist.cover_url ??
-    'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
+  const imageSource = playlist.cover_url
+    ? { uri: playlist.cover_url }
+    : getRandomImage();
 
   const playlistDescription =
     playlist.description ?? 'No description available';
@@ -101,9 +102,10 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   return (
     <>
       <Image
-        source={{ uri: imageUri }}
-        className='w-full aspect-square h-100'
+        source={imageSource}
+        className='w-full h-[300px]'
         alt='Playlist image'
+        resizeMode='cover'
       />
       <Card>
         <VStack>

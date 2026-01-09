@@ -31,7 +31,7 @@ export default function EventListItem({ event, owner }: Props) {
   const getImage = () => {
     return event.image_url
       ? { uri: event.image_url }
-      : { uri: getRandomImage() };
+      : getRandomImage();
   };
 
   return (

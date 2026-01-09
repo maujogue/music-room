@@ -16,6 +16,7 @@ import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
 import FloatButton from '@/components/generics/FloatButton';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -58,12 +59,33 @@ export default function EditPlayListForm({
   const handlePressValid = async () => {
     if (!validate()) return;
 
+    let finalCoverUrl = imageUrl;
+
+    // If no cover URL is provided, use a random default image (same logic as events)
+    if (!finalCoverUrl) {
+      try {
+        const randomImageAsset = getRandomImage();
+        const resolvedAsset = Image.resolveAssetSource(randomImageAsset);
+        if (resolvedAsset?.uri) {
+          // Upload the default image to storage
+          finalCoverUrl = await uploadImageToSupabase(
+            resolvedAsset.uri,
+            'avatars',
+            'playlists'
+          );
+        }
+      } catch (err) {
+        console.error('Failed to upload default playlist image:', err);
+        // Continue without cover_url if upload fails
+      }
+    }
+
     const payload: PlaylistPayload = {
       name: name.trim(),
       is_private: isPrivate,
       is_collaborative: isCollaborative,
       description: description.trim() || undefined,
-      cover_url: imageUrl || undefined,
+      cover_url: finalCoverUrl || undefined,
     };
 
     try {
@@ -134,10 +156,10 @@ export default function EditPlayListForm({
             />
           ) : (
             <Box
-              className='bg-gray-200 items-center justify-center'
+              className='bg-white items-center justify-center'
               style={{ width: '100%', height: 300, marginTop: 0 }}
             >
-              <Text className='text-gray-500'>No image selected</Text>
+              <Text className='text-typography-500'>No image selected</Text>
             </Box>
           )}
           <Button

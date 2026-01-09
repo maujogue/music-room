@@ -141,7 +141,7 @@ export default function PlaylistMembersDrawer({
                 <Text size='sm' className='font-medium text-gray-600'>
                   Owner
                 </Text>
-                <HStack className='items-center gap-3 p-2 bg-gray-50 rounded-lg'>
+                <HStack className='items-center gap-3 p-2 bg-white rounded-lg'>
                   <Avatar size='md'>
                     <AvatarFallbackText>
                       {playlist.owner.username.charAt(0).toUpperCase()}

@@ -23,6 +23,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { Divider } from '@/components/ui/divider';
 import { useState } from 'react';
 import { Image } from '@/components/ui/image';
+import { getRandomImage } from '@/utils/randomImage';
 
 interface Props {
   playlist: Playlist;
@@ -39,9 +40,9 @@ export default function Playlist3DotMenu({
   isPremium = true,
   onUpgrade,
 }: Props) {
-  const imageUri =
-    playlist?.cover_url ??
-    'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228';
+  const imageSource = playlist?.cover_url
+    ? { uri: playlist.cover_url }
+    : getRandomImage();
   const [showDrawer, setShowDrawer] = useState(false);
 
   const handleClose = () => setShowDrawer(false);
@@ -64,7 +65,7 @@ export default function Playlist3DotMenu({
           <DrawerHeader>
             <HStack className='gap-3 items-center'>
               <Image
-                source={{ uri: imageUri }}
+                source={imageSource}
                 className='w-20 h-20 aspect-square '
                 alt='Playlist image'
               />
@@ -97,7 +98,11 @@ export default function Playlist3DotMenu({
                     }}
                   >
                     <HStack className='gap-3 items-center'>
-                      <Icon as={LockIcon} size='lg' className='text-typography-400' />
+                      <Icon
+                        as={LockIcon}
+                        size='lg'
+                        className='text-typography-400'
+                      />
                       <Text className='text-typography-400'>Delete</Text>
                     </HStack>
                     <Badge action='warning' className='rounded-full'>
@@ -130,7 +135,11 @@ export default function Playlist3DotMenu({
                     }}
                   >
                     <HStack className='gap-3 items-center'>
-                      <Icon as={LockIcon} size='lg' className='text-typography-400' />
+                      <Icon
+                        as={LockIcon}
+                        size='lg'
+                        className='text-typography-400'
+                      />
                       <Text className='text-typography-400'>Edit</Text>
                     </HStack>
                     <Badge action='warning' className='rounded-full'>

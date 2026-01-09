@@ -42,8 +42,8 @@ export default function EventList({ sections }: Props) {
           className='w-full'
         />
       </ScrollView>
-      <FloatButton 
-        onPress={handlePressCreateEvent} 
+      <FloatButton
+        onPress={handlePressCreateEvent}
         icon={Plus}
         className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
       />
