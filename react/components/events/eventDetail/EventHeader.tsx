@@ -85,9 +85,6 @@ export default function EventHeader({ eventData, onRefresh }: Props) {
                     ) : (
                       <Box />
                     )}
-                    <HStack className='gap-1'>
-                      <EventAllBadges event={eventData.event} />
-                    </HStack>
                   </HStack>
                 </HStack>
               </VStack>

@@ -93,7 +93,7 @@ export default function Search({
         />
 
         <ResultsSection
-          title='Tracks'
+          title={defaultType === 'All' ? 'Tracks' : undefined}
           items={tracks}
           limit={limit}
           renderItem={renderItemTrack}
