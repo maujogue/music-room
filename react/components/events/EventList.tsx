@@ -1,4 +1,4 @@
-import { SectionList, ScrollView } from 'react-native';
+import { SectionList, ScrollView, View } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import EventListItem from '@/components/events/EventListItem';
 import { useRouter } from 'expo-router';
@@ -22,6 +22,11 @@ export default function EventList({ sections }: Props) {
   return (
     <>
       <ScrollView className='px-4'>
+        <View className='pt-6 pb-4'>
+          <Heading size='3xl' className='font-bold text-typography-900'>
+            Events
+          </Heading>
+        </View>
         <SectionList
           sections={sections}
           keyExtractor={item => `item-${item.event.id}-${Math.random()}`}
@@ -37,10 +42,14 @@ export default function EventList({ sections }: Props) {
           className='w-full'
         />
       </ScrollView>
-      <FloatButton onPress={handlePressCreateEvent} icon={Plus} />
+      <FloatButton 
+        onPress={handlePressCreateEvent} 
+        icon={Plus}
+        className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+      />
       <FloatButton
         onPress={handlePressEventRadar}
-        className='absolute bottom-4 right-20 rounded-full p-4 blurred-bg'
+        className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
         icon={Radar}
       />
     </>

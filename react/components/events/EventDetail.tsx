@@ -88,8 +88,6 @@ export default function EventDetail() {
         <VStack className='flex-1'>
           <EventHeader
             eventData={data}
-            expanded={expanded}
-            onToggle={onToggleHeader}
             onRefresh={refetch}
           />
 
