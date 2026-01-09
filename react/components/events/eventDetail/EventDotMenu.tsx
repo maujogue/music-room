@@ -20,13 +20,21 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Divider } from '@/components/ui/divider';
 import { useState } from 'react';
+import { MusicEventFetchResult } from '@/types/events';
+import EventLocationInfo from '@/components/events/eventDetail/EventLocationInfos';
+import EventDatesInfos from './Dates/EventDatesInfos';
 
 interface Props {
   callDelete: () => void;
   callEdit: () => void;
+  eventData: MusicEventFetchResult;
 }
 
-export default function Event3DotMenu({ callDelete, callEdit }: Props) {
+export default function Event3DotMenu({
+  callDelete,
+  callEdit,
+  eventData,
+}: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleOpenDrawer = () => {
@@ -69,6 +77,25 @@ export default function Event3DotMenu({ callDelete, callEdit }: Props) {
           </DrawerHeader>
 
           <DrawerBody className='gap-2'>
+            <VStack className='bg-background-50 p-4 rounded-xl gap-3 mb-2'>
+              <EventDatesInfos event={eventData.event} />
+              <Divider />
+              <EventLocationInfo location={eventData.location} />
+              <Divider />
+              <HStack className='justify-between items-center'>
+                <Text className='font-semibold'>Visibility</Text>
+                <Text>{eventData.event.is_private ? 'Private' : 'Public'}</Text>
+              </HStack>
+              <HStack className='justify-between items-center'>
+                <Text className='font-semibold'>Type</Text>
+                <Text>
+                  {eventData.event.everyone_can_vote
+                    ? 'Collaborative'
+                    : 'Not Collaborative'}
+                </Text>
+              </HStack>
+            </VStack>
+
             <VStack className='gap-2'>
               {/* Delete Button */}
               <Button

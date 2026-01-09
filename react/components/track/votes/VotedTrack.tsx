@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
 import { padding } from 'aes-js';
+import NumBadge from '@/components/generics/NumBadge';
 
 type Props = {
   track: PlaylistTrack;
@@ -62,25 +63,22 @@ export default function VotedTrack({
         leftThreshold={75}
         rightThreshold={75}
       >
-        <Card
-          key={track.track_id}
-          className='bg-white p-0 rounded-lg'
-        >
+        <Card key={track.track_id} className='bg-white p-0 rounded-lg'>
           <HStack className='w-full rounded-lg justify-between items-center'>
-            <HStack className='w-full justify-start gap-2 items-center'>
-            <HStack  className='items-center gap-1.5'>
-              <Image className='h-10 rounded-l-lg'
-                source={{ uri: track.details.album.images[0]?.url }}
-                alt='Track album art'
-              />
- { voteCount && (<Text className=' text-xs font-bold text-sky-500'>
-                  {voteCount}
-                </Text>)}
-            </HStack>
-                <Text className='font-medium line-clamp-1'>
-                  {track.details.name}
-                </Text>
+            <HStack className='w-full justify-between gap-2 items-center'>
+              <HStack className='items-center gap-1.5'>
+                <Image
+                  className='h-10 rounded-l-lg'
+                  source={{ uri: track.details.album.images[0]?.url }}
+                  alt='Track album art'
+                />
+              <Text className='font-medium line-clamp-1'>
+                {track.details.name}
+              </Text>
               </HStack>
+            <NumBadge num={voteCount ?? 0} hideIfZero={true} />
+
+            </HStack>
           </HStack>
         </Card>
       </ReanimatedSwipeable>

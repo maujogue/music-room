@@ -26,6 +26,8 @@ import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import EventDoneBadge from '@/components/generics/EventDoneBadge';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
+import { uploadImageToSupabase } from '@/utils/uploadImage';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -59,9 +61,7 @@ export default function EditEventForm({
   const [spatio_licence, setSpatioLicence] = useState(
     initialValues.event?.spatio_licence ?? false
   );
-  const [done, setDone] = useState(
-    initialValues.event?.done ?? false
-  );
+  const [done, setDone] = useState(initialValues.event?.done ?? false);
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
   );
@@ -102,7 +102,7 @@ export default function EditEventForm({
     showBeginningMode('time');
   };
 
-  async function uploadAvatar() {
+  async function uploadEventImage() {
     try {
       setUploading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -124,18 +124,23 @@ export default function EditEventForm({
         throw new Error('No image uri!');
       }
 
-      setImageUrl(image.uri);
+      const publicUrl = await uploadImageToSupabase(
+        image.uri,
+        'avatars',
+        'events'
+      );
 
-      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const path = `${Date.now()}.${fileExt}`;
+      setImageUrl(publicUrl);
 
-      console.log('Uploading to path:', path);
       toast.show({
-        title: 'uploaded playlist cover',
-        description: `Uploading to ${path}`,
+        title: 'uploaded event image',
+        description: 'Image uploaded successfully',
       });
-    } catch {
-      toast.error({ title: 'uploading event image failed' });
+    } catch (err: any) {
+      toast.error({
+        title: 'uploading event image failed',
+        description: err.message,
+      });
     } finally {
       setUploading(false);
     }
@@ -173,7 +178,10 @@ export default function EditEventForm({
           complement: location?.street ?? null,
           city: location?.city ?? null,
           country: location?.country ?? null,
-          coordinates: location && location.latitude && location.longitude ?  { lat: location?.latitude, long: location?.longitude } : null,
+          coordinates:
+            location && location.latitude && location.longitude
+              ? { lat: location?.latitude, long: location?.longitude }
+              : null,
         }
       : null;
 
@@ -188,14 +196,15 @@ export default function EditEventForm({
     const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
-      image_url: imageUrl.trim() || null,
+      image_url:
+        imageUrl.trim() || Image.resolveAssetSource(getRandomImage()).uri,
       playlist_id: playlist?.id || null,
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       is_private,
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
       spatio_licence,
-      done
+      done,
     } as any;
 
     try {
@@ -239,7 +248,7 @@ export default function EditEventForm({
               <Button
                 size='sm'
                 variant='solid'
-                onPress={uploadAvatar}
+                onPress={uploadEventImage}
                 disabled={uploading}
                 className='mb-2 absolute right-2 top-2 z-10 rounded-full w-12 h-12 p-1.5 bg-primary-500/70 '
               >
@@ -292,8 +301,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={is_private}
                         onToggle={() => {
                           setIsPrivate(prev => !prev);
@@ -307,8 +316,8 @@ export default function EditEventForm({
                       <Switch
                         value={everyone_can_vote}
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         onToggle={() => {
                           setEveryoneCanVote(prev => !prev);
                         }}
@@ -321,8 +330,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={spatio_licence}
                         onToggle={() => {
                           setSpatioLicence(prev => !prev);
@@ -334,8 +343,8 @@ export default function EditEventForm({
                     <HStack className='items-center'>
                       <Switch
                         trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor="#FFFFFF"
-                        ios_backgroundColor="#d4d4d4"
+                        thumbColor='#FFFFFF'
+                        ios_backgroundColor='#d4d4d4'
                         value={done}
                         onToggle={() => {
                           setDone(prev => !prev);
@@ -345,8 +354,6 @@ export default function EditEventForm({
                       <Text>Event is done</Text>
                     </HStack>
                   </VStack>
-                  
-
                 </HStack>
 
                 <Text className='mt-2 font-semibold'>
@@ -393,13 +400,19 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <Box>
-                  <Text size='sm' className='text-neutral-700'>{location?.address ?? 'No address place'}</Text>
-                  {(location && location.latitude && location.longitude) ? (
-
-                    <Badge size='md' action='muted' className='rounded-full h-6 my-2'>
+                  <Text size='sm' className='text-neutral-700'>
+                    {location?.address ?? 'No address place'}
+                  </Text>
+                  {location && location.latitude && location.longitude ? (
+                    <Badge
+                      size='md'
+                      action='muted'
+                      className='rounded-full h-6 my-2'
+                    >
                       <BadgeIcon as={MapPinIcon} size='lg' />
                       <BadgeText className='pl-1'>
-                        {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+                        {location.latitude.toFixed(5)},{' '}
+                        {location.longitude.toFixed(5)}
                       </BadgeText>
                     </Badge>
                   ) : (
@@ -459,7 +472,7 @@ export default function EditEventForm({
           setLocation(val);
         }}
         initialCoords={
-          (location && location.latitude && location.longitude)
+          location && location.latitude && location.longitude
             ? { latitude: location.latitude, longitude: location.longitude }
             : undefined
         }

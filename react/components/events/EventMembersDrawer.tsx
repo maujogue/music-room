@@ -143,8 +143,8 @@ export default function EventMembersDrawer({
                 )}
                 <VStack className='flex-1 p-4'>
                   <Text
-                    size='lg'
-                    className='font-semibold text-left text-gray-100'
+                    size='2xl'
+                    className='font-semibold text-left text-bold'
                   >
                     {eventData.event.name}
                   </Text>

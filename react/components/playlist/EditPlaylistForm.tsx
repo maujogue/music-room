@@ -15,6 +15,7 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
 import FloatButton from '@/components/generics/FloatButton';
+import { uploadImageToSupabase } from '@/utils/uploadImage';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -93,17 +94,23 @@ export default function EditPlayListForm({
         throw new Error('No image uri!');
       }
 
-      setImageUrl(image.uri);
+      const publicUrl = await uploadImageToSupabase(
+        image.uri,
+        'avatars',
+        'playlists'
+      );
 
-      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const path = `${Date.now()}.${fileExt}`;
-      console.log('Uploading to path:', path);
+      setImageUrl(publicUrl);
+
       toast.show({
         title: 'uploaded playlist cover',
-        description: `Uploading to ${path}`,
+        description: 'Image uploaded successfully',
       });
-    } catch {
-      toast.error({ title: 'uploading playlist cover image failed' });
+    } catch (err: any) {
+      toast.error({
+        title: 'uploading playlist cover image failed',
+        description: err.message,
+      });
     } finally {
       setUploading(false);
     }

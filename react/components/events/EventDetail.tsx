@@ -23,7 +23,6 @@ import { useProfile } from '@/contexts/profileCtx';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const [expanded, setIsExpanded] = useState<boolean>(false);
   const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
@@ -48,15 +47,17 @@ export default function EventDetail() {
   }, [data]);
 
   useEffect(() => {
+    if (!data) return;
     navigation.setOptions({
       headerRight: () => (
         <Event3DotMenu
           callDelete={() => setShowAlertDialog(true)}
           callEdit={onEditEvent}
+          eventData={data}
         />
       ),
     });
-  }, [navigation]);
+  }, [navigation, data]);
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
@@ -71,10 +72,6 @@ export default function EventDetail() {
     router.push(`(main)/events/${eventId}/edit`);
   };
 
-  const onToggleHeader = () => {
-    setIsExpanded(v => !v);
-  };
-
   if (!data || loading) {
     return <LoadingSpinner text='Loading Events' />;
   }
@@ -85,17 +82,15 @@ export default function EventDetail() {
 
   return (
     <>
-      <ScrollView className='bg-primary-500'>
-        <VStack className='flex-1' >
-          <EventHeader
-            eventData={data}
-            expanded={expanded}
-            onToggle={onToggleHeader}
-            onRefresh={refetch}
-          />
+      <ScrollView className='bg-white'>
+        <VStack className='flex-1'>
+          <EventHeader eventData={data} onRefresh={refetch} />
 
           <Center className='flex-1'>
-            <VotesRoom eventId={eventId} isOwner={data?.event?.owner_id === profile?.id} />
+            <VotesRoom
+              eventId={eventId}
+              isOwner={data?.event?.owner_id === profile?.id}
+            />
           </Center>
         </VStack>
 
@@ -113,13 +108,15 @@ export default function EventDetail() {
         eventId={eventId}
         eventData={data}
         onUpdated={refetch}
-        abovePlayer={isActive && !!track} />
+        abovePlayer={isActive && !!track}
+      />
 
       {track && isActive && (
-        <Box className='absolute bottom-0 right-18 w-full' pointerEvents={'auto'}>
-          <Player
-            showControls={true}
-          />
+        <Box
+          className='absolute bottom-0 right-18 w-full'
+          pointerEvents={'auto'}
+        >
+          <Player showControls={true} />
         </Box>
       )}
     </>

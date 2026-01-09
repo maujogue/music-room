@@ -6,7 +6,6 @@ import { useCallback } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
-import emptyPng from '@/assets/empty-events.png';
 import { useRouter } from 'expo-router';
 import { Box } from '@/components/ui/box';
 import { Button, ButtonIcon } from '@/components/ui/button';
@@ -61,7 +60,6 @@ export default function AllEvents() {
     return (
       <Box>
         <EmptyState
-          source={emptyPng}
           title='No events'
           subtitle='Nothing on the radar, only dust and empty bullets.'
           text="What a sadness ! Let's create a supa-event as soon as possible !"

@@ -2,18 +2,52 @@ import { apiFetch } from '@/utils/apiFetch';
 import { convertPOINT, isValidCoordinateObject } from '@/utils/parsePointCoordinates';
 
 export async function createEvent(payload: MusicEventPayload) {
-  const form = createEventFormData(payload);
+  const imageUri = (payload as any)?.image_url;
+  const isLocalFile =
+    typeof imageUri === 'string' &&
+    (imageUri.startsWith('file:') ||
+      imageUri.startsWith('content:') ||
+      imageUri.startsWith('/') ||
+      imageUri.startsWith('data:'));
+
+  if (isLocalFile) {
+    const form = createEventFormData(payload);
+
+    const res = await apiFetch<MusicEvent>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
+      {
+        method: 'POST',
+        body: form,
+      }
+    );
+
+    if (!res.success) {
+      console.error('Error creating Event (form):', res.error);
+      throw res.error;
+    }
+    return res.data;
+  }
+
+  // Ensure coordinates are properly formatted if string (copied from updateEvent)
+  if (typeof (payload.location as any)?.coordinates === 'string') {
+    const coordConverted = convertPOINT((payload.location as any).coordinates);
+    if (isValidCoordinateObject(coordConverted)) {
+      (payload.location as any).coordinates = coordConverted;
+    } else {
+      (payload.location as any).coordinates = undefined;
+    }
+  }
 
   const res = await apiFetch<MusicEvent>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events`,
     {
       method: 'POST',
-      body: form,
+      body: payload,
     }
   );
 
   if (!res.success) {
-    console.error('Error creating Event:', res.error);
+    console.error('Error creating Event (json):', res.error);
     throw res.error;
   }
   return res.data;

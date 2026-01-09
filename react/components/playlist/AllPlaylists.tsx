@@ -6,7 +6,6 @@ import { useCallback, useEffect } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { useRouter } from 'expo-router';
-import emptyPng from '@/assets/empty-playlists.png';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
 
 export default function AllPlaylists() {
@@ -35,7 +34,6 @@ export default function AllPlaylists() {
   if (playlists.length === 0) {
     return (
       <EmptyState
-        source={emptyPng}
         title='No Playlists'
         subtitle='A world without playlists… devilish, isn’t it ?'
         text='Synchronize with your Spotify account, or even create your own playlist from scratch right now !'
