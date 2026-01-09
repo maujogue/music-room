@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Pressable } from 'react-native';
-import { Icon, StarIcon, InfoIcon, SettingsIcon } from '@/components/ui/icon';
+import { Icon, StarIcon, InfoIcon } from '@/components/ui/icon';
 import { useSubscription } from '@/contexts/subscriptionCtx';
 import PaywallModal from './PaywallModal';
 
@@ -42,7 +42,7 @@ export default function SubscriptionBadge({
       <HStack className='w-full items-center'>
         <VStack style={{ flex: 1 }} />
         <VStack>
-          <HStack space='xs' className='items-center'>
+          <Pressable onPress={() => setIsPaywallOpen(true)}>
             <Badge variant='solid' action={isPremium ? 'success' : 'warning'} size='lg'>
               <HStack space='xs' className='items-center'>
                 <Icon
@@ -53,15 +53,7 @@ export default function SubscriptionBadge({
                 <BadgeText>{isPremium ? 'Premium' : 'Free'}</BadgeText>
               </HStack>
             </Badge>
-            <Pressable onPress={() => setIsPaywallOpen(true)}>
-              <Icon
-                as={SettingsIcon}
-                size='md'
-                color={isPremium ? '#10B981' : '#F59E0B'}
-                style={{ marginLeft: 8 }}
-              />
-            </Pressable>
-          </HStack>
+          </Pressable>
           {isPremium && subscription && showMemberSince && (
             <Text
               className='text-xs text-typography-500'
