@@ -25,12 +25,12 @@ import {
   checkPermission,
   PERMISSIONS,
 } from './permissions.ts'
-import type { 
-  EventPayload, 
+import type {
+  EventPayload,
   EventResponse,
   EventMember,
   EventRadarFromDb
- } from '@event';
+} from '@event';
 import type { User } from '@supabase/supabase-js';
 import { safeJsonFromContext } from '@utils/parsing';
 
@@ -49,12 +49,12 @@ export async function createEvent(c: Context): Promise<Response> {
   }
 
   const validation = validateEventPayload(
-    payload, { 
-      requireName: true, 
-      requireDateTime: true, 
-      requireLocation: true,
-      requirePlaylist: true
-    })
+    payload, {
+    requireName: true,
+    requireDateTime: true,
+    requireLocation: true,
+    requirePlaylist: true
+  })
 
   if (!validation.valid) {
     return c.json({ error: validation.message }, 400)
@@ -73,7 +73,7 @@ export async function createEvent(c: Context): Promise<Response> {
   await createSupabaseEvent(payload, c.get('user').id)
 
   c.status(201)
-  return c.json({ message: 'Event created successfully'})
+  return c.json({ message: 'Event created successfully' })
 }
 
 function createPayloadFromFormData(
@@ -138,10 +138,8 @@ export async function fetchEvent(c: Context): Promise<Response> {
 
   try {
     const imagePath = data?.event.image_url;
-    console.log('Event image path:', imagePath);
     if (imagePath) {
       const publicUrl = await getPublicUrlForPath(imagePath);
-      console.log('Resolved public URL for event image:', publicUrl);
       data.event.image_url = publicUrl;
     }
   } catch (err) {
@@ -154,8 +152,7 @@ export async function fetchEvent(c: Context): Promise<Response> {
   return c.json(data)
 }
 
-function setUserPermissions(data: EventResponse, user: User): EventResponse 
-{
+function setUserPermissions(data: EventResponse, user: User): EventResponse {
   const memberEvent = data.members.find((m: EventMember) => m.profile.id === user.id)
 
   if (data.owner.id === user.id) {
@@ -221,11 +218,11 @@ export async function updateEventById(c: Context): Promise<Response> {
   const user = c.get('user')
 
   await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
-  
+
   const contentTypeHeader = c.req.header('content-type') || ''
   let body: any = {}
   let uploadedFile: File | null = null
-  
+
   if (contentTypeHeader.includes('multipart/form-data')) {
     const form = await c.req.raw.formData()
     const result = createPayloadFromFormData(form)
@@ -234,7 +231,7 @@ export async function updateEventById(c: Context): Promise<Response> {
   } else {
     body = await safeJsonFromContext(c)
   }
-  
+
   const validation = validateEventPayload(body, { requireName: false })
   if (!validation.valid) {
     c.status(400)
@@ -331,7 +328,7 @@ export async function addUserToEvent(c: Context): Promise<Response> {
 
   const { user_id, role } = body
   await addUserToEventSupabase(eventId, user_id, role)
-  return c.json({ message: 'User added to event successfully'})
+  return c.json({ message: 'User added to event successfully' })
 }
 
 export async function removeUserFromEvent(c: Context): Promise<Response> {
@@ -342,7 +339,6 @@ export async function removeUserFromEvent(c: Context): Promise<Response> {
   if (body.user_id === '') {
     body.user_id = user.id
   }
-  console.log('Body in removeUserFromEvent:', body);
   const validation = validateRemoveUserPayload(body)
   if (!validation.valid) {
     throw new HTTPException(400, { message: validation.message })
@@ -353,7 +349,7 @@ export async function removeUserFromEvent(c: Context): Promise<Response> {
 
   const { user_id } = body
   await removeUserFromEventSupabase(eventId, user_id)
-  return c.json({ message: 'User removed from event successfully'})
+  return c.json({ message: 'User removed from event successfully' })
 }
 
 export async function editUserInEvent(c: Context): Promise<Response> {
@@ -368,7 +364,7 @@ export async function editUserInEvent(c: Context): Promise<Response> {
   await checkPermission(eventId, user.id, PERMISSIONS.UPDATE_USER_ROLE)
 
   const { user_id, role } = body
-  await editUserInEventSupabase(eventId, user_id, role)  
+  await editUserInEventSupabase(eventId, user_id, role)
   return c.json({ message: 'User edited in event successfully' })
 }
 
@@ -404,11 +400,13 @@ async function formatEventsRadars(event: EventRadarFromDb) {
     everyone_can_vote,
   } = event
 
-  const publicUrl = image_url ? await getPublicUrlForPath(image_url): null
-  
+  const publicUrl = image_url ? await getPublicUrlForPath(image_url) : null
+
   return {
-    event: { id, name, beginning_at, image_url: publicUrl, description, spatio_licence, done,
-    everyone_can_vote },
+    event: {
+      id, name, beginning_at, image_url: publicUrl, description, spatio_licence, done,
+      everyone_can_vote
+    },
     owner: { id: owner_id, username: owner_username, avatar_url: owner_avatar_url },
     radar: { coordinates: { lat, long }, dist: dist_meters, venuename }
   }

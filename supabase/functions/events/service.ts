@@ -1,10 +1,10 @@
 import { HTTPException } from '@hono/http-exception';
 import { createClient } from '@supabase/supabase-js';
 import { formatDbError } from '@postgres/postgres_errors_map';
-import { 
-  EventPayload, 
-  EventResponse, 
-  EventLocation 
+import {
+  EventPayload,
+  EventResponse,
+  EventLocation
 } from "@event";
 import { geometryToCoordinates } from '@utils/geometry';
 
@@ -201,7 +201,6 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
   const ext = (uploadedFile.name || 'jpg').split('.').pop() || 'jpg';
   const path = `events/${Date.now()}.${ext}`;
 
-  console.log('Uploading file to path:', path);
   const { data, error: uploadError } = await supabaseClient.storage
     .from('avatars')
     .upload(path, buffer, { contentType: uploadedFile.type || 'image/jpeg', upsert: true });
@@ -256,8 +255,7 @@ export async function editUserInEventSupabase(
 }
 
 export async function getSupabaseEventByCoordinates(lat: number, long: number) {
-  console.log('Fetching nearby events for coordinates:', { lat, long });
-  
+
   const { data, error } = await supabaseClient.rpc('nearby_events', {
     p_lat: lat,
     p_long: long,

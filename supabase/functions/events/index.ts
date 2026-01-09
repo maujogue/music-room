@@ -22,7 +22,6 @@ declare module '@hono/hono' {
 
 app.use('*', async (c, next) => {
   try {
-    console.log('Authenticating request to', c.req.url);
     const user = await getCurrentUser(c.req)
     const token = await getUserSpotifyToken(user.id)
     c.set('user', user)

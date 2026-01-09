@@ -3,7 +3,7 @@ import {
 	searchUsersByQuery,
 	searchEventsByQuery,
 	searchPlaylistsByQuery
- } from './services/supabase.ts'
+} from './services/supabase.ts'
 import { HTTPException } from '@hono/http-exception';
 import { refreshSpotifyToken } from '@auth/utils';
 import getPublicUrlForPath from '../../utils/get_public_url_for_path.tsx'
@@ -22,7 +22,7 @@ export async function search(c: Context) {
 	let eventResults: EventResponseReduced[] = []
 	let trackResults: TrackResponse[] = []
 
-	console.log('Search params:', { q, type, limit, offset });
+
 	if (!q) {
 		c.status(400)
 		return c.json({ error: 'Query parameter "q" is required' })
@@ -33,14 +33,13 @@ export async function search(c: Context) {
 	}
 	if (type === 'track') {
 		await refreshSpotifyToken(user.id);
-		trackResults = await searchTracks(spotify_token, { query: q, limit, offset})
+		trackResults = await searchTracks(spotify_token, { query: q, limit, offset })
 	}
 	if (type === 'playlist' || type === 'all') {
-		playlistResults = await searchPlaylistsByQuery({ query: q, limit, offset})
-		console.log('Playlist results:', playlistResults);
+		playlistResults = await searchPlaylistsByQuery({ query: q, limit, offset })
 	}
 	if (type === 'user' || type === 'all') {
-		userResults = await searchUsersByQuery(user.id, { query: q, limit, offset})
+		userResults = await searchUsersByQuery(user.id, { query: q, limit, offset })
 	}
 	if (type === 'event' || type === 'all') {
 		eventResults = await searchEventsByQuery({ query: q, limit, offset })
@@ -62,10 +61,10 @@ export async function search(c: Context) {
 }
 
 async function searchTracks(
-	spotify_token: string, 
+	spotify_token: string,
 	params: { query: string, limit: string, offset: string })
 	: Promise<TrackResponse[]> {
-	console.log('Searching tracks with params:', params);
+
 	const res: SpotifyTrackResponse = await fetchSpotifySearch(spotify_token, { ...params, type: 'track' })
 	if (res.error) {
 		throw new HTTPException(res.error.status || 500, { message: res.error.message || 'Unknown error from Spotify API' })

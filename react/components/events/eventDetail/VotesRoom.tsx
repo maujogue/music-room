@@ -18,7 +18,6 @@ import { useProfile } from '@/contexts/profileCtx';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
-import { useAuth } from '@/contexts/authCtx';
 import StartAndStopButton from '@/components/events/StartAndStopButton';
 import { usePlayer } from '@/contexts/PlayerCtx';
 
@@ -32,7 +31,6 @@ export default function VotesRoom({ eventId, isOwner}: Props) {
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
   const started = isEventStarted(data?.event?.beginning_at);
-  const { user: currentUser } = useAuth();
   const {
     connected,
     track,
