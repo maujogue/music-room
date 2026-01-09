@@ -14,7 +14,7 @@ app.use("*", loggingMiddleware);
 
 app.use('*', async (c, next) => {
   try {
-    if (c.req.url.includes('/spotify/callback')) {
+    if (c.req.url.includes('/spotify')) {
       return await next()
     }
     const user = await getCurrentUser(c.req)

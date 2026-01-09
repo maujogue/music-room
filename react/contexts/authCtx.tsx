@@ -12,8 +12,10 @@ import { supabase } from '../services/supabase';
 import {
   configureGoogleSignIn,
   signInWithGoogle as googleSignInService,
+  signInWithSpotify as spotifySignInService,
   signOutFromGoogle,
   type GoogleSignInResult,
+  type SpotifySignInResult,
 } from '../services/auth';
 import { useRouter } from 'expo-router';
 
@@ -33,6 +35,7 @@ interface AuthContextType {
     password: string
   ) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<GoogleSignInResult>;
+  signInWithSpotify: () => Promise<SpotifySignInResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
@@ -212,6 +215,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return result;
   };
 
+  const signInWithSpotify = async (): Promise<SpotifySignInResult> => {
+    setIsLoading(true);
+    const result = await spotifySignInService();
+    setIsLoading(false);
+    return result;
+  };
+
   const resetPassword = async (email: string) => {
     setIsLoading(true);
     // Use Linking.createURL to generate proper deep link (from Theodo blog post)
@@ -245,6 +255,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     signIn,
     signUp,
     signInWithGoogle,
+    signInWithSpotify,
     signOut,
     resetPassword,
     updatePassword,
