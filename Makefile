@@ -11,6 +11,8 @@ WS_SERVER_DIR := ${SUPABASE_DIR}/ws-server
 SUPABASE_FUNCTIONS_DIR := ${SUPABASE_DIR}/functions
 SUPABASE_SCRIPTS_DIR := ${SUPABASE_DIR}/scripts
 OS := $(shell uname)
+SUPABASE := supabase@2.67.0 # ~2.72.0 jwtVerify issues in local
+
 ifeq ($(OS), Darwin)
     IP := $(shell ifconfig en0 | grep inet | awk '$$1=="inet" {print $$2}')
 else
@@ -60,8 +62,8 @@ setup-supabase:
 	@echo "🔧 Setting up Supabase locally..."
 	@if [ ! -d "supabase" ]; then \
 		echo "Initializing Supabase..."; \
-		npx supabase init \
-		npx supabase start \
+		npx ${SUPABASE} init \
+		npx ${SUPABASE} start \
 	else \
 		echo "Supabase already initialized, skipping..."; \
 	fi
@@ -70,26 +72,26 @@ setup-supabase:
 # Start local Supabase services and apply migrations
 start-supabase:
 	@echo "🚀 Starting Supabase services..."
-	npx supabase start
+	npx ${SUPABASE} start
 	@echo "✅ Supabase services started!"
 
 
 # Stop local Supabase services
 stop-supabase:
 	@echo "🛑 Stopping Supabase services..."
-	npx supabase stop --project-id music-room
+	npx ${SUPABASE} stop --project-id music-room
 	@echo "✅ Supabase services stopped!"
 
 # Apply database migrations
 migrate:
 	@echo "🔄 Applying database migrations..."
-	npx supabase db push
+	npx ${SUPABASE} db push
 	@echo "✅ Migrations applied!"
 
 # Reset database (keep services running)
 reset-db:
 	@echo "🔄 Resetting database..."
-	npx supabase db reset
+	npx ${SUPABASE} db reset
 	@echo "✅ Database reset complete!"
 
 # Create .env files with local Supabase configuration
@@ -105,7 +107,7 @@ setup-frontend-env:
 		cd ${REACT_APP_DIR}; \
 		IP=$$(ipconfig getifaddr en0 2>/dev/null || hostname -I | awk '{print $$1}'); \
 		echo "EXPO_PUBLIC_SUPABASE_URL=http://$${IP}:54321" > .env.dev; \
-		ANON_KEY=$$(npx supabase status | grep "anon key" | awk -F": " '{print $$2}'); \
+		ANON_KEY=$$(npx ${SUPABASE} status | grep "anon key" | awk -F": " '{print $$2}'); \
 		echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$${ANON_KEY}" >> .env.dev; \
 		echo "✅ Frontend .env.dev created"; \
 		echo "⚠️ Switch EXPO_PUBLIC_SUPABASE_URL to tunnel url if you want to use spotify auth"; \
@@ -140,7 +142,7 @@ dev:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
 	@echo "🔁 Starting supabase functions in background..."
-	cd ${SUPABASE_FUNCTIONS_DIR} && npx supabase functions serve &
+	cd ${SUPABASE_FUNCTIONS_DIR} && npx ${SUPABASE} functions serve &
 	@echo "🔁 Starting Expo (foreground)..."
 	cd ${REACT_APP_DIR} && npm start
 
@@ -155,7 +157,7 @@ dev-tunnel:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	npx supabase functions serve --no-verify-jwt& \
+	npx ${SUPABASE} functions serve --no-verify-jwt& \
 	cd ${REACT_APP_DIR} && npm start --tunnel
 
 api: redocly
@@ -176,10 +178,10 @@ clean:
 # Reset Supabase database and restart
 reset:
 	@echo "🔄 Resetting Supabase database and restarting services..."
-	npx supabase stop
-	npx supabase start
+	npx ${SUPABASE} stop
+	npx ${SUPABASE} start
 	@echo "🔄 Applying migrations after reset..."
-	npx supabase db push
+	npx ${SUPABASE} db push
 	@echo "✅ Database reset and migrations applied!"
 
 # Check project status
@@ -192,7 +194,7 @@ status:
 	@if [ -d "${REACT_APP_DIR}/node_modules" ]; then echo "  ✅ Dependencies installed"; else echo "  ❌ Dependencies not installed"; fi
 	@echo ""
 	@echo "🔧 Supabase Status:"
-	@npx supabase status 2>/dev/null || echo "  ❌ Supabase services not running"
+	@npx ${SUPABASE} status 2>/dev/null || echo "  ❌ Supabase services not running"
 	@echo ""
 	@echo "🗄️  Database Migrations:"
 	@if [ -d "${SUPABASE_DIR}/migrations" ]; then \
@@ -253,12 +255,12 @@ test-supabase-local:
 
 test-supabase-sql-local:
 	@echo "🧪 Running SQL database tests..."
-	cd ${SUPABASE_DIR} && supabase test db
+	cd ${SUPABASE_DIR} && ${SUPABASE} test db
 
 test-supabase-sql-cloud:
 	@echo "🧪 Running SQL database tests..."
-	cd ${SUPABASE_DIR} && supabase test db --linked
+	cd ${SUPABASE_DIR} && ${SUPABASE} test db --linked
 
 deploy:
-	npx supabase db push
-	npx supabase functions deploy
+	npx ${SUPABASE} db push
+	npx ${SUPABASE} functions deploy
