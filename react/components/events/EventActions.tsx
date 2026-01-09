@@ -25,8 +25,11 @@ export default function EventActions({
   const { playTrack, tracksToPlay, setTracksToPlay } = usePlayer();
   const router = useRouter();
 
+  const isOwner = eventData.user?.role === 'owner';
+  console.log('isOwner', isOwner);
+
   useEffect(() => {
-    const tracksIds = eventData.playlist.tracks.map((track) => track.track_id);
+    const tracksIds = eventData.playlist.tracks.map(track => track.track_id);
     setTracksToPlay(tracksIds);
   }, []);
 
@@ -36,7 +39,7 @@ export default function EventActions({
 
   return (
     <>
-    {displayInviteButton && abovePlayer && (
+      {displayInviteButton && abovePlayer && (
         <>
           <FloatButton
             onPress={handleOpenInvite}
@@ -72,17 +75,29 @@ export default function EventActions({
             icon={UserPlus}
             className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
           />
-          <FloatButton
-            onPress={() => setIsDrawerOpen(true)}
-            icon={Users}
-          />
+          <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
         </>
       )}
-      <FloatButton
-        onPress={() => playTrack(tracksToPlay)}
-        icon={Play}
-        className={'absolute bottom-36 right-4 rounded-full p-4 blurred-bg'}
-      />
+      {isOwner && abovePlayer && (
+        <FloatButton
+          onPress={() => playTrack(tracksToPlay)}
+          icon={Play}
+          className={'absolute right-4 rounded-full p-4 blurred-bg'}
+          style={{
+            bottom: 220,
+            zIndex: 9997,
+            elevation: 17,
+            pointerEvents: 'auto',
+          }}
+        />
+      )}
+      {isOwner && !abovePlayer && (
+        <FloatButton
+          onPress={() => playTrack(tracksToPlay)}
+          icon={Play}
+          className={'absolute bottom-36 right-4 rounded-full p-4 blurred-bg'}
+        />
+      )}
       <EventMembersDrawer
         eventData={eventData}
         isOpen={isDrawerOpen}

@@ -48,16 +48,18 @@ export default function EventDetail() {
 
   useEffect(() => {
     if (!data) return;
+    const isOwner = data?.event?.owner_id === profile?.id;
     navigation.setOptions({
       headerRight: () => (
         <Event3DotMenu
           callDelete={() => setShowAlertDialog(true)}
           callEdit={onEditEvent}
           eventData={data}
+          isOwner={isOwner}
         />
       ),
     });
-  }, [navigation, data]);
+  }, [navigation, data, profile]);
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
