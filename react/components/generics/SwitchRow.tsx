@@ -29,8 +29,10 @@ export default function SwitchRow({
                     value={value}
                     onToggle={onToggle}
                 />
-                {leading}
-                <Text className='pl-2'>{label}</Text>
+                <HStack className='items-center'>
+                    {leading}
+                    <Text className='pl-2'>{label}</Text>
+                </HStack>
             </HStack>
             {helper ? (
                 <Text size='sm' className='text-neutral-500 mt-1'>

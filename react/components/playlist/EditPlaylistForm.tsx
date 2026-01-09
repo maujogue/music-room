@@ -4,7 +4,6 @@ import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
 import { Image } from 'react-native';
-import { Switch } from '@/components/ui/switch';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { Icon, CheckIcon, AlertCircleIcon } from '@/components/ui/icon';
@@ -17,6 +16,8 @@ import * as ImagePicker from 'expo-image-picker';
 import FloatButton from '@/components/generics/FloatButton';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
 import { getRandomImage } from '@/utils/randomImage';
+import SwitchRow from '../generics/SwitchRow';
+import { Users, Lock } from 'lucide-react-native';
 
 type Props = {
   onSubmit: (payload: PlaylistPayload) => Promise<void> | void;
@@ -139,7 +140,7 @@ export default function EditPlayListForm({
   }
 
   return (
-    <FormControl className='p-4 border rounded-lg border-outline-300'>
+    <FormControl className='border rounded-lg border-outline-300'>
       <VStack space='md'>
         <Box>
           {imageUrl ? (
@@ -148,6 +149,8 @@ export default function EditPlayListForm({
               style={{
                 width: '100%',
                 height: 300,
+                margin: 0,
+                padding: 0,
                 marginTop: 0,
                 marginBottom: 10,
               }}
@@ -170,6 +173,9 @@ export default function EditPlayListForm({
             <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
           </Button>
 
+        </Box>
+
+        <VStack space='sm' className='px-4'>
           <Text>Name</Text>
           <Input>
             <InputField
@@ -179,42 +185,44 @@ export default function EditPlayListForm({
               autoCapitalize='sentences'
             />
           </Input>
-        </Box>
+          <Box>
 
-        <Box>
-          <Text>Description</Text>
-          <Textarea className=''>
-            <TextareaInput
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-              textAlignVertical='top'
-              autoCapitalize='sentences'
-            />
-          </Textarea>
-        </Box>
+            <Text>Description</Text>
+            <Textarea className=''>
+              <TextareaInput
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={3}
+                textAlignVertical='top'
+                autoCapitalize='sentences'
+              />
+            </Textarea>
+          </Box>
 
-        <VStack className='items-start'>
-          <HStack className='items-center'>
-            <Switch
-              value={isPrivate}
-              onToggle={() => {
-                setIsPrivate(prev => !prev);
-              }}
-            />
-            <Text>Private</Text>
-          </HStack>
+          <VStack className='items-start py-2 w-full'>
+            <Box className='py-4'>
+              <SwitchRow
+                value={isPrivate}
+                onToggle={() => {
+                  setIsPrivate(prev => !prev);
+                }}
+                label='Private'
+                helper='Only you can see this playlist.'
+                leading={<Lock size={16} />}
+              />
+            </Box>
 
-          <HStack className='items-center'>
-            <Switch
+            <SwitchRow
               value={isCollaborative}
               onToggle={() => {
                 setIsCollaborative(prev => !prev);
               }}
+              label='Collaborative'
+              helper='Allow others to add songs to this playlist.'
+              leading={<Users size={16} />}
             />
-            <Text>Collaborative</Text>
-          </HStack>
+          </VStack>
         </VStack>
 
         {error ? (
