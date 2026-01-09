@@ -39,7 +39,7 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
     // Get the user info and ID token
     const userInfo = await GoogleSignin.signIn();
 
-    if (!userInfo.data.idToken) {
+    if (!userInfo.data || !userInfo.data.idToken) {
       return {
         success: false,
         error: {
@@ -116,7 +116,8 @@ export async function signOutFromGoogle() {
 // Check if user is signed in with Google
 export async function isSignedInWithGoogle(): Promise<boolean> {
   try {
-    return await GoogleSignin.isSignedIn();
+    const currentUser = await GoogleSignin.getCurrentUser();
+    return currentUser !== null;
   } catch (error) {
     console.log('Error checking Google sign-in status:', error);
     return false;
