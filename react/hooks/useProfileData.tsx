@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { signInWithSpotify } from '@/services/auth';
 import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
@@ -15,6 +14,7 @@ export function useProfileData(userId: string) {
     followers,
     following,
     refreshProfile,
+    connectSpotify,
   } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
@@ -101,11 +101,16 @@ export function useProfileData(userId: string) {
   const actions = {
     handleSpotifyConnect: useCallback(async () => {
       try {
-        await signInWithSpotify();
+        if (isOwnProfile) {
+          // Use connectSpotify from context for own profile
+          await connectSpotify();
+          // Refresh profile after connection to update connection status
+          await refreshProfile();
+        }
       } catch (error) {
         console.error('Error during Spotify OAuth:', error);
       }
-    }, []),
+    }, [isOwnProfile, connectSpotify, refreshProfile]),
 
     handlePrivacyChange: useCallback(
       async (privacy: PrivacySetting) => {

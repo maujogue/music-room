@@ -192,3 +192,32 @@ export async function signInWithSpotify(): Promise<SpotifySignInResult> {
     };
   }
 }
+
+// Handle Spotify Connection flow (for existing users)
+export async function connectToSpotify(): Promise<void> {
+  try {
+    // Get the Spotify authorization URL (using existing endpoint)
+    // The backend will detect the logged-in user from the auth token
+    const response = await apiFetch<{ url: string }>(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,
+      {
+        method: 'POST',
+      }
+    );
+
+    if (!response.success) {
+      throw new Error(
+        response.error?.message || 'Failed to get Spotify authorization URL'
+      );
+    }
+
+    // Open the Spotify authorization URL
+    await Linking.openURL(response.data.url);
+
+    // Note: The actual connection happens in the callback
+    // This function just initiates the flow
+  } catch (error: any) {
+    console.log('Spotify Connection Error:', error);
+    throw error;
+  }
+}
