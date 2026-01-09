@@ -264,16 +264,3 @@ test-supabase-sql-cloud:
 deploy:
 	npx supabase db push
 	npx supabase functions deploy
-
-load-test:
-	cd load-testing && ./run_k6_test.sh profile 25 50 75 100 125 150
-
-load-test-visualize:
-	open load-testing/reports/event_create_2025-10-30_13-21-59.html
-	open load-testing/reports/me_events_2025-10-29_16-17-20.html
-	open load-testing/reports/me_events_2025-10-29_16-17-20.html
-	open load-testing/reports/me_playlists_2025-10-29_16-31-00.html
-	open load-testing/reports/mixed_workload_2025-10-30_13-17-45.html
-	open load-testing/reports/playlist_create_2025-10-30_12-52-31.html
-	open load-testing/reports/profile_fetch_2025-10-30_11-47-54.html
-	open load-testing/reports/profile_update_2025-10-29_15-50-44.html
