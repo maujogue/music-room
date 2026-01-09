@@ -18,17 +18,22 @@ import { useProfile } from '@/contexts/profileCtx';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
+import StartAndStopButton from '@/components/events/StartAndStopButton';
+import { usePlayer } from '@/contexts/PlayerCtx';
 
 interface Props {
   eventId: string;
+  isOwner?: boolean;
 }
 
-export default function VotesRoom({ eventId }: Props) {
+export default function VotesRoom({ eventId, isOwner }: Props) {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
-  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const { data, loading, error, updateEvent, refetch } = useEvent(eventId);
+  const started = isEventStarted(data?.event?.beginning_at);
   const {
     connected,
+    track,
     disconnect,
     sendVote,
     sendUnvote,
@@ -38,12 +43,21 @@ export default function VotesRoom({ eventId }: Props) {
     connectionAttempts,
     lastError,
     reconnect,
-  } = useWebSocketClient(eventId);
+  } = useWebSocketClient(
+    eventId,
+    {
+      enabled: started,
+      done: data?.event?.done,
+      spatio_licence: data?.event?.spatio_licence,
+    },
+    isOwner || false
+  );
   const toast = useAppToast();
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
   );
   const isFocused = useIsFocused();
+  const { setTrack, setTracksToPlay } = usePlayer();
 
   const {
     playlist,
@@ -57,6 +71,13 @@ export default function VotesRoom({ eventId }: Props) {
       disconnect();
     }
   }, [isFocused, disconnect]);
+
+  useEffect(() => {
+    if (data?.event?.playlist?.tracks) {
+      const trackIds = data.event.playlist.tracks.map(track => track.track_id);
+      setTracksToPlay(trackIds);
+    }
+  }, [data?.event?.playlist?.tracks, setTracksToPlay]);
 
   useEffect(() => {
     if (!data?.event?.id) return;
@@ -73,6 +94,12 @@ export default function VotesRoom({ eventId }: Props) {
 
     return unsubscribe;
   }, [data?.event?.id, subscribeToVotes]);
+
+  useEffect(() => {
+    if (track) {
+      setTrack(track);
+    }
+  }, [track]);
 
   useEffect(() => {
     if (!connected && connectionAttempts > 0) {
@@ -127,6 +154,13 @@ export default function VotesRoom({ eventId }: Props) {
       });
     }
   };
+
+  function isEventStarted(beginning_at?: string | null) {
+    if (!beginning_at) return false;
+    const start = new Date(beginning_at);
+    if (isNaN(start.getTime())) return false;
+    return Date.now() >= start.getTime();
+  }
 
   if (loading) {
     return <LoadingSpinner text="Loading event's data" />;
@@ -224,7 +258,27 @@ export default function VotesRoom({ eventId }: Props) {
     );
   }
 
-  const onTrackSwipe = (dir: string, trackId: string) => {
+  const onTrackSwipe = async (dir: string, trackId: string) => {
+    if (!started) {
+      toast.error({
+        title: 'Too impulsive !',
+        description: "The event hasn't started yet.",
+        duration: 3000,
+      });
+      return;
+    }
+    if (
+      !data?.location ||
+      !data?.location?.coordinates?.lat ||
+      !data?.location?.coordinates?.long
+    ) {
+      toast.error({
+        title: 'Event is nowhere ?',
+        description: 'The event need a location to allow votes.',
+        duration: 3000,
+      });
+      return;
+    }
     if (!connected) {
       toast.error({
         title: 'Cannot vote',
@@ -253,12 +307,11 @@ export default function VotesRoom({ eventId }: Props) {
         return;
       }
 
-      sendVote(eventId, trackId);
+      await sendVote(eventId, trackId);
     } else {
       if (eventUserData?.voted_tracks[trackId]) {
-        sendUnvote(eventId, trackId);
-      }
-      else {
+        await sendUnvote(eventId, trackId);
+      } else {
         toast.show({
           title: 'Cannot unvote',
           description: 'You have not voted for this track',
@@ -271,63 +324,55 @@ export default function VotesRoom({ eventId }: Props) {
   return (
     <>
       <VStack className='flex-1 w-full'>
-        {eventUserData && (
+        {eventUserData ? (
           <>
-            <View className='bg-gray-100 p-3 rounded-lg mb-4'>
-              <Text className='text-sm text-gray-600'>
-                Votes left:{' '}
-                <Text className='font-bold text-blue-600'>
-                  {eventUserData.vote_remaining}
-                </Text>{' '}
-                / {eventUserData.voteMax}
-              </Text>
-              <Text className='text-xs text-gray-500'>
-                Total votes: {eventUserData.voteCount}
-              </Text>
-            </View>
             {eventUserData.voted_tracks &&
               Object.keys(eventUserData.voted_tracks).length > 0 && (
-                <Box className='mb-4'>
-                  <Text className='font-bold text-gray-700 mb-2'>
-                    Tracks you voted for: (
-                    {Object.keys(eventUserData.voted_tracks).length})
-                  </Text>
+                <Box className='my-3 px-3'>
                   <GestureHandlerRootView>
-                    {Object.entries(eventUserData.voted_tracks).map(
-                      ([trackId, voteCount]) => {
-                        const track = playlist?.tracks?.find(
-                          (t: PlaylistTrack) => t.track_id === trackId
-                        );
-                        return track ? (
-                          <VotedTrack
-                            key={trackId}
-                            track={track}
-                            voteCount={voteCount}
-                            onSwipeableOpen={(dir: 'left' | 'right') => {
-                              onTrackSwipe(dir, trackId);
-                              return Promise.resolve(true);
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            key={trackId}
-                            className='p-2 bg-gray-100 rounded mb-1'
-                          >
-                            <Text className='text-gray-500 text-xs'>
-                              Track not found (ID: {trackId})
+                    <VStack className='p-1.5 gap-1.5 border-2 border-primary-400 rounded-xl'>
+                      <View className=' min-h-12 py-1.5 px-3'>
+                        <HStack className='justify-between items-end'>
+                          <Text className='font-bold text-primary'>My votes</Text>
+                            <Text className='font-bold text-sky-500'>
+                              {5 - eventUserData.vote_remaining} <Text className='text-primary-200'>/ {eventUserData.voteMax}</Text>
                             </Text>
-                            <Text className='text-xs text-blue-600'>
-                              Your votes: {voteCount}{' '}
-                              {voteCount === 1 ? 'vote' : 'votes'}
-                            </Text>
-                          </Box>
-                        );
-                      }
-                    )}
+                          {isOwner && data && (
+                            <StartAndStopButton data={data} eventId={eventId} />
+                          )}
+                        </HStack>
+                      </View>
+                      {Object.entries(eventUserData.voted_tracks).map(
+                        ([trackId, voteCount]) => {
+                          const track = playlist?.tracks?.find(
+                            (t: PlaylistTrack) => t.track_id === trackId
+                          );
+                          return (
+                            track && (
+                              <VotedTrack
+                                key={trackId}
+                                track={track}
+                                voteCount={voteCount}
+                                onSwipeableOpen={(dir: 'left' | 'right') => {
+                                  onTrackSwipe(dir, trackId);
+                                  return Promise.resolve(true);
+                                }}
+                              />
+                            )
+                          );
+                        }
+                      )}
+                    </VStack>
                   </GestureHandlerRootView>
                 </Box>
               )}
           </>
+        ) : (
+          isOwner && (
+            <HStack className='py-1.5 px-3 justify-end'>
+              <StartAndStopButton data={data} eventId={eventId} />
+            </HStack>
+          )
         )}
 
         <TrackListVotes

@@ -119,7 +119,11 @@ enabled = true
 # in emails.
 site_url = "http://127.0.0.1:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = [
+  "https://127.0.0.1:3000",
+  "music-room://update-password",
+  "music-room:///update-password"
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # Path to JWT signing key. DO NOT commit your signing keys file to git.
@@ -336,7 +340,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.auth]
 enabled = true
 verify_jwt = false
-import_map = "./functions/auth/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/auth/index.ts"
@@ -347,7 +351,7 @@ entrypoint = "./functions/auth/index.ts"
 [functions.search]
 enabled = true
 verify_jwt = true
-import_map = "./functions/search/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/search/index.ts"
@@ -358,7 +362,7 @@ entrypoint = "./functions/search/index.ts"
 [functions.playlists]
 enabled = true
 verify_jwt = true
-import_map = "./functions/playlists/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/playlists/index.ts"
@@ -366,10 +370,16 @@ entrypoint = "./functions/playlists/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/playlists/*.html" ]
 
+[functions.openapi]
+enabled = true
+verify_jwt = false
+import_map = "./functions/deno.json"
+entrypoint = "./functions/openapi/index.ts"
+
 [functions.events]
 enabled = true
 verify_jwt = true
-import_map = "./functions/events/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/events/index.ts"
@@ -380,10 +390,23 @@ entrypoint = "./functions/events/index.ts"
 [functions.websocket]
 enabled = true
 verify_jwt = false
-import_map = "./functions/websocket/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/websocket/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/websocket/*.html" ]
+
+[functions.me]
+enabled = true
+verify_jwt = true
+import_map = "./functions/deno.json"
+entrypoint = "./functions/me/index.ts"
+
+[functions.profile]
+enabled = true
+verify_jwt = true
+import_map = "./functions/deno.json"
+entrypoint = "./functions/profile/index.ts"
+

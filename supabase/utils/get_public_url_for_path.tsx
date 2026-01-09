@@ -8,6 +8,7 @@ const supabase = createClient(
 // This function is for developing locally with the Supabase emulator
 export default async function getPublicUrlForPath(path: string): Promise<string> {
   const localUrl = "http://10.0.2.2:54321";
+  console.log('path:', path);
 
   const { data: signedData, error } = await supabase.storage
     .from('avatars')

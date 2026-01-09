@@ -20,7 +20,6 @@ export function AppToast({
       nativeID={id}
       action={action}
       variant={variant}
-      style={{ right: '10%', width: '120%' }}
     >
       <ToastTitle>{title}</ToastTitle>
       {description ? <ToastDescription>{description}</ToastDescription> : null}

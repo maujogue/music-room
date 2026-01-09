@@ -53,8 +53,6 @@ export default function TrackListVotes({
     error: errorV,
   } = useVoteCountIndex(eventId);
 
-  // --------------------------------------------------
-  // CONTINUE DEBUG HERE TO GET WHAT IS WITH VOTES RETREIVED
   useEffect(() => {
     if (!playlistTracks) return;
 
@@ -70,8 +68,6 @@ export default function TrackListVotes({
 
     console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
-  // --------------------------------------------------
-  // --------------------------------------------------
 
   const getRealtimeVoteCount = (trackId: string): number => {
     const realtimeVote = realtimeVotes?.get(trackId);
@@ -138,45 +134,45 @@ export default function TrackListVotes({
             const voteCount = getRealtimeVoteCount(trackId);
 
             return (
-              <Pressable key={track.added_at}>
+                <Pressable key={trackId}>
                 <TrackListItem
                   track={track.details}
                   voteCount={voteCount}
                   renderRightAction={() => (
-                    <Reanimated.View
-                      style={{
-                        flex: 1,
-                        backgroundColor: colors.red[600],
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: 80,
-                      }}
-                    >
-                      <Box className='flex-1 justify-center items-end w-full p-4'>
-                        <Icon as={CircleMinus} color='white' size='xl' />
-                      </Box>
-                    </Reanimated.View>
+                  <Reanimated.View
+                    style={{
+                    flex: 1,
+                    backgroundColor: colors.red[600],
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: 80,
+                    }}
+                  >
+                    <Box className='flex-1 justify-center items-end w-full p-4'>
+                    <Icon as={CircleMinus} color='white' size='xl' />
+                    </Box>
+                  </Reanimated.View>
                   )}
                   renderLeftAction={() => (
-                    <Reanimated.View
-                      style={{
-                        flex: 1,
-                        backgroundColor: colors.green[600],
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: 80,
-                      }}
-                    >
-                      <Box className='flex-1 justify-center items-start w-full p-4'>
-                        <Icon as={PlusCircleIcon} color='white' size='xl' />
-                      </Box>
-                    </Reanimated.View>
+                  <Reanimated.View
+                    style={{
+                    flex: 1,
+                    backgroundColor: colors.green[600],
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: 80,
+                    }}
+                  >
+                    <Box className='flex-1 justify-center items-start w-full p-4'>
+                    <Icon as={PlusCircleIcon} color='white' size='xl' />
+                    </Box>
+                  </Reanimated.View>
                   )}
                   onSwipeableOpen={dir =>
-                    handleSwipeableOpen(dir, getTrackId(track))
+                  handleSwipeableOpen(dir, getTrackId(track))
                   }
                 />
-              </Pressable>
+                </Pressable>
             );
           })}
       </GestureHandlerRootView>

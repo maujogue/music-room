@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { getSession } from '@/services/session';
-import { useAppToast } from '@/hooks/useAppToast';
-
+import { useCurrentPosition } from './useCurrentPosition';
 
 export interface TrackVote {
   eventId: string;
@@ -12,7 +11,7 @@ export interface TrackVote {
   voters: string[];
 }
 
-export interface eventUserData {
+export interface EventUserData {
   userId: string;
   vote_remaining: number;
   voteCount: number;
@@ -22,11 +21,12 @@ export interface eventUserData {
 
 export interface WebSocketActions {
   connected: boolean;
-  sendVote: (eventId: string, trackId: string) => boolean;
-  sendUnvote: (eventId: string, trackId: string) => boolean;
+  track: PlayerTrack | null;
+  sendVote: (eventId: string, trackId: string) => Promise<boolean>;
+  sendUnvote: (eventId: string, trackId: string) => Promise<boolean>;
   sendPing: () => boolean;
   trackVotes: Map<string, TrackVote>;
-  eventUserData: eventUserData | null;
+  eventUserData: EventUserData | null;
   subscribeToVotes: (callback: (vote: TrackVote) => void) => () => void;
   connectionAttempts: number;
   lastError: string | null;
@@ -34,7 +34,14 @@ export interface WebSocketActions {
   disconnect: () => void;
 }
 
-export default function useWebSocketClient(event_id: string): WebSocketActions {
+type Options = {
+  enabled?: boolean,
+  spatio_licence?: boolean
+  done?: boolean
+}
+
+export default function useWebSocketClient(event_id: string, opts?: Options, isOwner?: boolean): WebSocketActions {
+  const { enabled = true, done = false, spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
@@ -46,19 +53,26 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   const [voteCallbacks, setVoteCallbacks] = useState<
     Set<(vote: TrackVote) => void>
   >(new Set());
-  const [eventUserData, setEventUserData] = useState<eventUserData | null>(
+  const [eventUserData, setEventUserData] = useState<EventUserData | null>(
     null
   );
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [track, setTrack] = useState<PlayerTrack | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
   const connectionAttemptsRef = useRef<number>(0);
-  const toast = useAppToast();
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
-  const pingInterval = 60000;
+  const pingInterval = 1000;
+
+  const { coords, loading, error } = useCurrentPosition({ radiusKm: 50 })
+
+  const hasPosition = useCallback(async () => {
+    if (loading || error) { return false }
+    if (coords) { return true }
+  }, [coords])
 
   const checkTokenValidity = useCallback(async () => {
     try {
@@ -67,7 +81,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         return false;
       }
 
-      // Vérifier si le token expire bientôt (dans les 5 prochaines minutes)
       if (session.expires_at) {
         const expirationTime = new Date(session.expires_at).getTime();
         const currentTime = Date.now();
@@ -87,8 +100,8 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
   const initWebSocket = useCallback(async () => {
     try {
+      if (!enabled || done) return;
       if (!shouldReconnectRef.current) {
-        console.log('ws: init aborted — reconnection disabled');
         return;
       }
       if (reconnectTimeoutRef.current) {
@@ -96,7 +109,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         reconnectTimeoutRef.current = null;
       }
 
-      console.log('ws: initializing connection to', serverUrl);
       const currentSession = await getSession();
 
       if (!currentSession?.access_token) {
@@ -108,20 +120,25 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
-        console.log('✅ ws: connection established successfully');
         setConnected(true);
-        setConnectionAttempts(0); // Reset attempts on success
+        setConnectionAttempts(0);
         connectionAttemptsRef.current = 0;
         setLastError(null);
 
-        // Démarrer le ping automatique
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
         }
         pingIntervalRef.current = window.setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
-            console.log('🏓 Auto-ping sent');
+            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now(), eventId: event_id }));
+            if (isOwner) {
+              ws.send(
+                JSON.stringify({
+                  type: 'event_current_track:get',
+                  eventId: event_id,
+                })
+              );
+            }
           }
         }, pingInterval);
 
@@ -135,36 +152,25 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       };
 
       ws.onclose = event => {
-        console.log('ws: connection closed', {
-          code: event.code,
-          reason: event.reason,
-        });
         setConnected(false);
 
-        // Arrêter le ping
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
 
-        // Reconnexion automatique si ce n'est pas une fermeture intentionnelle
         if (
           event.code !== 1000 &&
           shouldReconnectRef.current &&
           connectionAttemptsRef.current < maxReconnectAttempts
         ) {
-          console.log(
-            `🔄 Auto-reconnect in ${reconnectDelay}ms (attempt ${connectionAttemptsRef.current + 1}/${maxReconnectAttempts})`
-          );
           reconnectTimeoutRef.current = window.setTimeout(() => {
             connectionAttemptsRef.current += 1;
             setConnectionAttempts(connectionAttemptsRef.current);
             initWebSocket();
           }, reconnectDelay);
         } else {
-          console.log(
-            'ws: not reconnecting (intentional close or max attempts reached)'
-          );
+          // not reconnecting (intentional close or max attempts reached)
         }
       };
 
@@ -176,20 +182,18 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       ws.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
-          console.log('ws: message received', data.type);
 
           switch (data.type) {
             case 'subscribed':
-              console.log('📋 Subscribed to event:', data.eventId);
               break;
             case 'error':
-              setLastError(data.message);
+              setLastError(data.message ?? 'some error');
               break;
             case 'pong':
-              console.log('🏓 Pong received - connection alive');
               break;
             case 'track_vote:update':
               handleTrackVoteUpdate(data);
+              sendRequestUserInfo();
               break;
             case 'vote:confirmed':
               sendRequestUserInfo();
@@ -206,13 +210,17 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
             case 'user:info:response':
               handleUserInfo(data);
               break;
+            case 'event_current_track:update':
+              handleTrackPlay(data);
+              break;
             default:
-              console.log('ws: unhandled message type:', data.type);
+              // unhandled message type
+              break;
           }
         } catch (error) {
           console.warn('ws: failed to parse message:', error);
         }
-      };
+      }
 
       setWebSocket(ws);
       webSocketRef.current = ws;
@@ -221,12 +229,11 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       setLastError('Failed to initialize WebSocket connection');
       setConnected(false);
     }
-  }, []);
+  }, [enabled, done]);
 
   useEffect(() => {
     initWebSocket();
 
-    // Cleanup lors du démontage
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -243,22 +250,19 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
           shouldReconnectRef.current = false;
           webSocketRef.current.close(1000, 'Component unmounted');
         } catch {
-          /* ignore */
+          console.warn('ws: error closing socket on unmount');
         }
         webSocketRef.current = null;
         setWebSocket(null);
       }
     };
-  }, [initWebSocket]);
+  }, [initWebSocket, enabled, done]);
 
   // Listen to app state and close websocket when app is backgrounded to avoid reconnect loops
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       const active = nextAppState === 'active';
       if (!active) {
-        console.log(
-          'ws: app not active — closing socket and disabling reconnects'
-        );
         shouldReconnectRef.current = false;
 
         if (reconnectTimeoutRef.current) {
@@ -275,14 +279,12 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
           try {
             webSocketRef.current.close(1000, 'App backgrounded');
           } catch {
-            /* ignore */
+            console.warn('ws: error closing socket on app background');
           }
           webSocketRef.current = null;
           setWebSocket(null);
         }
       } else {
-        // App became active again: allow reconnects and reset attempts
-        console.log('ws: app active — enabling reconnects');
         shouldReconnectRef.current = true;
         connectionAttemptsRef.current = 0;
         setConnectionAttempts(0);
@@ -292,7 +294,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
     const sub = AppState.addEventListener('change', handleAppStateChange);
     return () => sub.remove();
-  }, [initWebSocket]);
+  }, [initWebSocket, enabled, done]);
 
   const sendRequestUserInfo = useCallback(
     (ws?: WebSocket) => {
@@ -317,31 +319,40 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-      webSocket.send(JSON.stringify({ type: 'ping' }));
-      console.log('ws: ping sent');
+      webSocket.send(JSON.stringify({
+        type: 'ping',
+        eventId: event_id
+      }));
       return true;
     }
     console.warn('ws: cannot send ping, socket not open');
     return false;
   };
 
-  const sendVote = (eventId: string, trackId: string): boolean => {
+  const sendVote = async (eventId: string, trackId: string): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send vote, socket not open');
       return false;
     }
 
-    console.log(`ws: sending vote for track ${trackId} in event ${eventId}`);
+    if (spatio_licence) {
+      const isOk = await hasPosition()
+      if (!isOk) {
+        console.warn('ws: cannot send vote, need user position');
+        return false;
+      }
+    }
+
     try {
       const message = {
         type: 'vote',
         eventId,
         trackId,
         timestamp: Date.now(),
+        coordinates: coords
       };
 
       webSocket.send(JSON.stringify(message));
-      console.log(`📤 Vote sent for track ${trackId} in event ${eventId}`);
       return true;
     } catch (error) {
       console.error('ws: error sending vote:', error);
@@ -349,10 +360,18 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     }
   };
 
-  const sendUnvote = (eventId: string, trackId: string): boolean => {
+  const sendUnvote = async (eventId: string, trackId: string): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send unvote, socket not open');
       return false;
+    }
+
+    if (spatio_licence) {
+      const isOk = await hasPosition()
+      if (!isOk) {
+        console.warn('ws: cannot send vote, need user position');
+        return false;
+      }
     }
 
     try {
@@ -361,10 +380,10 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         eventId,
         trackId,
         timestamp: Date.now(),
+        coordinates: coords
       };
 
       webSocket.send(JSON.stringify(message));
-      console.log(`📤 Unvote sent for track ${trackId} in event ${eventId}`);
       return true;
     } catch (error) {
       console.error('ws: error sending unvote:', error);
@@ -380,7 +399,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       voteMax: number;
       voted_tracks: Record<string, number>;
     }) => {
-      console.log('📊 Received user info:', data);
 
       const newUserData = {
         userId: data.userId,
@@ -390,14 +408,16 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
         voted_tracks: data.voted_tracks,
       };
 
-      console.log('📊 Setting eventUserData to:', newUserData);
       setEventUserData(newUserData);
     },
     []
   );
 
+  const handleTrackPlay = useCallback((data: any) => {
+    setTrack(data.track);
+  }, []);
+
   const handleVoteList = useCallback((votes: any[]) => {
-    console.log('📋 Processing vote list with', votes.length, 'entries');
     const newMap = new Map<string, TrackVote>();
 
     votes.forEach(vote => {
@@ -474,9 +494,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   );
 
   const reconnect = useCallback(async () => {
-    console.log('ws: manual reconnection requested');
 
-    // Vérifier la validité du token avant la reconnexion
     const tokenValid = await checkTokenValidity();
     if (!tokenValid) {
       setLastError('Session expired. Please login again.');
@@ -484,7 +502,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
     }
 
     if (!shouldReconnectRef.current) {
-      console.log('ws: reconnect aborted — reconnections disabled');
       return;
     }
 
@@ -494,7 +511,6 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
       return;
     }
 
-    // Nettoyer les timers existants
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -512,18 +528,13 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
   }, [initWebSocket, checkTokenValidity, maxReconnectAttempts]);
 
   const disconnect = useCallback(() => {
-    console.log('ws: manual disconnect requested');
-
-    // disable reconnect attempts
     shouldReconnectRef.current = false;
 
-    // clear any pending reconnect timer
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
 
-    // stop ping interval
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
@@ -542,6 +553,7 @@ export default function useWebSocketClient(event_id: string): WebSocketActions {
 
   return {
     connected,
+    track,
     sendPing,
     sendVote,
     sendUnvote,

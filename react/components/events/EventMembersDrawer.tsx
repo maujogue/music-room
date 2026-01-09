@@ -143,8 +143,8 @@ export default function EventMembersDrawer({
                 )}
                 <VStack className='flex-1 p-4'>
                   <Text
-                    size='lg'
-                    className='font-semibold text-left text-gray-100'
+                    size='2xl'
+                    className='font-semibold text-left text-bold'
                   >
                     {eventData.event.name}
                   </Text>
@@ -161,7 +161,7 @@ export default function EventMembersDrawer({
                 <Text size='sm' className='font-medium text-gray-600'>
                   Event Creator
                 </Text>
-                <HStack className='items-center gap-3 p-2 bg-gray-50 rounded-lg'>
+                <HStack className='items-center gap-3 p-2 bg-white rounded-lg'>
                   <Avatar size='md'>
                     <AvatarFallbackText>
                       {eventData.owner.username?.charAt(0).toUpperCase() || 'U'}

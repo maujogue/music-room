@@ -9,6 +9,7 @@ import {
 } from './service.ts';
 import type { ProfileWithFollowInfo } from '@profile';
 import { validateUpdateProfilePayload } from './validators.ts';
+import { safeJsonFromContext } from '@utils/parsing';
 
 export async function fetchUserProfile(c: Context): Promise<Response> {
   const userId = c.req.param('userId');
@@ -27,7 +28,7 @@ export async function fetchUserProfile(c: Context): Promise<Response> {
 
 export async function updateProfile(c: Context): Promise<Response> {
   const user = c.get('user');
-  const body = await c.req.json();
+  const body = await safeJsonFromContext(c)
 
   const { valid, errors, profilePayload } = validateUpdateProfilePayload(body);
   if (!valid) {

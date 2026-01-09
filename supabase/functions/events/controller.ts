@@ -9,7 +9,10 @@ import {
   uploadEventImage,
   addUserToEventSupabase,
   removeUserFromEventSupabase,
-  editUserInEventSupabase
+  editUserInEventSupabase,
+  getSupabaseEventByCoordinates,
+  supabaseStartEvent,
+  supabaseStopEvent
 } from './service.ts'
 import {
   validateEventPayload,
@@ -22,12 +25,14 @@ import {
   checkPermission,
   PERMISSIONS,
 } from './permissions.ts'
-import type { 
-  EventPayload, 
+import type {
+  EventPayload,
   EventResponse,
-  EventMember
- } from '@event';
+  EventMember,
+  EventRadarFromDb
+} from '@event';
 import type { User } from '@supabase/supabase-js';
+import { safeJsonFromContext } from '@utils/parsing';
 
 export async function createEvent(c: Context): Promise<Response> {
   const contentTypeHeader = c.req.header('content-type') || ''
@@ -40,10 +45,17 @@ export async function createEvent(c: Context): Promise<Response> {
     payload = result.payload
     uploadedFile = result.uploadedFile
   } else {
-    payload = await c.req.json()
+    payload = await safeJsonFromContext(c)
   }
 
-  const validation = validateEventPayload(payload, { requireName: true })
+  const validation = validateEventPayload(
+    payload, {
+    requireName: true,
+    requireDateTime: true,
+    requireLocation: true,
+    requirePlaylist: true
+  })
+
   if (!validation.valid) {
     return c.json({ error: validation.message }, 400)
   }
@@ -61,7 +73,7 @@ export async function createEvent(c: Context): Promise<Response> {
   await createSupabaseEvent(payload, c.get('user').id)
 
   c.status(201)
-  return c.json({ message: 'Event created successfully'})
+  return c.json({ message: 'Event created successfully' })
 }
 
 function createPayloadFromFormData(
@@ -87,6 +99,12 @@ function createPayloadFromFormData(
         break;
       case 'everyone_can_vote':
         payload.everyone_can_vote = (value === 'true' || value === '1');
+        break;
+      case 'done':
+        payload.done = (value === 'true' || value === '1');
+        break;
+      case 'spatio_licence':
+        payload.spatio_licence = (value === 'true' || value === '1');
         break;
       case 'name':
         payload.name = value as string;
@@ -120,10 +138,8 @@ export async function fetchEvent(c: Context): Promise<Response> {
 
   try {
     const imagePath = data?.event.image_url;
-    console.log('Event image path:', imagePath);
     if (imagePath) {
       const publicUrl = await getPublicUrlForPath(imagePath);
-      console.log('Resolved public URL for event image:', publicUrl);
       data.event.image_url = publicUrl;
     }
   } catch (err) {
@@ -136,8 +152,7 @@ export async function fetchEvent(c: Context): Promise<Response> {
   return c.json(data)
 }
 
-function setUserPermissions(data: EventResponse, user: User): EventResponse 
-{
+function setUserPermissions(data: EventResponse, user: User): EventResponse {
   const memberEvent = data.members.find((m: EventMember) => m.profile.id === user.id)
 
   if (data.owner.id === user.id) {
@@ -214,7 +229,7 @@ export async function updateEventById(c: Context): Promise<Response> {
     body = result.payload
     uploadedFile = result.uploadedFile
   } else {
-    body = await c.req.json()
+    body = await safeJsonFromContext(c)
   }
 
   const validation = validateEventPayload(body, { requireName: false })
@@ -252,9 +267,54 @@ export async function updateEventById(c: Context): Promise<Response> {
   return c.json({ message: 'Event updated successfully' })
 }
 
+
+export async function startEvent(c: Context): Promise<Response> {
+  const id = c.req.param('id')
+  const user = c.get('user')
+
+  await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
+
+  const data = await getSupabaseEventById(id)
+  if (!data) {
+    c.status(404)
+    return c.json({ error: 'Event not found' })
+  }
+
+  if (data.owner.id !== user.id) {
+    c.status(403)
+    return c.json({ error: 'Only owner can start an event' })
+  }
+
+  await supabaseStartEvent(id)
+
+  return c.json({ message: 'Event started successfully' })
+}
+
+export async function stopEvent(c: Context): Promise<Response> {
+  const id = c.req.param('id')
+  const user = c.get('user')
+
+  await checkPermission(id, user.id, PERMISSIONS.EDIT_EVENT)
+
+  const data = await getSupabaseEventById(id)
+  if (!data) {
+    c.status(404)
+    return c.json({ error: 'Event not found' })
+  }
+
+  if (data.owner.id !== user.id) {
+    c.status(403)
+    return c.json({ error: 'Only owner can start an event' })
+  }
+
+  await supabaseStopEvent(id)
+
+  return c.json({ message: 'Event started successfully' })
+}
+
 export async function addUserToEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   if (body.user_id === '') {
@@ -268,18 +328,17 @@ export async function addUserToEvent(c: Context): Promise<Response> {
 
   const { user_id, role } = body
   await addUserToEventSupabase(eventId, user_id, role)
-  return c.json({ message: 'User added to event successfully'})
+  return c.json({ message: 'User added to event successfully' })
 }
 
 export async function removeUserFromEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   if (body.user_id === '') {
     body.user_id = user.id
   }
-  console.log('Body in removeUserFromEvent:', body);
   const validation = validateRemoveUserPayload(body)
   if (!validation.valid) {
     throw new HTTPException(400, { message: validation.message })
@@ -290,12 +349,12 @@ export async function removeUserFromEvent(c: Context): Promise<Response> {
 
   const { user_id } = body
   await removeUserFromEventSupabase(eventId, user_id)
-  return c.json({ message: 'User removed from event successfully'})
+  return c.json({ message: 'User removed from event successfully' })
 }
 
 export async function editUserInEvent(c: Context): Promise<Response> {
   const eventId = c.req.param('id')
-  const body = await c.req.json()
+  const body = await safeJsonFromContext(c)
   const user = c.get('user')
 
   const validation = validateEditUserPayload(body)
@@ -305,8 +364,50 @@ export async function editUserInEvent(c: Context): Promise<Response> {
   await checkPermission(eventId, user.id, PERMISSIONS.UPDATE_USER_ROLE)
 
   const { user_id, role } = body
-  await editUserInEventSupabase(eventId, user_id, role)  
+  await editUserInEventSupabase(eventId, user_id, role)
   return c.json({ message: 'User edited in event successfully' })
 }
 
+export async function getEventsByCoordinates(c: Context): Promise<Response> {
+  const lat = c.req.query('lat')
+  const long = c.req.query('long')
 
+  if (!lat || !long) {
+    throw new HTTPException(400, { message: 'Missing latitude or longitude' })
+  }
+
+  const eventsRaw = await getSupabaseEventByCoordinates(Number(lat), Number(long));
+  const events = await Promise.all(eventsRaw.map((event: EventRadarFromDb) => formatEventsRadars(event)));
+  return c.json(events)
+}
+
+async function formatEventsRadars(event: EventRadarFromDb) {
+  const {
+    id,
+    beginning_at,
+    name,
+    image_url,
+    spatio_licence,
+    done,
+    owner_id,
+    owner_username,
+    owner_avatar_url,
+    long,
+    lat,
+    dist_meters,
+    venuename,
+    description,
+    everyone_can_vote,
+  } = event
+
+  const publicUrl = image_url ? await getPublicUrlForPath(image_url) : null
+
+  return {
+    event: {
+      id, name, beginning_at, image_url: publicUrl, description, spatio_licence, done,
+      everyone_can_vote
+    },
+    owner: { id: owner_id, username: owner_username, avatar_url: owner_avatar_url },
+    radar: { coordinates: { lat, long }, dist: dist_meters, venuename }
+  }
+}

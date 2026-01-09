@@ -7,8 +7,7 @@ export default function EventLayout() {
         name='index'
         options={{
           title: 'Events',
-          headerShown: true,
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
 
@@ -18,15 +17,14 @@ export default function EventLayout() {
           headerShown: false,
         }}
       />
-      {/*
-      <Stack.Screen name='add'
+      <Stack.Screen
+        name='radar'
         options={{
+          headerShown: true,
           presentation: 'modal',
-          title: 'New Playlist',
-          headerBackVisible: false,
-          headerRight: () => <CancelButton />,
+          title: 'Events Radar',
         }}
-      /> */}
+      />
     </Stack>
   );
 }

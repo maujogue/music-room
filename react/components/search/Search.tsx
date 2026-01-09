@@ -18,6 +18,7 @@ interface Props {
   renderItemPlaylist?: (item: any) => React.ReactNode;
   renderItemUser?: (item: any) => React.ReactNode;
   renderItemEvent?: (item: any) => React.ReactNode;
+  noHorizontalPadding?: boolean;
 }
 
 export default function Search({
@@ -34,6 +35,7 @@ export default function Search({
   renderItemEvent = (item: any) => (
     <EventListItem event={item} owner={item.owner} key={item.id} />
   ),
+  noHorizontalPadding = false,
 }: Props) {
   const { query, setQuery, filter, setFilter, onChangeFilter, results, error } =
     useSearchGlobal(defaultType);
@@ -95,6 +97,7 @@ export default function Search({
           items={tracks}
           limit={limit}
           renderItem={renderItemTrack}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -105,6 +108,7 @@ export default function Search({
             setFilter(label);
           }}
           renderItem={renderItemPlaylist}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -115,6 +119,7 @@ export default function Search({
             setFilter(label);
           }}
           renderItem={renderItemEvent}
+          noHorizontalPadding={noHorizontalPadding}
         />
 
         <ResultsSection
@@ -125,6 +130,7 @@ export default function Search({
             setFilter(label);
           }}
           renderItem={renderItemUser}
+          noHorizontalPadding={noHorizontalPadding}
         />
       </ScrollView>
     </GestureHandlerRootView>

@@ -3,14 +3,31 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter, usePathname } from 'expo-router';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider } from '@/contexts/profileCtx';
+import { SubscriptionProvider } from '../../contexts/subscriptionCtx';
 import { PlayIcon, Icon, StarIcon, SearchIcon } from '@/components/ui/icon';
+import PaywallModal from '@/components/subscription/PaywallModal';
+import { useSubscription } from '@/contexts/subscriptionCtx';
+import { useState, useEffect } from 'react';
 
 export default function AppLayout() {
   return (
     <ProfileProvider>
+      <SubscriptionProvider>
+        <AppTabs />
+      </SubscriptionProvider>
+    </ProfileProvider>
+  );
+}
+
+function AppTabs() {
+  const { isPremium } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  return (
+    <>
       <Tabs screenOptions={{ headerShown: false }}>
         <Tabs.Screen
           name='events'
@@ -24,6 +41,14 @@ export default function AppLayout() {
           options={{
             title: 'Playlists',
             tabBarIcon: () => <Icon as={PlayIcon} size='md' />,
+          }}
+          listeners={{
+            tabPress: e => {
+              if (!isPremium) {
+                e.preventDefault();
+                setShowPaywall(true);
+              }
+            },
           }}
         />
         <Tabs.Screen
@@ -47,6 +72,12 @@ export default function AppLayout() {
         />
         <Tabs.Screen name='index' options={{ href: null }} />
       </Tabs>
-    </ProfileProvider>
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => {
+          setShowPaywall(false);
+        }}
+      />
+    </>
   );
 }

@@ -15,12 +15,16 @@ import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import FloatButton from '@/components/generics/FloatButton';
 import { AddIcon } from '@/components/ui/icon';
-import { UserRoundPlus } from 'lucide-react-native';
+import { UserRoundPlus, Lock } from 'lucide-react-native';
 import { useProfile } from '@/contexts/profileCtx';
+import { useSubscription } from '@/contexts/subscriptionCtx';
 import { useAppToast } from '@/hooks/useAppToast';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
+import PaywallModal from '@/components/subscription/PaywallModal';
+import TrackSelectionModal from '@/components/track/TrackSelectionModal';
+import useAddTrack from '@/hooks/useAddTrack';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -34,11 +38,15 @@ export default function PlaylistDetail() {
     canInvite,
   } = usePlaylist(playlistId);
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
+  const { isPremium } = useSubscription();
   const toast = useAppToast();
+  const { onSwipeableOpen, renderLeftAction } = useAddTrack(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const [displayAddTrackButton, setDisplayAddTrackButton] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -52,18 +60,25 @@ export default function PlaylistDetail() {
   useEffect(() => {
     setDisplayAddTrackButton(
       canEdit &&
+        isPremium &&
         !playlist?.is_spotify_sync &&
         (playlist?.tracks.length ?? 0) > 0 &&
         !!isConnectedToSpotify
     );
-    setDisplayInviteButton(canInvite);
-  }, [canEdit, canInvite, playlist]);
+    setDisplayInviteButton(canInvite && isPremium);
+  }, [canEdit, canInvite, playlist, isPremium]);
 
   const handleAddTrackPress = () => {
-    router.push({
-      pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId, playlistTitle: playlist!.name },
-    });
+    setIsTrackModalOpen(true);
+  };
+
+  const handleAddTrack = async (trackId: string) => {
+    await onSwipeableOpen(trackId);
+  };
+
+  const handleCloseTrackModal = () => {
+    setIsTrackModalOpen(false);
+    refetch(); // Refetch when modal closes to update the playlist
   };
 
   useEffect(() => {
@@ -74,10 +89,12 @@ export default function PlaylistDetail() {
             playlist={playlist}
             callDelete={() => setShowAlertDialog(true)}
             callEdit={onCallEdit}
+            isPremium={isPremium}
+            onUpgrade={() => setShowPaywall(true)}
           />
         ),
     });
-  }, [navigation, playlist]);
+  }, [navigation, playlist, isPremium]);
 
   const onDeletePlaylist = async () => {
     setShowAlertDialog(false);
@@ -90,10 +107,18 @@ export default function PlaylistDetail() {
   };
 
   const onCallEdit = () => {
+    if (!isPremium) {
+      setShowPaywall(true);
+      return;
+    }
     router.push(`(main)/playlists/${playlistId}/edit`);
   };
 
   const handleInviteUserPress = () => {
+    if (!isPremium) {
+      setShowPaywall(true);
+      return;
+    }
     router.push(`(main)/playlists/${playlistId}/invite`);
   };
 
@@ -170,19 +195,42 @@ export default function PlaylistDetail() {
           isSpotifySync={playlist.is_spotify_sync}
           onTrackDeleted={refetch}
           canEdit={canEdit}
+          onAddTrackPress={handleAddTrackPress}
         />
         {/* </Box> */}
       </ScrollView>
 
       {displayAddTrackButton && (
-        <FloatButton onPress={handleAddTrackPress} icon={AddIcon} />
+        <FloatButton
+          onPress={handleAddTrackPress}
+          icon={AddIcon}
+          className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+        />
       )}
       {displayInviteButton && (
         <FloatButton
           onPress={handleInviteUserPress}
           icon={UserRoundPlus}
-          className={`absolute bottom-${displayAddTrackButton ? '20' : '4'} right-4 rounded-full p-4 blurred-bg`}
+          className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
         />
+      )}
+
+      {/* Show lock buttons for non-premium users */}
+      {canEdit && !isPremium && (
+        <>
+          <FloatButton
+            onPress={() => setShowPaywall(true)}
+            icon={Lock}
+            className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
+          />
+          {canInvite && (
+            <FloatButton
+              onPress={() => setShowPaywall(true)}
+              icon={UserRoundPlus}
+              className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+            />
+          )}
+        </>
       )}
 
       <DeleteAlert
@@ -191,6 +239,18 @@ export default function PlaylistDetail() {
         onDelete={onDeletePlaylist}
         itemName={playlist?.name ?? 'playlist'}
         itemType='playlist'
+      />
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
+
+      <TrackSelectionModal
+        isOpen={isTrackModalOpen}
+        onClose={handleCloseTrackModal}
+        onAddTrack={handleAddTrack}
+        renderLeftAction={renderLeftAction}
       />
     </>
   );
