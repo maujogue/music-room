@@ -7,8 +7,7 @@ export default function EventLayout() {
         name='index'
         options={{
           title: 'Events',
-          headerShown: true,
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
 
