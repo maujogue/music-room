@@ -28,8 +28,8 @@ import {
   validateAddTracksPayload
 } from './validators.ts';
 import { refreshSpotifyToken } from '@auth/utils';
-import type { 
-PlaylistCollaborator,
+import type {
+  PlaylistCollaborator,
   PlaylistMember,
   PlaylistResponse,
   PlaylistTrack,
@@ -104,7 +104,6 @@ export async function fetchPlaylistItems(c: Context): Promise<Response> {
   }
 
   if (playlist.tracks && playlist.tracks.length !== 0) {
-    console.log(playlist.tracks)
     const trackIds = playlist.tracks.map((track: PlaylistTrack) => track.track_id)
     await refreshSpotifyToken(user.id)
     const spotifyTracksData = await fetchSpotifyTracks(spotify_token, trackIds)
@@ -142,7 +141,7 @@ function setUserPlaylistPermissions(playlist: PlaylistResponse, user: User): Pla
   }
   if (playlist.user.role === 'owner' || !playlist.is_private || playlist.collaborators.find((collab: PlaylistCollaborator) => collab.id === user.id)) {
     playlist.user.can_invite = true
-}
+  }
 
   const is_owner = playlist.owner.id === user.id
   const is_member = playlist.members.find((member: PlaylistMember) => member.id === user.id)
@@ -220,7 +219,6 @@ export async function removeUserFromPlaylist(c: Context): Promise<Response> {
 
   await removeUserFromPlaylistInSupabase(id, user_id, role)
 
-  console.log('User removed successfully from playlist:', { playlist_id: id, user_id, role });
   c.status(200)
   return c.json({ message: 'User removed successfully from playlist' })
 }

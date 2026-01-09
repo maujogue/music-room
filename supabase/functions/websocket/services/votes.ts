@@ -127,7 +127,7 @@ export async function handleVote(userId: string, msg: VoteMessage): Promise<Vote
           message: 'Event has no location'
         };
       }
-      const eventCoords = {lat: res.data.location.lat, long: res.data.location.long}
+      const eventCoords = { lat: res.data.location.lat, long: res.data.location.long }
       const distance = distanceMeters(eventCoords, msg.coordinates)
 
       if (distance > DISTANCE_MIN) {
@@ -597,8 +597,6 @@ export async function clearTrackVotes(eventId: string, trackId: string): Promise
 
     if (error) {
       console.error('Error clearing track votes:', error);
-    } else {
-      console.log(`Cleared votes for track ${trackId} in event ${eventId}`);
     }
   } catch (err) {
     console.error('Exception clearing track votes:', err);

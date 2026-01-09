@@ -45,10 +45,9 @@ export async function addItemToSpotifyOwnerQueue(item: string, spotify_token: st
     });
 
     if (!response.ok) {
-      console.error('Failed to add item to queue:', response.statusText);
+      console.error('Failed to add item to queue:', response);
       return false;
     }
-    // item added to queue
     return true;
   } catch (error) {
     console.error('Error adding item to queue:', error);
@@ -154,7 +153,11 @@ export async function getOwnerCurrentPlayingTrack(
           console.warn('Error fetching vote_resolved status:', res.error);
         }
         if (res.data && !res.data.vote_resolved) {
-          await resolveVoteCount(eventId, current, accessToken, userId);
+          const voteResult = await resolveVoteCount(eventId, current, accessToken, userId);
+          if (voteResult) {
+            const { pushed, topId } = voteResult;
+            // Leader push attempted; result handled inside resolveVoteCount
+          }
         }
       }
     } catch (err) {
@@ -189,7 +192,7 @@ async function resolveVoteCount(
   }
 
   if (event.data.owner_id !== userId) {
-    // Only the owner can trigger an automated push
+    console.warn('User is not event owner, cannot push to owner queue');
     return null;
   }
 
@@ -201,18 +204,16 @@ async function resolveVoteCount(
   const top = await getTopTrackForEvent(eventId);
   const topId = top.trackId;
   if (!topId) {
-    // no top voted track
     return { pushed: false };
   }
 
   const currentTrackId = current.item?.id ?? null;
   if (currentTrackId === topId) {
-    // top voted track already playing
     return { pushed: false, topId };
   }
 
   try {
-    const pushed = await addItemToSpotifyOwnerQueue(`spotify:track:${topId}`, accessToken);
+    const pushed = await addItemToSpotifyOwnerQueue(topId, accessToken);
     await updateEventCurrentTrackVoteResolved(eventId, true);
     await clearTrackVotes(eventId, topId);
     return { pushed, topId };

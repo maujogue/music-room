@@ -23,7 +23,6 @@ const Player = ({
     );
   }
 
-  console.log('Rendering Player with track: (ici)', track);
   return (
     <Card
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}

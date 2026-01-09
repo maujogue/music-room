@@ -22,7 +22,6 @@ export function generateRandomString(length: number): string {
 export async function getCurrentUser(req: HonoRequest): Promise<User> {
   const authHeader = req.header('Authorization') || req.header('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('No Authorization header or invalid format');
     throw new HTTPException(401, {
       message: 'Unauthorized: No token provided',
     });
