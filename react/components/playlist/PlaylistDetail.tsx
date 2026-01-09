@@ -23,6 +23,8 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
 import PaywallModal from '@/components/subscription/PaywallModal';
+import TrackSelectionModal from '@/components/track/TrackSelectionModal';
+import useAddTrack from '@/hooks/useAddTrack';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -38,11 +40,13 @@ export default function PlaylistDetail() {
   const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
   const { isPremium } = useSubscription();
   const toast = useAppToast();
+  const { onSwipeableOpen, renderLeftAction } = useAddTrack(playlistId);
 
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const [displayAddTrackButton, setDisplayAddTrackButton] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -65,10 +69,16 @@ export default function PlaylistDetail() {
   }, [canEdit, canInvite, playlist, isPremium]);
 
   const handleAddTrackPress = () => {
-    router.push({
-      pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId, playlistTitle: playlist!.name },
-    });
+    setIsTrackModalOpen(true);
+  };
+
+  const handleAddTrack = async (trackId: string) => {
+    await onSwipeableOpen(trackId);
+  };
+
+  const handleCloseTrackModal = () => {
+    setIsTrackModalOpen(false);
+    refetch(); // Refetch when modal closes to update the playlist
   };
 
   useEffect(() => {
@@ -185,6 +195,7 @@ export default function PlaylistDetail() {
           isSpotifySync={playlist.is_spotify_sync}
           onTrackDeleted={refetch}
           canEdit={canEdit}
+          onAddTrackPress={handleAddTrackPress}
         />
         {/* </Box> */}
       </ScrollView>
@@ -229,6 +240,13 @@ export default function PlaylistDetail() {
       <PaywallModal 
         isOpen={showPaywall} 
         onClose={() => setShowPaywall(false)} 
+      />
+
+      <TrackSelectionModal
+        isOpen={isTrackModalOpen}
+        onClose={handleCloseTrackModal}
+        onAddTrack={handleAddTrack}
+        renderLeftAction={renderLeftAction}
       />
     </>
   );
