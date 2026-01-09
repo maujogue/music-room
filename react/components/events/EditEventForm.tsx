@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Input, InputField } from '@/components/ui/input';
@@ -27,7 +27,6 @@ import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import EventDoneBadge from '@/components/generics/EventDoneBadge';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
-import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -81,6 +80,13 @@ export default function EditEventForm({
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const toast = useAppToast();
+
+  // Sync imageUrl when initialValues change
+  useEffect(() => {
+    if (initialValues.event?.image_url) {
+      setImageUrl(initialValues.event.image_url);
+    }
+  }, [initialValues.event?.image_url]);
 
   // DateTimePicker handlers
   const onBeginningChange = (event: any, selectedDate?: Date) => {
@@ -196,8 +202,7 @@ export default function EditEventForm({
     const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
-      image_url:
-        imageUrl.trim() || Image.resolveAssetSource(getRandomImage()).uri,
+      image_url: imageUrl.trim() || initialValues.event?.image_url || null,
       playlist_id: playlist?.id || null,
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       is_private,

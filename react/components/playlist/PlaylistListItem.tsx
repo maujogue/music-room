@@ -6,6 +6,7 @@ import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
+import { useState } from 'react';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import PrivateBadge from '@/components/generics/PrivateBadge';
 import { getRandomImage } from '@/utils/randomImage';
@@ -17,10 +18,10 @@ type Props = {
 
 export default function PlaylistListItem({ playlist, onPress }: Props) {
   const router = useRouter();
+  const [defaultImage] = useState(() => getRandomImage());
+
   const getImage = () => {
-    return playlist.cover_url
-      ? { uri: playlist.cover_url }
-      : getRandomImage();
+    return playlist.cover_url ? { uri: playlist.cover_url } : defaultImage;
   };
 
   const onPlaylistPress = () => {
