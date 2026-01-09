@@ -136,14 +136,10 @@ setup: install setup-env setup-supabase
 	@echo "🚀 Next steps:"
 	@echo "    Start the app: make dev"
 
-
 dev:
 	@echo "📱 Starting Expo development server..."
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
 	cd ${REACT_APP_DIR} && cp .env.dev .env
-	@echo "🔁 Starting supabase functions in background..."
-	cd ${SUPABASE_FUNCTIONS_DIR} && npx ${SUPABASE} functions serve &
-	@echo "🔁 Starting Expo (foreground)..."
 	cd ${REACT_APP_DIR} && npm start
 
 dev-cloud:
@@ -263,6 +259,7 @@ test-supabase-sql-cloud:
 
 deploy:
 	npx supabase db push
+deploy-functions:
 	npx supabase functions deploy
 
 load-test:

@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { connectToSpotify } from '@/services/auth';
 import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
@@ -15,6 +14,8 @@ export function useProfileData(userId: string) {
     followers,
     following,
     refreshProfile,
+    connectSpotify,
+    connectGoogle,
   } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
@@ -101,11 +102,29 @@ export function useProfileData(userId: string) {
   const actions = {
     handleSpotifyConnect: useCallback(async () => {
       try {
-        await connectToSpotify();
+        if (isOwnProfile) {
+          // Use connectSpotify from context for own profile
+          await connectSpotify();
+          // Refresh profile after connection to update connection status
+          await refreshProfile();
+        }
       } catch (error) {
         console.error('Error during Spotify OAuth:', error);
       }
-    }, []),
+    }, [isOwnProfile, connectSpotify, refreshProfile]),
+
+    handleGoogleConnect: useCallback(async () => {
+      try {
+        if (isOwnProfile) {
+          // Use connectGoogle from context for own profile
+          await connectGoogle();
+          // Refresh profile after connection to update connection status
+          await refreshProfile();
+        }
+      } catch (error) {
+        console.error('Error during Google OAuth:', error);
+      }
+    }, [isOwnProfile, connectGoogle, refreshProfile]),
 
     handlePrivacyChange: useCallback(
       async (privacy: PrivacySetting) => {

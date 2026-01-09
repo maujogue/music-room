@@ -9,6 +9,14 @@ import {
 import { Session, User } from '@supabase/supabase-js';
 import * as Linking from 'expo-linking';
 import { supabase } from '../services/supabase';
+import {
+  configureGoogleSignIn,
+  signInWithGoogle as googleSignInService,
+  signInWithSpotify as spotifySignInService,
+  signOutFromGoogle,
+  type GoogleSignInResult,
+  type SpotifySignInResult,
+} from '../services/auth';
 import { useRouter } from 'expo-router';
 
 type Tokens = {
@@ -26,6 +34,8 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<GoogleSignInResult>;
+  signInWithSpotify: () => Promise<SpotifySignInResult>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
@@ -89,6 +99,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
+    // Configure Google Sign-In
+    configureGoogleSignIn();
+
     // Helper to extract tokens from URL
     const extractTokensFromUrl = (url: string): Tokens | null => {
       const transformedUrl = parseSupabaseUrl(url);
@@ -189,9 +202,24 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const signOut = async () => {
     const router = useRouter();
     setIsLoading(true);
+    await signOutFromGoogle();
     await supabase.auth.signOut();
     router.navigate('/(auth)/login');
     setIsLoading(false);
+  };
+
+  const signInWithGoogle = async (): Promise<GoogleSignInResult> => {
+    setIsLoading(true);
+    const result = await googleSignInService();
+    setIsLoading(false);
+    return result;
+  };
+
+  const signInWithSpotify = async (): Promise<SpotifySignInResult> => {
+    setIsLoading(true);
+    const result = await spotifySignInService();
+    setIsLoading(false);
+    return result;
   };
 
   const resetPassword = async (email: string) => {
@@ -226,6 +254,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isLoading,
     signIn,
     signUp,
+    signInWithGoogle,
+    signInWithSpotify,
     signOut,
     resetPassword,
     updatePassword,
