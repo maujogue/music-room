@@ -82,9 +82,6 @@ export default function EventListItem({ event, owner }: Props) {
                   {owner?.username}
                 </Text>
               </HStack>
-              <HStack className='items-center gap-2'>
-                <EventAllBadges event={event} />
-              </HStack>
             </HStack>
           </Box>
         </Box>

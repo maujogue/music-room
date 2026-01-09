@@ -67,3 +67,17 @@ type Playlist = {
   is_spotify_sync: boolean;
   spotify_id: string | null;
 };
+
+type PlaylistListItem = {
+  id: string;
+  name: string;
+  can_invite: boolean;
+  owner_email: string;
+  description: string | null;
+  is_private: boolean;
+  is_collaborative: boolean;
+  cover_url: string | null;
+  owner_username: string | null;
+  created_at: string;
+  updated_at: string;
+};
