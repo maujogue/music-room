@@ -70,7 +70,7 @@ export default function AllPlaylists() {
       <FloatButton
         icon={Plus}
         onPress={onPlaylistPress}
-        className='absolute bottom-24 right-4 rounded-full p-4 blurred-bg'
+        className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
       />
       <FloatButton
         icon={RefreshCw}

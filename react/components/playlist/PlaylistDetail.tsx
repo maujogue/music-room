@@ -201,29 +201,33 @@ export default function PlaylistDetail() {
       </ScrollView>
 
       {displayAddTrackButton && (
-        <FloatButton onPress={handleAddTrackPress} icon={AddIcon} />
+        <FloatButton
+          onPress={handleAddTrackPress}
+          icon={AddIcon}
+          className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
+        />
       )}
       {displayInviteButton && (
         <FloatButton
           onPress={handleInviteUserPress}
           icon={UserRoundPlus}
-          className={`absolute bottom-${displayAddTrackButton ? '20' : '4'} right-4 rounded-full p-4 blurred-bg`}
+          className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
         />
       )}
-      
+
       {/* Show lock buttons for non-premium users */}
       {canEdit && !isPremium && (
         <>
           <FloatButton
             onPress={() => setShowPaywall(true)}
             icon={Lock}
-            className="absolute bottom-4 right-4 rounded-full p-4 blurred-bg"
+            className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
           />
           {canInvite && (
             <FloatButton
               onPress={() => setShowPaywall(true)}
               icon={UserRoundPlus}
-              className="absolute bottom-20 right-4 rounded-full p-4 blurred-bg"
+              className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
             />
           )}
         </>
@@ -237,9 +241,9 @@ export default function PlaylistDetail() {
         itemType='playlist'
       />
 
-      <PaywallModal 
-        isOpen={showPaywall} 
-        onClose={() => setShowPaywall(false)} 
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
       />
 
       <TrackSelectionModal
