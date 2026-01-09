@@ -15,6 +15,7 @@ export function useProfileData(userId: string) {
     following,
     refreshProfile,
     connectSpotify,
+    connectGoogle,
   } = useProfile();
 
   const [editProfile, setEditProfile] = useState(false);
@@ -111,6 +112,19 @@ export function useProfileData(userId: string) {
         console.error('Error during Spotify OAuth:', error);
       }
     }, [isOwnProfile, connectSpotify, refreshProfile]),
+
+    handleGoogleConnect: useCallback(async () => {
+      try {
+        if (isOwnProfile) {
+          // Use connectGoogle from context for own profile
+          await connectGoogle();
+          // Refresh profile after connection to update connection status
+          await refreshProfile();
+        }
+      } catch (error) {
+        console.error('Error during Google OAuth:', error);
+      }
+    }, [isOwnProfile, connectGoogle, refreshProfile]),
 
     handlePrivacyChange: useCallback(
       async (privacy: PrivacySetting) => {

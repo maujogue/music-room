@@ -37,6 +37,7 @@ interface ProfileActionsProps {
   actions: {
     handleEditToggle: () => void;
     handleSpotifyConnect: () => void;
+    handleGoogleConnect?: () => void;
     handleFollowAction?: () => void;
     signOut: () => void;
   };
@@ -49,7 +50,7 @@ export default function ProfileActions({
   actions,
 }: ProfileActionsProps) {
   const [showDrawer, setShowDrawer] = useState(false);
-  const { isConnectedToSpotify } = useProfile();
+  const { isConnectedToSpotify, isConnectedToGoogle } = useProfile();
   const { session } = useAuth();
 
   function isDev() {
@@ -132,8 +133,15 @@ export default function ProfileActions({
                     <Text className='text-extra-lg font-semibold flex-1'>
                       Google
                     </Text>
-                    <Button disabled={true} size='sm' className='w-[95px]'>
-                      <ButtonText size='xs'>Not Available</ButtonText>
+                    <Button
+                      onPress={actions.handleGoogleConnect}
+                      disabled={isConnectedToGoogle}
+                      size='sm'
+                      className='w-[95px]'
+                    >
+                      <ButtonText size='xs'>
+                        {isConnectedToGoogle ? 'Connected' : 'Connect'}
+                      </ButtonText>
                     </Button>
                   </HStack>
                   <Divider />

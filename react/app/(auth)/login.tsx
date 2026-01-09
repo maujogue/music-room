@@ -6,7 +6,8 @@ import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { FormControl } from '@/components/ui/form-control';
-import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { Image } from '@/components/ui/image';
+import { HStack } from '@/components/ui/hstack';
 
 import { useAuth } from '../../contexts/authCtx';
 
@@ -80,19 +81,43 @@ export default function SignIn() {
             {error}
           </Text>
         ) : null}
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
+        <Button
+          variant='solid'
           onPress={handleGoogleSignIn}
           disabled={isLoading}
-        />
+          style={{ backgroundColor: '#4285F4' }}
+          className='bg-[#4285F4] data-[hover=true]:bg-[#357ae8] data-[active=true]:bg-[#3367d6]'
+        >
+          <HStack className='items-center gap-2'>
+            <Image
+              source={{
+                uri: 'https://www.google.com/favicon.ico',
+              }}
+              className='w-5 h-5'
+              alt='Google logo'
+              resizeMode='contain'
+            />
+            <ButtonText className='text-white'>Sign in with Google</ButtonText>
+          </HStack>
+        </Button>
         <Button
-          variant='outline'
+          variant='solid'
           onPress={handleSpotifySignIn}
           disabled={isLoading}
-          style={{ marginTop: 8 }}
+          style={{ marginTop: 8, backgroundColor: '#1DB954' }}
+          className='bg-[#1DB954] data-[hover=true]:bg-[#1ed760] data-[active=true]:bg-[#1aa34a]'
         >
-          <ButtonText>Sign in with Spotify</ButtonText>
+          <HStack className='items-center gap-2'>
+            <Image
+              source={{
+                uri: 'https://spotify.com/favicon.ico',
+              }}
+              className='w-5 h-5'
+              alt='Spotify logo'
+              resizeMode='contain'
+            />
+            <ButtonText className='text-white'>Sign in with Spotify</ButtonText>
+          </HStack>
         </Button>
         <FormControl>
           <Input>

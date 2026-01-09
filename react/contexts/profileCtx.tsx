@@ -13,11 +13,12 @@ import {
   followUser,
   unfollowUser,
 } from '@/services/profile';
-import { connectToSpotify } from '@/services/auth';
+import { connectToSpotify, connectToGoogle } from '@/services/auth';
 
 interface ProfileContextType {
   profile: UserInfo | null;
   isConnectedToSpotify?: boolean;
+  isConnectedToGoogle?: boolean;
   isLoading: boolean;
   followers: any[];
   following: any[];
@@ -29,6 +30,7 @@ interface ProfileContextType {
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
   connectSpotify: () => Promise<{ error: any }>;
+  connectGoogle: () => Promise<{ error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -49,6 +51,20 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnectedToSpotify, setIsConnectedToSpotify] =
     useState<boolean>(false);
+  const [isConnectedToGoogle, setIsConnectedToGoogle] =
+    useState<boolean>(false);
+
+  // Check Google connection status when user changes
+  useEffect(() => {
+    if (user) {
+      const hasGoogleIdentity = user.identities?.some(
+        (identity: any) => identity.provider === 'google'
+      );
+      setIsConnectedToGoogle(!!hasGoogleIdentity);
+    } else {
+      setIsConnectedToGoogle(false);
+    }
+  }, [user]);
 
   // Fetch profile and subscribe to realtime changes when user is authenticated
   useEffect(() => {
@@ -132,6 +148,13 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         // The data now includes both profile and follow information
         console.log('Fetched profile data:', data);
         setIsConnectedToSpotify(!!data.is_connected_to_spotify);
+        
+        // Check if user has Google identity linked
+        const hasGoogleIdentity = user.identities?.some(
+          (identity: any) => identity.provider === 'google'
+        );
+        setIsConnectedToGoogle(!!hasGoogleIdentity);
+        
         setProfile(data);
         setFollowers(data?.followers || []);
         setFollowing(data?.following || []);
@@ -171,6 +194,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     setProfile(null);
     setFollowers([]);
     setFollowing([]);
+    setIsConnectedToSpotify(false);
+    setIsConnectedToGoogle(false);
     setIsLoading(false);
   };
 
@@ -214,10 +239,22 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const connectGoogle = async (): Promise<{ error: any }> => {
+    try {
+      await connectToGoogle();
+      return { error: null };
+    } catch (error) {
+      console.error('Error during Google OAuth:', error);
+      return { error };
+    }
+  };
+
   const value: ProfileContextType = {
     profile,
     isConnectedToSpotify,
+    isConnectedToGoogle,
     connectSpotify,
+    connectGoogle,
     isLoading,
     followers,
     following,

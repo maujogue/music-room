@@ -221,3 +221,21 @@ export async function connectToSpotify(): Promise<void> {
     throw error;
   }
 }
+
+// Handle Google Connection flow (for existing users)
+export async function connectToGoogle(): Promise<void> {
+  try {
+    // Use the same sign-in flow - Supabase will automatically link
+    // the Google identity to the existing authenticated account
+    const result = await signInWithGoogle();
+
+    if (!result.success) {
+      throw new Error(
+        result.error?.message || 'Failed to connect Google account'
+      );
+    }
+  } catch (error: any) {
+    console.log('Google Connection Error:', error);
+    throw error;
+  }
+}
