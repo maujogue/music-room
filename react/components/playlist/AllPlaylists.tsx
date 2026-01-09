@@ -50,7 +50,7 @@ export default function AllPlaylists() {
     return (
       <EmptyState
         title='No Playlists'
-        subtitle='A world without playlists… devilish, isn’t it ?'
+        subtitle="Create or sync playlists to get started."
         text='Synchronize with your Spotify account, or even create your own playlist from scratch right now !'
         onPressCta={onPlaylistPress}
       />

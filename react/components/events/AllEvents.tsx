@@ -7,7 +7,6 @@ import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
 import { useRouter } from 'expo-router';
-import { Box } from '@/components/ui/box';
 import { Button, ButtonIcon } from '@/components/ui/button';
 import { Radar } from 'lucide-react-native';
 
@@ -43,7 +42,7 @@ export default function AllEvents() {
     },
   ];
 
-  const radarEventButon = () => {
+  const radarEventButton = () => {
     return (
       <Button
         size='lg'
@@ -58,15 +57,13 @@ export default function AllEvents() {
 
   if (events.length === 0) {
     return (
-      <Box>
-        <EmptyState
-          title='No events'
-          subtitle='Nothing on the radar, only dust and empty bullets.'
-          text="What a sadness ! Let's create a supa-event as soon as possible !"
-          onPressCta={handlePressCreateEvent}
-          addedCTA={radarEventButon()}
-        />
-      </Box>
+      <EmptyState
+        title='No Events Yet'
+        subtitle='Time to create your first event!'
+        text='Start organizing amazing music events and invite your friends to join the fun. You can also explore events near you with the radar.'
+        onPressCta={handlePressCreateEvent}
+        addedCTA={radarEventButton()}
+      />
     );
   }
 
