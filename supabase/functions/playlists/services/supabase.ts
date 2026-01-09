@@ -185,12 +185,7 @@ export async function addUserToPlaylistInSupabase(
   user_id: string,
   role: string
 ): Promise<PlaylistCollaborator[] | PlaylistMember[]> {
-  console.log(
-    "Adding user to playlist in Supabase:",
-    playlist_id,
-    user_id,
-    role
-  );
+
 
   let result;
 

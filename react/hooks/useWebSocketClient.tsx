@@ -35,13 +35,13 @@ export interface WebSocketActions {
 }
 
 type Options = {
-  enabled?: boolean, 
-  spatio_licence? : boolean
-  done? : boolean
+  enabled?: boolean,
+  spatio_licence?: boolean
+  done?: boolean
 }
 
-export default function useWebSocketClient(event_id: string, opts?: Options, isPing?: boolean): WebSocketActions {
-  const { enabled = true, done = false,  spatio_licence = false } = opts ?? {};
+export default function useWebSocketClient(event_id: string, opts?: Options, isOwner?: boolean): WebSocketActions {
+  const { enabled = true, done = false, spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
@@ -58,7 +58,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
   );
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
-  const [track, setTrack] = useState<PlayerTrack| null>(null);
+  const [track, setTrack] = useState<PlayerTrack | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
@@ -67,7 +67,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
   const reconnectDelay = 3000;
   const pingInterval = 1000;
 
-  const { coords, loading, error } = useCurrentPosition({radiusKm: 50})
+  const { coords, loading, error } = useCurrentPosition({ radiusKm: 50 })
 
   const hasPosition = useCallback(async () => {
     if (loading || error) { return false }
@@ -102,7 +102,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
     try {
       if (!enabled || done) return;
       if (!shouldReconnectRef.current) {
-        console.log('ws: init aborted — reconnection disabled');
         return;
       }
       if (reconnectTimeoutRef.current) {
@@ -130,8 +129,16 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
           clearInterval(pingIntervalRef.current);
         }
         pingIntervalRef.current = window.setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN && isPing) {
+          if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now(), eventId: event_id }));
+            if (isOwner) {
+              ws.send(
+                JSON.stringify({
+                  type: 'event_current_track:get',
+                  eventId: event_id,
+                })
+              );
+            }
           }
         }, pingInterval);
 
@@ -145,10 +152,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
       };
 
       ws.onclose = event => {
-        console.log('ws: connection closed', {
-          code: event.code,
-          reason: event.reason,
-        });
         setConnected(false);
 
         if (pingIntervalRef.current) {
@@ -167,9 +170,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
             initWebSocket();
           }, reconnectDelay);
         } else {
-          console.log(
-            'ws: not reconnecting (intentional close or max attempts reached)'
-          );
+          // not reconnecting (intentional close or max attempts reached)
         }
       };
 
@@ -181,7 +182,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
       ws.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
-          console.log('ws: message received', data.type);
 
           switch (data.type) {
             case 'subscribed':
@@ -214,12 +214,13 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
               handleTrackPlay(data);
               break;
             default:
-              console.log('ws: unhandled message type:', data.type);
+              // unhandled message type
+              break;
           }
         } catch (error) {
           console.warn('ws: failed to parse message:', error);
         }
-      };
+      }
 
       setWebSocket(ws);
       webSocketRef.current = ws;
@@ -262,9 +263,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       const active = nextAppState === 'active';
       if (!active) {
-        console.log(
-          'ws: app not active — closing socket and disabling reconnects'
-        );
         shouldReconnectRef.current = false;
 
         if (reconnectTimeoutRef.current) {
@@ -321,7 +319,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isP
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-      webSocket.send(JSON.stringify({ 
+      webSocket.send(JSON.stringify({
         type: 'ping',
         eventId: event_id
       }));

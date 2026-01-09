@@ -32,6 +32,10 @@ export async function handleMessage(
         handlePing(userId, socket, message);
         break;
 
+      case 'event_current_track:get':
+        handleGetEventCurrentTrack(userId, socket, message);
+        break;
+
       case 'vote':
         await handleVoteMessage(userId, message, socket);
         break;
@@ -84,6 +88,16 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
 
 async function handlePing(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
   try {
+    sendSuccessMessage(socket, {
+      type: 'pong',
+    });
+  } catch (error) {
+    console.error('ws: error sending pong:', error);
+  }
+}
+
+async function handleGetEventCurrentTrack(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
+  try {
     const eventId = message.eventId as string;
     const res = await getOwnerCurrentPlayingTrack(userId, eventId);
     if (res.error) {
@@ -91,7 +105,7 @@ async function handlePing(userId: string, socket: WebSocket, message: WebSocketM
       return;
     }
     sendSuccessMessage(socket, {
-      type: 'pong',
+      type: 'event_current_track:response',
       track: res.data,
     });
   } catch (error) {

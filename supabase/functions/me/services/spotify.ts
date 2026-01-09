@@ -23,7 +23,7 @@ export async function getCurrentUserPlayingTrack(spotify_token: string): Promise
   return response.json();
 }
 
-export async function startPlayback(spotify_token: string, body?: {uris: string[]}): Promise<any> {
+export async function startPlayback(spotify_token: string, body?: { uris: string[] }): Promise<any> {
   const response = await fetch('https://api.spotify.com/v1/me/player/play', {
     method: 'PUT',
     headers: {
@@ -32,7 +32,6 @@ export async function startPlayback(spotify_token: string, body?: {uris: string[
     body: JSON.stringify(body),
   });
 
-  console.log('response startPlayback', JSON.stringify(response, null, 2))
   return response;
 }
 

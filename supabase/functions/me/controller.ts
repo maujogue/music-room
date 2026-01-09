@@ -24,109 +24,109 @@ const supabase = createClient(
 );
 
 export async function fetchCurrentUserProfile(c: Context): Promise<Response> {
-    const user = c.get('user')
-    const res: ProfileResponse | null = await getUserProfile(user.id)
+  const user = c.get('user')
+  const res: ProfileResponse | null = await getUserProfile(user.id)
 
-    if (!res) {
-      c.status(404);
-      return c.json({ error: 'User profile not found' });
-    }
+  if (!res) {
+    c.status(404);
+    return c.json({ error: 'User profile not found' });
+  }
 
-    c.status(200);
-    return c.json(res);
+  c.status(200);
+  return c.json(res);
 }
 
 export async function fetchCurrentUserPlaylists(c: Context): Promise<Response> {
-    const user = c.get('user')
-    const res = await getCurrentUserPlaylistSupabase(user.id)
+  const user = c.get('user')
+  const res = await getCurrentUserPlaylistSupabase(user.id)
 
-    c.status(200)
-    return c.json(res)
+  c.status(200)
+  return c.json(res)
 }
 
 export async function fetchCurrentUserPlayingTrack(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const res = await getCurrentUserPlayingTrack(spotify_token)
+  const spotify_token = c.get('spotify_token')
+  const res = await getCurrentUserPlayingTrack(spotify_token)
 
-    if (!res) {
-      throw new HTTPException(500, { message: 'Failed to fetch Spotify currently playing track' })
-    }
+  if (!res) {
+    throw new HTTPException(500, { message: 'Failed to fetch Spotify currently playing track' })
+  }
 
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-    }
+  if (res.error) {
+    c.status(res.error.status || 500)
+    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+  }
 
-    if (res.status === 204) {
-      c.status(204)
-      return c.body(null)
-    }
+  if (res.status === 204) {
+    c.status(204)
+    return c.body(null)
+  }
 
-    c.status(200)
-    return c.json(res)
+  c.status(200)
+  return c.json(res)
 }
 
 export async function startUserPlayback(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const body = await safeJsonFromContext(c)
-    const res = await startPlayback(spotify_token, body)
+  const spotify_token = c.get('spotify_token')
+  const body = await safeJsonFromContext(c)
+  const res = await startPlayback(spotify_token, body)
 
-    if (!res) {
-      c.status(500)
-      return c.json({ error: 'Failed to start Spotify playback' })
-    }
+  if (!res) {
+    c.status(500)
+    return c.json({ error: 'Failed to start Spotify playback' })
+  }
 
+  if (res.error) {
+    console.error('Error from Spotify API:', res.error);
     if (res.error) {
-      console.error('Error from Spotify API:', res.error);
-      if (res.error) {
-        c.status(res.status || 500)
-        return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-      }
       c.status(res.status || 500)
-      return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
+      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
     }
+    c.status(res.status || 500)
+    return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
+  }
 
-    c.status(204)
-    return c.body(null)
+  c.status(204)
+  return c.body(null)
 }
 
 export async function pauseUserPlayback(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const res = await pausePlayback(spotify_token)
+  const spotify_token = c.get('spotify_token')
+  const res = await pausePlayback(spotify_token)
 
-    if (!res) {
-      c.status(500)
-      return c.json({ error: 'Failed to pause Spotify playback' })
-    }
-    if (res.error) {
-      c .status(res.error.status || 500)
-      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-    }
+  if (!res) {
+    c.status(500)
+    return c.json({ error: 'Failed to pause Spotify playback' })
+  }
+  if (res.error) {
+    c.status(res.error.status || 500)
+    return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
+  }
 
-    c.status(200)
-    return c.json(res)
+  c.status(200)
+  return c.json(res)
 }
 
 export async function skipToNextUserTrack(c: Context): Promise<Response> {
-    const spotify_token = c.get('spotify_token')
-    const res = await skipToNextTrack(spotify_token)
+  const spotify_token = c.get('spotify_token')
+  const res = await skipToNextTrack(spotify_token)
 
-    if (!res) {
-      c.status(500)
-      return c.json({ error: 'Failed to skip to next Spotify track' })
-    }
-    if (res.error || !res.ok) {
-      console.error('Error from Spotify API:', res.error);
-      if (res.error) {
-        c.status(res.status || 500)
-        return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
-      }
+  if (!res) {
+    c.status(500)
+    return c.json({ error: 'Failed to skip to next Spotify track' })
+  }
+  if (res.error || !res.ok) {
+    console.error('Error from Spotify API:', res.error);
+    if (res.error) {
       c.status(res.status || 500)
-      return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
+      return c.json({ error: res.error.message || 'Unknown error from Spotify API' })
     }
+    c.status(res.status || 500)
+    return c.json({ error: res.statusText || 'Unknown error from Spotify API' })
+  }
 
-    c.status(204);
-    return c.body(null);
+  c.status(204);
+  return c.body(null);
 }
 
 export async function fetchCurrentUserEvents(c: Context): Promise<Response> {
@@ -141,7 +141,6 @@ export async function fetchCurrentUserEvents(c: Context): Promise<Response> {
       const imagePath = data.event.image_url;
       if (imagePath) {
         const publicUrl = await getPublicUrlForPath(imagePath);
-        console.log('Resolved public URL for image:', publicUrl);
         data.event.image_url = publicUrl;
       }
     } catch (error) {
@@ -202,10 +201,10 @@ export async function syncSpotifyPlaylists(c: Context): Promise<Response> {
 
 export async function getMySubscription(c: Context): Promise<Response> {
   const user = c.get('user');
-  
+
   try {
     const subscription = await getUserSubscription(user.id);
-    
+
     c.status(200);
     return c.json(subscription); // Returns null for free users, subscription object for premium
   } catch (error) {
@@ -216,7 +215,7 @@ export async function getMySubscription(c: Context): Promise<Response> {
 
 export async function createMySubscription(c: Context): Promise<Response> {
   const user = c.get('user');
-  
+
   try {
     // Check if user already has a subscription
     const existingSubscription = await getUserSubscription(user.id);
@@ -224,11 +223,11 @@ export async function createMySubscription(c: Context): Promise<Response> {
       c.status(400);
       return c.json({ error: 'User already has an active subscription' });
     }
-    
+
     // Create new subscription with renewal date 30 days from now
     const now = new Date();
     const renewalDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-    
+
     const { data, error } = await supabase
       .from('subscriptions')
       .insert({
@@ -238,12 +237,12 @@ export async function createMySubscription(c: Context): Promise<Response> {
       })
       .select()
       .single();
-    
+
     if (error) {
       console.error('Error creating subscription:', error);
       throw new HTTPException(500, { message: 'Failed to create subscription' });
     }
-    
+
     c.status(201);
     return c.json(data);
   } catch (error) {
@@ -257,18 +256,18 @@ export async function createMySubscription(c: Context): Promise<Response> {
 
 export async function deleteMySubscription(c: Context): Promise<Response> {
   const user = c.get('user');
-  
+
   try {
     const { error } = await supabase
       .from('subscriptions')
       .delete()
       .eq('user_id', user.id);
-    
+
     if (error) {
       console.error('Error deleting subscription:', error);
       throw new HTTPException(500, { message: 'Failed to cancel subscription' });
     }
-    
+
     c.status(200);
     return c.json({ message: 'Subscription cancelled successfully' });
   } catch (error) {

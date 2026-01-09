@@ -84,9 +84,14 @@ export default function EventDetail() {
 
   return (
     <>
-      <ScrollView className='bg-white'>
+      <ScrollView className='bg-primary-500'>
         <VStack className='flex-1'>
-          <EventHeader eventData={data} onRefresh={refetch} />
+          <EventHeader
+            eventData={data}
+            expanded={expanded}
+            onToggle={onToggleHeader}
+            onRefresh={refetch}
+          />
 
           <Center className='flex-1'>
             <VotesRoom
