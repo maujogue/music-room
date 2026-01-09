@@ -3,7 +3,7 @@ import { View, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 
 type Props<T> = {
-  title: string;
+  title?: string;
   items: T[] | undefined;
   limit?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
@@ -30,6 +30,7 @@ export default function ResultsSection<T>({
     <View
       style={{ paddingHorizontal: noHorizontalPadding ? 0 : 16, marginTop: 12 }}
     >
+      {title && <Text className='text-lg font-semibold mb-4'>{title}</Text>}
       {sliced.map((item, i) => (
         <View key={(item as any)?.id || `${title}-${i}`}>
           {renderItem(item as T, i)}

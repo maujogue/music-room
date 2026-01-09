@@ -10,13 +10,14 @@ import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ScrollView, Image } from 'react-native';
+import { Divider } from '@/components/ui/divider';
+import { Heading } from '@/components/ui/heading';
 import { MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FloatButton from '@/components/generics/FloatButton';
-import { Switch } from '@/components/ui/switch';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
 import LocationPickerModal from '@/components/generics/LocationPickerModal';
@@ -24,7 +25,7 @@ import { parseLocation } from '@/utils/parsePointCoordinates';
 import PrivateBadge from '@/components/generics/PrivateBadge';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
-import EventDoneBadge from '@/components/generics/EventDoneBadge';
+import SwitchRow from '@/components/generics/SwitchRow';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
 
@@ -60,14 +61,9 @@ export default function EditEventForm({
   const [spatio_licence, setSpatioLicence] = useState(
     initialValues.event?.spatio_licence ?? false
   );
-  const [done, setDone] = useState(initialValues.event?.done ?? false);
   const [everyone_can_vote, setEveryoneCanVote] = useState(
     initialValues.event?.everyone_can_vote ?? true
   );
-
-  // DateTimePicker states
-  const [showBeginning, setShowBeginning] = useState(false);
-  const [mode, setMode] = useState<'date' | 'time'>('date');
 
   // location fields
   const initialLocation = parseLocation(initialValues?.location); // TODO : check l'initialisation
@@ -91,21 +87,7 @@ export default function EditEventForm({
   // DateTimePicker handlers
   const onBeginningChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || beginningAt;
-    setShowBeginning(false);
     setBeginningAt(currentDate);
-  };
-
-  const showBeginningMode = (currentMode: 'date' | 'time') => {
-    setShowBeginning(true);
-    setMode(currentMode);
-  };
-
-  const showBeginningDatepicker = () => {
-    showBeginningMode('date');
-  };
-
-  const showBeginningTimepicker = () => {
-    showBeginningMode('time');
   };
 
   async function uploadEventImage() {
@@ -161,42 +143,53 @@ export default function EditEventForm({
   };
 
   const validate = (): boolean => {
-    if (!name.trim()) {
-      setError('Required name.');
-      console.log('Validation failed: name is required');
+    const missing: string[] = [];
+
+    if (!name.trim()) missing.push('Name');
+    if (!playlist) missing.push('Playlist');
+    if (!location && !venueName.trim()) missing.push('Location');
+
+    if (missing.length > 0) {
+      const msg = `Required: ${missing.join(', ')}`;
+      setError(msg);
+      toast.error({
+        title: 'Missing required fields',
+        description: msg,
+      });
       return false;
     }
 
     setError(null);
-    console.log('Validation passed');
     return true;
   };
 
   const handlePressValid = async () => {
+    console.log('Submitting event form...');
     if (!validate()) return;
 
+    console.log('Preparing event payload...');
     const getLoc = location
       ? {
-          id: initialValues?.location?.id,
-          event_id: initialValues?.event?.id,
-          venuename: venueName.trim() || null,
-          address: location?.address ?? null,
-          complement: location?.street ?? null,
-          city: location?.city ?? null,
-          country: location?.country ?? null,
-          coordinates:
-            location && location.latitude && location.longitude
-              ? { lat: location?.latitude, long: location?.longitude }
-              : null,
-        }
+        id: initialValues?.location?.id,
+        event_id: initialValues?.event?.id,
+        venuename: venueName.trim() || null,
+        address: location?.address ?? null,
+        complement: location?.street ?? null,
+        city: location?.city ?? null,
+        country: location?.country ?? null,
+        coordinates:
+          location && location.latitude && location.longitude
+            ? { lat: location?.latitude, long: location?.longitude }
+            : null,
+      }
       : null;
 
     const getLocFallback = venueName
       ? {
-          id: initialValues?.location?.id,
-          event_id: initialValues?.event?.id,
-          venuename: venueName.trim() || null,
-        }
+        id: initialValues?.location?.id,
+        event_id: initialValues?.event?.id,
+        venuename: venueName.trim() || null,
+      }
       : null;
 
     const payload: MusicEventPayload = {
@@ -209,11 +202,10 @@ export default function EditEventForm({
       everyone_can_vote,
       location: getLoc ?? getLocFallback,
       spatio_licence,
-      done,
     } as any;
 
+    console.log('Event payload:', payload);
     try {
-      console.log('[Event creation] Submitting payload:', payload);
       await onSubmit(payload);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error while creation.');
@@ -260,9 +252,9 @@ export default function EditEventForm({
                 <ButtonIcon size='lg' className='w-7 h-7' as={Pen} />
               </Button>
 
-              <Box className='p-4 pt-0'>
+              <Box className='p-4 pt-4'>
                 <Text className='font-semibold'>Name</Text>
-                <Input className='bg-white'>
+                <Input className='bg-neutral-50 mb-3 rounded-full border'>
                   <InputField
                     placeholder='Supacool event'
                     value={name}
@@ -270,25 +262,31 @@ export default function EditEventForm({
                     autoCapitalize='sentences'
                   />
                 </Input>
+                <Text size='xs' className='text-neutral-500 mt-1 mb-2'>Keep it short and friendly — this appears on event previews.</Text>
 
                 <Text className='mt-2 font-semibold'>Description</Text>
-                <Textarea className='bg-white'>
+                <Textarea className='bg-neutral-50 mb-3 rounded-lg border text-base'>
                   <TextareaInput
                     placeholder='Event description'
                     value={description}
                     onChangeText={setDescription}
                     autoCapitalize='sentences'
+                    style={{ minHeight: 120 }}
                   />
                 </Textarea>
+                <Text size='xs' className='text-neutral-500 mt-1 mb-3'>Add a short, friendly description — 1–2 lines are ideal for previews.</Text>
 
-                <Text className='mt-2 font-semibold'>Playlist</Text>
+                <Divider className='my-4' />
+
+                <Heading size='lg' className='mb-2'>Playlist</Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>Select which playlist will be used during the event. You can change it later.</Text>
                 {!playlist ? (
                   <AddPlaylistItem
                     onPress={handleSelectPlaylist}
                     title='Add Playlist'
                   />
                 ) : (
-                  <VStack>
+                  <VStack className='mb-3'>
                     <PlaylistListItem playlist={playlist} />
                     <Button
                       size='sm'
@@ -301,101 +299,56 @@ export default function EditEventForm({
                   </VStack>
                 )}
 
-                <HStack className='px-4 justify-between'>
-                  <VStack className=''>
-                    <HStack className='items-center'>
-                      <Switch
-                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
-                        value={is_private}
-                        onToggle={() => {
-                          setIsPrivate(prev => !prev);
-                        }}
-                      />
-                      <PrivateBadge />
-                      <Text>Private</Text>
-                    </HStack>
+                <Divider className='my-4' />
 
-                    <HStack className='items-center'>
-                      <Switch
-                        value={everyone_can_vote}
-                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
-                        onToggle={() => {
-                          setEveryoneCanVote(prev => !prev);
-                        }}
-                      />
-                      <CollaborativeBadge />
-                      <Text>Collaborative</Text>
-                    </HStack>
-                  </VStack>
-                  <VStack className=''>
-                    <HStack className='items-center'>
-                      <Switch
-                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
-                        value={spatio_licence}
-                        onToggle={() => {
-                          setSpatioLicence(prev => !prev);
-                        }}
-                      />
-                      <SpatioLicenceBadge />
-                      <Text>Spatio temporal</Text>
-                    </HStack>
-                    <HStack className='items-center'>
-                      <Switch
-                        trackColor={{ false: '#d4d4d4', true: '#000000' }}
-                        thumbColor='#FFFFFF'
-                        ios_backgroundColor='#d4d4d4'
-                        value={done}
-                        onToggle={() => {
-                          setDone(prev => !prev);
-                        }}
-                      />
-                      <EventDoneBadge light />
-                      <Text>Event is done</Text>
-                    </HStack>
-                  </VStack>
-                </HStack>
+                <Heading size='lg' className='mb-2'>Settings</Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>Control privacy, voting and temporal options for this event.</Text>
 
-                <Text className='mt-2 font-semibold'>
-                  Beginning Date & Time
-                </Text>
-                <HStack className='gap-2 mb-2'>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    onPress={showBeginningDatepicker}
-                    className='bg-white'
-                  >
-                    <ButtonText>Select Date</ButtonText>
-                  </Button>
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    onPress={showBeginningTimepicker}
-                    className='bg-white'
-                  >
-                    <ButtonText>Select Time</ButtonText>
-                  </Button>
-                </HStack>
-                <Text>Selected: {beginningAt.toLocaleString()}</Text>
-                {showBeginning && (
-                  <DateTimePicker
-                    testID='beginningDateTimePicker'
-                    value={beginningAt}
-                    mode={mode}
-                    is24Hour={true}
-                    onChange={onBeginningChange}
+                <VStack className='px-2 space-y-4 mb-3'>
+                  <SwitchRow
+                    value={is_private}
+                    onToggle={() => setIsPrivate(prev => !prev)}
+                    leading={<PrivateBadge />}
+                    label='Private'
+                    helper='Private events are visible only to invited users.'
                   />
-                )}
+
+                  <SwitchRow
+                    value={everyone_can_vote}
+                    onToggle={() => setEveryoneCanVote(prev => !prev)}
+                    leading={<CollaborativeBadge />}
+                    label='Collaborative'
+                    helper='Allow all attendees to vote on tracks.'
+                  />
+
+                  <SwitchRow
+                    value={spatio_licence}
+                    onToggle={() => setSpatioLicence(prev => !prev)}
+                    leading={<SpatioLicenceBadge />}
+                    label='Spatio temporal'
+                    helper='Require attendees to be near the event to vote (location-based voting).'
+                  />
+                </VStack>
+
+                <Divider className='my-4' />
+
+                <Heading size='lg' className='mb-2'>Beginning Date & Time</Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>Set when the event will start. Times are shown in your device timezone.</Text>
+                <DateTimePicker
+                  testID='beginningDateTimePicker'
+                  value={beginningAt}
+                  mode={"datetime"}
+                  is24Hour={true}
+                  onChange={onBeginningChange}
+                />
+
+                <Divider className='my-4' />
 
                 {/* ---------- LOCATION ----------- */}
+                <Heading size='lg' className='mb-2'>Location</Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>Provide a venue or address so attendees can find the event. If spatio-temporal voting is enabled, location is required for voting.</Text>
                 <Text className='mt-2 font-semibold'>Place name</Text>
-                <Input className='bg-white'>
+                <Input className='bg-white mb-2 rounded-full px-4 py-3 shadow-sm border border-gray-200'>
                   <InputField
                     placeholder='Place name'
                     value={venueName}
@@ -404,36 +357,26 @@ export default function EditEventForm({
                 </Input>
 
                 <Text className='mt-4 font-semibold'>Location</Text>
-                <Box>
-                  <Text size='sm' className='text-neutral-700'>
+                <HStack className='justify-between items-center mt-1'>
+                    <Text size='sm' className='text-neutral-700 flex-1 mr-2 truncate'>
                     {location?.address ?? 'No address place'}
-                  </Text>
-                  {location && location.latitude && location.longitude ? (
-                    <Badge
-                      size='md'
-                      action='muted'
-                      className='rounded-full h-6 my-2'
-                    >
-                      <BadgeIcon as={MapPinIcon} size='lg' />
-                      <BadgeText className='pl-1'>
-                        {location.latitude.toFixed(5)},{' '}
-                        {location.longitude.toFixed(5)}
-                      </BadgeText>
-                    </Badge>
-                  ) : (
-                    <Text>No location selected</Text>
-                  )}
-
+                    </Text>
                   <Button
                     action='primary'
                     onPress={() => setLocationOpen(true)}
+                    className='mt-3 rounded-full shadow-md bg-primary-500'
                   >
-                    <ButtonText>
-                      {location ? "Change event's place" : "Set event's place"}
-                    </ButtonText>
+                      <ButtonIcon as={MapPinIcon} />
                   </Button>
-                </Box>
+                </HStack>
+                <Text size='xs' className='text-neutral-500 mt-2'>Tap to pick the event location on the map.</Text>
               </Box>
+                { initialValues.event == null &&
+                <Button onPress={handlePressValid} className='m-4 rounded-lg bg-primary-500 shadow-lg active:shadow-md active:scale-95 mb-6' size='xl'>
+                  <ButtonIcon as={Save} className='mr-2' />
+                  <ButtonText className='font-semibold'> Create Event </ButtonText>
+                </Button>
+                }
             </Box>
             {error ? (
               <Center>
@@ -461,7 +404,9 @@ export default function EditEventForm({
           </VStack>
         </ScrollView>
 
-        <FloatButton onPress={handlePressValid} icon={Save} />
+        { initialValues.event &&
+          <FloatButton onPress={handlePressValid} icon={Save} />
+        }
       </FormControl>
 
       <PlaylistSelectionModal
