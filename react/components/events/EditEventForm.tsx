@@ -389,17 +389,6 @@ export default function EditEventForm({
               <Center className='p-3' />
             )}
 
-            {ApiError !== '' ? (
-              <Center>
-                <HStack space='xs' className='items-center color-red-500'>
-                  <Icon as={AlertCircleIcon} size='sm' />
-                  <Text>{ApiError}</Text>
-                </HStack>
-              </Center>
-            ) : (
-              <Center className='p-3' />
-            )}
-
             {/* Submit */}
           </VStack>
         </ScrollView>
