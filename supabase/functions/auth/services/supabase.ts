@@ -134,10 +134,21 @@ export async function impersonateUser(userEmail: string) {
     throw new Error("Failed to generate auth token");
   }
 
-  const { data: verified } = await supabase.auth.verifyOtp({
-    token_hash: magicLink.properties.hashed_token,
-    type: "email",
-  });
+  let verified;
+  try {
+    const result = await supabase.auth.verifyOtp({
+      token_hash: magicLink.properties.hashed_token,
+      type: "email",
+    });
+    verified = result.data;
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    throw new Error("Failed to verify OTP");
+  }
+
+  if (!verified || !verified.session) {
+    throw new Error("OTP verification did not return a valid session");
+  }
 
   const accessToken = verified.session.access_token;
   const refreshToken = verified.session.refresh_token;
