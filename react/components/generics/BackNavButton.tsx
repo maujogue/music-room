@@ -11,11 +11,11 @@ export default function BackNavButton() {
 
      <Button
         size='lg'
-        className='rounded-full bg-primary-500 w-10 h-10 p-1'
+        className='rounded-full w-10 h-10 p-1 bg-transparent'
         action='primary'
         onPress={() => router.back()}
       >
-        <ButtonIcon size='xl' className='w-8 h-8 text-sky-400' as={ArrowLeft} />
+        <ButtonIcon size='xl' className='w-8 h-8 text-typography-950' as={ArrowLeft} />
       </Button>
   );
 }

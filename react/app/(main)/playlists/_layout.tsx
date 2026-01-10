@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import CancelButton from '@/components/generics/CancelButton';
+import BackNavButton from '@/components/generics/BackNavButton';
 
 export default function PlaylistLayout() {
   return (

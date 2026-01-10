@@ -1,5 +1,5 @@
-import CancelButton from '@/components/generics/CancelButton';
 import { Stack } from 'expo-router';
+import BackNavButton from '@/components/generics/BackNavButton';
 
 export default function EventDetailLayout() {
   return (
@@ -10,17 +10,15 @@ export default function EventDetailLayout() {
           title: '',
           headerShown: true,
           headerTransparent: true,
-          headerTintColor: '#aeaeae',
-          headerRight: () => <CancelButton />,
+          headerLeft: () => <BackNavButton />,
         }}
       />
       <Stack.Screen
         name='edit'
         options={{
-          presentation: 'modal',
           title: '',
           headerShadowVisible: false,
-          headerRight: () => <CancelButton />,
+          headerLeft: () => <BackNavButton />,
         }}
       />
     </Stack>

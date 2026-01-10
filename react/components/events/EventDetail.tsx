@@ -9,7 +9,6 @@ import { useCallback, useEffect, useState } from 'react';
 import VotesRoom from '@/components/events/eventDetail/VotesRoom';
 import { VStack } from '@/components/ui/vstack';
 import DeleteAlert from '@/components/generics/DeleteAlert';
-import Event3DotMenu from '@/components/events/eventDetail/EventDotMenu';
 import { useEvent } from '@/hooks/useEvent';
 import EventHeader from './eventDetail/EventHeader';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
@@ -45,21 +44,6 @@ export default function EventDetail() {
       setIsActive(eventStart <= new Date());
     }
   }, [data]);
-
-  useEffect(() => {
-    if (!data) return;
-    const isOwner = data?.event?.owner_id === profile?.id;
-    navigation.setOptions({
-      headerRight: () => (
-        <Event3DotMenu
-          callDelete={() => setShowAlertDialog(true)}
-          callEdit={onEditEvent}
-          eventData={data}
-          isOwner={isOwner}
-        />
-      ),
-    });
-  }, [navigation, data, profile]);
 
   const onDeleteEvent = async () => {
     setShowAlertDialog(false);
@@ -114,6 +98,8 @@ export default function EventDetail() {
         eventData={data}
         onUpdated={refetch}
         abovePlayer={isActive && !!track}
+        callDelete={() => setShowAlertDialog(true)}
+        callEdit={onEditEvent}
       />
 
       {track && isActive && (
