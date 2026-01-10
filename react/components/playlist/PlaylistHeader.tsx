@@ -125,14 +125,14 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
             <HStack>
               <Avatar size='sm'>
                 <AvatarFallbackText>
-                  {playlist.owner.username.charAt(0).toUpperCase()}
+                  {playlist.owner.username?.charAt(0)?.toUpperCase() || '?'}
                 </AvatarFallbackText>
                 {playlist.owner.avatar_url && (
                   <AvatarImage source={{ uri: playlist.owner.avatar_url }} />
                 )}
               </Avatar>
               <Text size='md' className='color-secondary-700 pl-2 pt-1'>
-                {playlist.owner.username}
+                {playlist.owner.username || 'Unknown'}
               </Text>
             </HStack>
             <HStack>

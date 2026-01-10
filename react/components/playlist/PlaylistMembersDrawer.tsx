@@ -144,7 +144,7 @@ export default function PlaylistMembersDrawer({
                 <HStack className='items-center gap-3 p-2 bg-white rounded-lg'>
                   <Avatar size='md'>
                     <AvatarFallbackText>
-                      {playlist.owner.username.charAt(0).toUpperCase()}
+                      {playlist.owner.username?.charAt(0)?.toUpperCase() || '?'}
                     </AvatarFallbackText>
                     {playlist.owner.avatar_url && (
                       <AvatarImage
@@ -175,7 +175,7 @@ export default function PlaylistMembersDrawer({
                       >
                         <Avatar size='md'>
                           <AvatarFallbackText>
-                            {collaborator.username.charAt(0).toUpperCase()}
+                            {collaborator.username?.charAt(0)?.toUpperCase() || '?'}
                           </AvatarFallbackText>
                           {collaborator.avatar_url && (
                             <AvatarImage
@@ -225,7 +225,7 @@ export default function PlaylistMembersDrawer({
                         <HStack className='items-center gap-3'>
                           <Avatar size='md'>
                             <AvatarFallbackText>
-                              {member.username.charAt(0).toUpperCase()}
+                              {member.username?.charAt(0)?.toUpperCase() || '?'}
                             </AvatarFallbackText>
                             {member.avatar_url && (
                               <AvatarImage
