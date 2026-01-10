@@ -69,7 +69,7 @@ setup-supabase:
 	@echo "✅ Supabase initialized!"
 
 # Start local Supabase services and apply migrations
-start-supabase:
+start-supabase: local-migrations
 	@echo "🚀 Starting Supabase services..."
 	npx ${SUPABASE} start
 	@echo "✅ Supabase services started!"
@@ -260,6 +260,9 @@ deploy:
 	npx supabase db push
 deploy-functions:
 	npx supabase functions deploy
+
+local-migrations:
+	npx ${SUPABASE} migrations up
 
 load-test:
 	cd load-testing && ./run_k6_test.sh profile 25 50 75 100 125 150
