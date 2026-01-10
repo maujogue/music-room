@@ -1,6 +1,7 @@
 import { Marker } from 'react-native-maps';
 import { View } from 'react-native';
 import { Music } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
 
 type Props = {
   item: MusicEventRadarResult;
@@ -9,6 +10,14 @@ type Props = {
 };
 
 export default function EventMarker({ item, selected, onPress }: Props) {
+  const [tracksView, setTracksView] = useState(true);
+
+  useEffect(() => {
+    setTracksView(true);
+    const timer = setTimeout(() => setTracksView(false), 500);
+    return () => clearTimeout(timer);
+  }, [selected]);
+
   if (!item.radar.coordinates) return null;
   const coord = item.radar.coordinates;
 
@@ -19,7 +28,7 @@ export default function EventMarker({ item, selected, onPress }: Props) {
         e.stopPropagation();
         onPress?.(item.event.id);
       }}
-      tracksViewChanges={false}
+      tracksViewChanges={tracksView}
     >
       <View
         className={`items-center justify-center h-10 w-10 rounded-full shadow-sm border border-neutral-200 ${

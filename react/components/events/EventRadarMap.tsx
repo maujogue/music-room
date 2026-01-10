@@ -94,6 +94,12 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
     }
   }
 
+  useEffect(() => {
+    if (region && mapRef.current) {
+      mapRef.current.animateToRegion(region, 500);
+    }
+  }, [region]);
+
   async function handleJoinEvent() {
     if (!selectedItem || !profile) return;
 

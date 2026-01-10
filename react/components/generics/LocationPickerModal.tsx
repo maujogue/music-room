@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
+import MapView, { Marker, MapPressEvent, Region, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   Modal,
@@ -177,6 +177,7 @@ export default function LocationPickerModal({
                 {region && (
                   <Box className='h-full w-full'>
                     <MapView
+                      provider={PROVIDER_GOOGLE}
                       style={{ flex: 1 }}
                       initialRegion={region}
                       onPress={handlePress}
