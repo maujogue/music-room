@@ -55,23 +55,23 @@ export default function ProfileContent({
 
         {/* Username */}
         <VStack className='flex-1 self-start pt-6'>
-            {/* Subscription Badge - only show on own profile */}
-            {permissions.canEdit && <SubscriptionBadge />}
+        {permissions.canEdit && <SubscriptionBadge />}
           <HStack className='items-center gap-3'>
             <EditProfileTextFeature
               type='username'
               currentText={profile?.username || 'toto'}
-              size='3xl'
+              size='2xl'
               isEdit={permissions.canEdit && editProfile}
               />
           </HStack>
           {/* Music Genre */}
           {permissions.canViewMusicGenre && (
             <EditMusicTastes
-              currentText={profile?.music_genre || []}
-              isEdit={permissions.canEdit && editProfile}
+            currentText={profile?.music_genre || []}
+            isEdit={permissions.canEdit && editProfile}
             />
           )}
+          {/* Subscription Badge - only show on own profile */}
         </VStack>
       </HStack>
 

@@ -1,38 +1,23 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getEventsWithRadar } from '@/services/events';
+import { getErrorMsg } from '@/utils/getErrorMsg';
 
 export function useEventsRadar(coords: Coordinates | null) {
-  const [events, setEvents] = useState<MusicEventRadarResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: events,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['radar-events', coords],
+    queryFn: () => getEventsWithRadar(coords!),
+    enabled: !!coords,
+  });
 
-  const RadarEvents = useCallback(async () => {
-    if (!coords) {
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getEventsWithRadar(coords);
-      setEvents(data || []);
-    } catch (e) {
-      console.error(
-        `Error fetching Events at position (${coords.lat}, ${coords.long})`,
-        e
-      );
-      setError('Radar events error');
-    } finally {
-      setLoading(false);
-    }
-  }, [coords]);
-
-  const launchRadar = useCallback(() => {
-    RadarEvents();
-  }, [RadarEvents]);
-
-  useEffect(() => {
-    RadarEvents();
-  }, [coords]);
-
-  return { events, launchRadar, loading, error };
+  return {
+    events: events ?? [],
+    launchRadar: refetch,
+    loading,
+    error: error ? getErrorMsg(error) : null
+  };
 }

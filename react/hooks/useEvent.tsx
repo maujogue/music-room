@@ -1,126 +1,134 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMsg } from '@/utils/getErrorMsg';
-import { deleteEventById, getEventById, startEvent, stopEvent, updateEvent,  } from '@/services/events';
+import {
+  deleteEventById,
+  getEventById,
+  startEvent as startEventService,
+  stopEvent as stopEventService,
+  updateEvent as updateEventService,
+} from '@/services/events';
 
 export function useEvent(id: string) {
-  const [data, setData] = useState<MusicEventFetchResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = ['event', id];
 
   // ---------------------------------------------------------------
   // Fetch event (GET)
   // ---------------------------------------------------------------
-  const fetchEvent = useCallback(async () => {
-    if (!id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getEventById(id);
-      setData(data);
-    } catch (err) {
-      setError(getErrorMsg(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchEvent();
-  }, [fetchEvent]);
-
-  const refetch = useCallback(() => {
-    fetchEvent();
-  }, [fetchEvent]);
+  const {
+    data,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () => getEventById(id),
+    enabled: !!id,
+  });
 
   // ---------------------------------------------------------------
   // Remove Event (DELETE)
   // ---------------------------------------------------------------
-  const deleteEvent = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteEventById(id),
+    onSuccess: () => {
+      // Invalidate the event query (though it's deleted, so maybe just clear it or invalidate list)
+      queryClient.setQueryData(queryKey, null);
+      // Also invalidate list of events if possible, e.g. queryClient.invalidateQueries({ queryKey: ['events'] })
+      // For now, at least clear this specific one.
+    },
+  });
 
+  const deleteEvent = async () => {
     try {
-      await deleteEventById(id);
-      setData(null);
-    } catch (e: any) {
-      setError(`delete Event error: ${e.message ?? e}`);
+      await deleteMutation.mutateAsync();
+    } catch (e) {
       console.error('Delete Event error:', e);
-    } finally {
-      setLoading(false);
+      // Error is handled by mutation state if needed, but keeping original API return void for now
     }
-  }, [id]);
+  };
 
-  const handleUpdateEvent = useCallback(
-    async (payload: MusicEventPayload) => {
-      if (!id) {
-        setError('Event ID is required for update');
-        return;
-      }
-      setLoading(true);
-      setError(null);
-
-      try {
-        await updateEvent(id, payload);
-        refetch();
-      } catch (e: any) {
-        setError(`Update Event error: ${e.message ?? e}`);
-        console.error('Update Event error:', e);
-        throw Error(e);
-      } finally {
-        setLoading(false);
-      }
+  // ---------------------------------------------------------------
+  // Update Event (PUT)
+  // ---------------------------------------------------------------
+  const updateMutation = useMutation({
+    mutationFn: (payload: MusicEventPayload) => updateEventService(id, payload),
+    onSuccess: (updatedData) => {
+      queryClient.setQueryData(queryKey, updatedData);
     },
-    [id]
-  );
+  });
 
-  const handleStartEvent = useCallback(
-    async (id: string) => {
-      if (!id) {
-        setError('Event ID is required for start');
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        await startEvent(id);
-      } catch (e: any) {
-        setError(`Start event error: ${e.message ?? e}`);
-        console.error('Start event error:', e);
-        throw Error(e);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [id]
-  );
+  const handleUpdateEvent = async (payload: MusicEventPayload) => {
+    if (!id) throw new Error('Event ID is required for update');
+    try {
+      await updateMutation.mutateAsync(payload);
+    } catch (e) {
+      console.error('Update Event error:', e);
+      throw e;
+    }
+  };
 
-  const handleStopEvent = useCallback(
-    async (id: string) => {
-      if (!id) {
-        setError('Event ID is required for stop');
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        await stopEvent(id);
-      } catch (e: any) {
-        setError(`Stop event error: ${e.message ?? e}`);
-        console.error('Stop event error:', e);
-        throw Error(e);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [id]
-  );
+  // ---------------------------------------------------------------
+  // Start Event
+  // ---------------------------------------------------------------
+  const startMutation = useMutation({
+    mutationFn: () => startEventService(id),
+    onSuccess: () => {
+      // Re-fetch to get updated status
+      queryClient.invalidateQueries({ queryKey });
+    }
+  });
+
+  const handleStartEvent = async (id: string) => {
+    if (!id) throw new Error('Event ID is required for start');
+    try {
+      await startMutation.mutateAsync();
+    } catch (e) {
+      console.error('Start event error:', e);
+      throw e;
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Stop Event
+  // ---------------------------------------------------------------
+  const stopMutation = useMutation({
+    mutationFn: () => stopEventService(id),
+    onSuccess: () => {
+      // Re-fetch to get updated status
+      queryClient.invalidateQueries({ queryKey });
+    }
+  });
+
+  const handleStopEvent = async (id: string) => {
+    if (!id) throw new Error('Event ID is required for stop');
+    try {
+      await stopMutation.mutateAsync();
+    } catch (e) {
+      console.error('Stop event error:', e);
+      throw e;
+    }
+  }
+
+  // Combine errors
+  const combinedError = error
+    ? getErrorMsg(error)
+    : deleteMutation.error
+      ? getErrorMsg(deleteMutation.error)
+      : updateMutation.error
+        ? getErrorMsg(updateMutation.error)
+        : startMutation.error
+          ? getErrorMsg(startMutation.error)
+          : stopMutation.error
+            ? getErrorMsg(stopMutation.error)
+            : null;
 
   return {
-    data,
-    loading,
-    error,
-    setError,
+    data: data ?? null,
+    loading: loading || deleteMutation.isPending || updateMutation.isPending || startMutation.isPending || stopMutation.isPending,
+    error: combinedError,
+    // Maintaining API compatibility mostly, though setters are gone
+    setError: () => { }, // No-op, managed by Query
     refetch,
     deleteEvent,
     updateEvent: handleUpdateEvent,

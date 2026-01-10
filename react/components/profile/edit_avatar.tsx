@@ -7,13 +7,20 @@ import { Button } from '@/components/ui/button';
 import { EditIcon, Icon } from '@/components/ui/icon';
 import { Image } from '@/components/ui/image';
 
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallbackText,
+} from '@/components/ui/avatar';
+
 interface Props {
   url: string | ImageSourcePropType;
   onUpload: (filePath: string) => void;
   isEdit: boolean;
+  username?: string;
 }
 
-export default function EditAvatar({ url, onUpload, isEdit }: Props) {
+export default function EditAvatar({ url, onUpload, isEdit, username }: Props) {
   const [uploading, setUploading] = useState(false);
 
   async function uploadAvatar() {
@@ -72,18 +79,20 @@ export default function EditAvatar({ url, onUpload, isEdit }: Props) {
 
   return (
     <HStack className='relative'>
-      <Image
-        source={url}
-        className='rounded-full self-start'
-        size='lg'
-        alt='profile image'
-        resizeMode='cover'
-      />
+      <Avatar size='xl'>
+        <AvatarFallbackText>
+          {username ? username[0].toUpperCase() : '👤'}
+        </AvatarFallbackText>
+        <AvatarImage
+          source={url as any}
+          alt='profile image'
+        />
+      </Avatar>
       {isEdit && (
         <Button
           onPress={uploadAvatar}
           size='sm'
-          className='right-0 absolute'
+          className='right-0 absolute rounded-full'
           disabled={uploading}
         >
           <Icon as={EditIcon} size='md' color='white' />
