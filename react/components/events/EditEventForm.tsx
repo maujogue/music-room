@@ -16,7 +16,7 @@ import { MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimeInput from '@/components/ui/date-time-input';
 import FloatButton from '@/components/generics/FloatButton';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
@@ -86,9 +86,8 @@ export default function EditEventForm({
   }, [initialValues.event?.image_url]);
 
   // DateTimePicker handlers
-  const onBeginningChange = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || beginningAt;
-    setBeginningAt(currentDate);
+  const onBeginningChange = (selectedDate: Date) => {
+    setBeginningAt(selectedDate);
   };
 
   async function uploadEventImage() {
@@ -372,11 +371,8 @@ export default function EditEventForm({
                   Set when the event will start. Times are shown in your device
                   timezone.
                 </Text>
-                <DateTimePicker
-                  testID='beginningDateTimePicker'
+                <DateTimeInput
                   value={beginningAt}
-                  mode={'datetime'}
-                  is24Hour={true}
                   onChange={onBeginningChange}
                 />
 
