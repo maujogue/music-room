@@ -6,8 +6,6 @@ import { Center } from '@/components/ui/center';
 import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
 import { Badge, BadgeIcon } from '@/components/ui/badge';
 import { Heading } from '@/components/ui/heading';
-import { useRouter } from 'expo-router';
-import { supabase } from '@/services/supabase';
 import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { useAuth } from '@/contexts/authCtx';
 import React from 'react';
@@ -23,7 +21,6 @@ export default function ErrorScreen({
   text = 'Please try again later.',
   actionButton,
 }: Props) {
-  const router = useRouter();
   const { signOut } = useAuth();
 
   const handleLogout = async () => {
@@ -31,52 +28,39 @@ export default function ErrorScreen({
   };
 
   return (
-    <Center className="flex-1 p-24">
-      <Card className="items-center rounded-xl">
-        <HStack space="md" className="items-center mb-8">
-          <Badge size="sm" action="error" className="rounded-full h-6">
-            <BadgeIcon size="lg" as={TriangleAlertIcon} />
-            <BadgeIcon size="lg" as={Music4Icon} />
+    <Center className='flex-1 p-24'>
+      <Card className='items-center rounded-xl'>
+        <HStack space='md' className='items-center mb-8'>
+          <Badge size='sm' action='error' className='rounded-full h-6'>
+            <BadgeIcon size='lg' as={TriangleAlertIcon} />
+            <BadgeIcon size='lg' as={Music4Icon} />
           </Badge>
-          <Heading className="text-red-700 text-center">
+          <Heading className='text-center text-red-700'>
             There is a wrong note in your music room
           </Heading>
-          <Badge size="sm" action="error" className="rounded-full h-6">
-            <BadgeIcon size="lg" as={Music2Icon} />
-            <BadgeIcon size="lg" as={TriangleAlertIcon} />
+          <Badge size='sm' action='error' className='rounded-full h-6'>
+            <BadgeIcon size='lg' as={Music2Icon} />
+            <BadgeIcon size='lg' as={TriangleAlertIcon} />
           </Badge>
         </HStack>
-        <HStack space="md" className="items-start">
+        <HStack space='md' className='items-start pb-8'>
           <VStack>
-            <Button
-              variant="outline"
-              onPress={() => {
-                supabase.auth.signOut();
-              }}
-              className="mt-2"
-            >
-              <ButtonText>Log out</ButtonText>
-            </Button>
+            <Text size='md' className='font-semibold'>
+              {error ? error : 'Unknown error broke the music'}
+            </Text>
+            <Text size='md' className='text-secondary-700'>
+              {text}
+            </Text>
           </VStack>
-          <HStack space="md" className="items-start pb-8">
-            <VStack>
-              <Text size="md" className="font-semibold">
-                {error ? error : 'Unknown error broke the music'}
-              </Text>
-              <Text size="md" className="text-secondary-700">
-                {text}
-              </Text>
-            </VStack>
-          </HStack>
         </HStack>
-        <VStack space="md" className="mt-6 w-full">
+        <VStack space='md' className='mt-6 w-full'>
           <Button
-            action="negative"
-            variant="solid"
+            action='negative'
+            variant='solid'
             onPress={handleLogout}
-            className="w-full"
+            className='w-full'
           >
-            <ButtonIcon size="sm" />
+            <ButtonIcon size='sm' />
             <ButtonText>Logout</ButtonText>
           </Button>
         </VStack>
