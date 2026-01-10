@@ -4,6 +4,7 @@ import { Users, UserPlus, Play } from 'lucide-react-native';
 import EventMembersDrawer from './EventMembersDrawer';
 import { useRouter } from 'expo-router';
 import { usePlayer } from '@/contexts/PlayerCtx';
+import Event3DotMenu from '@/components/events/eventDetail/EventDotMenu';
 
 type Props = {
   displayInviteButton: boolean;
@@ -12,6 +13,8 @@ type Props = {
   onUpdated?: () => void;
   className?: string;
   abovePlayer?: boolean;
+  callDelete: () => void;
+  callEdit: () => void;
 };
 
 export default function EventActions({
@@ -20,6 +23,8 @@ export default function EventActions({
   eventData,
   onUpdated,
   abovePlayer = false,
+  callDelete,
+  callEdit,
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { playTrack, tracksToPlay, setTracksToPlay } = usePlayer();
@@ -47,9 +52,6 @@ export default function EventActions({
             className={'absolute right-4 rounded-full p-4 blurred-bg'}
             style={{
               bottom: 160,
-              zIndex: 9999,
-              elevation: 20,
-              pointerEvents: 'auto',
             }}
           />
           <FloatButton
@@ -58,9 +60,6 @@ export default function EventActions({
             className={'absolute right-4 rounded-full p-4 blurred-bg'}
             style={{
               bottom: 100,
-              zIndex: 9998,
-              elevation: 18,
-              pointerEvents: 'auto',
             }}
           />
         </>
@@ -75,7 +74,11 @@ export default function EventActions({
             icon={UserPlus}
             className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
           />
-          <FloatButton onPress={() => setIsDrawerOpen(true)} icon={Users} />
+          <FloatButton
+            onPress={() => setIsDrawerOpen(true)}
+            icon={Users}
+            className={'absolute bottom-4 right-4 rounded-full p-4 blurred-bg'}
+          />
         </>
       )}
       {isOwner && abovePlayer && (
@@ -84,10 +87,7 @@ export default function EventActions({
           icon={Play}
           className={'absolute right-4 rounded-full p-4 blurred-bg'}
           style={{
-            bottom: 220,
-            zIndex: 9997,
-            elevation: 17,
-            pointerEvents: 'auto',
+            bottom: 280,
           }}
         />
       )}
@@ -95,7 +95,7 @@ export default function EventActions({
         <FloatButton
           onPress={() => playTrack(tracksToPlay)}
           icon={Play}
-          className={'absolute bottom-36 right-4 rounded-full p-4 blurred-bg'}
+          className={'absolute bottom-52 right-4 rounded-full p-4 blurred-bg'}
         />
       )}
       <EventMembersDrawer
@@ -104,6 +104,26 @@ export default function EventActions({
         onClose={() => setIsDrawerOpen(false)}
         onUpdated={onUpdated}
       />
+      {!abovePlayer ? (
+        <Event3DotMenu
+          callDelete={callDelete}
+          callEdit={callEdit}
+          eventData={eventData}
+          isOwner={isOwner}
+          className={'absolute right-4 bottom-36 rounded-full p-4 blurred-bg'}
+        />
+      ) : (
+        <Event3DotMenu
+          callDelete={callDelete}
+          callEdit={callEdit}
+          eventData={eventData}
+          isOwner={isOwner}
+          className={'absolute right-4 rounded-full p-4 blurred-bg'}
+          style={{
+            bottom: 220,
+          }}
+        />
+      )}
     </>
   );
 }

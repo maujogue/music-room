@@ -21,7 +21,6 @@ export default function EventLayout() {
         name='radar'
         options={{
           headerShown: true,
-          presentation: 'modal',
           title: 'Events Radar',
         }}
       />

@@ -78,12 +78,16 @@ jest.mock('@/components/ui/form-control', () => ({
 
 describe('SignIn Component', () => {
   let mockSignIn;
+  let mockSignInWithGoogle;
+  let mockSignInWithSpotify;
   let mockRouterPush;
   let mockRouterReplace;
 
   beforeEach(() => {
     // Mocks reset
     mockSignIn = jest.fn();
+    mockSignInWithGoogle = jest.fn();
+    mockSignInWithSpotify = jest.fn();
     mockRouterPush = jest.fn();
     mockRouterReplace = jest.fn();
 
@@ -94,6 +98,8 @@ describe('SignIn Component', () => {
 
     useAuth.mockReturnValue({
       signIn: mockSignIn,
+      signInWithGoogle: mockSignInWithGoogle,
+      signInWithSpotify: mockSignInWithSpotify,
       isLoading: false,
     });
   });
@@ -161,12 +167,12 @@ describe('SignIn Component', () => {
     expect(mockSignIn).not.toHaveBeenCalled();
   });
 
-  it('renders exactly 3 buttons', async () => {
+  it('renders exactly 5 buttons', async () => {
     render(<SignIn />);
 
     const buttons = await screen.findAllByRole('button');
 
-    expect(buttons).toHaveLength(3);
+    expect(buttons).toHaveLength(5);
   });
 
   it('sets password input as secure text entry', () => {
@@ -213,5 +219,124 @@ describe('SignIn Component', () => {
     fireEvent.press(loginButton);
 
     expect(mockRouterPush).toHaveBeenCalledWith('/forgotten_password');
+  });
+
+  it('displays error message when signIn returns an error', async () => {
+    mockSignIn.mockResolvedValue({
+      error: { message: 'Invalid credentials' },
+    });
+
+    render(<SignIn />);
+
+    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'wrongpassword');
+    fireEvent.press(screen.getByRole('button', { name: 'Sign In' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid credentials')).toBeTruthy();
+    });
+  });
+
+  it('calls signInWithGoogle and navigates on success', async () => {
+    mockSignInWithGoogle.mockResolvedValue({ success: true, data: {} });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+
+    await waitFor(() => {
+      expect(mockSignInWithGoogle).toHaveBeenCalled();
+      expect(mockRouterReplace).toHaveBeenCalledWith('/(main)');
+    });
+  });
+
+  it('displays error message when signInWithGoogle fails', async () => {
+    mockSignInWithGoogle.mockResolvedValue({
+      success: false,
+      error: { message: 'Google login cancelled' },
+    });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Google login cancelled')).toBeTruthy();
+    });
+  });
+
+  it('calls signInWithSpotify and navigates on success', async () => {
+    mockSignInWithSpotify.mockResolvedValue({ success: true, data: {} });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+
+    await waitFor(() => {
+      expect(mockSignInWithSpotify).toHaveBeenCalled();
+      expect(mockRouterReplace).toHaveBeenCalledWith('/(main)');
+    });
+  });
+
+  it('displays error message when signInWithSpotify fails', async () => {
+    mockSignInWithSpotify.mockResolvedValue({
+      success: false,
+      error: { message: 'Spotify login failed' },
+    });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Spotify login failed')).toBeTruthy();
+    });
+  });
+
+  it('displays default error message when signInWithGoogle fails without message', async () => {
+    mockSignInWithGoogle.mockResolvedValue({
+      success: false,
+      error: {},
+    });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Google Sign-In failed. Please try again.')
+      ).toBeTruthy();
+    });
+  });
+
+  it('displays default error message when signInWithSpotify fails without message', async () => {
+    mockSignInWithSpotify.mockResolvedValue({
+      success: false,
+      error: {},
+    });
+
+    render(<SignIn />);
+
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Spotify Sign-In failed. Please try again.')
+      ).toBeTruthy();
+    });
+  });
+
+  it('renders "Signing In..." when isLoading is true', () => {
+    useAuth.mockReturnValue({
+      signIn: mockSignIn,
+      signInWithGoogle: mockSignInWithGoogle,
+      signInWithSpotify: mockSignInWithSpotify,
+      isLoading: true,
+    });
+
+    render(<SignIn />);
+
+    expect(screen.getByText('Signing In...')).toBeTruthy();
   });
 });

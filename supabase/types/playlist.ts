@@ -17,6 +17,7 @@ export interface PlaylistResponse {
   owner_id: string;
   is_private: boolean;
   is_collaborative: boolean;
+  can_invite: boolean;
   created_at: string;
   updated_at: string;
   is_spotify_sync?: boolean;

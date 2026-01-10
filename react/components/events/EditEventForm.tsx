@@ -16,7 +16,7 @@ import { MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimeInput from '@/components/ui/date-time-input';
 import FloatButton from '@/components/generics/FloatButton';
 import { useAppToast } from '@/hooks/useAppToast';
 import * as ImagePicker from 'expo-image-picker';
@@ -28,6 +28,7 @@ import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import SwitchRow from '@/components/generics/SwitchRow';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -85,9 +86,8 @@ export default function EditEventForm({
   }, [initialValues.event?.image_url]);
 
   // DateTimePicker handlers
-  const onBeginningChange = (event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || beginningAt;
-    setBeginningAt(currentDate);
+  const onBeginningChange = (selectedDate: Date) => {
+    setBeginningAt(selectedDate);
   };
 
   async function uploadEventImage() {
@@ -167,35 +167,53 @@ export default function EditEventForm({
     console.log('Submitting event form...');
     if (!validate()) return;
 
+    let finalImageUrl = imageUrl;
+
+    if (!finalImageUrl) {
+      try {
+        const randomImageAsset = getRandomImage();
+        const resolvedAsset = Image.resolveAssetSource(randomImageAsset);
+        if (resolvedAsset?.uri) {
+          finalImageUrl = await uploadImageToSupabase(
+            resolvedAsset.uri,
+            'avatars',
+            'events'
+          );
+        }
+      } catch (err) {
+        console.error('Failed to upload default event image:', err);
+      }
+    }
+
     console.log('Preparing event payload...');
     const getLoc = location
       ? {
-        id: initialValues?.location?.id,
-        event_id: initialValues?.event?.id,
-        venuename: venueName.trim() || null,
-        address: location?.address ?? null,
-        complement: location?.street ?? null,
-        city: location?.city ?? null,
-        country: location?.country ?? null,
-        coordinates:
-          location && location.latitude && location.longitude
-            ? { lat: location?.latitude, long: location?.longitude }
-            : null,
-      }
+          id: initialValues?.location?.id,
+          event_id: initialValues?.event?.id,
+          venuename: venueName.trim() || null,
+          address: location?.address ?? null,
+          complement: location?.street ?? null,
+          city: location?.city ?? null,
+          country: location?.country ?? null,
+          coordinates:
+            location && location.latitude && location.longitude
+              ? { lat: location?.latitude, long: location?.longitude }
+              : null,
+        }
       : null;
 
     const getLocFallback = venueName
       ? {
-        id: initialValues?.location?.id,
-        event_id: initialValues?.event?.id,
-        venuename: venueName.trim() || null,
-      }
+          id: initialValues?.location?.id,
+          event_id: initialValues?.event?.id,
+          venuename: venueName.trim() || null,
+        }
       : null;
 
     const payload: MusicEventPayload = {
       name: name.trim(),
       description: description.trim() || null,
-      image_url: imageUrl.trim() || initialValues.event?.image_url || null,
+      image_url: finalImageUrl.trim() || initialValues.event?.image_url || null,
       playlist_id: playlist?.id || null,
       beginning_at: beginningAt ? beginningAt.toISOString() : null,
       is_private,
@@ -262,7 +280,9 @@ export default function EditEventForm({
                     autoCapitalize='sentences'
                   />
                 </Input>
-                <Text size='xs' className='text-neutral-500 mt-1 mb-2'>Keep it short and friendly — this appears on event previews.</Text>
+                <Text size='xs' className='text-neutral-500 mt-1 mb-2'>
+                  Keep it short and friendly — this appears on event previews.
+                </Text>
 
                 <Text className='mt-2 font-semibold'>Description</Text>
                 <Textarea className='bg-neutral-50 mb-3 rounded-lg border text-base'>
@@ -274,12 +294,20 @@ export default function EditEventForm({
                     style={{ minHeight: 120 }}
                   />
                 </Textarea>
-                <Text size='xs' className='text-neutral-500 mt-1 mb-3'>Add a short, friendly description — 1–2 lines are ideal for previews.</Text>
+                <Text size='xs' className='text-neutral-500 mt-1 mb-3'>
+                  Add a short, friendly description — 1–2 lines are ideal for
+                  previews.
+                </Text>
 
                 <Divider className='my-4' />
 
-                <Heading size='lg' className='mb-2'>Playlist</Heading>
-                <Text size='sm' className='text-neutral-600 mb-2'>Select which playlist will be used during the event. You can change it later.</Text>
+                <Heading size='lg' className='mb-2'>
+                  Playlist
+                </Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>
+                  Select which playlist will be used during the event. You can
+                  change it later.
+                </Text>
                 {!playlist ? (
                   <AddPlaylistItem
                     onPress={handleSelectPlaylist}
@@ -301,8 +329,12 @@ export default function EditEventForm({
 
                 <Divider className='my-4' />
 
-                <Heading size='lg' className='mb-2'>Settings</Heading>
-                <Text size='sm' className='text-neutral-600 mb-2'>Control privacy, voting and temporal options for this event.</Text>
+                <Heading size='lg' className='mb-2'>
+                  Settings
+                </Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>
+                  Control privacy, voting and temporal options for this event.
+                </Text>
 
                 <VStack className='px-2 space-y-4 mb-3'>
                   <SwitchRow
@@ -332,21 +364,29 @@ export default function EditEventForm({
 
                 <Divider className='my-4' />
 
-                <Heading size='lg' className='mb-2'>Beginning Date & Time</Heading>
-                <Text size='sm' className='text-neutral-600 mb-2'>Set when the event will start. Times are shown in your device timezone.</Text>
-                <DateTimePicker
-                  testID='beginningDateTimePicker'
+                <Heading size='lg' className='mb-2'>
+                  Beginning Date & Time
+                </Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>
+                  Set when the event will start. Times are shown in your device
+                  timezone.
+                </Text>
+                <DateTimeInput
                   value={beginningAt}
-                  mode={"datetime"}
-                  is24Hour={true}
                   onChange={onBeginningChange}
                 />
 
                 <Divider className='my-4' />
 
                 {/* ---------- LOCATION ----------- */}
-                <Heading size='lg' className='mb-2'>Location</Heading>
-                <Text size='sm' className='text-neutral-600 mb-2'>Provide a venue or address so attendees can find the event. If spatio-temporal voting is enabled, location is required for voting.</Text>
+                <Heading size='lg' className='mb-2'>
+                  Location
+                </Heading>
+                <Text size='sm' className='text-neutral-600 mb-2'>
+                  Provide a venue or address so attendees can find the event. If
+                  spatio-temporal voting is enabled, location is required for
+                  voting.
+                </Text>
                 <Text className='mt-2 font-semibold'>Place name</Text>
                 <Input className='bg-white mb-2 rounded-full px-4 py-3 shadow-sm border border-gray-200'>
                   <InputField
@@ -358,25 +398,37 @@ export default function EditEventForm({
 
                 <Text className='mt-4 font-semibold'>Location</Text>
                 <HStack className='justify-between items-center mt-1'>
-                    <Text size='sm' className='text-neutral-700 flex-1 mr-2 truncate'>
+                  <Text
+                    size='sm'
+                    className='text-neutral-700 flex-1 mr-2 truncate'
+                  >
                     {location?.address ?? 'No address place'}
-                    </Text>
+                  </Text>
                   <Button
                     action='primary'
                     onPress={() => setLocationOpen(true)}
                     className='mt-3 rounded-full shadow-md bg-primary-500'
                   >
-                      <ButtonIcon as={MapPinIcon} />
+                    <ButtonIcon as={MapPinIcon} />
                   </Button>
                 </HStack>
-                <Text size='xs' className='text-neutral-500 mt-2'>Tap to pick the event location on the map.</Text>
+                <Text size='xs' className='text-neutral-500 mt-2'>
+                  Tap to pick the event location on the map.
+                </Text>
               </Box>
-                { initialValues.event == null &&
-                <Button onPress={handlePressValid} className='m-4 rounded-lg bg-primary-500 shadow-lg active:shadow-md active:scale-95 mb-6' size='xl'>
+              {initialValues.event == null && (
+                <Button
+                  onPress={handlePressValid}
+                  className='m-4 rounded-lg bg-primary-500 shadow-lg active:shadow-md active:scale-95 mb-6'
+                  size='xl'
+                >
                   <ButtonIcon as={Save} className='mr-2' />
-                  <ButtonText className='font-semibold'> Create Event </ButtonText>
+                  <ButtonText className='font-semibold'>
+                    {' '}
+                    Create Event{' '}
+                  </ButtonText>
                 </Button>
-                }
+              )}
             </Box>
             {error ? (
               <Center>
@@ -389,24 +441,13 @@ export default function EditEventForm({
               <Center className='p-3' />
             )}
 
-            {ApiError !== '' ? (
-              <Center>
-                <HStack space='xs' className='items-center color-red-500'>
-                  <Icon as={AlertCircleIcon} size='sm' />
-                  <Text>{ApiError}</Text>
-                </HStack>
-              </Center>
-            ) : (
-              <Center className='p-3' />
-            )}
-
             {/* Submit */}
           </VStack>
         </ScrollView>
 
-        { initialValues.event &&
+        {initialValues.event && (
           <FloatButton onPress={handlePressValid} icon={Save} />
-        }
+        )}
       </FormControl>
 
       <PlaylistSelectionModal

@@ -1,12 +1,6 @@
+import FloatButton from '@/components/generics/FloatButton';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import {
-  ThreeDotsIcon,
-  GlobeIcon,
-  PaperclipIcon,
-  SettingsIcon,
-  TrashIcon,
-  EditIcon,
-} from '@/components/ui/icon';
+import { SettingsIcon, TrashIcon, EditIcon } from '@/components/ui/icon';
 import {
   Drawer,
   DrawerBackdrop,
@@ -25,13 +19,15 @@ import EventDatesInfos from './Dates/EventDatesInfos';
 import ConfirmModal from '@/components/generics/ConfirmModal';
 import { useEvent } from '@/hooks/useEvent';
 import { useRouter } from 'expo-router';
-import { Star, StarOff } from 'lucide-react-native';
+import { Star, StarOff, Info } from 'lucide-react-native';
 
 interface Props {
   callDelete: () => void;
   callEdit: () => void;
   eventData: MusicEventFetchResult;
   isOwner?: boolean;
+  className?: string;
+  style?: any;
 }
 
 export default function Event3DotMenu({
@@ -39,6 +35,8 @@ export default function Event3DotMenu({
   callEdit,
   eventData,
   isOwner = false,
+  className,
+  style,
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [startModal, setStartModal] = useState(false);
@@ -109,15 +107,12 @@ export default function Event3DotMenu({
 
   return (
     <>
-      <Button
-        size='sm'
-        action='secondary'
-        variant='solid'
-        className='rounded-2xl opacity-80'
+      <FloatButton
         onPress={handleOpenDrawer}
-      >
-        <ButtonIcon as={ThreeDotsIcon} size='md' />
-      </Button>
+        icon={isOwner ? SettingsIcon : Info}
+        className={className}
+        style={style}
+      />
 
       <Drawer isOpen={isDrawerOpen} onClose={handleCloseDrawer}>
         <DrawerBackdrop />

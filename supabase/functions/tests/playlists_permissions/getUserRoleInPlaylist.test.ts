@@ -12,7 +12,7 @@ Deno.test("returns OWNER if userId is the owner's", () => {
     owner: { id: ownerId },
     collaborators: [{ id: "collab123" }],
     members: [{ id: "member123" }],
-  };
+  } as any;
   const role = getUserRoleInPlaylist(playlist, ownerId);
   assertStrictEquals(role, ROLES.OWNER);
 });
@@ -23,7 +23,7 @@ Deno.test("returns COLLABORATOR if userId is in collaborators", () => {
     owner: { id: "owner123" },
     collaborators: [{ id: collaboratorId }, {id: "another_one"}],
     members: [{ id: "member123" }],
-  };
+  } as any;
   const role = getUserRoleInPlaylist(playlist, collaboratorId);
   assertStrictEquals(role, ROLES.COLLABORATOR);
 });
@@ -34,39 +34,39 @@ Deno.test("returns MEMBER if userId is in members", () => {
     owner: { id: "owner123" },
     collaborators: [{ id: "collab123" }],
     members: [{ id: memberId }],
-  };
+  } as any;
   const role = getUserRoleInPlaylist(playlist, memberId);
   assertStrictEquals(role, ROLES.MEMBER);
 });
 
-Deno.test("returns null if userId is not in any role", () => {
+Deno.test("returns NONE if userId is not in any role", () => {
   const unknownId = "unknown123";
   const playlist = {
     owner: { id: "owner123" },
     collaborators: [{ id: "collab123" }],
     members: [{ id: "member123" }],
-  };
+  } as any;
   const role = getUserRoleInPlaylist(playlist, unknownId);
-  assertStrictEquals(role, null);
+  assertStrictEquals(role, ROLES.NONE);
 });
 
-Deno.test("returns null if playlist has no collaborators or members", () => {
+Deno.test("returns NONE if playlist has no collaborators or members", () => {
   const collaboratorId = "collab123";
   const playlist = {
     owner: { id: "owner123" },
-  };
+  } as any;
   const role = getUserRoleInPlaylist(playlist, collaboratorId);
-  assertStrictEquals(role, null);
+  assertStrictEquals(role, ROLES.NONE);
 });
 
-Deno.test("returns null if userId  is not a member in the playlist", () => {
+Deno.test("returns NONE if userId  is not a member in the playlist", () => {
   const unknownId = "notInPlaylist";
   const playlist = {
     owner: { id: "owner123" },
     collaborators: [{ id: "collab123" }],
     members: [{ id: "member123" }],
-  };
+  } as any;
 
   const role = getUserRoleInPlaylist(playlist, unknownId);
-  assertStrictEquals(role, null);
+  assertStrictEquals(role, ROLES.NONE);
 });

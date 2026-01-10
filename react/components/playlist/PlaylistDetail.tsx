@@ -62,7 +62,6 @@ export default function PlaylistDetail() {
       canEdit &&
         isPremium &&
         !playlist?.is_spotify_sync &&
-        (playlist?.tracks.length ?? 0) > 0 &&
         !!isConnectedToSpotify
     );
     setDisplayInviteButton(canInvite && isPremium);
@@ -80,21 +79,6 @@ export default function PlaylistDetail() {
     setIsTrackModalOpen(false);
     refetch(); // Refetch when modal closes to update the playlist
   };
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        playlist && (
-          <Playlist3DotMenu
-            playlist={playlist}
-            callDelete={() => setShowAlertDialog(true)}
-            callEdit={onCallEdit}
-            isPremium={isPremium}
-            onUpgrade={() => setShowPaywall(true)}
-          />
-        ),
-    });
-  }, [navigation, playlist, isPremium]);
 
   const onDeletePlaylist = async () => {
     setShowAlertDialog(false);
@@ -252,6 +236,17 @@ export default function PlaylistDetail() {
         onAddTrack={handleAddTrack}
         renderLeftAction={renderLeftAction}
       />
+
+      {playlist && (
+        <Playlist3DotMenu
+          playlist={playlist}
+          callDelete={() => setShowAlertDialog(true)}
+          callEdit={onCallEdit}
+          isPremium={isPremium}
+          onUpgrade={() => setShowPaywall(true)}
+          className='absolute bottom-36 right-4 rounded-full p-4 blurred-bg'
+        />
+      )}
     </>
   );
 }

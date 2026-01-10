@@ -1,3 +1,4 @@
+import BackNavButton from '@/components/generics/BackNavButton';
 import { Stack } from 'expo-router';
 
 export default function PlaylistDetailLayout() {
@@ -9,14 +10,14 @@ export default function PlaylistDetailLayout() {
           title: '',
           headerShown: true,
           headerTransparent: true,
-          headerTintColor: '#aeaeae'
+          headerLeft: () => <BackNavButton />,
         }}
       />
       <Stack.Screen
         name='invite'
         options={{
-          title: 'Invite',
-          presentation: 'modal',
+          title: 'Invite to playlist',
+          headerShown: true,
         }}
       />
       <Stack.Screen

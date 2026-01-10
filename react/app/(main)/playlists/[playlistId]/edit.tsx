@@ -6,11 +6,13 @@ import EditPlaylistForm from '@/components/playlist/EditPlaylistForm';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
 import { editPlaylistById } from '@/services/playlist';
+import { useAppToast } from '@/hooks/useAppToast';
 
 export default function EditPlaylist() {
   const router = useRouter();
   const [error, setError] = useState<string>('');
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
+  const toast = useAppToast();
 
   const { playlist, error: fetchError } = usePlaylist(playlistId);
 
@@ -21,7 +23,18 @@ export default function EditPlaylist() {
       })
       .catch(err => {
         console.error('Error editing playlist:', err);
-        setError('Failed to edit playlist. Please try again.');
+        const errorStatus = err?.status;
+        const errorMessage = err?.message || 'Failed to edit playlist. Please try again.';
+        
+        // Show toast for duplicate (409) or forbidden (403) errors
+        if (errorStatus === 409 || errorStatus === 403) {
+          toast.error({
+            title: 'Cannot update playlist',
+            description: errorMessage,
+          });
+        }
+        
+        setError(errorMessage);
       });
   };
 

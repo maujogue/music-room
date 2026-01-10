@@ -54,7 +54,6 @@ help:
 install:
 	@echo "📦 Installing dependencies..."
 	cd ${REACT_APP_DIR} && npx expo install
-	cd ${REACT_APP_DIR} && npm install --save-dev babel-plugin-module-resolver
 	@echo "✅ Dependencies installed successfully!"
 
 # Initialize Supabase (run from project root)
@@ -70,7 +69,7 @@ setup-supabase:
 	@echo "✅ Supabase initialized!"
 
 # Start local Supabase services and apply migrations
-start-supabase:
+start-supabase: local-migrations
 	@echo "🚀 Starting Supabase services..."
 	npx ${SUPABASE} start
 	@echo "✅ Supabase services started!"
@@ -243,24 +242,27 @@ test-react:
 
 test-supabase-cloud:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.prod .env
-	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
 
 test-supabase-local:
 	cd ${SUPABASE_FUNCTIONS_DIR} && cp .env.dev .env
-	cd ${SUPABASE_DIR} && npx deno test --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
 
 test-supabase-sql-local:
 	@echo "🧪 Running SQL database tests..."
-	cd ${SUPABASE_DIR} && ${SUPABASE} test db
+	cd ${SUPABASE_DIR} && npx ${SUPABASE} test db
 
 test-supabase-sql-cloud:
 	@echo "🧪 Running SQL database tests..."
-	cd ${SUPABASE_DIR} && ${SUPABASE} test db --linked
+	cd ${SUPABASE_DIR} && npx ${SUPABASE} test db --linked
 
 deploy:
 	npx supabase db push
 deploy-functions:
 	npx supabase functions deploy
+
+local-migrations:
+	npx ${SUPABASE} migrations up
 
 load-test:
 	cd load-testing && ./run_k6_test.sh profile 25 50 75 100 125 150
