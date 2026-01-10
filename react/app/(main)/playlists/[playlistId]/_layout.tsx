@@ -9,14 +9,14 @@ export default function PlaylistDetailLayout() {
           title: '',
           headerShown: true,
           headerTransparent: true,
-          headerTintColor: '#aeaeae'
+          headerTintColor: '#aeaeae',
         }}
       />
       <Stack.Screen
         name='invite'
         options={{
-          title: 'Invite',
-          presentation: 'modal',
+          title: 'Invite to playlist',
+          headerShown: true,
         }}
       />
       <Stack.Screen
