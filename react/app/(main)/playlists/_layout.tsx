@@ -1,5 +1,4 @@
 import { Stack } from 'expo-router';
-import CancelButton from '@/components/generics/CancelButton';
 import BackNavButton from '@/components/generics/BackNavButton';
 
 export default function PlaylistLayout() {
@@ -23,10 +22,9 @@ export default function PlaylistLayout() {
       <Stack.Screen
         name='add'
         options={{
-          presentation: 'modal',
           title: 'New Playlist',
           headerBackVisible: false,
-          headerRight: () => <CancelButton />,
+          headerLeft: () => <BackNavButton />,
         }}
       />
     </Stack>

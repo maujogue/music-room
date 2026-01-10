@@ -5,7 +5,7 @@ import {
 } from '@/components/ui/avatar';
 import { Tabs, useRouter, usePathname } from 'expo-router';
 import vibingImg from '@/assets/vibing.jpg';
-import { ProfileProvider } from '@/contexts/profileCtx';
+import { ProfileProvider, useProfile } from '@/contexts/profileCtx';
 import { SubscriptionProvider } from '../../contexts/subscriptionCtx';
 import { PlayIcon, Icon, StarIcon, SearchIcon } from '@/components/ui/icon';
 import PaywallModal from '@/components/subscription/PaywallModal';
@@ -22,9 +22,15 @@ export default function AppLayout() {
   );
 }
 
+import { useCachePrewarmer } from '@/hooks/useCachePrewarmer';
+
 function AppTabs() {
   const { isPremium } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
+  const { profile } = useProfile();
+
+  // Pre-warm the cache for core data
+  useCachePrewarmer();
 
   return (
     <>
@@ -64,8 +70,14 @@ function AppTabs() {
             title: 'Profile',
             tabBarIcon: () => (
               <Avatar size='sm'>
-                <AvatarFallbackText>👤</AvatarFallbackText>
-                <AvatarImage source={vibingImg} />
+                <AvatarFallbackText>
+                  {profile?.username ? profile.username[0].toUpperCase() : '👤'}
+                </AvatarFallbackText>
+                {profile?.avatar_url ? (
+                  <AvatarImage source={{ uri: profile.avatar_url }} />
+                ) : (
+                  <AvatarImage source={vibingImg} />
+                )}
               </Avatar>
             ),
           }}

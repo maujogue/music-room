@@ -28,9 +28,10 @@ export default function SubscriptionBadge({
   };
 
   if (isLoading) {
+    // Left aligned loading badge
     return (
-      <VStack className='px-3' style={{ alignSelf: 'flex-end' }}>
-        <Badge variant='outline' size='sm'>
+      <VStack className="px-3" style={{ alignSelf: 'flex-start' }}>
+        <Badge variant="outline" size="sm">
           <BadgeText>Loading...</BadgeText>
         </Badge>
       </VStack>
@@ -38,31 +39,29 @@ export default function SubscriptionBadge({
   }
 
   return (
-    <VStack className='px-3'>
-      <HStack className='w-full items-center'>
-        <VStack style={{ flex: 1 }} />
-        <VStack>
-          <Pressable onPress={() => setIsPaywallOpen(true)}>
-            <Badge variant='solid' action={isPremium ? 'success' : 'warning'} size='lg'>
-              <HStack space='xs' className='items-center'>
-                <Icon
-                  as={isPremium ? StarIcon : InfoIcon}
-                  size='sm'
-                  color={isPremium ? '#10B981' : '#F59E0B'}
-                />
-                <BadgeText>{isPremium ? 'Premium' : 'Free'}</BadgeText>
-              </HStack>
-            </Badge>
-          </Pressable>
-          {isPremium && subscription && showMemberSince && (
-            <Text
-              className='text-xs text-typography-500'
-              style={{ marginTop: 4, marginRight: 0, alignSelf: 'flex-end' }}
-            >
-              since {formatDate(subscription.started_at)}
-            </Text>
-          )}
-        </VStack>
+    <VStack className="px-3" style={{ alignItems: 'flex-end' }}>
+      <HStack className="items-center w-full justify-end">
+        {isPremium && subscription && showMemberSince ? (
+          <Text
+            className="text-xs text-typography-500 mr-2"
+          >
+            Since {formatDate(subscription.started_at)}
+          </Text>
+        ) : (
+          <Text style={{ minWidth: 80 }}>{' '}</Text>
+        )}
+        <Pressable onPress={() => setIsPaywallOpen(true)}>
+          <Badge variant="solid" action={isPremium ? 'success' : 'warning'} size="lg">
+            <HStack space="xs" className="items-center">
+              <Icon
+                as={isPremium ? StarIcon : InfoIcon}
+                size="sm"
+                color={isPremium ? '#10B981' : '#F59E0B'}
+              />
+              <BadgeText>{isPremium ? 'Premium' : 'Free'}</BadgeText>
+            </HStack>
+          </Badge>
+        </Pressable>
       </HStack>
 
       <PaywallModal
