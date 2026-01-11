@@ -1,7 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import MapView from 'react-native-maps';
-import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
-import { View, Pressable, Platform } from 'react-native';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import { useCurrentPosition } from '@/hooks/useCurrentPosition';
@@ -10,6 +8,7 @@ import EventMarker from '@/components/events/EventMarker';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Button, ButtonText } from '@/components/ui/button';
+import { Box } from '@/components/ui/box';
 import { Image } from '@/components/ui/image';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
@@ -23,6 +22,7 @@ import EventAllBadges from '@/components/generics/EventAllBadges';
 import { addUserToEvent } from '@/services/events';
 import { useProfile } from '@/contexts/profileCtx';
 import { useAppToast } from '@/hooks/useAppToast';
+import { useUserEvents } from '@/hooks/useUserEvents';
 
 type RadarProps = {
   radiusKm?: number;
@@ -35,6 +35,7 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
   const { profile } = useProfile();
   const toast = useAppToast();
   const [joining, setJoining] = useState(false);
+  const { events: userEvents, loading: userEventsLoading } = useUserEvents();
 
   const {
     events,
@@ -49,23 +50,14 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
     [events, selectedId]
   );
 
-  function select(id: string) {
-    setSelectedId(id);
-    const item = events.find(e => e.event.id === id);
+  const isJoined = useMemo(() => {
+    if (!selectedId || !userEvents) return false;
+    return userEvents.some(ue => ue.event.id === selectedId);
+  }, [selectedId, userEvents]);
 
-    if (item && item.radar.coordinates && mapRef.current) {
-      // Animate to the marker, slightly offset so it appears above the bottom sheet
-      const { lat, long } = item.radar.coordinates;
-      mapRef.current.animateToRegion(
-        {
-          latitude: lat - 0.002, // slight offset to show pin above sheet
-          longitude: long,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.015,
-        },
-        500
-      );
-    }
+  function select(id: string) {
+    console.log('Selecting : ', id);
+    setSelectedId(id);
   }
 
   function clearSelection() {
@@ -103,6 +95,11 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
   async function handleJoinEvent() {
     if (!selectedItem || !profile) return;
 
+    if (isJoined) {
+      router.push(`/events/${selectedItem.event.id}`);
+      return;
+    }
+
     setJoining(true);
     try {
       await addUserToEvent(selectedItem.event.id, profile.id, 'collaborator');
@@ -136,7 +133,7 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
   }
 
   return (
-    <View className='flex-1 w-full relative bg-neutral-100'>
+    <VStack className='h-full w-full'>
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
@@ -149,10 +146,8 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
           }
         }
         showsUserLocation
-        showsMyLocationButton={false}
+        showsMyLocationButton
         onPress={clearSelection}
-        toolbarEnabled={false}
-        moveOnMarkerPress={false}
       >
         {events.map(item => (
           <EventMarker
@@ -164,146 +159,118 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
         ))}
       </MapView>
 
-      {/* Custom User Location Button */}
-      <Pressable
-        onPress={centerOnUser}
-        className='absolute top-4 right-4 bg-white p-3 rounded-xl shadow-md border border-neutral-200 active:bg-neutral-100'
-        style={{ elevation: 5 }}
-      >
-        <Navigation
-          size={24}
-          color='#007AFF'
-          fill={coords ? '#007AFF' : 'transparent'}
-        />
-      </Pressable>
-
-      {/* Bottom Sheet Card */}
+      {/* EVENT INFOS */}
       {selectedItem && (
-        <Animated.View
-          entering={SlideInDown.springify().damping(15)}
-          exiting={SlideOutDown.duration(200)}
-          className='absolute bottom-6 left-4 right-4'
-          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 5,
-            elevation: 10,
-          }}
-        >
-          <View className='bg-white rounded-2xl overflow-hidden'>
-            {/* Image Header */}
-            <View className='h-40 w-full relative bg-neutral-100'>
+        <Box className='absolute inset-x-3 bottom-3 z-50'>
+          <Box className='bg-neutral-300/50 rounded-xl border border-neutral-300 p-0.5'>
+            <VStack className='relative'>
               {selectedItem.event.image_url ? (
                 <Image
                   source={{ uri: selectedItem.event.image_url }}
-                  className='w-full h-full'
+                  className='w-full h-[150px] rounded-lg'
                   alt='Event image'
-                  resizeMode='cover'
                 />
               ) : (
-                <View className='w-full h-full items-center justify-center'>
-                  <Text className='text-neutral-400'>No Image</Text>
-                </View>
+                <Box className='w-full h-[150px] rounded-lg bg-neutral-100 items-center justify-center'>
+                  <Text size='xs' className='text-neutral-500'>
+                    No img
+                  </Text>
+                </Box>
               )}
-
               <LinearGradient
-                colors={['rgba(0,0,0,0.6)', 'transparent']}
-                start={{ x: 0, y: 1 }}
-                end={{ x: 0, y: 0.5 }}
-                className='absolute inset-0'
+                colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', 'transparent']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1.4, y: 0 }}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                }}
               />
 
-              <Pressable
-                onPress={clearSelection}
-                className='absolute top-2 right-2 bg-black/30 p-1.5 rounded-full backdrop-blur-md'
-              >
-                <X size={16} color='white' />
-              </Pressable>
-
               {selectedItem.event.everyone_can_vote && (
-                <View className='absolute bottom-2 right-2'>
+                <HStack className='absolute bottom-2 right-2 gap-1'>
                   <EventAllBadges event={selectedItem.event} />
-                </View>
+                </HStack>
               )}
-            </View>
+            </VStack>
 
-            {/* Content */}
-            <VStack className='p-4 space-y-3'>
-              <HStack className='justify-between items-start'>
-                <VStack className='flex-1 pr-2'>
-                  <Heading
-                    size='md'
-                    className='text-neutral-900 font-bold'
-                    numberOfLines={1}
+            <VStack className='bg-white/50 rounded-b-xl border border-neutral-300 w-full pt-2 px-2'>
+              <HStack className='w-full justify-between'>
+                <Heading size='lg' className='text-neutral-950 font-semibold'>
+                  {' '}
+                  {selectedItem.event.name}{' '}
+                </Heading>
+                <Badge size='md' className='rounded-xl h-6'>
+                  <BadgeIcon as={ShellIcon} size='lg' />
+                  <BadgeText
+                    className='pl-1 font-bold'
+                    ellipsizeMode='tail'
+                    style={{ maxWidth: 200 }}
                   >
-                    {selectedItem.event.name}
-                  </Heading>
-                  <HStack className='items-center mt-1 space-x-1'>
-                    <ShellIcon size={14} className='text-neutral-500' />
-                    <Text
-                      size='sm'
-                      className='text-neutral-500 font-medium'
-                      numberOfLines={1}
-                    >
-                      {selectedItem.radar.venuename || 'Unknown Venue'}
-                    </Text>
-                    <Text size='sm' className='text-neutral-300 mx-1'>
-                      •
-                    </Text>
-                    <Text size='sm' className='text-neutral-500'>
-                      {displayDistance(selectedItem.radar.dist)}
-                    </Text>
-                  </HStack>
-                </VStack>
-
-                <View className='bg-primary-50 px-2 py-1 rounded-lg'>
-                  <EventDatesInfos
-                    event={selectedItem.event}
-                    coordinates={selectedItem.radar.coordinates}
-                    minimal
-                  />
-                </View>
+                    {selectedItem.radar.venuename}
+                  </BadgeText>
+                </Badge>
               </HStack>
-
-              <Text
-                size='sm'
-                className='text-neutral-600 leading-5'
-                numberOfLines={2}
-              >
+              <Text size='sm' className='text-neutral-600'>
                 {selectedItem.event.description}
               </Text>
+              <HStack className='items-center px-2'>
+                <Avatar size='sm'>
+                  <AvatarImage
+                    source={{
+                      uri: selectedItem.owner?.avatar_url
+                        ? selectedItem.owner.avatar_url
+                        : 'https://picsum.photos/111',
+                    }}
+                  />
+                </Avatar>
+                <Text size='sm' className='text-typography-400 px-2'>
+                  {selectedItem.owner?.username}
+                </Text>
+              </HStack>
+              <HStack className='w-full my-3 items-center justify-between'>
+                {!!selectedItem.radar?.dist && (
+                  <Badge size='md' className='rounded-xl h-6'>
+                    <BadgeIcon as={Footprints} size='lg' />
+                    <BadgeText
+                      className='pl-1 font-bold'
+                      ellipsizeMode='tail'
+                      style={{ maxWidth: 200 }}
+                    >
+                      {displayDistance(selectedItem.radar.dist)}
+                    </BadgeText>
+                  </Badge>
+                )}
 
-              <HStack className='items-center justify-between pt-2 mt-2 border-t border-neutral-100'>
-                <HStack className='items-center space-x-2'>
-                  <Avatar size='sm'>
-                    <AvatarImage
-                      source={{
-                        uri:
-                          selectedItem.owner?.avatar_url ||
-                          'https://picsum.photos/111',
-                      }}
-                    />
-                  </Avatar>
-                  <Text size='sm' className='font-medium text-neutral-700'>
-                    {selectedItem.owner?.username}
-                  </Text>
-                </HStack>
+                <EventDatesInfos
+                  event={selectedItem.event}
+                  coordinates={selectedItem.radar.coordinates}
+                />
 
                 <Button
                   size='sm'
                   action='primary'
-                  className='rounded-full px-5'
                   onPress={handleJoinEvent}
-                  isDisabled={joining}
+                  isDisabled={joining || userEventsLoading}
                 >
-                  <ButtonText>{joining ? 'Joining...' : 'Join'}</ButtonText>
+                  <ButtonText>
+                    {joining
+                      ? 'Joining...'
+                      : userEventsLoading
+                        ? 'Checking...'
+                        : isJoined
+                          ? 'Go'
+                          : 'Join'}
+                  </ButtonText>
                 </Button>
               </HStack>
             </VStack>
-          </View>
-        </Animated.View>
+          </Box>
+        </Box>
       )}
-    </View>
+    </VStack>
   );
 }
