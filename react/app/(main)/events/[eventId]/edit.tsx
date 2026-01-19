@@ -33,7 +33,7 @@ export default function EditEvent() {
       console.error('Error editing event:', error);
       const errorStatus = error?.status;
       const errorMessage = error?.message || `Error editing event: ${error}`;
-      
+
       // Show toast for duplicate (409) or forbidden (403) errors
       if (errorStatus === 409 || errorStatus === 403) {
         toast.error({
@@ -41,7 +41,7 @@ export default function EditEvent() {
           description: errorMessage,
         });
       }
-      
+
       setError(errorMessage);
       return;
     }

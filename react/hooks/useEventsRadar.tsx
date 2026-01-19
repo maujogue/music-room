@@ -18,6 +18,6 @@ export function useEventsRadar(coords: Coordinates | null) {
     events: events ?? [],
     launchRadar: refetch,
     loading,
-    error: error ? getErrorMsg(error) : null
+    error: error ? getErrorMsg(error) : null,
   };
 }

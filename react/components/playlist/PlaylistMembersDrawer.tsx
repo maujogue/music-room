@@ -175,7 +175,8 @@ export default function PlaylistMembersDrawer({
                       >
                         <Avatar size='md'>
                           <AvatarFallbackText>
-                            {collaborator.username?.charAt(0)?.toUpperCase() || '?'}
+                            {collaborator.username?.charAt(0)?.toUpperCase() ||
+                              '?'}
                           </AvatarFallbackText>
                           {collaborator.avatar_url && (
                             <AvatarImage

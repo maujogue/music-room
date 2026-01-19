@@ -3,10 +3,10 @@ import { formatDbError } from "@postgres/postgres_errors_map";
 import { HTTPException } from "@hono/http-exception";
 import type {
   CreatePlaylistPayload,
-  PlaylistResponse,
-  PlaylistTrack,
   PlaylistCollaborator,
   PlaylistMember,
+  PlaylistResponse,
+  PlaylistTrack,
 } from "@playlist";
 
 import "jsr:@std/dotenv/load";
@@ -17,7 +17,7 @@ const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const supabase = createClient(supabaseUrl!, supabaseKey!);
 
 export async function getSupabasePlaylistByOwner(
-  ownerId: string
+  ownerId: string,
 ): Promise<any[]> {
   const { data, error } = await supabase
     .from("playlists")
@@ -35,7 +35,7 @@ export async function getSupabasePlaylistByOwner(
 
 export async function createPlaylistInSupabase(
   owner_id: string,
-  payload: CreatePlaylistPayload
+  payload: CreatePlaylistPayload,
 ): Promise<PlaylistResponse> {
   const { data, error } = await supabase
     .from("playlists")
@@ -62,7 +62,7 @@ export async function createPlaylistInSupabase(
 }
 
 export async function getSupabasePlaylistById(
-  id: string
+  id: string,
 ): Promise<PlaylistResponse> {
   const { data, error } = await supabase.rpc("get_playlist_complete", {
     p_playlist_id: id,
@@ -79,7 +79,7 @@ export async function getSupabasePlaylistById(
 
 export async function deletePlaylistInSupabase(
   id: string,
-  user_id: string
+  user_id: string,
 ): Promise<void> {
   const { error } = await supabase
     .from("playlists")
@@ -96,7 +96,7 @@ export async function deletePlaylistInSupabase(
 
 export async function isPlaylistCollaborator(
   playlist_id: string,
-  user_id: string
+  user_id: string,
 ): Promise<boolean> {
   const { data, error } = await supabase
     .from("playlist_collaborators")
@@ -117,7 +117,7 @@ export async function isPlaylistCollaborator(
 export async function addTracksToPlaylistInSupabase(
   playlist_id: string,
   tracks: string[],
-  added_by: string
+  added_by: string,
 ): Promise<PlaylistTrack[]> {
   const payload = tracks.map((track_id) => ({
     playlist_id,
@@ -141,7 +141,7 @@ export async function addTracksToPlaylistInSupabase(
 
 export async function deleteTracksFromPlaylistInSupabase(
   playlist_id: string,
-  track_ids: string[]
+  track_ids: string[],
 ): Promise<void> {
   const response = await supabase
     .from("playlist_tracks")
@@ -160,7 +160,7 @@ export async function deleteTracksFromPlaylistInSupabase(
 
 export async function editPlaylistSupabaseById(
   id: string,
-  payload: Partial<CreatePlaylistPayload>
+  payload: Partial<CreatePlaylistPayload>,
 ): Promise<void> {
   const { error } = await supabase
     .from("playlists")
@@ -183,10 +183,8 @@ export async function editPlaylistSupabaseById(
 export async function addUserToPlaylistInSupabase(
   playlist_id: string,
   user_id: string,
-  role: string
+  role: string,
 ): Promise<PlaylistCollaborator[] | PlaylistMember[]> {
-
-
   let result;
 
   if (role === "member") {
@@ -219,7 +217,7 @@ export async function addUserToPlaylistInSupabase(
 export async function removeUserFromPlaylistInSupabase(
   playlist_id: string,
   user_id: string,
-  role: string | undefined
+  role: string | undefined,
 ): Promise<void> {
   if (role === "member" || !role) {
     const { error: memberError } = await supabase
@@ -231,7 +229,7 @@ export async function removeUserFromPlaylistInSupabase(
     if (memberError) {
       console.error(
         "Supabase error (remove from playlist_members):",
-        memberError
+        memberError,
       );
       const pgError = formatDbError(memberError);
       throw new HTTPException(pgError.status, { message: pgError.message });
@@ -247,7 +245,7 @@ export async function removeUserFromPlaylistInSupabase(
   if (collaboratorError) {
     console.error(
       "Supabase error (remove from playlist_collaborators):",
-      collaboratorError
+      collaboratorError,
     );
     const pgError = formatDbError(collaboratorError);
     throw new HTTPException(pgError.status, { message: pgError.message });

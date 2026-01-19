@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
 import FloatButton from '../generics/FloatButton';
-import { Bug } from "lucide-react-native";
+import { Bug } from 'lucide-react-native';
 import {
   Pencil,
   Settings as SettingsIcon,
@@ -54,15 +54,17 @@ export default function ProfileActions({
   const { session } = useAuth();
 
   function isDev() {
-    return process.env.NODE_ENV === 'development'
+    return process.env.NODE_ENV === 'development';
   }
 
   function getToken() {
-    if (!isDev()) { return }
-      console.log("=== DEV MODE BEARER TOKEN ACCESS ===")
-      const token = session?.access_token
-      console.log(token)
-      console.log("=== ============================ ===")
+    if (!isDev()) {
+      return;
+    }
+    console.log('=== DEV MODE BEARER TOKEN ACCESS ===');
+    const token = session?.access_token;
+    console.log(token);
+    console.log('=== ============================ ===');
   }
 
   return (
@@ -163,19 +165,19 @@ export default function ProfileActions({
                     </Button>
                     {isDev() && (
                       <Button
-                      variant='link'
-                      className='w-full justify-start'
-                      onPress={() => {
-                        getToken()
-                      }}
-                    >
-                      <HStack className='items-center justify-between w-full'>
-                        <HStack className='items-center gap-3'>
-                          <Bug />
-                          <ButtonText>Jwt</ButtonText>
+                        variant='link'
+                        className='w-full justify-start'
+                        onPress={() => {
+                          getToken();
+                        }}
+                      >
+                        <HStack className='items-center justify-between w-full'>
+                          <HStack className='items-center gap-3'>
+                            <Bug />
+                            <ButtonText>Jwt</ButtonText>
+                          </HStack>
                         </HStack>
-                      </HStack>
-                    </Button>
+                      </Button>
                     )}
                   </HStack>
                   <Button

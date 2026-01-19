@@ -24,8 +24,9 @@ export default function EditPlaylist() {
       .catch(err => {
         console.error('Error editing playlist:', err);
         const errorStatus = err?.status;
-        const errorMessage = err?.message || 'Failed to edit playlist. Please try again.';
-        
+        const errorMessage =
+          err?.message || 'Failed to edit playlist. Please try again.';
+
         // Show toast for duplicate (409) or forbidden (403) errors
         if (errorStatus === 409 || errorStatus === 403) {
           toast.error({
@@ -33,7 +34,7 @@ export default function EditPlaylist() {
             description: errorMessage,
           });
         }
-        
+
         setError(errorMessage);
       });
   };

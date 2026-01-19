@@ -77,74 +77,70 @@ export default function Playlist3DotMenu({
 
           <DrawerBody contentContainerClassName='gap-2'>
             {isPremium ? (
-                  <Pressable
-                    className='gap-3 flex-row items-center hover:bg-background-50 p-3 rounded-md'
-                    onPress={() => {
-                      handleClose();
-                      callDelete();
-                    }}
-                  >
-                    <Icon as={TrashIcon} size='lg' className='text-red-500' />
-                    <Text className='text-red-500'>Delete</Text>
-                  </Pressable>
-                ) : (
-                  <Pressable
-                    className='gap-3 flex-row items-center justify-between hover:bg-background-50 p-3 rounded-md opacity-75'
-                    onPress={() => {
-                      handleClose();
-                      onUpgrade?.();
-                    }}
-                  >
-                    <HStack className='gap-3 items-center'>
-                      <Icon
-                        as={LockIcon}
-                        size='lg'
-                        className='text-typography-400'
-                      />
-                      <Text className='text-typography-400'>Delete</Text>
-                    </HStack>
-                    <Badge action='warning' className='rounded-full'>
-                      <BadgeText className='text-2xs'>Premium</BadgeText>
-                    </Badge>
-                  </Pressable>
-                )}
+              <Pressable
+                className='gap-3 flex-row items-center hover:bg-background-50 p-3 rounded-md'
+                onPress={() => {
+                  handleClose();
+                  callDelete();
+                }}
+              >
+                <Icon as={TrashIcon} size='lg' className='text-red-500' />
+                <Text className='text-red-500'>Delete</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                className='gap-3 flex-row items-center justify-between hover:bg-background-50 p-3 rounded-md opacity-75'
+                onPress={() => {
+                  handleClose();
+                  onUpgrade?.();
+                }}
+              >
+                <HStack className='gap-3 items-center'>
+                  <Icon
+                    as={LockIcon}
+                    size='lg'
+                    className='text-typography-400'
+                  />
+                  <Text className='text-typography-400'>Delete</Text>
+                </HStack>
+                <Badge action='warning' className='rounded-full'>
+                  <BadgeText className='text-2xs'>Premium</BadgeText>
+                </Badge>
+              </Pressable>
+            )}
 
-                {isPremium ? (
-                  <Pressable
-                    className='gap-3 flex-row items-center hover:bg-background-50 p-3 rounded-md'
-                    onPress={() => {
-                      handleClose();
-                      callEdit();
-                    }}
-                  >
-                    <Icon
-                      as={EditIcon}
-                      size='lg'
-                      className='text-typography-600'
-                    />
-                    <Text>Edit</Text>
-                  </Pressable>
-                ) : (
-                  <Pressable
-                    className='gap-3 flex-row items-center justify-between hover:bg-background-50 p-3 rounded-md opacity-75'
-                    onPress={() => {
-                      handleClose();
-                      onUpgrade?.();
-                    }}
-                  >
-                    <HStack className='gap-3 items-center'>
-                      <Icon
-                        as={LockIcon}
-                        size='lg'
-                        className='text-typography-400'
-                      />
-                      <Text className='text-typography-400'>Edit</Text>
-                    </HStack>
-                    <Badge action='warning' className='rounded-full'>
-                      <BadgeText className='text-2xs'>Premium</BadgeText>
-                    </Badge>
-                  </Pressable>
-                )}
+            {isPremium ? (
+              <Pressable
+                className='gap-3 flex-row items-center hover:bg-background-50 p-3 rounded-md'
+                onPress={() => {
+                  handleClose();
+                  callEdit();
+                }}
+              >
+                <Icon as={EditIcon} size='lg' className='text-typography-600' />
+                <Text>Edit</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                className='gap-3 flex-row items-center justify-between hover:bg-background-50 p-3 rounded-md opacity-75'
+                onPress={() => {
+                  handleClose();
+                  onUpgrade?.();
+                }}
+              >
+                <HStack className='gap-3 items-center'>
+                  <Icon
+                    as={LockIcon}
+                    size='lg'
+                    className='text-typography-400'
+                  />
+                  <Text className='text-typography-400'>Edit</Text>
+                </HStack>
+                <Badge action='warning' className='rounded-full'>
+                  <BadgeText className='text-2xs'>Premium</BadgeText>
+                </Badge>
+              </Pressable>
+            )}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

@@ -23,6 +23,6 @@ export function useUserPlaylists() {
     playlists: playlists ?? null,
     refetch,
     loading,
-    error: error ? getErrorMsg(error) : null
+    error: error ? getErrorMsg(error) : null,
   };
 }

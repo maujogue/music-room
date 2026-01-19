@@ -23,6 +23,6 @@ export function useUserEvents() {
     events: events ?? null,
     refetch,
     loading,
-    error: error ? getErrorMsg(error) : null
+    error: error ? getErrorMsg(error) : null,
   };
 }

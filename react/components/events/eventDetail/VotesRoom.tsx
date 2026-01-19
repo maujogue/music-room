@@ -333,10 +333,15 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
                     <VStack className='p-1.5 gap-1.5 border-2 border-primary-400 rounded-xl'>
                       <View className=' min-h-12 py-1.5 px-3'>
                         <HStack className='justify-between items-end'>
-                          <Text className='font-bold text-primary'>My votes</Text>
-                            <Text className='font-bold text-sky-500'>
-                              {5 - eventUserData.vote_remaining} <Text className='text-primary-200'>/ {eventUserData.voteMax}</Text>
+                          <Text className='font-bold text-primary'>
+                            My votes
+                          </Text>
+                          <Text className='font-bold text-sky-500'>
+                            {5 - eventUserData.vote_remaining}{' '}
+                            <Text className='text-primary-200'>
+                              / {eventUserData.voteMax}
                             </Text>
+                          </Text>
                           {isOwner && data && (
                             <StartAndStopButton data={data} eventId={eventId} />
                           )}

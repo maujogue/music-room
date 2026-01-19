@@ -32,8 +32,9 @@ export async function loggingMiddleware(c: Context, next: Next) {
     statusCode = c.res.status || 200;
   } catch (err) {
     // Capture error information
-    statusCode =
-      err instanceof Error && "status" in err ? (err as any).status : 500;
+    statusCode = err instanceof Error && "status" in err
+      ? (err as any).status
+      : 500;
     errorMessage = err instanceof Error ? err.message : String(err);
   } finally {
     // Calculate request duration

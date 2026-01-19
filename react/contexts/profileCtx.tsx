@@ -46,10 +46,16 @@ export function useProfile() {
 
 export function ProfileProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
-  const { profile, loading: isLoading, refetch: refreshProfile } = useCurrentUser();
+  const {
+    profile,
+    loading: isLoading,
+    refetch: refreshProfile,
+  } = useCurrentUser();
 
-  const [isConnectedToSpotify, setIsConnectedToSpotify] = useState<boolean>(false);
-  const [isConnectedToGoogle, setIsConnectedToGoogle] = useState<boolean>(false);
+  const [isConnectedToSpotify, setIsConnectedToSpotify] =
+    useState<boolean>(false);
+  const [isConnectedToGoogle, setIsConnectedToGoogle] =
+    useState<boolean>(false);
 
   // Derive followers/following from profile data
   const followers = profile?.followers || [];
@@ -73,7 +79,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   }, [user, profile]);
 
-
   const updateProfile = async (
     updates: Partial<UserInfo>
   ): Promise<{ error: any }> => {
@@ -94,7 +99,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   };
 
   const clearProfile = () => {
-    // With React Query, we might clear the query cache if needed, 
+    // With React Query, we might clear the query cache if needed,
     // but usually signing out (which clears 'user') handles it via 'enabled: !!user'
     // For manual clearing we could queryClient.removeQueries... but let's keep it simple for now or no-op
     // effectively state is cleared if user is null
@@ -162,7 +167,9 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     followersCount: followers.length,
     followingCount: following.length,
     updateProfile,
-    refreshProfile: async () => { await refreshProfile(); }, // adapter
+    refreshProfile: async () => {
+      await refreshProfile();
+    }, // adapter
     clearProfile,
     followUser: handleFollowUser,
     unfollowUser: handleUnfollowUser,

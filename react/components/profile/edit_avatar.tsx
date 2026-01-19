@@ -83,10 +83,7 @@ export default function EditAvatar({ url, onUpload, isEdit, username }: Props) {
         <AvatarFallbackText>
           {username ? username[0].toUpperCase() : '👤'}
         </AvatarFallbackText>
-        <AvatarImage
-          source={url as any}
-          alt='profile image'
-        />
+        <AvatarImage source={url as any} alt='profile image' />
       </Avatar>
       {isEdit && (
         <Button

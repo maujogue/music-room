@@ -5,7 +5,11 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { getCurrentUserSubscription, upgradeSubscription, cancelSubscription } from '@/services/subscription';
+import {
+  getCurrentUserSubscription,
+  upgradeSubscription,
+  cancelSubscription,
+} from '@/services/subscription';
 import { Subscription } from '@/types/subscription';
 
 interface SubscriptionContextType {
@@ -16,12 +20,16 @@ interface SubscriptionContextType {
   refreshSubscription: () => Promise<void>;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
+  undefined
+);
 
 export function useSubscription() {
   const context = useContext(SubscriptionContext);
   if (context === undefined) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
+    throw new Error(
+      'useSubscription must be used within a SubscriptionProvider'
+    );
   }
   return context;
 }

@@ -30,7 +30,7 @@ export function useProfileData(userId: string) {
     data: otherUserData,
     isLoading: isOtherLoading,
     error: otherError,
-    refetch: refetchOtherUser
+    refetch: refetchOtherUser,
   } = useQuery({
     queryKey: ['user-profile', userId],
     queryFn: () => getUserProfile(userId),
@@ -57,7 +57,11 @@ export function useProfileData(userId: string) {
     : otherUserData?.following || [];
 
   const isLoading = isOwnProfile ? false : isOtherLoading;
-  const error = isOwnProfile ? null : (otherError ? 'Failed to load profile' : null);
+  const error = isOwnProfile
+    ? null
+    : otherError
+      ? 'Failed to load profile'
+      : null;
 
   // Permissions based on variant
   const permissions = {

@@ -56,21 +56,21 @@ export default function ConfirmDialog({
   const handleConfirm = async () => {
     try {
       const maybePromise = onConfirm?.();
-      if (maybePromise && typeof (maybePromise as Promise<void>).then === 'function') {
+      if (
+        maybePromise &&
+        typeof (maybePromise as Promise<void>).then === 'function'
+      ) {
         setSubmitting(true);
         await (maybePromise as Promise<void>);
       }
       if (!preventAutoCloseOnConfirm) setIsOpen(false);
     } catch (e) {
-
     } finally {
       setSubmitting(false);
     }
   };
 
-  const ConfirmIcon =
-    confirmIcon ??
-    (destructive ? TrashIcon : CheckIcon);
+  const ConfirmIcon = confirmIcon ?? (destructive ? TrashIcon : CheckIcon);
 
   const CancelIcon = cancelIcon ?? CloseIcon;
 
@@ -80,7 +80,7 @@ export default function ConfirmDialog({
       <AlertDialogContent className={className}>
         <AlertDialogHeader>
           {typeof title === 'string' ? (
-            <Heading className="text-typography-950 font-semibold" size="md">
+            <Heading className='text-typography-950 font-semibold' size='md'>
               {title}
             </Heading>
           ) : (
@@ -88,35 +88,38 @@ export default function ConfirmDialog({
           )}
         </AlertDialogHeader>
 
-        <AlertDialogBody className="mt-3 mb-4">
-          {description && (
-            typeof description === 'string' ? (
-              <Text size="sm" className="text-secondary-700">{description}</Text>
-            ) : description
-          )}
+        <AlertDialogBody className='mt-3 mb-4'>
+          {description &&
+            (typeof description === 'string' ? (
+              <Text size='sm' className='text-secondary-700'>
+                {description}
+              </Text>
+            ) : (
+              description
+            ))}
           {children}
         </AlertDialogBody>
 
-        <AlertDialogFooter className="justify-center gap-3">
+        <AlertDialogFooter className='justify-center gap-3'>
           <Button
-            variant="outline"
-            action="secondary"
+            variant='outline'
+            action='secondary'
             onPress={handleClose}
-            size="sm"
+            size='sm'
             disabled={submitting}
           >
-            <ButtonIcon as={CancelIcon} className="ml-2" />
+            <ButtonIcon as={CancelIcon} className='ml-2' />
             <ButtonText>{cancelText}</ButtonText>
           </Button>
 
           <Button
-            size="sm"
+            size='sm'
             onPress={handleConfirm}
             disabled={submitting}
             variant={destructive ? 'solid' : 'solid'}
             action={destructive ? 'negative' : 'primary'}
           >
-            <ButtonIcon as={ConfirmIcon} className="ml-2" />
+            <ButtonIcon as={ConfirmIcon} className='ml-2' />
             <ButtonText>{submitting ? 'Sending…' : confirmText}</ButtonText>
           </Button>
         </AlertDialogFooter>

@@ -45,10 +45,7 @@ export default function PlaylistSelectionModal({
         <AnimatePresence>
           {isOpen && (
             <>
-              <Pressable
-                style={styles.backdrop}
-                onPress={onClose}
-              />
+              <Pressable style={styles.backdrop} onPress={onClose} />
               <MotionView
                 initial={{ y: modalHeight }}
                 animate={{ y: 0 }}

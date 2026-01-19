@@ -29,8 +29,8 @@ export function usePlaylist(id: string | null) {
   // ---------------------------------------------------------------
   const deleteMutation = useMutation({
     mutationFn: () => {
-      if (!id) throw new Error("No playlist ID");
-      return deletePlaylistById(id)
+      if (!id) throw new Error('No playlist ID');
+      return deletePlaylistById(id);
     },
     onSuccess: () => {
       queryClient.setQueryData(queryKey, null);

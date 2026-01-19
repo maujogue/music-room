@@ -41,7 +41,7 @@ app.onError((err, c) => {
     {
       message: "Internal Server Error",
     },
-    500
+    500,
   );
 });
 

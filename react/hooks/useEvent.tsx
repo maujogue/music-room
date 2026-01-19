@@ -53,7 +53,7 @@ export function useEvent(id: string) {
   // ---------------------------------------------------------------
   const updateMutation = useMutation({
     mutationFn: (payload: MusicEventPayload) => updateEventService(id, payload),
-    onSuccess: (updatedData) => {
+    onSuccess: updatedData => {
       queryClient.setQueryData(queryKey, updatedData);
     },
   });
@@ -76,7 +76,7 @@ export function useEvent(id: string) {
     onSuccess: () => {
       // Re-fetch to get updated status
       queryClient.invalidateQueries({ queryKey });
-    }
+    },
   });
 
   const handleStartEvent = async (id: string) => {
@@ -87,7 +87,7 @@ export function useEvent(id: string) {
       console.error('Start event error:', e);
       throw e;
     }
-  }
+  };
 
   // ---------------------------------------------------------------
   // Stop Event
@@ -97,7 +97,7 @@ export function useEvent(id: string) {
     onSuccess: () => {
       // Re-fetch to get updated status
       queryClient.invalidateQueries({ queryKey });
-    }
+    },
   });
 
   const handleStopEvent = async (id: string) => {
@@ -108,7 +108,7 @@ export function useEvent(id: string) {
       console.error('Stop event error:', e);
       throw e;
     }
-  }
+  };
 
   // Combine errors
   const combinedError = error
@@ -125,10 +125,15 @@ export function useEvent(id: string) {
 
   return {
     data: data ?? null,
-    loading: loading || deleteMutation.isPending || updateMutation.isPending || startMutation.isPending || stopMutation.isPending,
+    loading:
+      loading ||
+      deleteMutation.isPending ||
+      updateMutation.isPending ||
+      startMutation.isPending ||
+      stopMutation.isPending,
     error: combinedError,
     // Maintaining API compatibility mostly, though setters are gone
-    setError: () => { }, // No-op, managed by Query
+    setError: () => {}, // No-op, managed by Query
     refetch,
     deleteEvent,
     updateEvent: handleUpdateEvent,

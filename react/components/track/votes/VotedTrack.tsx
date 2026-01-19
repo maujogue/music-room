@@ -72,12 +72,11 @@ export default function VotedTrack({
                   source={{ uri: track.details.album.images[0]?.url }}
                   alt='Track album art'
                 />
-              <Text className='font-medium line-clamp-1'>
-                {track.details.name}
-              </Text>
+                <Text className='font-medium line-clamp-1'>
+                  {track.details.name}
+                </Text>
               </HStack>
-            <NumBadge num={voteCount ?? 0} hideIfZero={true} />
-
+              <NumBadge num={voteCount ?? 0} hideIfZero={true} />
             </HStack>
           </HStack>
         </Card>

@@ -1,8 +1,8 @@
 import { fetchSpotifySearch } from "./services/spotify.ts";
 import {
-  searchUsersByQuery,
   searchEventsByQuery,
   searchPlaylistsByQuery,
+  searchUsersByQuery,
 } from "./services/supabase.ts";
 import { HTTPException } from "@hono/http-exception";
 import { refreshSpotifyToken } from "@auth/utils";

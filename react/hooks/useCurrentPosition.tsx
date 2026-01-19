@@ -6,7 +6,7 @@ type Props = {
   radiusKm?: number;
 };
 
-const googleFallback = { lat: 37.4221, long: -122.0581 }
+const googleFallback = { lat: 37.4221, long: -122.0581 };
 
 async function getSafeCurrentCoords(): Promise<Coordinates | null> {
   try {
@@ -15,7 +15,7 @@ async function getSafeCurrentCoords(): Promise<Coordinates | null> {
         accuracy: Location.Accuracy.Balanced,
       }),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout GPS")), 5000)
+        setTimeout(() => reject(new Error('Timeout GPS')), 5000)
       ),
     ]);
 
@@ -31,7 +31,7 @@ async function getSafeCurrentCoords(): Promise<Coordinates | null> {
 async function getInitialCoords(): Promise<Coordinates> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== Location.PermissionStatus.GRANTED) {
-    throw new Error("Localisation authorization required.");
+    throw new Error('Localisation authorization required.');
   }
 
   const current = await getSafeCurrentCoords();
@@ -45,20 +45,18 @@ async function getInitialCoords(): Promise<Coordinates> {
         long: last.coords.longitude,
       };
     }
-  } catch {
-  }
+  } catch {}
 
   return googleFallback;
 }
 
-
-export function useCurrentPosition({ radiusKm = 50 }: Props) {  
+export function useCurrentPosition({ radiusKm = 50 }: Props) {
   const [status, setStatus] = useState<Location.PermissionStatus | null>(null);
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     let cancelled = false;
 
     (async () => {
@@ -75,7 +73,7 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
           setStatus(requestedStatus);
 
           if (requestedStatus !== Location.PermissionStatus.GRANTED) {
-            throw new Error("Localisation authorization required.");
+            throw new Error('Localisation authorization required.');
           }
         }
 
@@ -86,7 +84,7 @@ export function useCurrentPosition({ radiusKm = 50 }: Props) {
         }
       } catch (e: any) {
         if (!cancelled) {
-          setError(e?.message ?? "Error while getting location.");
+          setError(e?.message ?? 'Error while getting location.');
           setCoords(googleFallback);
         }
       } finally {

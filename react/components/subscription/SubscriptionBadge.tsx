@@ -30,8 +30,8 @@ export default function SubscriptionBadge({
   if (isLoading) {
     // Left aligned loading badge
     return (
-      <VStack className="px-3" style={{ alignSelf: 'flex-start' }}>
-        <Badge variant="outline" size="sm">
+      <VStack className='px-3' style={{ alignSelf: 'flex-start' }}>
+        <Badge variant='outline' size='sm'>
           <BadgeText>Loading...</BadgeText>
         </Badge>
       </VStack>
@@ -39,23 +39,25 @@ export default function SubscriptionBadge({
   }
 
   return (
-    <VStack className="px-3" style={{ alignItems: 'flex-end' }}>
-      <HStack className="items-center w-full justify-end">
+    <VStack className='px-3' style={{ alignItems: 'flex-end' }}>
+      <HStack className='items-center w-full justify-end'>
         {isPremium && subscription && showMemberSince ? (
-          <Text
-            className="text-xs text-typography-500 mr-2"
-          >
+          <Text className='text-xs text-typography-500 mr-2'>
             Since {formatDate(subscription.started_at)}
           </Text>
         ) : (
-          <Text style={{ minWidth: 80 }}>{' '}</Text>
+          <Text style={{ minWidth: 80 }}> </Text>
         )}
         <Pressable onPress={() => setIsPaywallOpen(true)}>
-          <Badge variant="solid" action={isPremium ? 'success' : 'warning'} size="lg">
-            <HStack space="xs" className="items-center">
+          <Badge
+            variant='solid'
+            action={isPremium ? 'success' : 'warning'}
+            size='lg'
+          >
+            <HStack space='xs' className='items-center'>
               <Icon
                 as={isPremium ? StarIcon : InfoIcon}
-                size="sm"
+                size='sm'
                 color={isPremium ? '#10B981' : '#F59E0B'}
               />
               <BadgeText>{isPremium ? 'Premium' : 'Free'}</BadgeText>

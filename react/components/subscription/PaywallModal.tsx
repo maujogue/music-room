@@ -37,17 +37,19 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
       if (error) {
         throw error;
       }
-      
-      isPremium ? toast.info({
-        title: 'Subscription Cancelled',
-        description: 'You can upgrade again anytime.',
-        duration: 3000,
-      }) : toast.success({
-          title: 'Welcome to Premium!',
-          description: 'You now have access to all premium features.',
-          duration: 3000,
-        });
-      
+
+      isPremium
+        ? toast.info({
+            title: 'Subscription Cancelled',
+            description: 'You can upgrade again anytime.',
+            duration: 3000,
+          })
+        : toast.success({
+            title: 'Welcome to Premium!',
+            description: 'You now have access to all premium features.',
+            duration: 3000,
+          });
+
       onClose();
     } catch (error) {
       toast.error({
@@ -68,59 +70,61 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
   ];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size='lg'>
       <ModalBackdrop />
       <ModalContent>
         <ModalHeader>
-          <VStack space="sm">
-            <Text className="text-2xl font-bold text-center">
+          <VStack space='sm'>
+            <Text className='text-2xl font-bold text-center'>
               {isPremium ? 'Manage Subscription' : 'Upgrade to Premium'}
             </Text>
-            <Text className="text-typography-500 text-center">
-              {isPremium 
+            <Text className='text-typography-500 text-center'>
+              {isPremium
                 ? 'You currently have a premium subscription'
-                : 'Unlock all playlist editing features'
-              }
+                : 'Unlock all playlist editing features'}
             </Text>
           </VStack>
           <ModalCloseButton>
-            <Icon as={CloseIcon} size="md" />
+            <Icon as={CloseIcon} size='md' />
           </ModalCloseButton>
         </ModalHeader>
 
         <ModalBody>
-          <VStack space="lg">
+          <VStack space='lg'>
             {/* Pricing */}
-            <Box className="p-4 rounded-lg">
-              <VStack space="sm" className="items-center">
-                <Text className="text-3xl font-bold text-primary-600">
+            <Box className='p-4 rounded-lg'>
+              <VStack space='sm' className='items-center'>
+                <Text className='text-3xl font-bold text-primary-600'>
                   {isPremium ? 'Premium' : '€25'}
                 </Text>
-                <Text className="text-typography-600">
+                <Text className='text-typography-600'>
                   {isPremium ? 'Member since' : 'per month'}
                 </Text>
               </VStack>
             </Box>
 
             {/* Features Comparison */}
-            <VStack space="md">
-              <Text className="text-lg font-semibold">Features Comparison</Text>
-              <VStack space="sm">
+            <VStack space='md'>
+              <Text className='text-lg font-semibold'>Features Comparison</Text>
+              <VStack space='sm'>
                 {features.map((feature, index) => (
-                  <HStack key={index} className="justify-between items-center py-2">
-                    <Text className="flex-1">{feature.name}</Text>
-                    <HStack space="md">
-                      <Badge 
-                        variant={feature.free ? "solid" : "outline"}
-                        action={feature.free ? "success" : "error"}
-                        size="sm"
+                  <HStack
+                    key={index}
+                    className='justify-between items-center py-2'
+                  >
+                    <Text className='flex-1'>{feature.name}</Text>
+                    <HStack space='md'>
+                      <Badge
+                        variant={feature.free ? 'solid' : 'outline'}
+                        action={feature.free ? 'success' : 'error'}
+                        size='sm'
                       >
                         <BadgeText>Free</BadgeText>
                       </Badge>
-                      <Badge 
-                        variant={feature.premium ? "solid" : "outline"}
-                        action={feature.premium ? "success" : "error"}
-                        size="sm"
+                      <Badge
+                        variant={feature.premium ? 'solid' : 'outline'}
+                        action={feature.premium ? 'success' : 'error'}
+                        size='sm'
                       >
                         <BadgeText>Premium</BadgeText>
                       </Badge>
@@ -133,30 +137,46 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             <Divider />
 
             {/* Benefits */}
-            <VStack space="sm">
-              <Text className="text-lg font-semibold">Premium Benefits</Text>
-              <VStack space="xs">
-                <HStack space="sm" className="items-start">
-                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
-                  <Text className="flex-1 text-sm">
+            <VStack space='sm'>
+              <Text className='text-lg font-semibold'>Premium Benefits</Text>
+              <VStack space='xs'>
+                <HStack space='sm' className='items-start'>
+                  <Icon
+                    as={CheckIcon}
+                    size='sm'
+                    className='text-success-500 mt-1'
+                  />
+                  <Text className='flex-1 text-sm'>
                     Full playlist creation and editing capabilities
                   </Text>
                 </HStack>
-                <HStack space="sm" className="items-start">
-                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
-                  <Text className="flex-1 text-sm">
+                <HStack space='sm' className='items-start'>
+                  <Icon
+                    as={CheckIcon}
+                    size='sm'
+                    className='text-success-500 mt-1'
+                  />
+                  <Text className='flex-1 text-sm'>
                     Add and remove tracks from any playlist
                   </Text>
                 </HStack>
-                <HStack space="sm" className="items-start">
-                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
-                  <Text className="flex-1 text-sm">
+                <HStack space='sm' className='items-start'>
+                  <Icon
+                    as={CheckIcon}
+                    size='sm'
+                    className='text-success-500 mt-1'
+                  />
+                  <Text className='flex-1 text-sm'>
                     Invite friends to collaborate on playlists
                   </Text>
                 </HStack>
-                <HStack space="sm" className="items-start">
-                  <Icon as={CheckIcon} size="sm" className="text-success-500 mt-1" />
-                  <Text className="flex-1 text-sm">
+                <HStack space='sm' className='items-start'>
+                  <Icon
+                    as={CheckIcon}
+                    size='sm'
+                    className='text-success-500 mt-1'
+                  />
+                  <Text className='flex-1 text-sm'>
                     Delete playlists you no longer need
                   </Text>
                 </HStack>
@@ -166,21 +186,19 @@ export default function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         </ModalBody>
 
         <ModalFooter>
-          <HStack space="md" className="w-full">
+          <HStack space='md' className='w-full'>
             <Button
               onPress={handleUpgrade}
-              className="flex-1"
+              className='flex-1'
               isDisabled={isLoading}
-
               action={isPremium ? 'negative' : 'primary'}
             >
               <ButtonText>
-                {isLoading 
-                  ? 'Processing...' 
-                  : isPremium 
-                    ? 'Cancel Subscription' 
-                    : 'Upgrade to Premium'
-                }
+                {isLoading
+                  ? 'Processing...'
+                  : isPremium
+                    ? 'Cancel Subscription'
+                    : 'Upgrade to Premium'}
               </ButtonText>
             </Button>
           </HStack>

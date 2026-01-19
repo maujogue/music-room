@@ -1,21 +1,21 @@
-import { Hono } from '@hono/hono';
+import { Hono } from "@hono/hono";
 import {
-  fetchUserProfile,
-  updateProfile,
   fetchUserFollows,
+  fetchUserProfile,
   followUser,
-  unfollowUser
-} from './controller.ts';
+  unfollowUser,
+  updateProfile,
+} from "./controller.ts";
 
 const router = new Hono();
 
 // Profile CRUD operations
-router.get('/user/:userId', fetchUserProfile);
-router.put('/update', updateProfile);
+router.get("/user/:userId", fetchUserProfile);
+router.put("/update", updateProfile);
 
 // Follow system
-router.get('/follows/:userId', fetchUserFollows);
-router.post('/follow/:userId', followUser);
-router.delete('/follow/:userId', unfollowUser);
+router.get("/follows/:userId", fetchUserFollows);
+router.post("/follow/:userId", followUser);
+router.delete("/follow/:userId", unfollowUser);
 
 export default router;

@@ -4,7 +4,11 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { AuthProvider, useAuth } from '@/contexts/authCtx';
 import { AppState, Platform } from 'react-native';
 import type { AppStateStatus } from 'react-native';
-import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  focusManager,
+} from '@tanstack/react-query';
 
 function onAppStateChange(status: AppStateStatus) {
   if (Platform.OS !== 'web') {

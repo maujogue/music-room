@@ -1,22 +1,23 @@
 import { Context } from "https://deno.land/x/hono@v3.12.11/mod.ts";
 import { generateRandomString } from "./utils.ts";
 import {
-  insertOauthStateToSupabase,
-  getAndDeleteOauthState,
-  updateSpotifyUserTokens,
   createUserWithSpotifyData,
   findUserByEmail,
+  getAndDeleteOauthState,
   impersonateUser,
+  insertOauthStateToSupabase,
+  updateSpotifyUserTokens,
 } from "./services/supabase.ts";
 import {
-  fetchSpotifyUserTokenData,
   fetchSpotifyUserProfile,
+  fetchSpotifyUserTokenData,
 } from "./services/spotify.ts";
 
 const client_id = Deno.env.get("SPOTIFY_CLIENT_ID")!;
 const base_url = Deno.env.get("SUPABASE_URL")!;
 const spotify_redirect_uri = Deno.env.get("SPOTIFY_REDIRECT_URI")! || base_url;
-const redirect_uri = `${spotify_redirect_uri}/functions/v1/auth/spotify/callback`;
+const redirect_uri =
+  `${spotify_redirect_uri}/functions/v1/auth/spotify/callback`;
 
 export async function handleSpotifyAuth(c: Context) {
   const state = generateRandomString(16);
@@ -42,8 +43,8 @@ export async function handleSpotifyAuth(c: Context) {
     state: state,
   });
 
-  const spotifyAuthUrl =
-    "https://accounts.spotify.com/authorize?" + params.toString();
+  const spotifyAuthUrl = "https://accounts.spotify.com/authorize?" +
+    params.toString();
 
   c.status(200);
   return c.json({ url: spotifyAuthUrl });
@@ -108,7 +109,8 @@ export async function handleSpotifyCallback(c: Context) {
 
     // Log the user in and redirect to callback
     const sessionTokens = await impersonateUser(spotifyProfile.email);
-    const redirectUrl = `music-room://(auth)/callback?access_token=${sessionTokens.access_token}&refresh_token=${sessionTokens.refresh_token}`;
+    const redirectUrl =
+      `music-room://(auth)/callback?access_token=${sessionTokens.access_token}&refresh_token=${sessionTokens.refresh_token}`;
     return c.redirect(redirectUrl);
   }
 }

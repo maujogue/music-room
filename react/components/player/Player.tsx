@@ -11,10 +11,9 @@ type PlayerProps = {
   showControls?: boolean;
 };
 
-const Player = ({
-  showControls,
-}: PlayerProps) => {
-  const { track, isPlaying, playTrack, pauseTrack, skipToNextTrack } = usePlayer();
+const Player = ({ showControls }: PlayerProps) => {
+  const { track, isPlaying, playTrack, pauseTrack, skipToNextTrack } =
+    usePlayer();
   if (!track) {
     return (
       <View>
@@ -43,17 +42,23 @@ const Player = ({
           </Button>
         )}
         {track?.cover_url && (
-          <Image source={{ uri: track.cover_url }} alt={track.title} className='rounded-md' />
+          <Image
+            source={{ uri: track.cover_url }}
+            alt={track.title}
+            className='rounded-md'
+          />
         )}
         <View className='ml-4 flex-1 justify-center w-25'>
           <Text className='text-white font-semibold'>{track.title}</Text>
-          {track?.artists_names &&
-            <Text className='text-gray-200'>{track?.artists_names.join(', ')}</Text>
-          }
-          </View>
+          {track?.artists_names && (
+            <Text className='text-gray-200'>
+              {track?.artists_names.join(', ')}
+            </Text>
+          )}
+        </View>
         {showControls && (
-          <Button 
-            onPress={skipToNextTrack} 
+          <Button
+            onPress={skipToNextTrack}
             className='rounded-full p-3.5'
             variant='link'
           >

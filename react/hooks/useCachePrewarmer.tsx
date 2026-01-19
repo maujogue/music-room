@@ -6,28 +6,28 @@ import { getCurrentUserEvents } from '@/services/events';
 import { getCurrentUserPlaylists } from '@/services/playlist';
 
 export function useCachePrewarmer() {
-    const { user } = useAuth();
-    const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-    useEffect(() => {
-        if (!user) return;
+  useEffect(() => {
+    if (!user) return;
 
-        // Prefetch Profile
-        queryClient.prefetchQuery({
-            queryKey: ['current-user-profile', user.id],
-            queryFn: getCurrentUserProfile,
-        });
+    // Prefetch Profile
+    queryClient.prefetchQuery({
+      queryKey: ['current-user-profile', user.id],
+      queryFn: getCurrentUserProfile,
+    });
 
-        // Prefetch Events
-        queryClient.prefetchQuery({
-            queryKey: ['user-events'],
-            queryFn: getCurrentUserEvents,
-        });
+    // Prefetch Events
+    queryClient.prefetchQuery({
+      queryKey: ['user-events'],
+      queryFn: getCurrentUserEvents,
+    });
 
-        // Prefetch Playlists
-        queryClient.prefetchQuery({
-            queryKey: ['user-playlists'],
-            queryFn: getCurrentUserPlaylists,
-        });
-    }, [user, queryClient]);
+    // Prefetch Playlists
+    queryClient.prefetchQuery({
+      queryKey: ['user-playlists'],
+      queryFn: getCurrentUserPlaylists,
+    });
+  }, [user, queryClient]);
 }

@@ -3,8 +3,15 @@ import {
   assertSpyCalls,
   spy,
 } from "https://deno.land/std@0.208.0/testing/mock.ts";
-import { assertEquals, assertRejects } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { beforeEach, describe, it } from "https://deno.land/std@0.208.0/testing/bdd.ts";
+import {
+  assertEquals,
+  assertRejects,
+} from "https://deno.land/std@0.208.0/assert/mod.ts";
+import {
+  beforeEach,
+  describe,
+  it,
+} from "https://deno.land/std@0.208.0/testing/bdd.ts";
 
 const createClientMock = () => {
   return {
@@ -33,7 +40,6 @@ describe("Integration tests", () => {
   });
 });
 
-
 describe("getSupabaseEventByOwner", () => {
   beforeEach(() => {
     // Reset mocks before each test
@@ -56,7 +62,7 @@ describe("getSupabaseEventByOwner", () => {
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
 
       if (error) {
@@ -76,16 +82,14 @@ describe("getSupabaseEventByOwner", () => {
   });
 
   it("should call rpc with the correct parameters", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.resolve({ data: [], error: null })
-    );
+    supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
       const { data, error } = await supabaseMock.rpc(
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
       return data;
     };
@@ -99,16 +103,14 @@ describe("getSupabaseEventByOwner", () => {
   });
 
   it("should return an empty array when no events exist for the owner", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.resolve({ data: [], error: null })
-    );
+    supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
       const { data, error } = await supabaseMock.rpc(
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
       return data;
     };
@@ -138,7 +140,7 @@ describe("getSupabaseEventByOwner", () => {
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
 
       if (error) {
@@ -154,7 +156,7 @@ describe("getSupabaseEventByOwner", () => {
         await getSupabaseEventByOwner("owner123");
       },
       Error,
-      "Database function error"
+      "Database function error",
     );
   });
 
@@ -186,7 +188,7 @@ describe("getSupabaseEventByOwner", () => {
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
 
       if (error) {
@@ -202,7 +204,7 @@ describe("getSupabaseEventByOwner", () => {
         await getSupabaseEventByOwner("owner123");
       },
       Error,
-      "Insufficient permissions"
+      "Insufficient permissions",
     );
 
     assertSpyCalls(formatDbErrorSpy, 1);
@@ -212,9 +214,7 @@ describe("getSupabaseEventByOwner", () => {
   });
 
   it("should handle network errors", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.reject(new Error("Network error"))
-    );
+    supabaseMock.rpc = spy(() => Promise.reject(new Error("Network error")));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
       try {
@@ -222,7 +222,7 @@ describe("getSupabaseEventByOwner", () => {
           "get_user_events",
           {
             p_user_id: ownerId,
-          }
+          },
         );
         return data;
       } catch (err) {
@@ -235,15 +235,27 @@ describe("getSupabaseEventByOwner", () => {
         await getSupabaseEventByOwner("owner123");
       },
       Error,
-      "Network error"
+      "Network error",
     );
   });
 
   it("should handle different error codes correctly", async () => {
     const testCases = [
-      { code: "23503", expectedStatus: 400, expectedMessage: "Foreign key violation" },
-      { code: "23505", expectedStatus: 409, expectedMessage: "Duplicate entry" },
-      { code: "42P01", expectedStatus: 500, expectedMessage: "Undefined table" },
+      {
+        code: "23503",
+        expectedStatus: 400,
+        expectedMessage: "Foreign key violation",
+      },
+      {
+        code: "23505",
+        expectedStatus: 409,
+        expectedMessage: "Duplicate entry",
+      },
+      {
+        code: "42P01",
+        expectedStatus: 500,
+        expectedMessage: "Undefined table",
+      },
     ];
 
     for (const testCase of testCases) {
@@ -272,7 +284,7 @@ describe("getSupabaseEventByOwner", () => {
           "get_user_events",
           {
             p_user_id: ownerId,
-          }
+          },
         );
 
         if (error) {
@@ -288,22 +300,20 @@ describe("getSupabaseEventByOwner", () => {
           await getSupabaseEventByOwner("owner123");
         },
         Error,
-        testCase.expectedMessage
+        testCase.expectedMessage,
       );
     }
   });
 
   it("should handle null data response correctly", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.resolve({ data: null, error: null })
-    );
+    supabaseMock.rpc = spy(() => Promise.resolve({ data: null, error: null }));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
       const { data, error } = await supabaseMock.rpc(
         "get_user_events",
         {
           p_user_id: ownerId,
-        }
+        },
       );
 
       if (error) {
@@ -319,10 +329,6 @@ describe("getSupabaseEventByOwner", () => {
     assertEquals(result, null);
   });
 });
-
-
-
-
 
 describe("getCurrentUserPlaylistSupabase", () => {
   beforeEach(() => {
@@ -346,7 +352,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
-        }
+        },
       );
 
       if (error) {
@@ -366,16 +372,14 @@ describe("getCurrentUserPlaylistSupabase", () => {
   });
 
   it("should call rpc with the correct parameters", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.resolve({ data: [], error: null })
-    );
+    supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
       const { data, error } = await supabaseMock.rpc(
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
-        }
+        },
       );
       return data;
     };
@@ -384,21 +388,21 @@ describe("getCurrentUserPlaylistSupabase", () => {
 
     assertSpyCalls(supabaseMock.rpc, 1);
     assertSpyCall(supabaseMock.rpc, 0, {
-      args: ["get_user_all_playlists_with_owner", { p_user_id: "test-user-456" }],
+      args: ["get_user_all_playlists_with_owner", {
+        p_user_id: "test-user-456",
+      }],
     });
   });
 
   it("should return an empty array when no playlists exist", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.resolve({ data: [], error: null })
-    );
+    supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
       const { data, error } = await supabaseMock.rpc(
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
-        }
+        },
       );
       return data;
     };
@@ -428,7 +432,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
-        }
+        },
       );
 
       if (error) {
@@ -444,7 +448,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         await getCurrentUserPlaylistSupabase("user123");
       },
       Error,
-      "Database function error"
+      "Database function error",
     );
   });
 
@@ -476,7 +480,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
-        }
+        },
       );
 
       if (error) {
@@ -492,7 +496,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         await getCurrentUserPlaylistSupabase("user123");
       },
       Error,
-      "Insufficient permissions"
+      "Insufficient permissions",
     );
 
     assertSpyCalls(formatDbErrorSpy, 1);
@@ -502,9 +506,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
   });
 
   it("should handle network errors", async () => {
-    supabaseMock.rpc = spy(() =>
-      Promise.reject(new Error("Network error"))
-    );
+    supabaseMock.rpc = spy(() => Promise.reject(new Error("Network error")));
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
       try {
@@ -512,7 +514,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
           "get_user_all_playlists_with_owner",
           {
             p_user_id: userId,
-          }
+          },
         );
         return data;
       } catch (err) {
@@ -525,7 +527,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
         await getCurrentUserPlaylistSupabase("user123");
       },
       Error,
-      "Network error"
+      "Network error",
     );
   });
 });

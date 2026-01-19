@@ -1,33 +1,37 @@
 import { assertStrictEquals } from "https://deno.land/std@0.203.0/testing/asserts.ts";
 
 import {
-  ROLES,
   getUserRoleInPlaylist,
+  ROLES,
 } from "../../../functions/playlists/permissions.ts";
 
-import { PlaylistResponse, PlaylistMember, PlaylistCollaborator } from "@playlist";
+import {
+  PlaylistCollaborator,
+  PlaylistMember,
+  PlaylistResponse,
+} from "@playlist";
 
 const mockMember: PlaylistMember = {
-  id: 'member123',
-  playlist_id: 'playlist_1',
-  user_id: 'user_3',
-  added_at: '',
-  added_by: ''
-}
+  id: "member123",
+  playlist_id: "playlist_1",
+  user_id: "user_3",
+  added_at: "",
+  added_by: "",
+};
 
 const mockCollaborator: PlaylistCollaborator = {
-  id: 'collab123',
-  playlist_id: 'playlist_1',
-  user_id: 'user_2',
-  added_at: '',
-  added_by: '',
-  role: 'collaborator'
-}
+  id: "collab123",
+  playlist_id: "playlist_1",
+  user_id: "user_2",
+  added_at: "",
+  added_by: "",
+  role: "collaborator",
+};
 
 const mockPlaylist: PlaylistResponse = {
-  id: 'playlist_1',
-  name: 'Test Playlist',
-  owner_id: 'owner123',
+  id: "playlist_1",
+  name: "Test Playlist",
+  owner_id: "owner123",
   is_private: true,
   is_collaborative: false,
   can_invite: true,
@@ -37,16 +41,16 @@ const mockPlaylist: PlaylistResponse = {
   collaborators: [mockCollaborator],
   members: [mockMember],
   owner: {
-    id: 'owner123',
-    name: 'Owner User',
-    email: 'owner@example.com',
+    id: "owner123",
+    name: "Owner User",
+    email: "owner@example.com",
   },
 };
 
 const emptyMockPlaylist: PlaylistResponse = {
-  id: 'playlist_1',
-  name: 'Test Playlist',
-  owner_id: 'owner123',
+  id: "playlist_1",
+  name: "Test Playlist",
+  owner_id: "owner123",
   is_private: true,
   is_collaborative: false,
   can_invite: true,
@@ -56,12 +60,11 @@ const emptyMockPlaylist: PlaylistResponse = {
   collaborators: [],
   members: [],
   owner: {
-    id: 'owner123',
-    name: 'Owner User',
-    email: 'owner@example.com',
+    id: "owner123",
+    name: "Owner User",
+    email: "owner@example.com",
   },
 };
-
 
 Deno.test("returns OWNER if userId is the owner's", () => {
   const ownerId = "owner123";
@@ -78,7 +81,7 @@ Deno.test("returns COLLABORATOR if userId is in collaborators", () => {
   const collaboratorId = "collab123";
   const playlist = {
     owner: { id: "owner123" },
-    collaborators: [{ id: collaboratorId }, {id: "another_one"}],
+    collaborators: [{ id: collaboratorId }, { id: "another_one" }],
     members: [{ id: "member123" }],
   } as any;
   const role = getUserRoleInPlaylist(playlist, collaboratorId);

@@ -1,39 +1,38 @@
-import { Hono } from '@hono/hono'
-import { serve } from '@deno/server'
-import { HTTPException } from '@hono/http-exception';
-import { getCurrentUser, getUserSpotifyToken } from '@auth/utils'
-import playlistRoutes from './routes.ts'
+import { Hono } from "@hono/hono";
+import { serve } from "@deno/server";
+import { HTTPException } from "@hono/http-exception";
+import { getCurrentUser, getUserSpotifyToken } from "@auth/utils";
+import playlistRoutes from "./routes.ts";
 import type { StatusCode } from "@hono/hono/utils/http-status";
-import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
+import { loggingMiddleware } from "../utils/loggingMiddleware.ts";
 
+const app = new Hono();
 
-const app = new Hono()
-
-serve(app.fetch)
+serve(app.fetch);
 
 app.use("*", loggingMiddleware);
 
-declare module '@hono/hono' {
+declare module "@hono/hono" {
   interface ContextVariableMap {
     user: Awaited<ReturnType<typeof getCurrentUser>>;
     spotify_token: Awaited<ReturnType<typeof getUserSpotifyToken>>;
   }
 }
 
-app.use('*', async (c, next) => {
+app.use("*", async (c, next) => {
   try {
-    const user = await getCurrentUser(c.req)
-    const token = await getUserSpotifyToken(user.id)
-    c.set('user', user)
-    c.set('spotify_token', token)
-    await next()
+    const user = await getCurrentUser(c.req);
+    const token = await getUserSpotifyToken(user.id);
+    c.set("user", user);
+    c.set("spotify_token", token);
+    await next();
   } catch (err) {
-    const message = typeof err === 'object' && err !== null && 'message' in err
+    const message = typeof err === "object" && err !== null && "message" in err
       ? (err as { message: string }).message
       : String(err);
-    return c.json({ error: message }, 401)
+    return c.json({ error: message }, 401);
   }
-})
+});
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
@@ -41,11 +40,10 @@ app.onError((err, c) => {
     return c.json({ message: err.message });
   }
 
-  console.error('Error occurred:', err);
+  console.error("Error occurred:", err);
   return c.json({
-    message: 'Internal Server Error'
+    message: "Internal Server Error",
   }, 500);
-})
+});
 
-app.route('/events', playlistRoutes)
-
+app.route("/events", playlistRoutes);

@@ -31,7 +31,7 @@ export default function AddNewPlayList() {
     if (!resp.success) {
       const errorStatus = resp.error?.status;
       const errorMessage = resp.error?.message || 'Unknown API error';
-      
+
       // Show toast for duplicate (409) or forbidden (403) errors
       if (errorStatus === 409 || errorStatus === 403) {
         toast.error({
@@ -39,7 +39,7 @@ export default function AddNewPlayList() {
           description: errorMessage,
         });
       }
-      
+
       setError(errorMessage);
       return;
     }

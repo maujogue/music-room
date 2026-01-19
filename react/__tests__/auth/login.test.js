@@ -228,8 +228,14 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'wrongpassword');
+    fireEvent.changeText(
+      screen.getByPlaceholderText('Email'),
+      'test@example.com'
+    );
+    fireEvent.changeText(
+      screen.getByPlaceholderText('Password'),
+      'wrongpassword'
+    );
     fireEvent.press(screen.getByRole('button', { name: 'Sign In' }));
 
     await waitFor(() => {
@@ -242,7 +248,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Google' })
+    );
 
     await waitFor(() => {
       expect(mockSignInWithGoogle).toHaveBeenCalled();
@@ -258,7 +266,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Google' })
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Google login cancelled')).toBeTruthy();
@@ -270,7 +280,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Spotify' })
+    );
 
     await waitFor(() => {
       expect(mockSignInWithSpotify).toHaveBeenCalled();
@@ -286,7 +298,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Spotify' })
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Spotify login failed')).toBeTruthy();
@@ -301,7 +315,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Google' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Google' })
+    );
 
     await waitFor(() => {
       expect(
@@ -318,7 +334,9 @@ describe('SignIn Component', () => {
 
     render(<SignIn />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Sign in with Spotify' }));
+    fireEvent.press(
+      screen.getByRole('button', { name: 'Sign in with Spotify' })
+    );
 
     await waitFor(() => {
       expect(

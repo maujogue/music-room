@@ -1,6 +1,10 @@
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts'
-import { getSupabasePlaylistById } from './services/supabase.ts'
-import { PlaylistResponse, PlaylistCollaborator, PlaylistMember } from "@playlist";
+import { HTTPException } from "https://deno.land/x/hono@v3.2.3/http-exception.ts";
+import { getSupabasePlaylistById } from "./services/supabase.ts";
+import {
+  PlaylistCollaborator,
+  PlaylistMember,
+  PlaylistResponse,
+} from "@playlist";
 
 export const ROLES = {
   MEMBER: "member",
@@ -21,18 +25,23 @@ export const PERMISSIONS = {
 } as const;
 
 export function getUserRoleInPlaylist(
-  playlist: PlaylistResponse, userId: string): 
-  'owner' | 'collaborator' | 'member' | 'none' {
+  playlist: PlaylistResponse,
+  userId: string,
+): "owner" | "collaborator" | "member" | "none" {
   if (playlist.owner.id === userId) {
     return ROLES.OWNER;
   }
 
-  const collaborator = playlist.collaborators?.find((collab: PlaylistCollaborator) => collab.id === userId);
+  const collaborator = playlist.collaborators?.find((
+    collab: PlaylistCollaborator,
+  ) => collab.id === userId);
   if (collaborator) {
     return ROLES.COLLABORATOR;
   }
 
-  const member = playlist.members?.find((member: PlaylistMember) => member.id === userId);
+  const member = playlist.members?.find((member: PlaylistMember) =>
+    member.id === userId
+  );
   if (member) {
     return ROLES.MEMBER;
   }
@@ -40,13 +49,18 @@ export function getUserRoleInPlaylist(
   return ROLES.NONE;
 }
 
-export function canUserPerformAction(role: string | null, permission: string, playlist: PlaylistResponse): boolean {
+export function canUserPerformAction(
+  role: string | null,
+  permission: string,
+  playlist: PlaylistResponse,
+): boolean {
   switch (permission) {
     case PERMISSIONS.READ_PLAYLIST:
       if (!playlist.is_private) {
         return true;
       }
-      return role === ROLES.OWNER || role === ROLES.COLLABORATOR || role === ROLES.MEMBER;
+      return role === ROLES.OWNER || role === ROLES.COLLABORATOR ||
+        role === ROLES.MEMBER;
 
     case PERMISSIONS.ADD_SONG:
       if (playlist.is_collaborative) {
@@ -87,11 +101,15 @@ export function canUserPerformAction(role: string | null, permission: string, pl
 }
 
 // Middleware pour vérifier les permissions
-export async function checkPermission(playlistId: string, userId: string, permission: string) {
+export async function checkPermission(
+  playlistId: string,
+  userId: string,
+  permission: string,
+) {
   const playlist = await getSupabasePlaylistById(playlistId);
 
   if (!playlist) {
-    throw new HTTPException(404, { message: 'Playlist not found' });
+    throw new HTTPException(404, { message: "Playlist not found" });
   }
 
   const userRole = getUserRoleInPlaylist(playlist, userId);
@@ -99,16 +117,21 @@ export async function checkPermission(playlistId: string, userId: string, permis
 
   if (!hasPermission) {
     throw new HTTPException(403, {
-      message: `Insufficient permissions. Required: ${permission}, User role: ${userRole || 'none'}`
+      message: `Insufficient permissions. Required: ${permission}, User role: ${
+        userRole || "none"
+      }`,
     });
   }
 
   return playlist;
 }
 
-export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) {
+export function checkPlaylistAccess(
+  playlist: PlaylistResponse,
+  userId: string,
+) {
   if (!playlist) {
-    throw new HTTPException(404, { message: 'Playlist not found' });
+    throw new HTTPException(404, { message: "Playlist not found" });
   }
   if (!playlist.is_private) {
     return playlist;
@@ -116,7 +139,9 @@ export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) 
 
   const userRole = getUserRoleInPlaylist(playlist, userId);
   if (userRole === ROLES.NONE) {
-    throw new HTTPException(403, { message: 'Access denied to private playlist' });
+    throw new HTTPException(403, {
+      message: "Access denied to private playlist",
+    });
   }
 
   return playlist;

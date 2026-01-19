@@ -4,12 +4,12 @@ import { HTTPException } from "https://deno.land/x/hono@v3.2.3/http-exception.ts
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 export async function insertOauthStateToSupabase(
   state: string,
-  user_id: string | null
+  user_id: string | null,
 ): Promise<void> {
   const { error } = await supabase
     .from("oauth_state")
@@ -22,7 +22,7 @@ export async function insertOauthStateToSupabase(
 }
 
 export async function getAndDeleteOauthState(
-  state: string
+  state: string,
 ): Promise<string | null> {
   const { data, error } = await supabase
     .from("oauth_state")
@@ -56,7 +56,7 @@ export async function getAndDeleteOauthState(
 
 export async function updateSpotifyUserTokens(
   user_id: string,
-  spotify_token_data: any
+  spotify_token_data: any,
 ): Promise<void> {
   await supabase.from("profiles").upsert({
     id: user_id,
@@ -77,8 +77,8 @@ export async function createUserWithSpotifyData(userData: any): Promise<any> {
 
   // Extract username from email (part before @)
   // If email doesn't have @ or username is too short, fallback to displayName or generate one
-  let username =
-    spotifyUser.email?.split("@")[0] || spotifyUser.displayName || "user";
+  let username = spotifyUser.email?.split("@")[0] || spotifyUser.displayName ||
+    "user";
 
   // Ensure username meets minimum length requirement (3 characters)
   // If too short, pad with numbers or use displayName
@@ -124,8 +124,8 @@ export async function findUserByEmail(email: string): Promise<any | null> {
 
 export async function impersonateUser(userEmail: string) {
   // Generate magic link to get session tokens
-  const { data: magicLink, error: linkError } =
-    await supabase.auth.admin.generateLink({
+  const { data: magicLink, error: linkError } = await supabase.auth.admin
+    .generateLink({
       type: "magiclink",
       email: userEmail,
     });

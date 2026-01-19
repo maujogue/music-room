@@ -35,12 +35,16 @@ export interface WebSocketActions {
 }
 
 type Options = {
-  enabled?: boolean,
-  spatio_licence?: boolean
-  done?: boolean
-}
+  enabled?: boolean;
+  spatio_licence?: boolean;
+  done?: boolean;
+};
 
-export default function useWebSocketClient(event_id: string, opts?: Options, isOwner?: boolean): WebSocketActions {
+export default function useWebSocketClient(
+  event_id: string,
+  opts?: Options,
+  isOwner?: boolean
+): WebSocketActions {
   const { enabled = true, done = false, spatio_licence = false } = opts ?? {};
   const serverUrl =
     process.env.EXPO_PUBLIC_WS_SERVER_URL || 'ws://localhost:8080/ws';
@@ -67,12 +71,16 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
   const reconnectDelay = 3000;
   const pingInterval = 1000;
 
-  const { coords, loading, error } = useCurrentPosition({ radiusKm: 50 })
+  const { coords, loading, error } = useCurrentPosition({ radiusKm: 50 });
 
   const hasPosition = useCallback(async () => {
-    if (loading || error) { return false }
-    if (coords) { return true }
-  }, [coords])
+    if (loading || error) {
+      return false;
+    }
+    if (coords) {
+      return true;
+    }
+  }, [coords]);
 
   const checkTokenValidity = useCallback(async () => {
     try {
@@ -130,7 +138,13 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
         }
         pingIntervalRef.current = window.setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now(), eventId: event_id }));
+            ws.send(
+              JSON.stringify({
+                type: 'ping',
+                timestamp: Date.now(),
+                eventId: event_id,
+              })
+            );
             if (isOwner) {
               ws.send(
                 JSON.stringify({
@@ -220,7 +234,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
         } catch (error) {
           console.warn('ws: failed to parse message:', error);
         }
-      }
+      };
 
       setWebSocket(ws);
       webSocketRef.current = ws;
@@ -319,24 +333,29 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
 
   const sendPing = (): boolean => {
     if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-      webSocket.send(JSON.stringify({
-        type: 'ping',
-        eventId: event_id
-      }));
+      webSocket.send(
+        JSON.stringify({
+          type: 'ping',
+          eventId: event_id,
+        })
+      );
       return true;
     }
     console.warn('ws: cannot send ping, socket not open');
     return false;
   };
 
-  const sendVote = async (eventId: string, trackId: string): Promise<boolean> => {
+  const sendVote = async (
+    eventId: string,
+    trackId: string
+  ): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send vote, socket not open');
       return false;
     }
 
     if (spatio_licence) {
-      const isOk = await hasPosition()
+      const isOk = await hasPosition();
       if (!isOk) {
         console.warn('ws: cannot send vote, need user position');
         return false;
@@ -349,7 +368,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
         eventId,
         trackId,
         timestamp: Date.now(),
-        coordinates: coords
+        coordinates: coords,
       };
 
       webSocket.send(JSON.stringify(message));
@@ -360,14 +379,17 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
     }
   };
 
-  const sendUnvote = async (eventId: string, trackId: string): Promise<boolean> => {
+  const sendUnvote = async (
+    eventId: string,
+    trackId: string
+  ): Promise<boolean> => {
     if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
       console.warn('ws: cannot send unvote, socket not open');
       return false;
     }
 
     if (spatio_licence) {
-      const isOk = await hasPosition()
+      const isOk = await hasPosition();
       if (!isOk) {
         console.warn('ws: cannot send vote, need user position');
         return false;
@@ -380,7 +402,7 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
         eventId,
         trackId,
         timestamp: Date.now(),
-        coordinates: coords
+        coordinates: coords,
       };
 
       webSocket.send(JSON.stringify(message));
@@ -399,7 +421,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
       voteMax: number;
       voted_tracks: Record<string, number>;
     }) => {
-
       const newUserData = {
         userId: data.userId,
         vote_remaining: data.vote_remaining,
@@ -494,7 +515,6 @@ export default function useWebSocketClient(event_id: string, opts?: Options, isO
   );
 
   const reconnect = useCallback(async () => {
-
     const tokenValid = await checkTokenValidity();
     if (!tokenValid) {
       setLastError('Session expired. Please login again.');

@@ -11,7 +11,6 @@ import { Heading } from '@/components/ui/heading';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { CloseIcon, TrashIcon } from '@/components/ui/icon';
 
-
 type Props = {
   itemType?: string;
   itemName?: string;
@@ -19,7 +18,6 @@ type Props = {
   setShowAlertDialog: React.Dispatch<React.SetStateAction<boolean>>;
   onDelete: () => void;
 };
-
 
 export default function DeleteAlert({
   showAlertDialog,

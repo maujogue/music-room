@@ -32,7 +32,7 @@ export default function AddNewEvent() {
       console.error('Error creating event:', error);
       const errorStatus = error?.status;
       const errorMessage = error?.message || `Error creating event: ${error}`;
-      
+
       // Show toast for duplicate (409) or forbidden (403) errors
       if (errorStatus === 409 || errorStatus === 403) {
         toast.error({
@@ -40,7 +40,7 @@ export default function AddNewEvent() {
           description: errorMessage,
         });
       }
-      
+
       setError(errorMessage);
       return;
     }

@@ -28,11 +28,7 @@ export function AppToast({
   const isTop = placement.includes('top');
 
   const toastContent = (
-    <Toast
-      nativeID={id}
-      action={action}
-      variant={variant}
-    >
+    <Toast nativeID={id} action={action} variant={variant}>
       <ToastTitle>{title}</ToastTitle>
       {description ? <ToastDescription>{description}</ToastDescription> : null}
     </Toast>

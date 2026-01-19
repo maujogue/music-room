@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import MapView, { Marker, MapPressEvent, Region, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, {
+  Marker,
+  MapPressEvent,
+  Region,
+  PROVIDER_GOOGLE,
+} from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   Modal,
@@ -26,12 +31,9 @@ type Props = {
   initialCoords?: Coords;
 };
 
-async function getInitialCenter(
-  initialCoords?: Coords
-): Promise<Coords> {
+async function getInitialCenter(initialCoords?: Coords): Promise<Coords> {
+  const googleFallback = { latitude: 37.4221, longitude: -122.0581 };
 
-  const googleFallback = { latitude: 37.4221, longitude: -122.0581 }
-  
   if (initialCoords) return initialCoords;
 
   const { status } = await Location.requestForegroundPermissionsAsync();
@@ -61,8 +63,7 @@ async function getInitialCenter(
           longitude: last.coords.longitude,
         };
       }
-    } catch {
-    }
+    } catch {}
 
     return googleFallback;
   }
@@ -81,31 +82,31 @@ export default function LocationPickerModal({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-  if (!isOpen) return;
+    if (!isOpen) return;
 
-  (async () => {
-    setLoading(true);
-    setError(null);
+    (async () => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const center = await getInitialCenter(initialCoords);
+      try {
+        const center = await getInitialCenter(initialCoords);
 
-      setRegion({
-        latitude: center.latitude,
-        longitude: center.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      });
+        setRegion({
+          latitude: center.latitude,
+          longitude: center.longitude,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
+        });
 
-      setPicked(null);
-      setAddress(undefined);
-    } catch (e: any) {
-      setError(e?.message ?? 'Error initializing map.');
-    } finally {
-      setLoading(false);
-    }
-  })();
-}, [isOpen, initialCoords]);
+        setPicked(null);
+        setAddress(undefined);
+      } catch (e: any) {
+        setError(e?.message ?? 'Error initializing map.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [isOpen, initialCoords]);
 
   const doReverse = useCallback(async (c: Coords) => {
     try {

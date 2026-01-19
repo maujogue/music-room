@@ -1,6 +1,8 @@
-import { assertRejects, assertEquals } from "https://deno.land/std@0.224.0/testing/asserts.ts";
+import {
+  assertEquals,
+  assertRejects,
+} from "https://deno.land/std@0.224.0/testing/asserts.ts";
 import { fetchSpotifyUserProfile } from "../../../functions/auth/services/spotify.ts";
-
 
 Deno.test("fetchSpotifyUserProfile should throw an error for invalid access token", async () => {
   const mockAccessToken = "D6lEX6Oj83iMIcOSBLgIbPdf6F6t7aBw";
@@ -24,12 +26,11 @@ Deno.test("fetchSpotifyUserProfile should throw an error for invalid access toke
       await fetchSpotifyUserProfile(mockAccessToken);
     },
     Error,
-    'Error fetching user profile: {"error":{"status":401,"message":"Invalid access token"}}'
+    'Error fetching user profile: {"error":{"status":401,"message":"Invalid access token"}}',
   );
 
   globalThis.fetch = originalFetch;
 });
-
 
 Deno.test("fetchSpotifyUserProfile should return user profile for valid token", async () => {
   const mockAccessToken = "FAKE_VALID_TOKEN";

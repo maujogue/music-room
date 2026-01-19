@@ -1,5 +1,8 @@
 import { apiFetch } from '@/utils/apiFetch';
-import { convertPOINT, isValidCoordinateObject } from '@/utils/parsePointCoordinates';
+import {
+  convertPOINT,
+  isValidCoordinateObject,
+} from '@/utils/parsePointCoordinates';
 
 export async function createEvent(payload: MusicEventPayload) {
   const imageUri = (payload as any)?.image_url;
@@ -86,8 +89,8 @@ export async function getEventById(id: string) {
     console.error('Error fetching Event:', res.error);
     throw res.error;
   }
-  
-   const normalized = normalizeEventCoordinates(res.data);
+
+  const normalized = normalizeEventCoordinates(res.data);
 
   return normalized;
 }
@@ -122,7 +125,9 @@ export async function stopEvent(id: string) {
   return res.data;
 }
 
-export async function getEventsWithRadar(coord: Coordinates): Promise<MusicEventRadarResult[]> {
+export async function getEventsWithRadar(
+  coord: Coordinates
+): Promise<MusicEventRadarResult[]> {
   const res = await apiFetch<MusicEventRadarResult[]>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/radar?lat=${coord.lat}&long=${coord.long}`,
     {
@@ -225,11 +230,11 @@ export async function updateEvent(id: string, payload: MusicEventPayload) {
   }
 
   if (typeof payload.location.coordinates === 'string') {
-    const coordConverted = convertPOINT(payload.location.coordinates)
+    const coordConverted = convertPOINT(payload.location.coordinates);
     if (isValidCoordinateObject(coordConverted)) {
-      payload.location.coordinates = coordConverted
+      payload.location.coordinates = coordConverted;
     } else {
-      payload.location.coordinates = undefined
+      payload.location.coordinates = undefined;
     }
   }
 
@@ -256,7 +261,10 @@ function createEventFormData(payload: MusicEventPayload) {
   form.append('location', JSON.stringify((payload as any).location ?? {}));
   form.append('is_private', String((payload as any).is_private ?? false));
   form.append('done', String((payload as any).done ?? false));
-  form.append('spatio_licence', String((payload as any).spatio_licence ?? false));
+  form.append(
+    'spatio_licence',
+    String((payload as any).spatio_licence ?? false)
+  );
   form.append(
     'everyone_can_vote',
     String((payload as any).everyone_can_vote ?? true)

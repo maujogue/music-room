@@ -204,10 +204,23 @@ status:
 lint:
 	@echo "🔄 Linting code..."
 	cd ${REACT_APP_DIR} && npm run lint
+	@echo "🔄 Linting Supabase functions..."
+	cd ${SUPABASE_DIR} && npx deno lint --config functions/deno.json functions
 
 format:
 	@echo "🔄 Formatting code..."
 	cd ${REACT_APP_DIR} && npm run format
+	@echo "🔄 Formatting Supabase functions..."
+	cd ${SUPABASE_DIR} && npx deno fmt --config functions/deno.json functions
+
+# Lint/Format targets specifically for Supabase functions
+lint-functions:
+	@echo "🔄 Linting Supabase functions..."
+	cd ${SUPABASE_DIR} && npx deno lint --config functions/deno.json functions
+
+format-functions:
+	@echo "🔄 Formatting Supabase functions..."
+	cd ${SUPABASE_DIR} && npx deno fmt --config functions/deno.json functions
 
 # Quick commands for common tasks
 up: start-supabase

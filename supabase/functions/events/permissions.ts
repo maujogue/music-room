@@ -1,7 +1,6 @@
-import { HTTPException } from '@hono/http-exception'
-import { getSupabaseEventById } from './service.ts'
-import type { EventResponse, EventMember } from '@event';
-
+import { HTTPException } from "@hono/http-exception";
+import { getSupabaseEventById } from "./service.ts";
+import type { EventMember, EventResponse } from "@event";
 
 export const ROLES = {
   MEMBER: "member",
@@ -22,21 +21,26 @@ export const PERMISSIONS = {
   EDIT_EVENT: "edit_event",
 } as const;
 
-export function getUserRoleInEvent(event: EventResponse, userId: string): string | null {
+export function getUserRoleInEvent(
+  event: EventResponse,
+  userId: string,
+): string | null {
   if (event.owner.id === userId) {
     return ROLES.OWNER;
   }
 
-  const member = event.members?.find((member: EventMember) => member.id === userId);
+  const member = event.members?.find((member: EventMember) =>
+    member.id === userId
+  );
   if (member) {
     switch (member.role) {
-      case 'member':
+      case "member":
         return ROLES.MEMBER;
-      case 'voter':
+      case "voter":
         return ROLES.VOTER;
-      case 'inviter':
+      case "inviter":
         return ROLES.INVITER;
-      case 'collaborator':
+      case "collaborator":
         return ROLES.COLLABORATOR;
       default:
         return null;
@@ -49,7 +53,7 @@ export function getUserRoleInEvent(event: EventResponse, userId: string): string
 export function canUserPerformAction(
   role: string | null,
   permission: string,
-  event: EventResponse
+  event: EventResponse,
 ): boolean {
   switch (permission) {
     case PERMISSIONS.READ_EVENT:
@@ -106,12 +110,12 @@ export function canUserPerformAction(
 export async function checkPermission(
   eventId: string,
   userId: string,
-  permission: string
+  permission: string,
 ) {
   const event = await getSupabaseEventById(eventId);
 
   if (!event) {
-    throw new HTTPException(404, { message: 'Event not found' });
+    throw new HTTPException(404, { message: "Event not found" });
   }
 
   const userRole = getUserRoleInEvent(event, userId);
@@ -119,7 +123,9 @@ export async function checkPermission(
 
   if (!hasPermission) {
     throw new HTTPException(403, {
-      message: `Insufficient permissions. Required: ${permission}, User role: ${userRole || 'none'}`
+      message: `Insufficient permissions. Required: ${permission}, User role: ${
+        userRole || "none"
+      }`,
     });
   }
 
@@ -128,7 +134,7 @@ export async function checkPermission(
 
 export function checkEventAccess(event: EventResponse, userId: string) {
   if (!event) {
-    throw new HTTPException(404, { message: 'Event not found' });
+    throw new HTTPException(404, { message: "Event not found" });
   }
 
   if (!event.event.is_private) {
@@ -137,6 +143,6 @@ export function checkEventAccess(event: EventResponse, userId: string) {
 
   const userRole = getUserRoleInEvent(event, userId);
   if (!userRole) {
-    throw new HTTPException(403, { message: 'Access denied to private event' });
+    throw new HTTPException(403, { message: "Access denied to private event" });
   }
 }

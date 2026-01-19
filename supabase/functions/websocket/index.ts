@@ -1,14 +1,14 @@
 // @ts-ignore
 import {
   authenticateUser,
-  handleConnectionOpen,
-  handleConnectionMessage,
   handleConnectionClose,
-  handleConnectionError
+  handleConnectionError,
+  handleConnectionMessage,
+  handleConnectionOpen,
   // @ts-ignore
-} from './handlers/connection.ts';
+} from "./handlers/connection.ts";
 // @ts-ignore
-import { startVoteRealtime } from './services/votes.ts';
+import { startVoteRealtime } from "./services/votes.ts";
 
 // Global clients map for the edge function
 const clientsByUser = new Map<string, Set<WebSocket>>();
@@ -25,28 +25,31 @@ async function handler(request: Request): Promise<Response> {
     try {
       await startVoteRealtime(clientsByUser);
       realtimeInitialized = true;
-      console.info('Realtime subscriptions initialized');
+      console.info("Realtime subscriptions initialized");
     } catch (error) {
-      console.error('Failed to initialize realtime:', error);
+      console.error("Failed to initialize realtime:", error);
     }
   }
 
   // Check if it's a WebSocket upgrade request
-  if (!request.headers.get('upgrade') || request.headers.get('upgrade')!.toLowerCase() !== 'websocket') {
-    return new Response('Expected WebSocket upgrade', { status: 400 });
+  if (
+    !request.headers.get("upgrade") ||
+    request.headers.get("upgrade")!.toLowerCase() !== "websocket"
+  ) {
+    return new Response("Expected WebSocket upgrade", { status: 400 });
   }
 
   // Extract token from query parameters
-  const token = url.searchParams.get('token');
+  const token = url.searchParams.get("token");
 
   if (!token) {
-    return new Response('Authentication token required', { status: 401 });
+    return new Response("Authentication token required", { status: 401 });
   }
 
   // Authenticate user
   const user = await authenticateUser(token);
   if (!user) {
-    return new Response('Invalid or expired token', { status: 401 });
+    return new Response("Invalid or expired token", { status: 401 });
   }
 
   const { userId, userEmail } = user;

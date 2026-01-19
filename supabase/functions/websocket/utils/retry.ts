@@ -8,13 +8,13 @@ export interface RetryOptions {
 
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<T> {
   const {
     maxAttempts = 3,
     delay = 1000,
     backoffMultiplier = 2,
-    maxDelay = 10000
+    maxDelay = 10000,
   } = options;
 
   let lastError: Error;
@@ -28,7 +28,7 @@ export async function retryWithBackoff<T>(
 
       console.warn(`Attempt ${attempt}/${maxAttempts} failed:`, {
         error: lastError.message,
-        nextDelay: attempt < maxAttempts ? currentDelay : 'none'
+        nextDelay: attempt < maxAttempts ? currentDelay : "none",
       });
 
       if (attempt === maxAttempts) {
@@ -36,7 +36,7 @@ export async function retryWithBackoff<T>(
       }
 
       // Attendre avant le prochain essai
-      await new Promise(resolve => setTimeout(resolve, currentDelay));
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
 
       // Augmenter le délai avec backoff exponentiel
       currentDelay = Math.min(currentDelay * backoffMultiplier, maxDelay);
@@ -51,14 +51,14 @@ export async function retryWithBackoff<T>(
 export async function retrySupabaseOperation<T>(
   operation: () => Promise<{ data: T; error: any }>,
   operationName: string,
-  options?: RetryOptions
+  options?: RetryOptions,
 ): Promise<T> {
   return retryWithBackoff(async () => {
     const { data, error } = await operation();
 
     if (error) {
       console.error(`${operationName} failed:`, error);
-      throw new Error(`${operationName}: ${error.message || 'Unknown error'}`);
+      throw new Error(`${operationName}: ${error.message || "Unknown error"}`);
     }
 
     return data;
@@ -69,20 +69,20 @@ export async function retrySupabaseOperation<T>(
 export class WebSocketError extends Error {
   constructor(message: string, public code?: string) {
     super(message);
-    this.name = 'WebSocketError';
+    this.name = "WebSocketError";
   }
 }
 
 export class DatabaseError extends Error {
   constructor(message: string, public code?: string) {
     super(message);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 
 export class AuthenticationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }

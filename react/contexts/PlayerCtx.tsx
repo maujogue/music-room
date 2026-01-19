@@ -6,7 +6,12 @@ import {
   useCallback,
   type PropsWithChildren,
 } from 'react';
-import { pauseTrack, playTrack, skipToNextTrack, getCurrentUserCurrentlyPlayingTrack } from '@/services/player';
+import {
+  pauseTrack,
+  playTrack,
+  skipToNextTrack,
+  getCurrentUserCurrentlyPlayingTrack,
+} from '@/services/player';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -89,8 +94,10 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     pauseTrack: handlePauseTrack,
     skipToNextTrack: handleSkipToNextTrack,
     startAutoRefresh,
-    stopAutoRefresh
+    stopAutoRefresh,
   };
 
-  return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
+  return (
+    <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
+  );
 }
