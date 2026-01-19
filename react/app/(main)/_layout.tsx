@@ -12,7 +12,11 @@ import PaywallModal from '@/components/subscription/PaywallModal';
 import { useSubscription } from '@/contexts/subscriptionCtx';
 import { useState, useEffect } from 'react';
 
+import { useNearbyEventsNotification } from '@/hooks/useNearbyEventsNotification';
+
 export default function AppLayout() {
+  useNearbyEventsNotification();
+
   return (
     <ProfileProvider>
       <SubscriptionProvider>
