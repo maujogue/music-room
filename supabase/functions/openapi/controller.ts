@@ -3,8 +3,7 @@ import { OPENAPI_YAML } from "./openapi-file.ts";
 
 export async function getOpenapiFile(c: Context): Promise<Response> {
   return c.text(OPENAPI_YAML, 200, {
-    "content-type": "text/yaml; charset=utf-8",
-    "access-control-allow-origin": "*",
+    "Content-Type": "application/x-yaml; charset=utf-8",
   });
 }
 
