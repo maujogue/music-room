@@ -10,7 +10,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 var client_id = process.env.SPOTIFY_CLIENT_ID;
 var client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-var redirect_uri = 'http://127.0.0.1:8888/callback';
+
 
 var g_token = '';
 
@@ -150,3 +150,4 @@ app.get('/get_access_token', (req, res) => {
 
 console.log('Listening on 8888');
 app.listen(8888);
+var redirect_uri = 'http://127.0.0.1:8888/callback';

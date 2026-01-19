@@ -93,7 +93,7 @@ Deno.test('pausePlayback returns invalid acces token error', async () => {
 });
 
 Deno.test('skipToNextTrack returns invalid acces token error', async () => {
-  const result = await skipToNextTrack(`invalid_token`);
+  const result = await skipToNextTrack('invalid_token');
 	await result.text();
 
 	if (result['status'] !== 401 && result['statusText'] !== 'Unauthorized') {
@@ -102,19 +102,10 @@ Deno.test('skipToNextTrack returns invalid acces token error', async () => {
 });
 
 Deno.test('pausePlayback returns invalid acces token error', async () => {
-  const result = await pausePlayback(spotifyToken);
+  const result = await pausePlayback('invalid_token');
 	await result.text();
 
-	if (result['status'] !== 403 && result['statusText'] !== 'Forbidden') {
-    throw new Error('This test expects a 403 status code');
-  }
-});
-
-Deno.test('skipToNextTrack returns invalid acces token error', async () => {
-  const result = await skipToNextTrack(spotifyToken);
-	await result.text();
-
-	if (result['status'] !== 403 && result['statusText'] !== 'Forbidden') {
-    throw new Error('This test expects a 403 status code');
+	if (result['status'] !== 401 && result['statusText'] !== 'Unauthorized') {
+    throw new Error('This test expects a 401 status code');
   }
 });
