@@ -35,7 +35,8 @@ export default function PlaylistDetail() {
     canEdit,
     canInvite,
   } = usePlaylist(playlistId);
-  const { isConnectedToSpotify, connectSpotify, refreshProfile } = useProfile();
+  const { profile, isConnectedToSpotify, connectSpotify, refreshProfile } =
+    useProfile();
   const { isPremium } = useSubscription();
   const toast = useAppToast();
 
@@ -55,7 +56,9 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     setDisplayAddTrackButton(
-      canEdit &&
+      (playlist?.is_collaborative ||
+        playlist?.owner?.id === profile?.id ||
+        canEdit) &&
         isPremium &&
         !playlist?.is_spotify_sync &&
         !!isConnectedToSpotify
