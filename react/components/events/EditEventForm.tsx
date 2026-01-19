@@ -291,10 +291,10 @@ export default function EditEventForm({
                     value={description}
                     onChangeText={setDescription}
                     multiline
-                    numberOfLines={4}
+                    numberOfLines={2}
                     textAlignVertical='top'
                     autoCapitalize='sentences'
-                    style={{ minHeight: 120 }}
+                    style={{ minHeight: 80 }}
                   />
                 </Textarea>
                 <Text size='xs' className='text-neutral-500 mt-1 mb-3'>
@@ -396,6 +396,7 @@ export default function EditEventForm({
                     placeholder='Place name'
                     value={venueName}
                     onChangeText={setVenueName}
+                    style={{ minHeight: 20 }}
                   />
                 </Input>
 
