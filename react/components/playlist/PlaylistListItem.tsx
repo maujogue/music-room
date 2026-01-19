@@ -26,7 +26,7 @@ export default function PlaylistListItem({ playlist, onPress }: Props) {
 
   const onPlaylistPress = () => {
     router.push({
-      pathname: '(main)/playlists/[playlistId]',
+      pathname: '/(main)/playlists/[playlistId]',
       params: { playlistId: playlist.id },
     });
   };
