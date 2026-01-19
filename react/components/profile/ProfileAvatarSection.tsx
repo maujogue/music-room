@@ -24,11 +24,12 @@ export default function ProfileAvatarSection({
   actions,
 }: ProfileAvatarSectionProps) {
   return (
-    <VStack className='justify-center items-center py-6 pl-2'>
+    <VStack className='justify-center items-center py-6 pl-4'>
       {/* Avatar */}
       <Center>
         <EditAvatar
           url={profile.avatar_url || vibingImg}
+          username={profile.username}
           onUpload={actions.handleAvatarUpload}
           isEdit={canEdit && editProfile}
         />

@@ -13,11 +13,13 @@ import {
   followUser,
   unfollowUser,
 } from '@/services/profile';
-import { connectToSpotify } from '@/services/auth';
+import { connectToSpotify, connectToGoogle } from '@/services/auth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface ProfileContextType {
   profile: UserInfo | null;
   isConnectedToSpotify?: boolean;
+  isConnectedToGoogle?: boolean;
   isLoading: boolean;
   followers: any[];
   following: any[];
@@ -29,6 +31,7 @@ interface ProfileContextType {
   followUser: (userId: string) => Promise<{ error: any }>;
   unfollowUser: (userId: string) => Promise<{ error: any }>;
   connectSpotify: () => Promise<{ error: any }>;
+  connectGoogle: () => Promise<{ error: any }>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -43,142 +46,64 @@ export function useProfile() {
 
 export function ProfileProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<UserInfo | null>(null);
-  const [followers, setFollowers] = useState<any[]>([]);
-  const [following, setFollowing] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isConnectedToSpotify, setIsConnectedToSpotify] =
-    useState<boolean>(false);
+  const { profile, loading: isLoading, refetch: refreshProfile } = useCurrentUser();
 
-  // Fetch profile and subscribe to realtime changes when user is authenticated
+  const [isConnectedToSpotify, setIsConnectedToSpotify] = useState<boolean>(false);
+  const [isConnectedToGoogle, setIsConnectedToGoogle] = useState<boolean>(false);
+
+  // Derive followers/following from profile data
+  const followers = profile?.followers || [];
+  const following = profile?.following || [];
+
+  // Check connection status when user or profile changes
   useEffect(() => {
-    let subscription: ReturnType<typeof supabase.channel> | null = null;
-
-    const setupRealtime = async () => {
-      if (!user) return;
-
-      await refreshProfile();
-
-      // Subscribe to realtime changes for this user's profile
-      subscription = supabase
-        .channel('public:profiles')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`,
-          },
-          () => {
-            // On any change, refresh the profile
-            refreshProfile();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'follows',
-            filter: `follower_id=eq.${user.id}`,
-          },
-          () => {
-            // On follow changes, refresh following data
-            refreshProfile();
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'follows',
-            filter: `following_id=eq.${user.id}`,
-          },
-          () => {
-            // On follower changes, refresh following data
-            refreshProfile();
-          }
-        )
-        .subscribe();
-    };
-
     if (user) {
-      setupRealtime();
+      const hasGoogleIdentity = user.identities?.some(
+        (identity: any) => identity.provider === 'google'
+      );
+      setIsConnectedToGoogle(!!hasGoogleIdentity);
     } else {
-      clearProfile();
+      setIsConnectedToGoogle(false);
     }
 
-    return () => {
-      if (subscription) {
-        supabase.removeChannel(subscription);
-      }
-    };
-  }, [user]);
-
-  const refreshProfile = async () => {
-    if (!user) return;
-
-    setIsLoading(true);
-    try {
-      const data = await getCurrentUserProfile();
-
-      if (!data) {
-        setProfile(null);
-        setFollowers([]);
-        setFollowing([]);
-      } else {
-        // The data now includes both profile and follow information
-        console.log('Fetched profile data:', data);
-        setIsConnectedToSpotify(!!data.is_connected_to_spotify);
-        setProfile(data);
-        setFollowers(data?.followers || []);
-        setFollowing(data?.following || []);
-      }
-    } catch (error) {
-      console.error('Unexpected error fetching profile:', error);
-      setProfile(null);
-      setFollowers([]);
-      setFollowing([]);
-    } finally {
-      setIsLoading(false);
+    if (profile) {
+      setIsConnectedToSpotify(!!profile.is_connected_to_spotify);
+    } else {
+      setIsConnectedToSpotify(false);
     }
-  };
+  }, [user, profile]);
+
 
   const updateProfile = async (
     updates: Partial<UserInfo>
   ): Promise<{ error: any }> => {
-    if (!user || !profile) {
+    if (!user) {
       return {
-        error: { message: 'User not authenticated or profile not loaded' },
+        error: { message: 'User not authenticated' },
       };
     }
-    setIsLoading(true);
     try {
       await updateProfileAPI(updates);
-      setProfile(prev => (prev ? { ...prev, ...updates } : null));
+      // Invalidate query to trigger refetch
+      await refreshProfile();
       return { error: null };
     } catch (error) {
       console.error('Unexpected error updating profile:', error);
       return { error: { message: error || 'An unexpected error occurred' } };
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const clearProfile = () => {
-    setProfile(null);
-    setFollowers([]);
-    setFollowing([]);
-    setIsLoading(false);
+    // With React Query, we might clear the query cache if needed, 
+    // but usually signing out (which clears 'user') handles it via 'enabled: !!user'
+    // For manual clearing we could queryClient.removeQueries... but let's keep it simple for now or no-op
+    // effectively state is cleared if user is null
   };
 
   const handleFollowUser = async (userId: string): Promise<{ error: any }> => {
     try {
       const { error } = await followUser(userId);
       if (!error) {
-        // Refresh following data after successful follow
         await refreshProfile();
       }
       return { error };
@@ -194,7 +119,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     try {
       const { error } = await unfollowUser(userId);
       if (!error) {
-        // Refresh following data after successful unfollow
         await refreshProfile();
       }
       return { error };
@@ -207,6 +131,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
   const connectSpotify = async (): Promise<{ error: any }> => {
     try {
       await connectToSpotify();
+      await refreshProfile(); // Refresh to update connection status
       return { error: null };
     } catch (error) {
       console.error('Error during Spotify OAuth:', error);
@@ -214,17 +139,30 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const connectGoogle = async (): Promise<{ error: any }> => {
+    try {
+      await connectToGoogle();
+      await refreshProfile();
+      return { error: null };
+    } catch (error) {
+      console.error('Error during Google OAuth:', error);
+      return { error };
+    }
+  };
+
   const value: ProfileContextType = {
     profile,
     isConnectedToSpotify,
+    isConnectedToGoogle,
     connectSpotify,
+    connectGoogle,
     isLoading,
     followers,
     following,
     followersCount: followers.length,
     followingCount: following.length,
     updateProfile,
-    refreshProfile,
+    refreshProfile: async () => { await refreshProfile(); }, // adapter
     clearProfile,
     followUser: handleFollowUser,
     unfollowUser: handleUnfollowUser,

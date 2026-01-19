@@ -3,17 +3,7 @@ import type { PlaylistRow } from './playlist.ts';
 export type EventRole = 'owner' | 'member' | 'inviter' | 'voter' | 'collaborator' | null;
 
 export interface EventResponse {
-  event: {
-    id: string;
-    name: string;
-    image_url?: string;
-    is_private: boolean;
-    everyone_can_vote: boolean;
-    description?: string;
-    playlist_id?: string;
-    playlistId: string;
-    beginning_at: string;
-  }
+  event: Event
   owner: SpotifyOwner;
   location?: EventLocation;
   members: EventMember[];
@@ -26,6 +16,20 @@ export interface EventResponse {
     can_vote: boolean;
   };
 };
+
+export interface Event {
+  id: string;
+  name: string;
+  image_url?: string;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
+  playlistId: string;
+  beginning_at: string;
+  spatio_licence: boolean;
+  done: boolean;
+}
 
 export interface EventResponseReduced {
     id: string;
@@ -80,9 +84,44 @@ export interface EventPayload {
   image_url?: string;
   is_private: boolean;
   everyone_can_vote: boolean;
+  done: boolean;
+  spatio_licence: boolean;
   description?: string;
   playlist_id?: string;
   beginning_at: string;
   playlistId: string;
-	location?: EventLocation;
+	location?: EventLocationPayload;
+}
+
+export interface EventLocationPayload {
+  coordinates?: Coordinates;
+  venueName?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+}
+
+export interface EventRadarResult {
+  radar: {
+    coordinates: Coordinates;
+    dist: Number;
+    venuename: string;
+  }
+  event: Event;
+  owner: SpotifyOwner;
+}
+
+export interface EventRadarFromDb {
+  id: string
+  name: string
+  beginning_at: string
+  image_url: string
+  owner_id: string
+  owner_name: string
+  owner_avatar_url: string
+  long: number
+  lat: number
+  dist_meters: number
+  done: boolean
+  spatio_licence: boolean
 }

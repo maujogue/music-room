@@ -1,9 +1,5 @@
-import { Text, View } from 'react-native';
+import ForgottenPassword from '@/components/auth/ForgottenPassword';
 
-export default function ForgottenPassword() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Forgotten Password</Text>
-    </View>
-  );
+export default function ForgottenPasswordScreen() {
+  return <ForgottenPassword />;
 }

@@ -7,7 +7,7 @@ Deno.test("fetchSpotifyUserProfile should throw an error for invalid access toke
 
   const originalFetch = globalThis.fetch;
 
-  globalThis.fetch = async (_url: string, _options: any) => {
+  globalThis.fetch = async (_url: string | URL | Request, _options: any) => {
     const errorResponse = {
       error: { status: 401, message: "Invalid access token" },
     };
@@ -41,7 +41,7 @@ Deno.test("fetchSpotifyUserProfile should return user profile for valid token", 
     id: "testuser123",
     email: "testuser@example.com",
   };
-  globalThis.fetch = async (_url: string, _options: any) => {
+  globalThis.fetch = async (_url: string | URL | Request, _options: any) => {
     return {
       ok: true,
       status: 200,

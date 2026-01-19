@@ -32,3 +32,30 @@ export async function getSupabaseEventByOwner(ownerId: string): Promise<any[]> {
 
   return data;
 }
+
+export async function getUserSubscription(userId: string): Promise<any | null> {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    // If no subscription found, return null (not an error)
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Supabase error fetching subscription:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
+}
+
+export async function requirePremiumSubscription(userId: string): Promise<void> {
+  const subscription = await getUserSubscription(userId);
+  if (!subscription) {
+    throw JSON.stringify({ subscription_required: true });
+  }
+}

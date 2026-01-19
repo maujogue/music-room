@@ -1,11 +1,12 @@
 import { HTTPException } from '@hono/http-exception';
 import { createClient } from '@supabase/supabase-js';
 import { formatDbError } from '@postgres/postgres_errors_map';
-import { 
-  EventPayload, 
-  EventResponse, 
-  EventLocation 
+import {
+  EventPayload,
+  EventResponse,
+  EventLocation
 } from "@event";
+import { geometryToCoordinates } from '@utils/geometry';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -31,9 +32,26 @@ export async function createSupabaseEvent(
   }
 
   if (location && data) {
-    const locationData = { ...location, event_id: data.id };
-    const { error: locationError } = await supabaseClient.from('location')
-      .insert([locationData])
+    const { coordinates, ...restLocation } = location;
+
+    const locationData: any = {
+      ...restLocation,
+      event_id: data.id,
+    };
+
+    if (coordinates) {
+      const { lat, long } = coordinates;
+      if (typeof lat === 'number' && typeof long === 'number') {
+        // POINT(x y)
+        locationData.coordinates = `POINT(${long} ${lat})`;
+      } else {
+        throw new HTTPException(400, { message: 'Invalid coordinates format' });
+      }
+    }
+
+    const { error: locationError } = await supabaseClient
+      .from('location')
+      .insert([locationData]);
 
     if (locationError) {
       const pgError = formatDbError(locationError);
@@ -55,8 +73,9 @@ export async function getSupabaseEventById(eventId: string): Promise<EventRespon
 }
 
 export async function getSupabaseEventByOwner(ownerId: string): Promise<EventResponse[]> {
-  const { data, error } = await supabaseClient.from('events')
-    .select('*')
+  const { data, error } = await supabaseClient
+    .from('events_with_location')
+    .select('event, owner, location, members, playlist, user')
     .eq('owner_id', ownerId);
 
   if (error) {
@@ -64,7 +83,24 @@ export async function getSupabaseEventByOwner(ownerId: string): Promise<EventRes
     throw new HTTPException(pgError.status, { message: `Error fetching events: ${pgError.message}` });
   }
 
-  return data;
+  return (data || []).map((row: any) => {
+    let location: EventLocation | undefined = row.location;
+
+    if (location && typeof location.coordinates === 'string') {
+      const coords = geometryToCoordinates(location.coordinates);
+      location = {
+        ...location,
+        coordinates: coords || undefined,
+      };
+    }
+
+    const res: EventResponse = {
+      ...row,
+      location,
+    };
+
+    return res;
+  });
 }
 
 export async function deleteSupabaseEventById(eventId: string): Promise<boolean> {
@@ -100,10 +136,25 @@ export async function updateSupabaseEventById(
   }
 
   if (locationData && Object.keys(locationData).length > 0) {
+    const { coordinates, ...restLocation } = locationData;
+
+    const updatePayload: any = {
+      ...restLocation,
+    };
+
+    if (coordinates) {
+      const { lat, long } = coordinates;
+      if (typeof lat === 'number' && typeof long === 'number') {
+        updatePayload.coordinates = `POINT(${long} ${lat})`;
+      } else {
+        throw new HTTPException(400, { message: 'Invalid coordinates format' });
+      }
+    }
+
     const { error } = await supabaseClient
       .from('location')
-      .update(locationData)
-      .eq('event_id', eventId)
+      .update(updatePayload)
+      .eq('event_id', eventId);
 
     if (error) {
       const pgError = formatDbError(error);
@@ -113,13 +164,43 @@ export async function updateSupabaseEventById(
   }
 }
 
+export async function supabaseStartEvent(eventId: string): Promise<void> {
+  const { error } = await supabaseClient
+    .from('events')
+    .update({
+      done: false,
+      beginning_at: new Date().toISOString(),
+    })
+    .eq('id', eventId)
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+
+export async function supabaseStopEvent(eventId: string): Promise<void> {
+  const { error } = await supabaseClient
+    .from('events')
+    .update({
+      done: true,
+    })
+    .eq('id', eventId)
+
+  if (error) {
+    console.error('Raw Supabase error:', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+}
+
 export async function uploadEventImage(uploadedFile: File): Promise<string> {
   const arrayBuffer = await uploadedFile.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
   const ext = (uploadedFile.name || 'jpg').split('.').pop() || 'jpg';
   const path = `events/${Date.now()}.${ext}`;
 
-  console.log('Uploading file to path:', path);
   const { data, error: uploadError } = await supabaseClient.storage
     .from('avatars')
     .upload(path, buffer, { contentType: uploadedFile.type || 'image/jpeg', upsert: true });
@@ -197,4 +278,21 @@ export async function editUserInEventSupabase(
     const pgError = formatDbError(error);
     throw new HTTPException(pgError.status, { message: pgError.message });
   }
+}
+
+export async function getSupabaseEventByCoordinates(lat: number, long: number) {
+
+  const { data, error } = await supabaseClient.rpc('nearby_events', {
+    p_lat: lat,
+    p_long: long,
+    p_range_km: 100
+  });
+
+  if (error) {
+    console.error('Raw Supabase error(getEventsByCoordinates):', error);
+    const pgError = formatDbError(error);
+    throw new HTTPException(pgError.status, { message: pgError.message });
+  }
+
+  return data;
 }

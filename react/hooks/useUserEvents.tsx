@@ -1,35 +1,28 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getSession } from '@/services/session';
 import { getCurrentUserEvents } from '@/services/events';
+import { getErrorMsg } from '@/utils/getErrorMsg';
 
 export function useUserEvents() {
-  const [events, setEvents] = useState<MusicEventFetchResult[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const {
+    data: events,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['user-events'],
+    queryFn: async () => {
       const session = await getSession();
       if (!session) throw new Error('Session retrieve error');
-      const data = await getCurrentUserEvents();
-      setEvents(data || []);
-    } catch (e) {
-      console.error('Error fetching events:', e);
-      setError('fetch events error');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return getCurrentUserEvents();
+    },
+    refetchInterval: 60000, // Background poll every 1 minute
+  });
 
-  const refetch = useCallback(() => {
-    fetchEvents();
-  }, [fetchEvents]);
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  return { events, refetch, loading, error };
+  return {
+    events: events ?? null,
+    refetch,
+    loading,
+    error: error ? getErrorMsg(error) : null
+  };
 }

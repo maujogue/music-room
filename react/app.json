@@ -8,6 +8,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "music-room",
+    "extra": {
+      "googleMapsApiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+    },
     "deepLinks": true,
     "splash": {
       "image": "./assets/vibing.jpg",
@@ -24,7 +27,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.maujogue.app"
+      "package": "com.maujogue.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +42,12 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you change your avatar."
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.672488124519-1evo7am5jdfsga8utom0q2ittcfd0npn"
         }
       ],
       [

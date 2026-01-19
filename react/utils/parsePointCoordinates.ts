@@ -37,17 +37,43 @@ export function useEventCoordinates(event: any | null) {
   }, [event]);
 }
 
+export function isValidCoordinateObject(value: any): value is { lat: number; long: number } {
+  return (
+    value &&
+    typeof value === 'object' &&
+    typeof value.lat === 'number' &&
+    typeof value.long === 'number'
+  );
+}
+
+export function convertPOINT(value: unknown): Coordinates | null {
+  if (typeof value !== 'string') return null;
+
+  // Supabase / PostGIS renvoie parfois "SRID=4326;POINT(lon lat)"
+  const cleaned = value.replace(/^SRID=\d+;/, '').trim(); // retire le "SRID=4326;" éventuel
+
+  const match = cleaned.match(/^POINT\(([-\d.]+)\s+([-\d.]+)\)$/);
+  if (!match) return null;
+
+  const long = parseFloat(match[1]);
+  const lat = parseFloat(match[2]);
+
+  if (Number.isNaN(lat) || Number.isNaN(long)) return null;
+
+  return { lat, long };
+}
+
 export function parseLocation(
   location: MusicEventLocation | undefined | null
 ): PickedPlace | null {
   if (!location) return null;
 
-  const coords = parsePointCoordinates(location.coordinates || '');
+  const coords = location.coordinates;
   if (!coords) return null;
 
   return {
-    latitude: coords.y,
-    longitude: coords.x,
+    latitude: coords.lat,
+    longitude: coords.long,
     address: location.address || undefined,
     street: location.complement || undefined,
     city: location.city || undefined,

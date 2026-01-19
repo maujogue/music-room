@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
 import FloatButton from '../generics/FloatButton';
+import { Bug } from "lucide-react-native";
 import {
   Pencil,
   Settings as SettingsIcon,
   LogOut,
   UserPlus,
   UserMinus,
+  KeyRound,
 } from 'lucide-react-native';
 import {
   Drawer,
@@ -18,13 +20,15 @@ import {
 } from '@/components/ui/drawer';
 import { Icon, CloseIcon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
-import { Button, ButtonText } from '@/components/ui/button';
+import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';
 import { Box } from '@/components/ui/box';
 import { useProfile } from '@/contexts/profileCtx';
 import { Text } from '@/components/ui/text';
+import { router } from 'expo-router';
+import { useAuth } from '@/contexts/authCtx';
 
 interface ProfileActionsProps {
   isOwner: boolean;
@@ -33,6 +37,7 @@ interface ProfileActionsProps {
   actions: {
     handleEditToggle: () => void;
     handleSpotifyConnect: () => void;
+    handleGoogleConnect?: () => void;
     handleFollowAction?: () => void;
     signOut: () => void;
   };
@@ -45,7 +50,20 @@ export default function ProfileActions({
   actions,
 }: ProfileActionsProps) {
   const [showDrawer, setShowDrawer] = useState(false);
-  const { isConnectedToSpotify } = useProfile();
+  const { isConnectedToSpotify, isConnectedToGoogle } = useProfile();
+  const { session } = useAuth();
+
+  function isDev() {
+    return process.env.NODE_ENV === 'development'
+  }
+
+  function getToken() {
+    if (!isDev()) { return }
+      console.log("=== DEV MODE BEARER TOKEN ACCESS ===")
+      const token = session?.access_token
+      console.log(token)
+      console.log("=== ============================ ===")
+  }
 
   return (
     <>
@@ -115,11 +133,51 @@ export default function ProfileActions({
                     <Text className='text-extra-lg font-semibold flex-1'>
                       Google
                     </Text>
-                    <Button disabled={true} size='sm' className='w-[95px]'>
-                      <ButtonText size='xs'>Not Available</ButtonText>
+                    <Button
+                      onPress={actions.handleGoogleConnect}
+                      disabled={isConnectedToGoogle}
+                      size='sm'
+                      className='w-[95px]'
+                    >
+                      <ButtonText size='xs'>
+                        {isConnectedToGoogle ? 'Connected' : 'Connect'}
+                      </ButtonText>
                     </Button>
                   </HStack>
                   <Divider />
+                  <HStack className='items-center justify-between w-full pr-28'>
+                    <Button
+                      variant='link'
+                      className='w-full justify-start'
+                      onPress={() => {
+                        router.push('/update-password');
+                        setShowDrawer(false);
+                      }}
+                    >
+                      <HStack className='items-center justify-between w-full'>
+                        <HStack className='items-center gap-3'>
+                          <KeyRound />
+                          <ButtonText>Edit password</ButtonText>
+                        </HStack>
+                      </HStack>
+                    </Button>
+                    {isDev() && (
+                      <Button
+                      variant='link'
+                      className='w-full justify-start'
+                      onPress={() => {
+                        getToken()
+                      }}
+                    >
+                      <HStack className='items-center justify-between w-full'>
+                        <HStack className='items-center gap-3'>
+                          <Bug />
+                          <ButtonText>Jwt</ButtonText>
+                        </HStack>
+                      </HStack>
+                    </Button>
+                    )}
+                  </HStack>
                   <Button
                     variant='link'
                     className='w-full justify-start'

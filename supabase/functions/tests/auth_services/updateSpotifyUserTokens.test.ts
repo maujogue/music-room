@@ -71,7 +71,7 @@ describe("updateSpotifyUserTokens", () => {
         assertEquals(params.id, userId);
         assertEquals(params.spotify_access_token, "access-token-xyz");
         assertEquals(params.spotify_refresh_token, "refresh-token-abc");
-        assertEquals(params.spotify_token_expires_at.getTime(), MOCK_NOW + 3600 * 1000);
+        assertEquals(params.spotify_token_expires_at!.getTime(), MOCK_NOW + 3600 * 1000);
     });
 
     it("should set expires_at to null when expires_in is not provided", async () => {
@@ -140,7 +140,7 @@ describe("updateSpotifyUserTokens", () => {
             const params = supabaseMock.getCapturedUpsertParams();
             assertExists(params);
             assertEquals(
-                params.spotify_token_expires_at.getTime(),
+                params.spotify_token_expires_at!.getTime(),
                 MOCK_NOW + testCase.expectedOffset
             );
         }
@@ -218,7 +218,7 @@ describe("updateSpotifyUserTokens", () => {
 
         const params = supabaseMock.getCapturedUpsertParams();
         assertExists(params);
-        assertEquals(params.spotify_token_expires_at.getTime(), MOCK_NOW + (-100 * 1000));
+        assertEquals(params.spotify_token_expires_at!.getTime(), MOCK_NOW + (-100 * 1000));
     });
 
     it("should handle undefined expires_in", async () => {

@@ -1,0 +1,1923 @@
+openapi: 3.0.0
+info:
+  title: Music App API
+  version: 1.0.0
+  license:
+    name: Proprietary
+    url: https://music-room/license
+
+servers:
+  - url: http://localhost:54321/functions/v1
+    description: Local Supabase Edge functions
+
+# All endpoints require a Bearer token by default
+security:
+  - bearerAuth: []
+
+########## [TAGS]
+tags:
+  - name: Events
+    description: Routes related to events (listing, details, radar, etc.)
+  - name: Search
+    description: Routes to search tracks, playlists, users, and events.
+  - name: Profile
+    description: Routes related to user profiles and follow relationships.
+  - name: Playlists
+    description: Routes to manage playlists, their tracks, and collaborators.
+
+
+########## [ROUTES]
+paths:
+  ########## EVENTS
+  /me/events:
+    get:
+      tags:
+        - Events
+      summary: List events for the current user
+      operationId: listCurrentUserEvents
+      description: >
+        Returns the list of events the authenticated user is involved in
+        (as owner or guest).
+      responses:
+        '200':
+          description: List of events for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+
+  /events:
+    post:
+      tags:
+        - Events
+      summary: Create a new event
+      operationId: createEvent
+      description: Creates a new event for the authenticated user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventInput'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateEventInput'
+                - type: object
+                  properties:
+                    image:
+                      type: string
+                      format: binary
+                      description: Optional image file for the event.
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event created successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get event by id
+      operationId: getEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '403':
+          description: Forbidden — the event is private and the user is not allowed to view it
+        '404':
+          description: Event not found
+
+    put:
+      tags:
+        - Events
+      summary: Update an existing event
+      operationId: updateEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventInput'
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event updated successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+    delete:
+      tags:
+        - Events
+      summary: Delete an event
+      operationId: deleteEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      responses:
+        '204':
+          description: Event deleted successfully (no content)
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+  /events/radar:
+    get:
+      tags:
+        - Events
+      summary: Radar of nearby events
+      operationId: getEventsRadar
+      description: >
+        Returns a list of events located near a given position.
+        Returns only public events (100km arround the given position).
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          description: Latitude of the reference point (decimal degrees).
+          schema:
+            type: number
+            example: 48.8566
+        - name: long
+          in: query
+          required: true
+          description: Longitude of the reference point (decimal degrees).
+          schema:
+            type: number
+            example: 2.3522
+      responses:
+        '200':
+          description: List of events within the requested radius
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventRadarItem'
+        '400':
+          description: Invalid geolocation parameters
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+
+  /events/{id}/start:
+    post:
+      tags:
+        - Events
+      summary: Start an event
+      operationId: startEvent
+      description: Marks the event as started. Only owner can start his event.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The event ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event successfully started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event started successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — user lacks permission to start this event
+        '404':
+          description: Event not found
+
+  /events/{id}/stop:
+    post:
+      tags:
+        - Events
+      summary: Stop an event
+      operationId: stopEvent
+      description: Marks the event as stopped/finished. Only the owner can stop an event.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The event ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event successfully stopped
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event stopped successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — user lacks permission to stop this event
+        '404':
+          description: Event not found
+
+  /events/{id}/invite:
+    post:
+      tags:
+        - Events
+      summary: Add a user to an event
+      operationId: inviteUserToEvent
+      description: Adds a user to the event with a given role.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventInvitationInput'
+      responses:
+        '201':
+          description: User successfully added to the event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User invited successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: Event or user not found
+    put:
+      tags:
+        - Events
+      summary: Edit a user role in an event
+      operationId: editEventUser
+      description: Updates the role of a user already participating in the event.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventInvitationInput'
+      responses:
+        '200':
+          description: User role updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User role updated successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: Event or user not found
+    delete:
+      tags:
+        - Events
+      summary: Remove a user from an event
+      operationId: removeUserFromEvent
+      description: Removes a user from the event.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The event ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  example: "c4e6b690-bbf2-4068-8d18-316cc468fbab"
+                  description: ID of the user to remove.
+      responses:
+        '204':
+          description: User removed (no content)
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — insufficient permissions
+        '404':
+          description: Event or user not found
+
+
+  ########### SEARCH
+  /search:
+    get:
+      tags:
+        - Search
+      summary: Search tracks, playlists, users, and events
+      operationId: search
+      description: >
+        Global search endpoint. Depending on the "type" parameter, it searches
+        among tracks (Spotify), playlists, users, and/or events.
+        The 'all' type option exclude tracks.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string.
+          schema:
+            type: string
+            example: "jazz"
+        - name: type
+          in: query
+          required: true
+          description: >
+            Type of resources to search. Use "all" to search across all supported types.
+          schema:
+            type: string
+            enum:
+              - track
+              - playlist
+              - user
+              - event
+              - all
+            example: "all"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of items to return per category.
+          schema:
+            type: integer
+            minimum: 1
+            example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Offset for pagination (number of items to skip).
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+      responses:
+        '200':
+          description: Search results grouped by resource type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Missing or invalid query parameters (e.g. "q" or "type")
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '500':
+          description: Unexpected error from Spotify or database
+
+
+  ########### PROFILE
+  /me/profile:
+    get:
+      tags:
+        - Profile
+      summary: Get the authenticated user's profile
+      operationId: getCurrentUserProfile
+      description: >
+        Returns the profile of the currently authenticated user.
+      responses:
+        '200':
+          description: The authenticated user's profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserProfileResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '404':
+          description: Profile not found
+
+  /profile/user/{userId}:
+    get:
+      tags:
+        - Profile
+      summary: Get public profile for a user
+      operationId: getUserProfile
+      description: >
+        Returns the public profile of the specified user.  
+        If the requester is authenticated, the response also includes
+        follow relationship flags (is_following, is_follower, is_friend)
+        relative to the current user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user whose profile is requested.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public profile information for the requested user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileWithFollowInfo'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '404':
+          description: Profile not found
+
+  /profile/update:
+    put:
+      tags:
+        - Profile
+      summary: Update current user profile
+      operationId: updateCurrentUserProfile
+      description: >
+        Updates the authenticated user's profile.  
+        Only the provided fields are updated; all fields are optional.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileInput'
+      responses:
+        '200':
+          description: Updated profile of the current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullProfileResponse'
+        '400':
+          description: Invalid payload (validation failed)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '500':
+          description: Failed to update profile
+
+  /profile/follows/{userId}:
+    get:
+      tags:
+        - Profile
+      summary: Get followers and following for a user
+      operationId: getUserFollows
+      description: >
+        Returns the list of followers and following profiles for the given user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user whose follow relationships are requested.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Followers and following profiles for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowsResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '404':
+          description: User not found
+
+  /profile/follow/{userId}:
+    post:
+      tags:
+        - Profile
+      summary: Follow a user
+      operationId: followUser
+      description: >
+        Creates a follow relationship from the authenticated user to the given user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to follow.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Follow operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowActionResponse'
+        '400':
+          description: Invalid follow action (e.g. following yourself or already following)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '404':
+          description: User not found
+        '409':
+          description: Error Conflict (the relationship exist already)
+
+    delete:
+      tags:
+        - Profile
+      summary: Unfollow a user
+      operationId: unfollowUser
+      description: >
+        Removes the follow relationship from the authenticated user to the given user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to unfollow.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unfollow operation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowActionResponse'
+        '400':
+          description: Invalid unfollow action
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '404':
+          description: User not found
+
+
+  ########## PLAYLISTS
+  /me/playlists:
+    get:
+      tags:
+        - Playlists
+      summary: Get playlists of the authenticated user
+      operationId: getCurrentUserPlaylists
+      description: >
+        Returns all playlists the authenticated user owns, collaborates on
+        or can invite from, including owner information and the user's role.
+      responses:
+        '200':
+          description: List of playlists for the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserPlaylistsResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+
+  /playlists:
+    post:
+      tags:
+        - Playlists
+      summary: Create a new playlist
+      operationId: createPlaylist
+      description: >
+        Creates a new playlist for the authenticated user.
+        Requires a valid subscription (enforced by middleware).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlaylistInput'
+      responses:
+        '201':
+          description: Playlist created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistResponse'
+        '400':
+          description: Invalid payload (validation failed)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '402':
+          description: Payment required (no active premium subscription)
+        '500':
+          description: Failed to create playlist
+
+  /playlists/{id}:
+    get:
+      tags:
+        - Playlists
+      summary: Get playlist details with tracks
+      operationId: getPlaylistById
+      description: >
+        Returns full playlist details for the given ID, including tracks
+        enriched with Spotify metadata, collaborators, members and
+        user-specific permissions.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Playlist details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistDetailsResponse'
+        '401':
+          description: >
+            Unauthorized, missing JWT or Spotify account not connected.
+        '403':
+          description: Access forbidden (private playlist without permission)
+        '404':
+          description: Playlist not found
+
+    put:
+      tags:
+        - Playlists
+      summary: Update a playlist
+      operationId: updatePlaylist
+      description: >
+        Updates basic metadata of a playlist. Only the owner or users with
+        appropriate permissions can update it.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlaylistInput'
+      responses:
+        '200':
+          description: Playlist updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Playlist updated successfully"
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (user lacks permission)
+        '404':
+          description: Playlist not found
+    delete:
+      tags:
+        - Playlists
+      summary: Delete a playlist
+      operationId: deletePlaylist
+      description: >
+        Deletes a playlist. Only the owner (or roles allowed by permissions)
+        can delete the playlist.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Playlist deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Playlist deleted successfully"
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (user lacks permission)
+        '404':
+          description: Playlist not found
+
+  /playlists/{id}/tracks:
+    post:
+      tags:
+        - Playlists
+      summary: Add tracks to a playlist
+      operationId: addTracksToPlaylist
+      description: >
+        Adds one or more tracks to the specified playlist. Requires the
+        ADD_SONG permission on that playlist.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistTracksInput'
+      responses:
+        '201':
+          description: Tracks added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tracks added successfully"
+        '400':
+          description: Invalid payload (uris must be an array of strings)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '403':
+          description: Forbidden (user has no permission to add songs)
+        '404':
+          description: Playlist not found
+
+    delete:
+      tags:
+        - Playlists
+      summary: Remove tracks from a playlist
+      operationId: removeTracksFromPlaylist
+      description: >
+        Removes one or more tracks from the specified playlist. Requires the
+        DELETE_SONG permission on that playlist.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistTracksInput'
+      responses:
+        '200':
+          description: Tracks removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Tracks deleted successfully"
+        '400':
+          description: Invalid payload (uris must be an array of strings)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '403':
+          description: Forbidden (user has no permission to delete songs)
+        '404':
+          description: Playlist not found
+
+  /playlists/{id}/users:
+    post:
+      tags:
+        - Playlists
+      summary: Add a user to a playlist
+      operationId: addUserToPlaylist
+      description: >
+        Adds a user to the playlist as a member or collaborator. Requires the
+        ADD_USER permission on that playlist.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistUserInput'
+      responses:
+        '200':
+          description: User added to playlist successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User added successfully as collaborator"
+        '400':
+          description: Invalid payload (missing or invalid user_id / role)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '403':
+          description: Forbidden (user has no permission to add users)
+        '404':
+          description: Playlist or user not found
+        '409':
+          description: Error conflict, user already into playlist members
+
+    delete:
+      tags:
+        - Playlists
+      summary: Remove a user from a playlist
+      operationId: removeUserFromPlaylist
+      description: >
+        Removes a user from the playlist. A user may remove themselves. Removing
+        another user requires the REMOVE_USER permission.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the playlist.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistUserInput'
+      responses:
+        '200':
+          description: User removed from playlist successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User removed successfully from playlist"
+        '400':
+          description: Invalid payload (missing or invalid user_id / role)
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+        '403':
+          description: Forbidden (user has no permission to remove others)
+        '404':
+          description: Playlist or user not found
+
+
+########## [SCHEMAS]
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Event:
+      type: object
+      required:
+        - id
+        - name
+        - is_private
+        - everyone_can_vote
+        - playlistId
+        - beginning_at
+        - spatio_licence
+        - done
+      properties:
+        id:
+          type: string
+          example: "ac4f0cd4-197e-443c-b9ff-8b9873dad829"
+        name:
+          type: string
+          example: "Jazz Night"
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/event.jpg"
+        is_private:
+          type: boolean
+          example: false
+        everyone_can_vote:
+          type: boolean
+          example: true
+        description:
+          type: string
+          nullable: true
+          example: "An evening to discover local artists."
+        playlist_id:
+          type: string
+          nullable: true
+          example: "pl_abc"
+        playlistId:
+          type: string
+          example: "pl_abc"
+        beginning_at:
+          type: string
+          format: date-time
+          example: "2025-01-10T20:00:00Z"
+        spatio_licence:
+          type: boolean
+          example: true
+        done:
+          type: boolean
+          example: false
+
+    Owner:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        avatar_url:
+          type: string
+          nullable: true
+
+    EventUserPermissions:
+      type: object
+      properties:
+        role:
+          type: string
+          example: owner
+        can_edit:
+          type: boolean
+        can_delete:
+          type: boolean
+        can_invite:
+          type: boolean
+        can_vote:
+          type: boolean
+
+    EventMember:
+      type: object
+      properties:
+        profile:
+          type: object
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+            avatar_url:
+              type: string
+              nullable: true
+        role:
+          type: string
+          example: voter
+
+    EventResponse:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/Event'
+        owner:
+          $ref: '#/components/schemas/Owner'
+        user:
+          $ref: '#/components/schemas/EventUserPermissions'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventMember'
+
+    Location:
+      type: object
+      properties:
+        coordinates:
+          type: object
+          properties:
+            lat:
+              type: number
+              example: 37.42221
+            long:
+              type: number
+              example: -122.0853
+        city:
+          type: string
+          nullable: true
+          example: "Mountain View"
+        address:
+          type: string
+          nullable: true
+          example: "160 Castro St"
+        country:
+          type: string
+          nullable: true
+          example: "USA"
+        venuename:
+          type: string
+          nullable: true
+          example: "Doppio Zero"
+        complement:
+          type: string
+          nullable: true
+          example: "CA 94041"
+      required:
+        - coordinates
+
+    CreateEventInput:
+      type: object
+      required:
+        - name
+        - is_private
+        - everyone_can_vote
+        - playlist_id
+        - beginning_at
+        - spatio_licence
+        - location
+      properties:
+        name:
+          type: string
+          example: "Jazz Night"
+        description:
+          type: string
+          nullable: true
+          example: "An evening to discover local artists."
+        is_private:
+          type: boolean
+          example: false
+        everyone_can_vote:
+          type: boolean
+          example: true
+        playlist_id:
+          type: string
+          description: ID of the associated playlist
+          example: "pl_abc"
+        beginning_at:
+          type: string
+          format: date-time
+          example: "2025-01-10T20:00:00Z"
+        spatio_licence:
+          type: boolean
+          example: true
+        location:
+          $ref: '#/components/schemas/Location'
+
+    UpdateEventInput:
+      type: object
+      description: >
+        Fields to update on an existing event.
+        All properties are optional; only provided fields will be updated.
+      properties:
+        name:
+          type: string
+          example: "Updated Jazz Night"
+        description:
+          type: string
+          nullable: true
+        is_private:
+          type: boolean
+        everyone_can_vote:
+          type: boolean
+        playlist_id:
+          type: string
+          description: ID of the associated playlist
+        beginning_at:
+          type: string
+          format: date-time
+        spatio_licence:
+          type: boolean
+        location:
+          $ref: '#/components/schemas/Location'
+
+    EventRadarItem:
+      type: object
+      description: "Simplified representation of an event for proximity radar results."
+      properties:
+        id:
+          type: string
+          example: "ac4f0cd4-197e-443c-b9ff-8b9873dad829"
+        name:
+          type: string
+          example: "Jazz Night"
+        beginning_at:
+          type: string
+          format: date-time
+          example: "2025-01-10T20:00:00Z"
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/event.jpg"
+        owner_id:
+          type: string
+          example: "c4e6b690-bbf2-4068-8d18-316cc468fbab"
+        owner_name:
+          type: string
+          example: "Alice"
+        owner_avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        long:
+          type: number
+          example: 2.3522
+        lat:
+          type: number
+          example: 48.8566
+        dist_meters:
+          type: number
+          description: Distance from the user to the event (in meters).
+          example: 1342.5
+        done:
+          type: boolean
+          description: Whether the event is finished.
+          example: false
+        spatio_licence:
+          type: boolean
+          description: Whether GPS position is required for voting.
+          example: true
+
+    EventInvitationInput:
+      type: object
+      required:
+        - user_id
+        - role
+      properties:
+        user_id:
+          type: string
+          example: "c4e6b690-bbf2-4068-8d18-316cc468fbab"
+        role:
+          type: string
+          description: Role assigned to the user.
+          enum:
+            - inviter
+            - voter
+            - member
+            - collaborator
+          example: "voter"
+
+    ProfileResponse:
+      type: object
+      description: Basic public profile information.
+      properties:
+        id:
+          type: string
+          example: "5c8ac14c-7272-487b-945a-5752b3810322"
+        username:
+          type: string
+          example: "susan"
+        email:
+          type: string
+          format: email
+          example: "susan@example.com"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        bio:
+          type: string
+          nullable: true
+          example: "Music lover and vinyl collector."
+        music_genre:
+          type: string
+          nullable: true
+          example: "jazz"
+
+    ProfileWithFollowInfo:
+      type: object
+      description: Profile information augmented with relationship flags.
+      allOf:
+        - $ref: '#/components/schemas/ProfileResponse'
+        - type: object
+          properties:
+            is_following:
+              type: boolean
+              description: Whether the current user is following this profile.
+              example: true
+            is_follower:
+              type: boolean
+              description: Whether this profile is following the current user.
+              example: false
+            is_friend:
+              type: boolean
+              description: True if both users follow each other.
+              example: false
+
+    PlaylistResponse:
+      type: object
+      description: Public playlist returned in search results.
+      properties:
+        id:
+          type: string
+          example: "pl_abc"
+        name:
+          type: string
+          example: "Jazz Classics"
+        description:
+          type: string
+          nullable: true
+          example: "All-time favorite jazz tracks."
+        is_private:
+          type: boolean
+          example: false
+        is_collaborative:
+          type: boolean
+          example: true
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/playlist-cover.jpg"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        owner_id:
+          type: string
+          example: "user_123"
+        is_spotify_sync:
+          type: boolean
+          nullable: true
+          description: Whether the playlist is synced with Spotify.
+        spotify_id:
+          type: string
+          nullable: true
+          example: "37i9dQZF1DXbITWG1ZJKYt"
+        owner:
+          $ref: '#/components/schemas/ProfileResponse'
+
+    EventResponseReduced:
+      type: object
+      description: Reduced event representation for search results.
+      properties:
+        event:
+          $ref: '#/components/schemas/Event'
+        owner:
+          $ref: '#/components/schemas/Owner'
+
+    TrackResponse:
+      type: object
+      description: >
+        Track object returned by the internal mapping of Spotify search results.
+      additionalProperties: true
+
+    SearchResponse:
+      type: object
+      description: Search results grouped by resource type.
+      properties:
+        trackResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackResponse'
+        playlistResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaylistResponse'
+        userResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileWithFollowInfo'
+        eventResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponseReduced'
+
+    CurrentUserProfileResponse:
+      description: >
+        Enriched profile for the currently authenticated user,
+        including follow relationships and Spotify connection status.
+      allOf:
+        - $ref: '#/components/schemas/ProfileResponse'
+        - type: object
+          properties:
+            is_connected_to_spotify:
+              type: boolean
+              description: True if the user has linked a Spotify account.
+              example: true
+            followers:
+              type: array
+              description: Users who follow the current user.
+              items:
+                $ref: '#/components/schemas/FollowUserWithRelation'
+            following:
+              type: array
+              description: Users that the current user is following.
+              items:
+                $ref: '#/components/schemas/FollowUserWithRelation'
+          required:
+            - is_connected_to_spotify
+            - followers
+            - following
+
+    UpdateProfileInput:
+      type: object
+      description: >
+        Payload for updating the authenticated user's profile.
+        All properties are optional, so only provided fields will be updated.
+      properties:
+        username:
+          type: string
+          example: "darwin"
+        email:
+          type: string
+          format: email
+          example: "darwin@lovefish.com"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://lovefish/avatar.jpg"
+        bio:
+          type: string
+          nullable: true
+          example: "Fish music lover and clams vinyl collector."
+        music_genre:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: >
+            List of preferred music genres (e.g. ["jazz", "blues"]) or null.
+        privacy_setting:
+          type: string
+          description: Privacy level of the profile.
+          enum:
+            - public
+            - friends
+            - private
+          example: "public"
+
+    FullProfileResponse:
+      type: object
+      description: Full profile returned after update, including Spotify authentication fields.
+      properties:
+        id:
+          type: string
+          example: "dc8405bf-df39-4ae2-9b20-ee3175835bf1"
+        username:
+          type: string
+          example: "Gumball"
+        email:
+          type: string
+          format: email
+          example: "gum@gum.gum"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        bio:
+          type: string
+          nullable: true
+          example: "Electro music fanatic."
+        music_genre:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example: ["electronic", "funk"]
+        privacy_setting:
+          type: string
+          enum: [public, friends, private]
+          example: public
+
+        # Spotify fields
+        spotify_access_token:
+          type: string
+          description: Spotify OAuth access token
+          example: "BQD3xJf..."
+        spotify_refresh_token:
+          type: string
+          description: Spotify OAuth refresh token
+          example: "AQDFkj..."
+        spotify_token_expires_at:
+          type: string
+          format: date-time
+          description: Expiration timestamp of the Spotify token
+          example: "2025-12-08T08:06:28.882Z"
+
+      required:
+        - id
+        - username
+        - email
+        - privacy_setting
+
+    FollowActionResponse:
+      type: object
+      description: Generic response for follow/unfollow operations.
+      properties:
+        success:
+          type: boolean
+          example: true
+      required:
+        - success
+
+    FollowsResponse:
+      type: object
+      description: Followers and following lists for a given user.
+      properties:
+        followers:
+          type: array
+          description: Users who follow the requested user.
+          items:
+            $ref: '#/components/schemas/FollowUserWithRelation'
+        following:
+          type: array
+          description: Users that the requested user is following.
+          items:
+            $ref: '#/components/schemas/FollowUserWithRelation'
+      required:
+        - followers
+        - following
+
+    FollowUserWithRelation:
+      type: object
+      description: >
+        Lightweight profile used in followers/following lists, including
+        relationship flags relative to the authenticated user.
+      properties:
+        id:
+          type: string
+          example: "9f6e5ad2-b7cc-4286-bc32-9f8ca76dc3cf"
+        username:
+          type: string
+          example: "Victor"
+        created_at:
+          type: string
+          format: date-time
+          description: When this follow relationship was created.
+          example: "2025-12-08T08:31:16.923672+00:00"
+        is_follower:
+          type: boolean
+          description: >
+            True if this user follows the authenticated user.
+          example: false
+        is_following:
+          type: boolean
+          description: >
+            True if the authenticated user follows this user.
+          example: false
+        is_friend:
+          type: boolean
+          description: >
+            True if both users follow each other (mutual follow).
+          example: false
+      required:
+        - id
+        - username
+        - created_at
+        - is_follower
+        - is_following
+        - is_friend
+
+    CreatePlaylistInput:
+      type: object
+      description: Payload to create a new playlist.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "My Roadtrip Playlist"
+        description:
+          type: string
+          nullable: true
+          example: "Songs for long drives."
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/playlist-cover.jpg"
+        is_private:
+          type: boolean
+          description: Whether the playlist is private.
+          default: false
+          example: false
+        is_collaborative:
+          type: boolean
+          description: Whether other users can collaborate on the playlist.
+          default: false
+          example: true
+
+    UpdatePlaylistInput:
+      type: object
+      description: >
+        Fields to update on an existing playlist. All properties are optional;
+        only provided fields will be updated.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "Updated Playlist Name"
+        description:
+          type: string
+          nullable: true
+          example: "Updated description."
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/new-cover.jpg"
+        is_private:
+          type: boolean
+          description: Whether the playlist is private.
+          example: true
+        is_collaborative:
+          type: boolean
+          description: Whether other users can collaborate on the playlist.
+          example: false
+
+    PlaylistUserPermissions:
+      type: object
+      description: Permissions of the current user on this playlist.
+      properties:
+        can_edit:
+          type: boolean
+          example: true
+        can_invite:
+          type: boolean
+          example: true
+        is_following:
+          type: boolean
+          example: true
+        role:
+          type: string
+          description: Role of the user relative to the playlist.
+          enum:
+            - owner
+            - collaborator
+            - member
+            - none
+          example: "owner"
+      required:
+        - can_edit
+        - can_invite
+        - is_following
+        - role
+
+    SpotifyTrackArtist:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Miles Davis"
+
+    SpotifyTrackAlbumImage:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: "https://i.scdn.co/image/abc123"
+
+    SpotifyTrackAlbum:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Kind of Blue"
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpotifyTrackAlbumImage'
+
+    SpotifyTrackDetails:
+      type: object
+      description: Minimal Spotify track information attached to a playlist track.
+      properties:
+        id:
+          type: string
+          example: "3Zwu2K0Qa5sT6teCCHPShP"
+        name:
+          type: string
+          example: "So What"
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpotifyTrackArtist'
+        album:
+          $ref: '#/components/schemas/SpotifyTrackAlbum'
+        duration_ms:
+          type: integer
+          example: 545000
+        uri:
+          type: string
+          example: "spotify:track:3Zwu2K0Qa5sT6teCCHPShP"
+
+    PlaylistTrackWithDetails:
+      type: object
+      description: >
+        Track entry in a playlist, including internal metadata and optional
+        Spotify details.
+      properties:
+        id:
+          type: string
+          example: "plt_track_123"
+        playlist_id:
+          type: string
+          example: "pl_abc"
+        track_id:
+          type: string
+          description: Spotify track ID or URI used as foreign key.
+          example: "3Zwu2K0Qa5sT6teCCHPShP"
+        added_at:
+          type: string
+          format: date-time
+          example: "2025-12-08T09:00:00Z"
+        added_by:
+          type: string
+          description: ID of the user who added the track.
+          example: "user_123"
+        details:
+          $ref: '#/components/schemas/SpotifyTrackDetails'
+      required:
+        - id
+        - playlist_id
+        - track_id
+        - added_at
+        - added_by
+
+    PlaylistCollaborator:
+      type: object
+      description: Collaborator entry for a playlist.
+      properties:
+        id:
+          type: string
+          example: "pl_collab_123"
+        playlist_id:
+          type: string
+          example: "pl_abc"
+        user_id:
+          type: string
+          example: "user_456"
+        added_at:
+          type: string
+          format: date-time
+          example: "2025-12-08T09:05:00Z"
+        added_by:
+          type: string
+          example: "user_123"
+        role:
+          type: string
+          enum:
+            - collaborator
+            - owner
+          example: "collaborator"
+      required:
+        - id
+        - playlist_id
+        - user_id
+        - added_at
+        - added_by
+        - role
+
+    PlaylistMember:
+      type: object
+      description: Member entry for a playlist (non-collaborator).
+      properties:
+        id:
+          type: string
+          example: "pl_member_123"
+        playlist_id:
+          type: string
+          example: "pl_abc"
+        user_id:
+          type: string
+          example: "user_789"
+        added_at:
+          type: string
+          format: date-time
+          example: "2025-12-08T09:10:00Z"
+        added_by:
+          type: string
+          example: "user_123"
+      required:
+        - id
+        - playlist_id
+        - user_id
+        - added_at
+        - added_by
+
+    PlaylistDetailsResponse:
+      description: >
+        Full playlist details including tracks, membership and user permissions.
+      allOf:
+        - $ref: '#/components/schemas/PlaylistResponse'
+        - type: object
+          properties:
+            tracks:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlaylistTrackWithDetails'
+            collaborators:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlaylistCollaborator'
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlaylistMember'
+            user:
+              $ref: '#/components/schemas/PlaylistUserPermissions'
+
+    PlaylistTracksInput:
+      type: object
+      description: List of track URIs (or IDs) to add or remove from the playlist.
+      required:
+        - uris
+      properties:
+        uris:
+          type: array
+          items:
+            type: string
+          example:
+            - "spotify:track:3Zwu2K0Qa5sT6teCCHPShP"
+            - "spotify:track:6rqhFgbbKwnb9MLmUQDhG6"
+
+    PlaylistUserInput:
+      type: object
+      description: >
+        User to add to or remove from the playlist. Role is optional and
+        can be "member" or "collaborator".
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: ID of the user to add/remove.
+          example: "dc8405bf-df39-4ae2-9b20-ee3175835bf1"
+        role:
+          type: string
+          nullable: true
+          description: Role of the user in the playlist (if provided).
+          enum:
+            - member
+            - collaborator
+          example: "collaborator"
+
+    CurrentUserPlaylistsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/CurrentUserPlaylistItem'
+
+    CurrentUserPlaylistItem:
+      type: object
+      description: >
+        Playlist entry returned by /me/playlists, including owner info
+        and the current user's role on that playlist.
+      properties:
+        id:
+          type: string
+          example: "1a5e3b72-6717-4f9a-8c2b-b26e6c237120"
+        name:
+          type: string
+          example: "BUNNY Playlist"
+        description:
+          type: string
+          nullable: true
+          example: "Songs for bunnies."
+        owner_id:
+          type: string
+          example: "dc8405bf-df39-4ae2-9b20-ee3175835bf1"
+        is_private:
+          type: boolean
+          example: false
+        is_collaborative:
+          type: boolean
+          example: true
+        can_invite:
+          type: boolean
+          description: Whether the current user can invite other users to this playlist.
+          example: true
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "http://image/7797987/..."
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-12-08T10:36:28.851462+00:00"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-12-08T10:44:02.482782+00:00"
+
+        owner_username:
+          type: string
+          example: "Squirrel2"
+        owner_email:
+          type: string
+          format: email
+          example: "sq@sq.sq"
+        owner_avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://.../avatars/profiles/1764755716495.jpeg"
+        owner_bio:
+          type: string
+          nullable: true
+          example: "Music lover and vinyl collector."
+
+        user_role:
+          type: string
+          description: Role of the current user on this playlist.
+          enum:
+            - owner
+            - collaborator
+            - member
+          example: "owner"
+      required:
+        - id
+        - name
+        - owner_id
+        - is_private
+        - is_collaborative
+        - can_invite
+        - created_at
+        - updated_at
+        - owner_username
+        - owner_email
+        - user_role

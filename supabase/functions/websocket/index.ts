@@ -5,7 +5,7 @@ import {
   handleConnectionMessage,
   handleConnectionClose,
   handleConnectionError
-// @ts-ignore
+  // @ts-ignore
 } from './handlers/connection.ts';
 // @ts-ignore
 import { startVoteRealtime } from './services/votes.ts';
@@ -25,7 +25,7 @@ async function handler(request: Request): Promise<Response> {
     try {
       await startVoteRealtime(clientsByUser);
       realtimeInitialized = true;
-      console.log('✅ Realtime subscriptions initialized');
+      console.info('Realtime subscriptions initialized');
     } catch (error) {
       console.error('Failed to initialize realtime:', error);
     }
@@ -33,7 +33,6 @@ async function handler(request: Request): Promise<Response> {
 
   // Check if it's a WebSocket upgrade request
   if (!request.headers.get('upgrade') || request.headers.get('upgrade')!.toLowerCase() !== 'websocket') {
-    console.log('ws: not a websocket request');
     return new Response('Expected WebSocket upgrade', { status: 400 });
   }
 
@@ -41,7 +40,6 @@ async function handler(request: Request): Promise<Response> {
   const token = url.searchParams.get('token');
 
   if (!token) {
-    console.log('ws: missing token');
     return new Response('Authentication token required', { status: 401 });
   }
 

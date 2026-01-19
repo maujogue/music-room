@@ -3,11 +3,12 @@ import { View, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 
 type Props<T> = {
-  title: string;
+  title?: string;
   items: T[] | undefined;
   limit?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   onShowMore?: (label: string) => void;
+  noHorizontalPadding?: boolean;
 };
 
 export default function ResultsSection<T>({
@@ -16,6 +17,7 @@ export default function ResultsSection<T>({
   limit,
   renderItem,
   onShowMore,
+  noHorizontalPadding = false,
 }: Props<T>) {
   if (!items || items.length === 0) return null;
 
@@ -25,8 +27,10 @@ export default function ResultsSection<T>({
   const sliced = limit ? validItems.slice(0, limit) : validItems;
 
   return (
-    <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
-      <Text className='text-lg font-semibold'>{title}</Text>
+    <View
+      style={{ paddingHorizontal: noHorizontalPadding ? 0 : 16, marginTop: 12 }}
+    >
+      {title && <Text className='text-lg font-semibold mb-4'>{title}</Text>}
       {sliced.map((item, i) => (
         <View key={(item as any)?.id || `${title}-${i}`}>
           {renderItem(item as T, i)}

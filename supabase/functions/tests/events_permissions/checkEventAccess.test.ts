@@ -66,7 +66,9 @@ const mockEvent: EventResponse = {
     description: '',
     playlist_id: '',
     playlistId: '',
-    beginning_at: ''
+    beginning_at: '',
+    spatio_licence: false,
+    done: false
   },
   owner: mockOwner,
   location: mockLocation,
