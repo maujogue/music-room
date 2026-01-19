@@ -24,6 +24,8 @@ tags:
     description: Routes related to user profiles and follow relationships.
   - name: Playlists
     description: Routes to manage playlists, their tracks, and collaborators.
+  - name: Tracks
+    description: Routes to fetch specific track metadata.
 
 
 ########## [ROUTES]
@@ -452,6 +454,41 @@ paths:
           description: Unauthorized (missing or invalid JWT)
         '500':
           description: Unexpected error from Spotify or database
+
+
+  ########### TRACKS
+  /tracks:
+    get:
+      tags:
+        - Tracks
+      summary: Get tracks details by their IDs
+      operationId: getTracksByIds
+      description: >
+        Returns detailed information for one or more Spotify tracks identified by their IDs.
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          description: Comma-separated list of Spotify track IDs.
+          schema:
+            type: string
+            example: "4rluseQQZbyvOzkTOJL4UI,63VOE20PqFLJVEOTZZMYLJ"
+      responses:
+        '200':
+          description: Array of track details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpotifyTrackDetails'
+        '400':
+          description: Invalid request (missing ids or malformed query)
+        '401':
+          description: Unauthorized
 
 
   ########### PROFILE

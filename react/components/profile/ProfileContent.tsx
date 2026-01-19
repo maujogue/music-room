@@ -4,6 +4,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { Divider } from '@/components/ui/divider';
 import { useRouter } from 'expo-router';
+import { Button } from '@/components/ui/button';
 import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import PrivacySettings from '@/components/profile/PrivacySettings';
@@ -28,6 +29,12 @@ interface ProfileContentProps {
   };
   actions: {
     handlePrivacyChange: (privacy: PrivacySetting) => void;
+    handleEditToggle: () => void;
+    handleSpotifyConnect: () => void;
+    handleFollowAction?: () => void;
+    handleAvatarUpload: (url: string) => void;
+    signOut: () => void;
+    handleGoogleConnect?: () => void;
   };
 }
 
@@ -117,6 +124,23 @@ export default function ProfileContent({
           />
           <Divider />
         </>
+      )}
+
+      {/* Stats Link - Only for own profile */}
+      {variant === 'own' && (
+        <VStack className='px-3'>
+          <Button
+            variant='outline'
+            className='justify-between border-secondary-200 bg-secondary-50 active:bg-secondary-100'
+            onPress={() => router.push('/profile/stats')}
+          >
+            <HStack className='items-center gap-3'>
+              <Text className='font-bold text-typography-900'>
+                View My Stats & Leaderboard
+              </Text>
+            </HStack>
+          </Button>
+        </VStack>
       )}
 
       {/* Followers/Following - Only if can view profile */}

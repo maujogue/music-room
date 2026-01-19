@@ -10,7 +10,8 @@ export default function useAddTrack(playlistId: string) {
 
   const onSwipeableOpen = async (trackId: string) => {
     try {
-      await addItemToPlaylist(playlistId, [`spotify:track:${trackId}`]);
+      const cleanId = trackId.replace('spotify:track:', '');
+      await addItemToPlaylist(playlistId, [cleanId]);
       toast.show({
         title: 'Track added to playlist',
         duration: 1500,

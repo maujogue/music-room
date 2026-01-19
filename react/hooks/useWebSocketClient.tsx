@@ -363,10 +363,11 @@ export default function useWebSocketClient(
     }
 
     try {
+      const cleanTrackId = trackId.replace('spotify:track:', '');
       const message = {
         type: 'vote',
         eventId,
-        trackId,
+        trackId: cleanTrackId,
         timestamp: Date.now(),
         coordinates: coords,
       };
@@ -397,10 +398,11 @@ export default function useWebSocketClient(
     }
 
     try {
+      const cleanTrackId = trackId.replace('spotify:track:', '');
       const message = {
         type: 'unvote',
         eventId,
-        trackId,
+        trackId: cleanTrackId,
         timestamp: Date.now(),
         coordinates: coords,
       };

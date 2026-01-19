@@ -1,27 +1,49 @@
+export interface SpotifyImage {
+  url: string;
+  height?: number;
+  width?: number;
+}
+
+export interface SpotifyAlbum {
+  album_type: string;
+  artists: { name: string; id: string; uri: string }[];
+  external_urls: { spotify: string };
+  href: string;
+  id: string;
+  images: SpotifyImage[];
+  name: string;
+  release_date: string;
+  total_tracks: number;
+  type: string;
+  uri: string;
+}
+
 export interface TrackResponse {
-    id: string;
-    name: string;
-    artists: SpotifyArtist[];
-    album: SpotifyAlbum;
-    duration_ms: number;
-    spotify_id: string;
-    cover_url?: string;
+  id: string;
+  name: string;
+  artists: SpotifyArtist[];
+  album: SpotifyAlbum;
+  duration_ms: number;
+  spotify_id: string;
+  cover_url?: string;
 }
 
 export interface SpotifyTrackResponse {
-    tracks: TrackResponse[];
-    error: {
-        status: number;
-        message: string;
-    } | null;
+  tracks: TrackResponse[];
+  error: {
+    status: number;
+    message: string;
+  } | null;
 }
 
-interface SpotifyArtist {
-    id: string;
-    name: string;
+// Assuming SpotifyAlbum is defined elsewhere or implicitly, but if not we might need to add it.
+// For now just ensuring existing interfaces are exported.
+export interface SpotifyArtist {
+  id: string;
+  name: string;
 }
 
-interface SpotifyTrack {
+export interface SpotifyTrack {
   album: SpotifyAlbum;
   artists: { name: string; id: string; uri: string }[];
   available_markets?: string[];

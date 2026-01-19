@@ -38,6 +38,13 @@ export default function ProfileLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name='stats'
+        options={{
+          title: 'My Music Stats',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 }

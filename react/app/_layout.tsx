@@ -29,16 +29,20 @@ const queryClient = new QueryClient({
 // Set up focus manager for mobile
 AppState.addEventListener('change', onAppStateChange);
 
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 export default function Root() {
   // Set up the auth context and render our layout inside of it.
   return (
-    <GluestackUIProvider mode='light'>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </QueryClientProvider>
-    </GluestackUIProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GluestackUIProvider mode='light'>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </QueryClientProvider>
+      </GluestackUIProvider>
+    </GestureHandlerRootView>
   );
 }
 
