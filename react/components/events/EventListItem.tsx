@@ -9,8 +9,8 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { HStack } from '@/components/ui/hstack';
 import { useEventDate } from '@/hooks/useEventDate';
 import { LinearGradient } from 'expo-linear-gradient';
-import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
-import PrivateBadge from '@/components/generics/PrivateBadge';
+import EventAllBadges from '@/components/generics/EventAllBadges';
+import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   event: MusicEvent;
@@ -29,9 +29,9 @@ export default function EventListItem({ event, owner }: Props) {
   };
 
   const getImage = () => {
-    return {
-      uri: event.image_url ? event.image_url : 'https://picsum.photos/111',
-    };
+    return event.image_url
+      ? { uri: event.image_url }
+      : getRandomImage();
   };
 
   return (
@@ -81,10 +81,6 @@ export default function EventListItem({ event, owner }: Props) {
                 <Text size='sm' className='text-typography-400 px-2'>
                   {owner?.username}
                 </Text>
-              </HStack>
-              <HStack className='items-center gap-2'>
-                {event.is_private && <PrivateBadge />}
-                {event.everyone_can_vote && <CollaborativeBadge />}
               </HStack>
             </HStack>
           </Box>

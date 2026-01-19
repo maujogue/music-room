@@ -8,6 +8,7 @@ import EditProfileTextFeature from '@/components/profile/edit_text_feature';
 import EditMusicTastes from '@/components/profile/edit_music_tastes';
 import PrivacySettings from '@/components/profile/PrivacySettings';
 import FollowingSection from '@/components/profile/FollowingSection';
+import SubscriptionBadge from '@/components/subscription/SubscriptionBadge';
 import { PrivacySetting } from '@/types/user';
 import ProfileAvatarSection from '@/components/profile/ProfileAvatarSection';
 
@@ -41,7 +42,6 @@ export default function ProfileContent({
   actions,
 }: ProfileContentProps) {
   const router = useRouter();
-
   return (
     <VStack className='gap-4'>
       <HStack className='items-center'>
@@ -55,19 +55,23 @@ export default function ProfileContent({
 
         {/* Username */}
         <VStack className='flex-1 self-start pt-6'>
-          <EditProfileTextFeature
-            type='username'
-            currentText={profile?.username || 'toto'}
-            size='3xl'
-            isEdit={permissions.canEdit && editProfile}
-          />
+        {permissions.canEdit && <SubscriptionBadge />}
+          <HStack className='items-center gap-3'>
+            <EditProfileTextFeature
+              type='username'
+              currentText={profile?.username || 'toto'}
+              size='2xl'
+              isEdit={permissions.canEdit && editProfile}
+              />
+          </HStack>
           {/* Music Genre */}
           {permissions.canViewMusicGenre && (
             <EditMusicTastes
-              currentText={profile?.music_genre || []}
-              isEdit={permissions.canEdit && editProfile}
+            currentText={profile?.music_genre || []}
+            isEdit={permissions.canEdit && editProfile}
             />
           )}
+          {/* Subscription Badge - only show on own profile */}
         </VStack>
       </HStack>
 

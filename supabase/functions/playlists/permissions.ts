@@ -61,6 +61,9 @@ export function canUserPerformAction(role: string | null, permission: string, pl
       return role === ROLES.OWNER;
 
     case PERMISSIONS.ADD_USER:
+      if (playlist.can_invite === false) {
+        return false;
+      }
       if (!playlist.is_private) {
         return true;
       }
@@ -113,7 +116,9 @@ export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) 
   }
 
   const userRole = getUserRoleInPlaylist(playlist, userId);
-  if (!userRole) {
+  if (userRole === ROLES.NONE) {
     throw new HTTPException(403, { message: 'Access denied to private playlist' });
   }
+
+  return playlist;
 }

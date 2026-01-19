@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getErrorMsg } from '@/utils/getErrorMsg';
 import { getPlaylistById, deletePlaylistById } from '@/services/playlist';
 
@@ -7,71 +7,58 @@ import { getPlaylistById, deletePlaylistById } from '@/services/playlist';
 // -------------------------------------------------------------------
 
 export function usePlaylist(id: string | null) {
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [canEdit, setCanEdit] = useState(false);
-  const [canInvite, setCanInvite] = useState(false);
+  const queryClient = useQueryClient();
+  const queryKey = ['playlist', id];
 
   // ---------------------------------------------------------------
   // Fetch playlist (GET)
   // ---------------------------------------------------------------
-  const fetchPlaylist = useCallback(async () => {
-    if (!id) {
-      setLoading(false);
-      setError(null);
-      setPlaylist(null);
-      return;
-    }
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getPlaylistById(id);
-      setPlaylist(data);
-      setCanEdit(data.user.can_edit ?? false);
-      setCanInvite(data.user.can_invite ?? false);
-    } catch (err) {
-      setError(getErrorMsg(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchPlaylist();
-  }, [fetchPlaylist]);
-
-  const refetch = useCallback(() => {
-    fetchPlaylist();
-  }, [fetchPlaylist]);
+  const {
+    data: playlist,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey,
+    queryFn: () => (id ? getPlaylistById(id) : null),
+    enabled: !!id,
+  });
 
   // ---------------------------------------------------------------
   // Remove Playlist (DELETE)
   // ---------------------------------------------------------------
-  const deletePlaylist = useCallback(async () => {
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!id) throw new Error("No playlist ID");
+      return deletePlaylistById(id)
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(queryKey, null);
+    },
+  });
+
+  const deletePlaylist = async () => {
     if (!id) return;
-
-    setLoading(true);
-    setError(null);
-
     try {
-      await deletePlaylistById(id);
-      setPlaylist(null);
-    } catch (e: any) {
-      setError(`delete playlist error: ${e.message ?? e}`);
+      await deleteMutation.mutateAsync();
+    } catch (e) {
       console.error('Delete playlist error:', e);
-    } finally {
-      setLoading(false);
     }
-  }, [id]);
+  };
+
+  const combinedError = error
+    ? getErrorMsg(error)
+    : deleteMutation.error
+      ? getErrorMsg(deleteMutation.error)
+      : null;
 
   return {
-    playlist,
-    loading,
-    error,
+    playlist: playlist ?? null,
+    loading: loading || deleteMutation.isPending,
+    error: combinedError,
     refetch,
     deletePlaylist,
-    canEdit,
-    canInvite,
+    canEdit: playlist?.user?.can_edit ?? false,
+    canInvite: playlist?.user?.can_invite ?? false,
   };
 }

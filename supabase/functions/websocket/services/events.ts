@@ -1,5 +1,5 @@
-import { formatDbError } from '../../../utils/postgres_errors_map.ts';
-
+import { formatDbError } from '@postgres/postgres_errors_map';
+import type { EventResponse } from "@event";
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -9,13 +9,18 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
-export async function getEventSupabase(eventId: string, selectFields = '*') {
+export async function getEventSupabase(eventId: string, selectFields = '*'):
+    Promise<{
+    success: boolean;
+    data?: any;
+    message?: string
+}> {
     try {
         const { data, error } = await supabase
         .from('events')
-        .select(selectFields)
+        .select(selectFields + ', location:location(id, venuename, lat:locations_lat, long:locations_long)')
         .eq('id', eventId)
-        .single();
+        .maybeSingle();
 
         if (error) {
             console.error('Error fetching event:', error);

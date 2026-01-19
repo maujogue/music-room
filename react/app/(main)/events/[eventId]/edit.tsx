@@ -6,6 +6,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEvent } from '@/hooks/useEvent';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import { useAppToast } from '@/hooks/useAppToast';
 
 export default function EditEvent() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function EditEvent() {
   const { eventId: eventId } = useLocalSearchParams();
   const id = Array.isArray(eventId) ? eventId[0] : eventId;
   const { data, loading, error, setError } = useEvent(id);
+  const toast = useAppToast();
 
   const onSubmit = async (payload: MusicEventPayload) => {
     if (!profile) {
@@ -27,9 +29,20 @@ export default function EditEvent() {
       if (router.canGoBack()) {
         router.back();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error editing event:', error);
-      setError(`Error editing event: ${error}`);
+      const errorStatus = error?.status;
+      const errorMessage = error?.message || `Error editing event: ${error}`;
+      
+      // Show toast for duplicate (409) or forbidden (403) errors
+      if (errorStatus === 409 || errorStatus === 403) {
+        toast.error({
+          title: 'Cannot update event',
+          description: errorMessage,
+        });
+      }
+      
+      setError(errorMessage);
       return;
     }
   };

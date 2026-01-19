@@ -1,35 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getSession } from '@/services/session';
 import { getCurrentUserPlaylists } from '@/services/playlist';
+import { getErrorMsg } from '@/utils/getErrorMsg';
 
 export function useUserPlaylists() {
-  const [playlists, setPlaylists] = useState<Playlist[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPlaylists = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const {
+    data: playlists,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['user-playlists'],
+    queryFn: async () => {
       const session = await getSession();
       if (!session) throw new Error('Session retrieve error');
-      const data = await getCurrentUserPlaylists();
-      setPlaylists(data || []);
-    } catch (e) {
-      console.error('Error fetching playlists:', e);
-      setError('fetch playlists error');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return getCurrentUserPlaylists();
+    },
+    refetchInterval: 60000, // Background poll every 1 minute
+  });
 
-  const refetch = useCallback(() => {
-    fetchPlaylists();
-  }, [fetchPlaylists]);
-
-  useEffect(() => {
-    fetchPlaylists();
-  }, []);
-
-  return { playlists, refetch, loading, error };
+  return {
+    playlists: playlists ?? null,
+    refetch,
+    loading,
+    error: error ? getErrorMsg(error) : null
+  };
 }

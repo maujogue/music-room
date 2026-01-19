@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';

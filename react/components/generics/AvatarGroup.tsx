@@ -19,7 +19,7 @@ export function AvatarGroup({ users, onPress }: Props) {
   const avatars = uniqueUsers.map(user => ({
     src: user.avatar_url,
     alt: user.username,
-    color: 'bg-gray-600',
+    color: 'bg-primary-500',
   }));
 
   const extraAvatars = avatars.slice(3);

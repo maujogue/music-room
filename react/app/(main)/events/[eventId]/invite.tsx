@@ -88,9 +88,6 @@ export default function Invite() {
               Invite {selectedUser?.username} to event?
             </Heading>
           </AlertDialogHeader>
-          <AlertDialogCloseButton>
-            <Icon as={CloseIcon} size='md' />
-          </AlertDialogCloseButton>
           <AlertDialogBody className='mt-3 mb-4'>
             <Text size='sm'>
               Are you sure you want to invite {selectedUser?.username} to

@@ -5,6 +5,7 @@ import {
 } from '../services/votes.ts';
 import { getEventMemberDetails } from '../services/events.ts';
 import { sendErrorMessage, sendSuccessMessage } from './error.ts';
+import { getOwnerCurrentPlayingTrack } from "../services/player.ts";
 
 export interface WebSocketMessage {
   type: string;
@@ -24,11 +25,15 @@ export async function handleMessage(
   socket: WebSocket
 ): Promise<void> {
   try {
-    console.log('ws: message from user', { userId, msgType: message.type });
+    // incoming websocket message
 
     switch (message.type) {
       case 'ping':
-        handlePing(userEmail, socket);
+        handlePing(userId, socket, message);
+        break;
+
+      case 'event_current_track:get':
+        handleGetEventCurrentTrack(userId, socket, message);
         break;
 
       case 'vote':
@@ -48,7 +53,6 @@ export async function handleMessage(
         break;
 
       default:
-        console.log('ws: unhandled message type:', message.type);
         sendErrorMessage(socket, 'Unknown message type');
     }
   } catch (error) {
@@ -82,14 +86,28 @@ async function handleUserInfo(userId: string, message: WebSocketMessage, socket:
   }
 }
 
-function handlePing(userEmail: string, socket: WebSocket): void {
+async function handlePing(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
   try {
-    socket.send(JSON.stringify({
+    sendSuccessMessage(socket, {
       type: 'pong',
-      timestamp: Date.now(),
-      serverTime: new Date().toISOString(),
-      email: userEmail
-    }));
+    });
+  } catch (error) {
+    console.error('ws: error sending pong:', error);
+  }
+}
+
+async function handleGetEventCurrentTrack(userId: string, socket: WebSocket, message: WebSocketMessage): Promise<void> {
+  try {
+    const eventId = message.eventId as string;
+    const res = await getOwnerCurrentPlayingTrack(userId, eventId);
+    if (res.error) {
+      sendErrorMessage(socket, `Failed to fetch owner's currently playing track: ${res.error.message}`);
+      return;
+    }
+    sendSuccessMessage(socket, {
+      type: 'event_current_track:response',
+      track: res.data,
+    });
   } catch (error) {
     console.error('ws: error sending pong:', error);
   }
@@ -171,24 +189,24 @@ async function handleVoteMessage(
 }
 
 function isVoteMessage(message: WebSocketMessage): message is VoteMessage {
-  console.log('Checking if message is a vote message:', message);
+  // validate vote message
   return message.type === 'vote' &&
-         typeof message.eventId === 'string' &&
-         typeof message.trackId === 'string';
+    typeof message.eventId === 'string' &&
+    typeof message.trackId === 'string';
 }
 
 function isUnvoteMessage(message: WebSocketMessage): message is { type: 'unvote'; eventId: string; trackId: string; } {
   return message.type === 'unvote' &&
-         typeof message.eventId === 'string' &&
-         typeof message.trackId === 'string';
+    typeof message.eventId === 'string' &&
+    typeof message.trackId === 'string';
 }
 
-function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string;} {
+function isGetVoteMessage(message: WebSocketMessage): message is { type: 'vote:get'; eventId: string; } {
   return message.type === 'vote:get' &&
-         typeof message.eventId === 'string';
+    typeof message.eventId === 'string';
 }
 
-function isUserInfoMessage(message: WebSocketMessage): message is { type: 'user:info'; eventId: string;} {
+function isUserInfoMessage(message: WebSocketMessage): message is { type: 'user:info'; eventId: string; } {
   return message.type === 'user:info' &&
-         typeof message.eventId === 'string';
+    typeof message.eventId === 'string';
 }

@@ -19,6 +19,7 @@ interface Props {
   isSpotifySync?: boolean;
   onTrackDeleted?: () => void;
   canEdit?: boolean;
+  onAddTrackPress?: () => void;
 }
 
 export default function TrackList({
@@ -28,6 +29,7 @@ export default function TrackList({
   isSpotifySync = false,
   onTrackDeleted,
   canEdit,
+  onAddTrackPress,
 }: Props) {
   const router = useRouter();
 
@@ -42,10 +44,14 @@ export default function TrackList({
   );
 
   const handleAddTrackPress = () => {
-    router.push({
-      pathname: '/(main)/playlists/[playlistId]/tracks/add',
-      params: { playlistId, playlistTitle },
-    });
+    if (onAddTrackPress) {
+      onAddTrackPress();
+    } else {
+      router.push({
+        pathname: '/(main)/playlists/[playlistId]/tracks/add',
+        params: { playlistId, playlistTitle },
+      });
+    }
   };
 
   const handleSwipeableOpen = async (trackId: string) => {

@@ -1,5 +1,10 @@
 import EventDetail from '@/components/events/EventDetail';
+import { PlayerProvider } from '@/contexts/PlayerCtx';
 
 export default function EventDetailScreen() {
-  return <EventDetail />;
+  return (
+    <PlayerProvider>
+      <EventDetail />
+    </PlayerProvider>
+  );
 }

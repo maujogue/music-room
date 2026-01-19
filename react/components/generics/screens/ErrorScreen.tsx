@@ -31,15 +31,14 @@ export default function ErrorScreen({
     <Center className='flex-1 p-24'>
       <Card className='items-center rounded-xl'>
         <HStack space='md' className='items-center mb-8'>
-          <Badge size='sm' action={'error'} className='rounded-full h-6'>
+          <Badge size='sm' action='error' className='rounded-full h-6'>
             <BadgeIcon size='lg' as={TriangleAlertIcon} />
             <BadgeIcon size='lg' as={Music4Icon} />
           </Badge>
-          <Heading className='text-red-700 text-center'>
+          <Heading className='text-center text-red-700'>
             There is a wrong note in your music room
           </Heading>
-
-          <Badge size='sm' action={'error'} className='rounded-full h-6'>
+          <Badge size='sm' action='error' className='rounded-full h-6'>
             <BadgeIcon size='lg' as={Music2Icon} />
             <BadgeIcon size='lg' as={TriangleAlertIcon} />
           </Badge>

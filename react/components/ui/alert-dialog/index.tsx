@@ -48,7 +48,7 @@ cssInterop(MotionView, { className: 'style' });
 cssInterop(AnimatedPressable, { className: 'style' });
 
 const alertDialogStyle = tva({
-  base: 'group/modal w-full h-full justify-center items-center web:pointer-events-none',
+  base: 'group/modal w-full h-full justify-center items-center web:pointer-events-none absolute inset-0 z-[9999]',
   parentVariants: {
     size: {
       xs: '',
@@ -61,7 +61,7 @@ const alertDialogStyle = tva({
 });
 
 const alertDialogContentStyle = tva({
-  base: 'bg-background-0 rounded-lg overflow-hidden border border-outline-100 p-6',
+  base: 'bg-background-0 rounded-lg overflow-hidden border border-outline-100 p-6 z-[10000]',
   parentVariants: {
     size: {
       xs: 'w-[60%] max-w-[360px]',
@@ -88,7 +88,7 @@ const alertDialogFooterStyle = tva({
 const alertDialogBodyStyle = tva({ base: '' });
 
 const alertDialogBackdropStyle = tva({
-  base: 'absolute left-0 top-0 right-0 bottom-0 bg-background-dark web:cursor-default',
+  base: 'absolute left-0 top-0 right-0 bottom-0 bg-background-dark web:cursor-default z-[9998]',
 });
 
 type IAlertDialogProps = React.ComponentPropsWithoutRef<
