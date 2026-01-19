@@ -17,7 +17,6 @@ export async function fetchSpotifySearch(
       Authorization: `Bearer ${spotify_token}`,
     }
   });
-  console.log('Spotify search response status:', response);
   if (!response.ok) {
     const errorData = await response.json();
     throw new HTTPException(response.status, { message: errorData.error.message || 'Unknown error from Spotify API' });

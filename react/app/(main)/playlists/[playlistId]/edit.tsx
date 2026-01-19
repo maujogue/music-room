@@ -4,16 +4,17 @@ import { useLocalSearchParams } from 'expo-router';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import EditPlaylistForm from '@/components/playlist/EditPlaylistForm';
 import { Center } from '@/components/ui/center';
-import { ActivityIndicator } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { editPlaylistById } from '@/services/playlist';
+import { useAppToast } from '@/hooks/useAppToast';
 
 export default function EditPlaylist() {
   const router = useRouter();
   const [error, setError] = useState<string>('');
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
+  const toast = useAppToast();
 
-  const { playlist, loading, error: fetchError } = usePlaylist(playlistId);
+  const { playlist, error: fetchError } = usePlaylist(playlistId);
 
   const onSubmit = async (payload: PlaylistPayload) => {
     await editPlaylistById(playlistId, payload)
@@ -22,17 +23,20 @@ export default function EditPlaylist() {
       })
       .catch(err => {
         console.error('Error editing playlist:', err);
-        setError('Failed to edit playlist. Please try again.');
+        const errorStatus = err?.status;
+        const errorMessage = err?.message || 'Failed to edit playlist. Please try again.';
+        
+        // Show toast for duplicate (409) or forbidden (403) errors
+        if (errorStatus === 409 || errorStatus === 403) {
+          toast.error({
+            title: 'Cannot update playlist',
+            description: errorMessage,
+          });
+        }
+        
+        setError(errorMessage);
       });
   };
-
-  if (loading) {
-    return (
-      <Center>
-        <ActivityIndicator size='large' />
-      </Center>
-    );
-  }
 
   if (fetchError) {
     return (
@@ -51,10 +55,12 @@ export default function EditPlaylist() {
   }
 
   return (
-    <EditPlaylistForm
-      initialValues={playlist}
-      onSubmit={onSubmit}
-      ApiError={error}
-    />
+    <>
+      <EditPlaylistForm
+        initialValues={playlist}
+        onSubmit={onSubmit}
+        ApiError={error}
+      />
+    </>
   );
 }

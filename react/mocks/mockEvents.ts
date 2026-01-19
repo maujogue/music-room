@@ -22,6 +22,78 @@ export const MOCK_VOTES: EventVote[] = [
   },
 ];
 
+export const EVENT_RADAR_MOCK_RESULT = [
+  {
+    radar: {
+      coordinates: { lat: 45.7336, long: 4.822 },
+      dist: 3.42,
+    },
+    event: {
+      id: 'evt_confluence',
+      name: 'Sunset Chill @ Confluence',
+      owner_id: 'u1',
+      is_private: false,
+      everyone_can_vote: true,
+      description: 'Apéro chill au bord de Saône, ambiance coucher de soleil.',
+      image_url: 'https://picsum.photos/seed/confluence/800/600',
+      created_at: '2025-10-27T18:00:00.000Z',
+      beginning_at: '2025-10-28T18:00:00.000Z',
+    },
+    owner: {
+      id: 'u1',
+      username: 'Alice',
+      email: 'alice@example.com',
+      avatar_url: 'https://i.pravatar.cc/150?img=1',
+    },
+  },
+  {
+    radar: {
+      coordinates: { lat: 45.7797, long: 4.8271 },
+      dist: 1.85,
+    },
+    event: {
+      id: 'evt_croixrousse',
+      name: 'Groove sur les pentes',
+      owner_id: 'u2',
+      is_private: false,
+      everyone_can_vote: true,
+      description: 'Session funk & disco sur les hauteurs de Lyon.',
+      image_url: 'https://picsum.photos/seed/croixrousse/800/600',
+      created_at: '2025-10-27T18:00:00.000Z',
+      beginning_at: '2025-10-29T18:00:00.000Z',
+    },
+    owner: {
+      id: 'u2',
+      username: 'Bob',
+      email: 'bob@example.com',
+      avatar_url: 'https://i.pravatar.cc/150?img=5',
+    },
+  },
+  {
+    radar: {
+      coordinates: { lat: 45.7666, long: 4.879 },
+      dist: 3.12,
+    },
+    event: {
+      id: 'evt_villeurbanne',
+      name: 'Party Villeurbanne',
+      owner_id: 'u3',
+      is_private: true,
+      everyone_can_vote: false,
+      description: 'Soirée privée – uniquement sur invitation.',
+      image_url: 'https://picsum.photos/seed/villeurbanne/800/600',
+      created_at: '2025-10-27T18:00:00.000Z',
+      beginning_at: '2025-10-30T18:00:00.000Z',
+    },
+    owner: {
+      id: 'u3',
+      username: 'Chloé',
+      email: 'chloe@example.com',
+      avatar_url: 'https://i.pravatar.cc/150?img=15',
+    },
+  },
+];
+
 export const MOCK_EVENTS: MusicEvent[] = [
   {
     id: '0',

@@ -1,4 +1,11 @@
-export function validateEventPayload(payload: unknown, opts: { requireName: boolean, requireDateTime?: boolean } = { requireName: true }): { valid: boolean, message?: string } {
+export function validateEventPayload(
+  payload: unknown, opts: 
+  { 
+    requireName: boolean, 
+    requireDateTime?: boolean, 
+    requireLocation?: boolean,
+    requirePlaylist?: boolean
+  } = { requireName: true }): { valid: boolean, message?: string } {
   const p = payload as any;
   if (!payload || typeof payload !== 'object') {
     return { valid: false, message: 'Invalid payload' }
@@ -10,6 +17,20 @@ export function validateEventPayload(payload: unknown, opts: { requireName: bool
   } else if (p.name !== undefined) {
     if (p.name !== null && (typeof p.name !== 'string' || p.name.trim().length < 3)) {
       return { valid: false, message: 'If provided, name must be at least 3 characters long' }
+    }
+  }
+
+  if (opts.requireLocation && !p.location.coordinates) {
+    return {
+      valid: false,
+      message: 'Coordinates is required'
+    }
+  }
+
+  if (opts.requirePlaylist && !p.playlist_id) {
+    return {
+      valid: false,
+      message: 'Playlist is required'
     }
   }
 
@@ -47,6 +68,14 @@ export function validateEventPayload(payload: unknown, opts: { requireName: bool
 
   if (p.everyone_can_vote !== undefined && p.everyone_can_vote !== null) {
     if (typeof p.everyone_can_vote !== 'boolean') return { valid: false, message: 'everyone_can_vote must be a boolean or null' }
+  }
+
+  if (p.done !== undefined && p.done !== null) {
+    if (typeof p.done !== 'boolean') return { valid: false, message: 'done must be a boolean or null' }
+  }
+
+  if (p.spatio_licence !== undefined && p.spatio_licence !== null) {
+    if (typeof p.spatio_licence !== 'boolean') return { valid: false, message: 'spatio_licence must be a boolean or null' }
   }
 
   return { valid: true }

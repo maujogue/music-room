@@ -11,10 +11,13 @@ import { getCurrentUser, getUserSpotifyToken } from '@auth/utils';
 import meRoutes from './routes.ts';
 import { Context } from "node:vm";
 import type { StatusCode } from "@hono/hono/utils/http-status";
+import { loggingMiddleware } from '../utils/loggingMiddleware.ts'
 
 const app = new Hono();
 
 serve(app.fetch);
+
+app.use("*", loggingMiddleware);
 
 declare module '@hono/hono' {
   interface ContextVariableMap {

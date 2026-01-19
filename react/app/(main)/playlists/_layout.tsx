@@ -1,6 +1,5 @@
 import { Stack } from 'expo-router';
-import CancelButton from '@/components/generics/CancelButton';
-import PlaylistMenu from '@/components/playlist/PlaylistMenu';
+import BackNavButton from '@/components/generics/BackNavButton';
 
 export default function PlaylistLayout() {
   return (
@@ -9,8 +8,7 @@ export default function PlaylistLayout() {
         name='index'
         options={{
           title: 'My Playlists',
-          headerShadowVisible: false,
-          headerRight: () => <PlaylistMenu />,
+          headerShown: false,
         }}
       />
 
@@ -24,10 +22,9 @@ export default function PlaylistLayout() {
       <Stack.Screen
         name='add'
         options={{
-          presentation: 'modal',
           title: 'New Playlist',
           headerBackVisible: false,
-          headerRight: () => <CancelButton />,
+          headerLeft: () => <BackNavButton />,
         }}
       />
     </Stack>

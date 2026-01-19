@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { HTTPException } from '@hono/http-exception';
 import { formatDbError } from '@postgres/postgres_errors_map';
-import type { 
-  ProfileResponse, 
-  ProfileWithFollowInfo, 
+import type {
+  ProfileResponse,
+  ProfileWithFollowInfo,
   ProfileSupabaseResponse,
 } from '@profile';
 
@@ -20,7 +20,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 export async function getUserProfile(
   userId: string
 ): Promise<ProfileResponse> {
-  console.log('getUserProfile called with userId:', userId);
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
@@ -34,7 +33,6 @@ export async function getUserProfile(
   }
 
   const { followers, following } = await getUserFollows(userId);
-  console.log('Fetched followers and following for userId:', userId);
   let is_connected_to_spotify = !!profile.spotify_access_token;
   if (is_connected_to_spotify) {
     if (new Date(profile.spotify_token_expires_at) < new Date()) {
@@ -42,7 +40,6 @@ export async function getUserProfile(
     }
   }
 
-  console.log('is_connected_to_spotify for userId', userId, ':', is_connected_to_spotify);
   const {
     spotify_access_token: _sat,
     spotify_refresh_token: _srt,
@@ -57,7 +54,6 @@ export async function getUserProfile(
     following: following || [],
   };
 
-  console.log('getUserProfile res:', res);
   return res;
 }
 
@@ -73,25 +69,21 @@ export async function getUserProfileWithFollows(
 
   const followsData = await getUserFollows(targetUserId, currentUserId);
   if (!followsData) {
-    console.error('Error fetching follows data for userId:', targetUserId);
     return {
-        ...profileRes,
-        is_following: false,
-        is_follower: false,
-        is_friend: false,
-        followers: [],
-        following: [],
-      };
+      ...profileRes,
+      is_following: false,
+      is_follower: false,
+      is_friend: false,
+      followers: [],
+      following: [],
+    };
   }
-
-  console.log('Follows data fetched for userId:', followsData);
   const followers = followsData.followers || [];
   const following = followsData.following || [];
 
   const is_following = followers.some((f) => f.id === currentUserId);
   const is_follower = following.some((f) => f.id === currentUserId);
 
-  console.log(`User ${currentUserId} following status for ${targetUserId}: is_following=${is_following}, is_follower=${is_follower}`);
   return {
     ...profileRes,
     is_following,
@@ -127,7 +119,7 @@ export async function getUserFollows(
   userId: string,
   currentUserId?: string
 ): Promise<{ followers: ProfileResponse[]; following: ProfileResponse[] }> {
-  const followers = await getUserFollowers(userId); 
+  const followers = await getUserFollowers(userId);
   const following = await getUserFollowing(userId);
 
   if (!currentUserId) {
@@ -137,41 +129,41 @@ export async function getUserFollows(
   const { followingSet, followersSet } = await getUserRelationships(currentUserId);
 
   followers.map((follow) => {
-      const followerId = follow.id;
-      const isFollowing = followingSet.has(followerId);
-      const isFollower = followersSet.has(followerId);
+    const followerId = follow.id;
+    const isFollowing = followingSet.has(followerId);
+    const isFollower = followersSet.has(followerId);
 
-      return {
-        id: followerId,
-        username: follow.username,
-        avatar_url: follow.avatar_url,
-        created_at: follow,
-        is_follower: isFollower,
-        is_following: isFollowing,
-        is_friend: isFollowing && isFollower,
-      };
-    }) || [];
+    return {
+      id: followerId,
+      username: follow.username,
+      avatar_url: follow.avatar_url,
+      created_at: follow,
+      is_follower: isFollower,
+      is_following: isFollowing,
+      is_friend: isFollowing && isFollower,
+    };
+  }) || [];
 
   following.map((follow) => {
-      const followingId = follow.id;
-      const isFollowing = followingSet.has(followingId);
-      const isFollower = followersSet.has(followingId);
+    const followingId = follow.id;
+    const isFollowing = followingSet.has(followingId);
+    const isFollower = followersSet.has(followingId);
 
-      return {
-        id: followingId,
-        username: follow.username,
-        avatar_url: follow.avatar_url,
-        is_follower: isFollower,
-        is_following: isFollowing,
-        is_friend: isFollowing && isFollower,
-      };
-    }) || [];
+    return {
+      id: followingId,
+      username: follow.username,
+      avatar_url: follow.avatar_url,
+      is_follower: isFollower,
+      is_following: isFollowing,
+      is_friend: isFollowing && isFollower,
+    };
+  }) || [];
 
   return { followers, following };
 }
 
 async function getUserRelationships(userId: string): Promise<{ followingSet: Set<string>; followersSet: Set<string> }> {
-    const [currentUserFollowsResult, currentUserFollowersResult] =
+  const [currentUserFollowsResult, currentUserFollowersResult] =
     await Promise.all([
       supabase
         .from('follows')
@@ -205,9 +197,9 @@ async function getUserRelationships(userId: string): Promise<{ followingSet: Set
 
 async function getUserFollowers(userId: string): Promise<ProfileWithFollowInfo[]> {
   const { data, error } = await supabase
-      .from('follows')
-      .select(
-        `
+    .from('follows')
+    .select(
+      `
         created_at,
         follower:profiles!follows_follower_id_fkey(
           id,
@@ -215,9 +207,9 @@ async function getUserFollowers(userId: string): Promise<ProfileWithFollowInfo[]
           avatar_url
         )
       `
-      )
-      .eq('following_id', userId)
-      .order('created_at', { ascending: false })
+    )
+    .eq('following_id', userId)
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching followers:', error);
@@ -245,9 +237,9 @@ async function getUserFollowers(userId: string): Promise<ProfileWithFollowInfo[]
 
 async function getUserFollowing(userId: string): Promise<ProfileWithFollowInfo[]> {
   const { data, error } = await supabase
-      .from('follows')
-      .select(
-        `
+    .from('follows')
+    .select(
+      `
         created_at,
         following:profiles!follows_following_id_fkey(
           id,
@@ -255,9 +247,9 @@ async function getUserFollowing(userId: string): Promise<ProfileWithFollowInfo[]
           avatar_url
         )
       `
-      )
-      .eq('follower_id', userId)
-      .order('created_at', { ascending: false })
+    )
+    .eq('follower_id', userId)
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching following:', error);

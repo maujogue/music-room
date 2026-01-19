@@ -3,8 +3,8 @@ CREATE EXTENSION IF NOT EXISTS pgtap;
 
 -- Create a table for public profiles
 create table if not exists public.profiles (
-  id uuid references auth.users not null primary key,
-  username text unique,
+  id uuid not null primary key references auth.users(id) on delete cascade,
+  username text,
   email text,
   avatar_url text,
   bio text,
@@ -18,7 +18,7 @@ create table if not exists public.profiles (
 create table if not exists public.oauth_state (
     id uuid primary key default gen_random_uuid(),
     state text not null unique,
-    user_id uuid references auth.users,
+    user_id uuid references auth.users(id) on delete cascade,
     created_at timestamp with time zone default timezone('utc'::text, now())
 );
 

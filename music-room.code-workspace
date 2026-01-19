@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "path": "./react"
+    },
+    {
+      "path": "./supabase"
+    },
+    {
+      "name": "config",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "react": true,
+      "supabase": true,
+      "**/.cursor": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/node_modules": true,
+      "**/android": true,
+      "**/ios": true,
+      "**/build": true,
+      "**/.branches": true,
+      "**/.temp": true,
+      "**/.expo": true
+    },
+    "deno.enable": true
+  }
+}

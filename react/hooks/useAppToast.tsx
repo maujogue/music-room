@@ -31,6 +31,7 @@ export function useAppToast() {
             title={title}
             description={description}
             variant='solid'
+            placement={placement}
           />
         ),
       });

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
+import MapView, { Marker, MapPressEvent, Region, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   Modal,
@@ -26,6 +26,48 @@ type Props = {
   initialCoords?: Coords;
 };
 
+async function getInitialCenter(
+  initialCoords?: Coords
+): Promise<Coords> {
+
+  const googleFallback = { latitude: 37.4221, longitude: -122.0581 }
+  
+  if (initialCoords) return initialCoords;
+
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') {
+    return googleFallback;
+  }
+
+  try {
+    const pos = await Promise.race([
+      Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout GPS')), 5000)
+      ),
+    ]);
+    return {
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+    };
+  } catch {
+    try {
+      const last = await Location.getLastKnownPositionAsync();
+      if (last) {
+        return {
+          latitude: last.coords.latitude,
+          longitude: last.coords.longitude,
+        };
+      }
+    } catch {
+    }
+
+    return googleFallback;
+  }
+}
+
 export default function LocationPickerModal({
   isOpen,
   onClose,
@@ -38,43 +80,32 @@ export default function LocationPickerModal({
   const [address, setAddress] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  // init: permission + region
   useEffect(() => {
-    if (!isOpen) return;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setError('Permission localisation refused.');
-        }
+  if (!isOpen) return;
 
-        let center = initialCoords ?? null;
-        if (!center) {
-          try {
-            const { coords } = await Location.getCurrentPositionAsync({});
-            center = { latitude: coords.latitude, longitude: coords.longitude };
-          } catch {
-            center = { latitude: 45.75, longitude: 4.85 }; // Lyon
-          }
-        }
+  (async () => {
+    setLoading(true);
+    setError(null);
 
-        setRegion({
-          latitude: center.latitude,
-          longitude: center.longitude,
-          latitudeDelta: 0.02,
-          longitudeDelta: 0.02,
-        });
-        setPicked(null);
-        setAddress(undefined);
-      } catch (e: any) {
-        setError(e?.message ?? 'Error initializing map.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [isOpen, initialCoords]);
+    try {
+      const center = await getInitialCenter(initialCoords);
+
+      setRegion({
+        latitude: center.latitude,
+        longitude: center.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      });
+
+      setPicked(null);
+      setAddress(undefined);
+    } catch (e: any) {
+      setError(e?.message ?? 'Error initializing map.');
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, [isOpen, initialCoords]);
 
   const doReverse = useCallback(async (c: Coords) => {
     try {
@@ -146,6 +177,7 @@ export default function LocationPickerModal({
                 {region && (
                   <Box className='h-full w-full'>
                     <MapView
+                      provider={PROVIDER_GOOGLE}
                       style={{ flex: 1 }}
                       initialRegion={region}
                       onPress={handlePress}

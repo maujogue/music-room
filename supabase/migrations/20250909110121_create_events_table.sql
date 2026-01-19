@@ -1,16 +1,26 @@
+-- Create a dedicated separate schema
+create schema if not exists "gis";
+-- Enable the "postgis" extension
+create extension postgis with schema "gis";
+
+GRANT USAGE ON SCHEMA gis TO authenticated, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA gis TO authenticated, service_role;
+
 -- Events table
 CREATE TABLE IF NOT EXISTS public.events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text UNIQUE,
   image_url text,
   description text,
-  playlist_id text,
+  playlist_id text NOT NULL,
   owner_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
   constraint name_length CHECK (char_length(name) >= 3),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
   beginning_at timestamp with time zone NOT NULL,
   is_private boolean DEFAULT false,
-  everyone_can_vote boolean DEFAULT true
+  everyone_can_vote boolean DEFAULT true,
+  spatio_licence boolean DEFAULT false,
+  done boolean DEFAULT false
 );
 
 -- Junction table for event members
@@ -28,13 +38,17 @@ CREATE TABLE IF NOT EXISTS public.event_members (
 CREATE TABLE IF NOT EXISTS public.location (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID REFERENCES events(id) ON DELETE CASCADE UNIQUE,
-  coordinates POINT,
+  coordinates gis.geography(POINT) NOT NULL,
   venueName TEXT,
   complement TEXT,
   address TEXT,
   city TEXT,
   country TEXT
 );
+
+create index location_geo_index
+  on public.location
+  using GIST (coordinates);
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_event_members_event_id ON event_members(event_id);
@@ -73,7 +87,17 @@ BEGIN
   LIMIT 1;
 
   -- Location: single row_to_json if exists
-  SELECT row_to_json(l.*) INTO location_json
+  SELECT jsonb_build_object(
+    'venuename', l.venuename,
+    'coordinates', jsonb_build_object(
+      'lat', gis.ST_Y(l.coordinates::gis.geometry),
+      'long', gis.ST_X(l.coordinates::gis.geometry)
+    ),
+    'complement', l.complement,
+    'city', l.city,
+    'country', l.country,
+    'address', l.address
+  ) INTO location_json 
   FROM location l
   WHERE l.event_id = p_event_id
   LIMIT 1;
@@ -448,4 +472,78 @@ BEGIN
     END IF;
   END IF;
 END;
+$$;
+
+CREATE OR REPLACE FUNCTION nearby_events(p_lat FLOAT, p_long FLOAT, p_range_km INTEGER)
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  beginning_at TIMESTAMP WITH TIME ZONE,
+  description TEXT,
+  venuename TEXT,
+  everyone_can_vote BOOLEAN,
+  image_url TEXT,
+  spatio_licence BOOLEAN,
+  done BOOLEAN,
+  lat FLOAT,
+  long FLOAT,
+  dist_meters FLOAT,
+  owner_id UUID,
+  owner_username TEXT,
+  owner_avatar_url TEXT
+)
+LANGUAGE sql
+AS $$
+  SELECT
+    e.id,
+    e.name,
+    e.beginning_at,
+    e.description,
+    l.venuename,
+    e.everyone_can_vote,
+    e.image_url,
+    e.spatio_licence,
+    e.done,
+    gis.st_y(l.coordinates::gis.geometry) AS lat,
+    gis.st_x(l.coordinates::gis.geometry) AS long,
+    gis.st_distance(
+      l.coordinates,
+      gis.st_setsrid(gis.st_makepoint(p_long, p_lat), 4326)::gis.geography
+    ) AS dist_meters,
+    p.id as owner_id,
+    p.username as owner_username,
+    p.avatar_url as owner_avatar_url
+  FROM public.events e
+  JOIN public.location l ON l.event_id = e.id
+  JOIN public.profiles p ON p.id = e.owner_id
+  WHERE gis.st_distance(
+    l.coordinates,
+    gis.st_setsrid(gis.st_makepoint(p_long, p_lat), 4326)::gis.geography
+  ) <= p_range_km * 1000
+  AND NOT e.is_private
+  ORDER BY l.coordinates operator(gis.<->) gis.st_point(p_long, p_lat)::gis.geography;
+$$;
+
+
+-- To convert lat & long from geography --
+CREATE OR REPLACE FUNCTION locations_long(l location)
+RETURNS double precision
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT CASE
+           WHEN l.coordinates IS NULL THEN NULL
+           ELSE gis.st_x(l.coordinates::gis.geometry)
+         END
+$$;
+
+CREATE OR REPLACE FUNCTION locations_lat(l location)
+RETURNS double precision
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT CASE
+           WHEN l.coordinates IS NULL THEN NULL
+           ELSE gis.st_y(l.coordinates::gis.geometry)
+         END
 $$;
