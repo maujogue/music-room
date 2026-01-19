@@ -37,7 +37,9 @@ export function useEventCoordinates(event: any | null) {
   }, [event]);
 }
 
-export function isValidCoordinateObject(value: any): value is { lat: number; long: number } {
+export function isValidCoordinateObject(
+  value: any
+): value is { lat: number; long: number } {
   return (
     value &&
     typeof value === 'object' &&

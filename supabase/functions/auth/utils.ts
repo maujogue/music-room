@@ -5,7 +5,7 @@ import type { HonoRequest } from "@hono/hono";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 export function generateRandomString(length: number): string {
@@ -40,7 +40,7 @@ export async function getCurrentUser(req: HonoRequest): Promise<User> {
 }
 
 export async function getCurrentUserOptional(
-  req: HonoRequest
+  req: HonoRequest,
 ): Promise<User | null> {
   const authHeader = req.header("Authorization") || req.header("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -58,7 +58,7 @@ export async function getCurrentUserOptional(
 }
 
 export async function getUserSpotifyToken(
-  user_id: string
+  user_id: string,
 ): Promise<string | null> {
   const { data, error } = await supabase
     .from("profiles")
@@ -75,10 +75,10 @@ export async function getUserSpotifyToken(
   return data[0].spotify_access_token;
 }
 
-export async function refreshSpotifyToken(user_id: string): Promise<void> {
+export async function refreshSpotifyToken(user_id: string): Promise<string> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("spotify_refresh_token")
+    .select("spotify_refresh_token,spotify_access_token")
     .eq("id", user_id);
 
   if (error) {
@@ -121,9 +121,10 @@ export async function refreshSpotifyToken(user_id: string): Promise<void> {
   }
 
   const tokenData = await response.json();
+  const access_token = tokenData.access_token;
 
   const upsertData = {
-    spotify_access_token: tokenData.access_token,
+    spotify_access_token: access_token,
     spotify_token_expires_at: tokenData.expires_in
       ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
       : null,
@@ -140,4 +141,6 @@ export async function refreshSpotifyToken(user_id: string): Promise<void> {
       message: pgError.message || "Failed to update Spotify token",
     });
   }
+
+  return access_token;
 }
