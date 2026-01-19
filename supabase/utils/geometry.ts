@@ -1,4 +1,4 @@
-
+type Coordinates = { lat: number; long: number };
 
 export function geometryToCoordinates(geom: string | null | undefined): Coordinates | null {
   if (!geom) return null;

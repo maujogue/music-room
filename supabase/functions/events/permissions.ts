@@ -53,13 +53,13 @@ export function canUserPerformAction(
 ): boolean {
   switch (permission) {
     case PERMISSIONS.READ_EVENT:
-      if (!event.is_private) {
+      if (!event.event.is_private) {
         return true;
       }
       return !role;
 
     case PERMISSIONS.VOTE:
-      if (event.everyone_can_vote) {
+      if (event.event.everyone_can_vote) {
         return true;
       }
       if (!role || role === ROLES.MEMBER || role === ROLES.INVITER) {
@@ -71,7 +71,7 @@ export function canUserPerformAction(
       return role === ROLES.OWNER;
 
     case PERMISSIONS.ADD_USER:
-      if (!event.is_private) {
+      if (!event.event.is_private) {
         return true;
       }
       if (!role || role === ROLES.MEMBER || role === ROLES.VOTER) {
@@ -80,7 +80,7 @@ export function canUserPerformAction(
       return true;
 
     case PERMISSIONS.UNVOTE:
-      if (event.everyone_can_vote) {
+      if (event.event.everyone_can_vote) {
         return true;
       }
       if (!role || role === ROLES.MEMBER || role === ROLES.INVITER) {
@@ -131,7 +131,7 @@ export function checkEventAccess(event: EventResponse, userId: string) {
     throw new HTTPException(404, { message: 'Event not found' });
   }
 
-  if (!event.is_private) {
+  if (!event.event.is_private) {
     return event;
   }
 

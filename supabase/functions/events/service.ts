@@ -213,6 +213,32 @@ export async function uploadEventImage(uploadedFile: File): Promise<string> {
   return data?.path || path;
 }
 
+
+export async function getPublicUrlForPath(path: string): Promise<string> {
+  const localUrl = Deno.env.get('SUPABASE_URL') ?? "";
+
+  const { data, error } = await supabaseClient.storage
+    .from('avatars')
+    .createSignedUrl(path, 3600);
+
+  if (error) {
+    console.error('createSignedUrl error', error);
+    throw error;
+  }
+
+  if (!data?.signedUrl) {
+    throw new Error("No signed URL returned");
+  }
+
+  const publicUrl = data.signedUrl.replace(
+    'http://kong:8000/storage/v1',
+    `${localUrl}/storage/v1`
+  );
+
+  console.log('Public URL:', publicUrl);
+  return publicUrl;
+}
+
 export async function addUserToEventSupabase(
   eventId: string, userId: string, role: string): Promise<void> {
   const { error } = await supabaseClient.from('event_members')
