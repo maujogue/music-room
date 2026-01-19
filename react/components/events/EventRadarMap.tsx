@@ -214,7 +214,7 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
                   </BadgeText>
                 </Badge>
               </HStack>
-              <Text size='sm' className='text-neutral-600'>
+              <Text size='sm' className='text-neutral-600' numberOfLines={3}>
                 {selectedItem.event.description}
               </Text>
               <HStack className='items-center px-2'>
