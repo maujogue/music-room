@@ -71,11 +71,9 @@ export default function EditProfileTextFeature({
         className={`w-full gap-2 items-center ${size === 'md' ? 'h-10' : 'h-15'}`}
       >
         {currentText.length > 0 ? (
-          <HStack>
-            <Heading size={size} className='my-1 mx-3 flex-1'>
-              {currentText}
-            </Heading>
-          </HStack>
+          <Heading size={size} className='my-1 mx-3 flex-1'>
+            {currentText}
+          </Heading>
         ) : (
           <Text style={{ color: '#888' }} className='my-1 mx-3 flex-1'>
             No {type} yet
