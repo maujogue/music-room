@@ -290,6 +290,9 @@ export default function EditEventForm({
                     placeholder='Event description'
                     value={description}
                     onChangeText={setDescription}
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical='top'
                     autoCapitalize='sentences'
                     style={{ minHeight: 120 }}
                   />
