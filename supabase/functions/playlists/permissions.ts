@@ -110,7 +110,6 @@ export function checkPlaylistAccess(playlist: PlaylistResponse, userId: string) 
   if (!playlist) {
     throw new HTTPException(404, { message: 'Playlist not found' });
   }
-
   if (!playlist.is_private) {
     return playlist;
   }

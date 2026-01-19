@@ -1,11 +1,12 @@
 import { assertStrictEquals } from "https://deno.land/std@0.203.0/testing/asserts.ts";
+import type { PlaylistRow } from '@playlist';
 
 import {
   ROLES,
   PERMISSIONS,
   canUserPerformAction,
 } from "../../../functions/events/permissions.ts";
-import type { PlaylistRow } from '@playlist';
+
 import { EventResponse,
   EventLocation,
   Coordinates,
@@ -13,6 +14,8 @@ import { EventResponse,
   EventMember,
   EventRole }
 from "@event";
+
+
 
 const mockEventRole: EventRole = 'member'
 
@@ -122,14 +125,12 @@ Deno.test("VOTE - restricted vote", () => {
 });
 
 Deno.test("DELETE_EVENT - only owner can delete", () => {
-  const event = {};
   assertStrictEquals(canUserPerformAction(ROLES.OWNER, PERMISSIONS.DELETE_EVENT, mockEvent), true);
   assertStrictEquals(canUserPerformAction(ROLES.MEMBER, PERMISSIONS.DELETE_EVENT, mockEvent), false);
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.DELETE_EVENT, mockEvent), false);
 });
 
 Deno.test("ADD_USER - public event - anyone can add", () => {
-  const event = { is_private: false };
   mockEvent.event.is_private = false;
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.ADD_USER, mockEvent), true);
   assertStrictEquals(canUserPerformAction(ROLES.MEMBER, PERMISSIONS.ADD_USER, mockEvent), true);
@@ -137,7 +138,6 @@ Deno.test("ADD_USER - public event - anyone can add", () => {
 });
 
 Deno.test("ADD_USER - private event - only inviter/owner can add", () => {
-  const event = { is_private: true };
   mockEvent.event.is_private = true;
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.ADD_USER, mockEvent), false);
   assertStrictEquals(canUserPerformAction(ROLES.MEMBER, PERMISSIONS.ADD_USER, mockEvent), false);
@@ -162,27 +162,23 @@ Deno.test("UNVOTE - restricted vote => only certain roles can unvote", () => {
 });
 
 Deno.test("UPDATE_USER_ROLE - only owner", () => {
-  const event = {};
   assertStrictEquals(canUserPerformAction(ROLES.OWNER, PERMISSIONS.UPDATE_USER_ROLE, mockEvent), true);
   assertStrictEquals(canUserPerformAction(ROLES.MEMBER, PERMISSIONS.UPDATE_USER_ROLE, mockEvent), false);
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.UPDATE_USER_ROLE, mockEvent), false);
 });
 
 Deno.test("REMOVE_USER - only owner", () => {
-  const event = {};
   assertStrictEquals(canUserPerformAction(ROLES.OWNER, PERMISSIONS.REMOVE_USER, mockEvent), true);
   assertStrictEquals(canUserPerformAction(ROLES.INVITER, PERMISSIONS.REMOVE_USER, mockEvent), false);
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.REMOVE_USER, mockEvent), false);
 });
 
 Deno.test("EDIT_EVENT - only owner", () => {
-  const event = {};
   assertStrictEquals(canUserPerformAction(ROLES.OWNER, PERMISSIONS.EDIT_EVENT, mockEvent), true);
   assertStrictEquals(canUserPerformAction(ROLES.MEMBER, PERMISSIONS.EDIT_EVENT, mockEvent), false);
   assertStrictEquals(canUserPerformAction(null, PERMISSIONS.EDIT_EVENT, mockEvent), false);
 });
 
 Deno.test("Unknown permission returns false", () => {
-  const event = {};
   assertStrictEquals(canUserPerformAction(ROLES.OWNER, "unknown_permission", mockEvent), false);
 });

@@ -1,10 +1,11 @@
+import type { PlaylistRow } from '@playlist';
+
 import { assertStrictEquals } from "https://deno.land/std@0.203.0/testing/asserts.ts";
 
 import {
   ROLES,
   getUserRoleInEvent,
 } from "../../../functions/events/permissions.ts";
-import type { PlaylistRow } from '@playlist';
 
 import { EventResponse,
   EventLocation,
@@ -13,6 +14,8 @@ import { EventResponse,
   EventMember,
   EventRole }
 from "@event";
+
+
 
 const mockEventRole: EventRole = 'member'
 
