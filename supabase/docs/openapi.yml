@@ -7,6 +7,8 @@ info:
     url: https://music-room/license
 
 servers:
+  - url: https://fhqnkxcbmlvcnvfhttmx.supabase.co/functions/v1
+    description: Remote Supabase Edge functions
   - url: http://localhost:54321/functions/v1
     description: Local Supabase Edge functions
 
