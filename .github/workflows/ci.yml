@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  pre-commit-equivalent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install React app dependencies
+        run: npm ci
+        working-directory: react
+
+      - name: Install Supabase tests dependencies
+        run: npm install
+        working-directory: supabase/functions/tests
+
+      - name: Lint
+        run: make lint
+
+      - name: Format
+        run: make format-check
+
+      - name: Ensure formatting is clean
+        run: git diff --exit-code
+
+      - name: Test
+        run: make test
