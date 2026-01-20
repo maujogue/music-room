@@ -30,7 +30,7 @@ export function getUserRoleInEvent(
   }
 
   const member = event.members?.find((member: EventMember) =>
-    member.id === userId
+    member.profile.id === userId
   );
   if (member) {
     switch (member.role) {
@@ -133,6 +133,8 @@ export async function checkPermission(
 }
 
 export function checkEventAccess(event: EventResponse, userId: string) {
+
+  console.log("[checkEventAccess] for event : ", event.name, "to user : ", userId)
   if (!event) {
     throw new HTTPException(404, { message: "Event not found" });
   }
@@ -143,6 +145,7 @@ export function checkEventAccess(event: EventResponse, userId: string) {
 
   const userRole = getUserRoleInEvent(event, userId);
   if (!userRole) {
-    throw new HTTPException(403, { message: "Access denied to private event" });
+    console.log("[checkEventAccess] YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    throw new HTTPException(403, { message: `UserRole[${userRole}]UUUUUUUUUUUUUUUUU@@@@@@Access denied to private event` });
   }
 }
