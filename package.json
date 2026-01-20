@@ -4,7 +4,10 @@
   "description": "A React Native mobile application built with Expo and Supabase, featuring user authentication, profile management, and a modern UI design.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "husky install",
+    "lint": "make lint",
+    "format": "make format",
+    "test": "make test"
   },
   "repository": {
     "type": "git",
