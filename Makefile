@@ -246,8 +246,6 @@ test: test-react test-supabase-local test-supabase-sql-local
 
 test-cloud: test-react test-supabase-cloud test-supabase-sql-cloud
 
-test-ci-cd: test-react test-supabase-sql-cloud test-supabase-cloud-no-env
-
 
 test-react:
 	cd ${REACT_APP_DIR} && npm test
@@ -272,16 +270,15 @@ env-react-prod:
 env-react-dev:
 	cd ${REACT_APP_DIR} && cp .env.dev .env
 
-test-supabase-cloud-no-env:
-	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --filter "^(?!spotify integration:)" --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
 
-test-supabase-cloud: env-supabase-prod test-supabase-cloud-no-env
+test-supabase-cloud: env-supabase-prod
+	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --filter "^(?!spotify integration:)" --allow-all functions/tests/**/*.test.ts --env-file=functions/.env
 
 test-supabase-local: env-supabase-dev
-	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --filter "^(?!spotify integration:)" --allow-env --allow-read --allow-net functions/tests/**/*.test.ts --env-file=functions/.env
+	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json --filter "^(?!spotify integration:)" --allow-all functions/tests/**/*.test.ts --env-file=functions/.env
 
 test-spotify: env-supabase-dev
-	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json  --allow-env --allow-read --allow-net functions/tests/**/services.integration.test.ts --env-file=functions/.env
+	cd ${SUPABASE_DIR} && npx deno test --config functions/deno.json  --allow-all functions/tests/**/services.integration.test.ts --env-file=functions/.env
 
 test-supabase-sql-local:
 	@echo "🧪 Running SQL database tests..."
