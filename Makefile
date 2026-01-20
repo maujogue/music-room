@@ -301,4 +301,5 @@ load-test-visualize:
 pre-commit:
 	make format-check
 	make lint
+	git diff --exit-code
 	make test
