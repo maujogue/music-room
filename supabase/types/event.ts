@@ -45,7 +45,7 @@ export interface EventResponseReduced {
 }
 
 export interface EventMember {
-  id: string;
+  id: string; // [!] Doublon ? Attention si l'id est dans profile.id
   event_id: string;
   user_id: string;
   joined_at: string;
