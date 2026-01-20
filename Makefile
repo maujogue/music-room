@@ -213,6 +213,10 @@ format:
 	@echo "🔄 Formatting Supabase functions..."
 	cd ${SUPABASE_DIR} && npx deno fmt --config functions/deno.json functions
 
+format-check:
+	@echo "🔍 Checking code format..."
+	cd ${REACT_APP_DIR} && npx prettier --check .
+
 # Quick commands for common tasks
 up: start-supabase
 down: stop-supabase
@@ -295,6 +299,6 @@ load-test-visualize:
 	open load-testing/reports/profile_update_2025-10-29_15-50-44.html
 
 pre-commit:
-	make format
+	make format-check
 	make lint
 	make test
