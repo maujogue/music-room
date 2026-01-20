@@ -1,6 +1,15 @@
-import { assertEquals, assertExists, assertRejects } from "jsr:@std/assert";
-import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { restore, stub } from "jsr:@std/testing/mock";
+import {
+  assertEquals,
+  assertExists,
+  assertRejects,
+} from "jsr:@std/assert@1.0.16";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "jsr:@std/testing@1.0.16/bdd";
+import { restore, stub } from "jsr:@std/testing@1.0.16/mock";
 
 class HTTPException extends Error {
   constructor(public status: number, options: { message: string }) {
@@ -22,8 +31,8 @@ const createSupabaseMock = () => {
 
   return {
     client: {
-      from: (table: string) => ({
-        insert: async (params: InsertParams[]) => {
+      from: (_table: string) => ({
+        insert: (params: InsertParams[]) => {
           capturedInsertParams = params;
           return insertResponse;
         },

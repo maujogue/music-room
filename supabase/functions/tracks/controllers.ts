@@ -1,7 +1,5 @@
 import { fetchSpotifyTracks } from "./services/spotify.ts";
-import { HTTPException } from "@hono/http-exception";
 import { Context } from "@hono/hono";
-import type { SpotifyTrack } from "@track";
 
 export async function getTracks(c: Context) {
   const spotify_token = c.get("spotify_token");

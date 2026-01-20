@@ -1,5 +1,4 @@
 import {
-  assertRejects,
   assertStrictEquals,
   assertThrows,
 } from "https://deno.land/std@0.203.0/testing/asserts.ts";
@@ -107,10 +106,10 @@ Deno.test("returns event if it is public", async () => {
   assertStrictEquals(result, mockEvent);
 });
 
-Deno.test("throws 403 if access is denied", async () => {
+Deno.test("throws 403 if access is denied", () => {
   mockEvent.event.is_private = true;
-  assertRejects(
-    async () => checkEventAccess(mockEvent as any, "user123"),
+  assertThrows(
+    () => checkEventAccess(mockEvent as any, "user123"),
     HTTPException,
     "Access denied to private event",
   );

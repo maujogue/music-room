@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/authCtx';
 import {
   useUserStats,
@@ -11,10 +9,8 @@ import useTracks from '@/hooks/useTracks';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
-import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Divider } from '@/components/ui/divider';
-import { ArrowLeftIcon } from '@/components/ui/icon';
 import { Image } from '@/components/ui/image';
 import TrackListItem from '@/components/track/TrackListItem';
 
@@ -135,7 +131,6 @@ function LeaderboardRow({
 }
 
 export default function StatsPage() {
-  const router = useRouter();
   const { user } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserStats(user?.id || '');
   const { data: leaderboard, isLoading: lbLoading } = useFriendsLeaderboard(

@@ -9,7 +9,7 @@ import type {
   PlaylistTrack,
 } from "@playlist";
 
-import "jsr:@std/dotenv/load";
+import "jsr:@std/dotenv@0.225.6/load";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");

@@ -29,7 +29,7 @@ export default function PlaylistDetailLayout() {
       />
       <Stack.Screen
         name='tracks/add'
-        options={({ route }: any) => ({
+        options={() => ({
           title: 'Add Tracks',
           headerShadowVisible: false,
         })}

@@ -15,7 +15,6 @@ import type { SpotifyTrackResponse, TrackResponse } from "@track";
 
 export async function search(c: Context) {
   const user = c.get("user");
-  const spotify_token = c.get("spotify_token");
   const { q, type, limit, offset } = c.req.query();
   let userResults: ProfileWithFollowInfo[] = [];
   let playlistResults: PlaylistResponse[] = [];

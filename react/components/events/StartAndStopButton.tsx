@@ -51,7 +51,9 @@ export default function StartAndStopButton({
     console.log('START EVENT CONFIRMATION');
     try {
       await startEvent(eventId);
-    } catch (e) {}
+    } catch {
+      // Ignore errors
+    }
     reload();
   }
 
@@ -59,7 +61,9 @@ export default function StartAndStopButton({
     console.log('STOP EVENT CONFIRMATION');
     try {
       await stopEvent(eventId);
-    } catch (e) {}
+    } catch {
+      // Ignore errors
+    }
     reload();
   }
 

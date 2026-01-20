@@ -5,10 +5,8 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { supabase } from '@/services/supabase';
 import { useAuth } from './authCtx';
 import {
-  getCurrentUserProfile,
   updateProfile as updateProfileAPI,
   followUser,
   unfollowUser,

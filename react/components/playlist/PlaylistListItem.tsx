@@ -7,8 +7,6 @@ import { HStack } from '@/components/ui/hstack';
 import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 import { useState } from 'react';
-import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
-import PrivateBadge from '@/components/generics/PrivateBadge';
 import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {

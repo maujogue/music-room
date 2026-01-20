@@ -1,13 +1,13 @@
 import { Context } from "@hono/hono";
 import { OPENAPI_YAML } from "./openapi-file.ts";
 
-export async function getOpenapiFile(c: Context): Promise<Response> {
+export function getOpenapiFile(c: Context): Promise<Response> {
   return c.text(OPENAPI_YAML, 200, {
     "Content-Type": "application/x-yaml; charset=utf-8",
   });
 }
 
-export async function getOpenapiFilesAsHtml(c: Context): Promise<Response> {
+export function getOpenapiFilesAsHtml(c: Context): Promise<Response> {
   const html = `<!doctype html>
   <html>
     <head>

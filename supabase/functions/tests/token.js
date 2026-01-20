@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 var express = require("express");
 var request = require("request");
 var crypto = require("crypto");

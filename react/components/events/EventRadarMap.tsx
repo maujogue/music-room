@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import EventDatesInfos from './eventDetail/Dates/EventDatesInfos';
 import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
-import { Footprints, ShellIcon, Navigation, X } from 'lucide-react-native';
+import { Footprints, ShellIcon } from 'lucide-react-native';
 import { Heading } from '@/components/ui/heading';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import EventAllBadges from '@/components/generics/EventAllBadges';
@@ -72,19 +72,19 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
     }
   }
 
-  function centerOnUser() {
-    if (coords && mapRef.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: coords.lat,
-          longitude: coords.long,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        },
-        500
-      );
-    }
-  }
+  //   function centerOnUser() {
+  //     if (coords && mapRef.current) {
+  //       mapRef.current.animateToRegion(
+  //         {
+  //           latitude: coords.lat,
+  //           longitude: coords.long,
+  //           latitudeDelta: 0.05,
+  //           longitudeDelta: 0.05,
+  //         },
+  //         500
+  //       );
+  //     }
+  //   }
 
   useEffect(() => {
     if (region && mapRef.current) {

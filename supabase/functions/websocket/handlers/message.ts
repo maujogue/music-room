@@ -20,7 +20,7 @@ export interface VoteMessage extends WebSocketMessage {
 
 export async function handleMessage(
   userId: string,
-  userEmail: string,
+  _userEmail: string,
   message: WebSocketMessage,
   socket: WebSocket,
 ): Promise<void> {
@@ -91,11 +91,11 @@ async function handleUserInfo(
   }
 }
 
-async function handlePing(
-  userId: string,
+function handlePing(
+  _userId: string,
   socket: WebSocket,
-  message: WebSocketMessage,
-): Promise<void> {
+  _message: WebSocketMessage,
+): void {
   try {
     sendSuccessMessage(socket, {
       type: "pong",

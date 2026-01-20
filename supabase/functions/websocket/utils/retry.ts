@@ -48,7 +48,7 @@ export async function retryWithBackoff<T>(
 }
 
 // Wrapper spécialisé pour les opérations Supabase
-export async function retrySupabaseOperation<T>(
+export function retrySupabaseOperation<T>(
   operation: () => Promise<{ data: T; error: any }>,
   operationName: string,
   options?: RetryOptions,

@@ -1,36 +1,10 @@
 import { assertStrictEquals } from "https://deno.land/std@0.203.0/testing/asserts.ts";
-import { PlaylistResponse } from "@playlist";
 
 import {
   canUserPerformAction,
   PERMISSIONS,
   ROLES,
 } from "../../../functions/playlists/permissions.ts";
-
-const mockPlaylist: PlaylistResponse = {
-  id: "playlist_1",
-  name: "Test Playlist",
-  owner_id: "user_1",
-  is_private: true,
-  is_collaborative: false,
-  can_invite: true,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  tracks: [],
-  collaborators: [],
-  members: [],
-  owner: {
-    id: "user_1",
-    name: "Owner User",
-    email: "owner@example.com",
-  },
-  user: {
-    can_edit: true,
-    can_invite: true,
-    is_following: true,
-    role: "owner",
-  },
-};
 
 Deno.test("READ_PLAYLIST - public playlist - anyone can read", () => {
   const playlist = { is_private: false } as any;

@@ -54,7 +54,7 @@ app.use("/playlists", async (c, next) => {
               subscription_required: true,
             }, 403);
           }
-        } catch (parseErr) {
+        } catch (_parseErr) {
           // Not a subscription error, continue with normal error handling
         }
       }

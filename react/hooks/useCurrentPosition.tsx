@@ -45,13 +45,15 @@ async function getInitialCoords(): Promise<Coordinates> {
         long: last.coords.longitude,
       };
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 
   return googleFallback;
 }
 
 export function useCurrentPosition({ radiusKm = 50 }: Props) {
-  const [status, setStatus] = useState<Location.PermissionStatus | null>(null);
+  const [, setStatus] = useState<Location.PermissionStatus | null>(null);
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -3,7 +3,7 @@ import { HTTPException } from "@hono/http-exception";
 import { formatDbError } from "@postgres/postgres_errors_map";
 import type { PlaylistResponse, PlaylistRow } from "@playlist";
 import type { ProfileResponse, ProfileWithFollowInfo } from "@profile";
-import type { EventResponse, EventResponseReduced } from "@event";
+import type { EventResponseReduced } from "@event";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

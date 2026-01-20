@@ -9,7 +9,6 @@ import EventMembersDrawer from '@/components/events/EventMembersDrawer';
 import { addUserToEvent, removeUserFromEvent } from '@/services/events';
 import { Box } from '@/components/ui/box';
 import { LinearGradient } from 'expo-linear-gradient';
-import EventAllBadges from '@/components/generics/EventAllBadges';
 import { getRandomImage } from '@/utils/randomImage';
 
 interface Props {

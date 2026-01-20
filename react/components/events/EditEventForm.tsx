@@ -26,21 +26,15 @@ import PrivateBadge from '@/components/generics/PrivateBadge';
 import CollaborativeBadge from '@/components/generics/CollaborativeBadge';
 import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import SwitchRow from '@/components/generics/SwitchRow';
-import { Badge, BadgeIcon, BadgeText } from '@/components/ui/badge';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
 import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
-  ApiError: string;
   initialValues?: Partial<MusicEventFetchResult>;
 };
 
-export default function EditEventForm({
-  initialValues = {},
-  ApiError,
-  onSubmit,
-}: Props) {
+export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
   const [name, setName] = useState(initialValues.event?.name ?? '');
   const [description, setDescription] = useState(
     initialValues.event?.description ?? ''

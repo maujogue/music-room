@@ -1,9 +1,4 @@
-import {
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-  useFocusEffect,
-} from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Center } from '@/components/ui/center';
 import { useCallback, useEffect, useState } from 'react';
 import VotesRoom from '@/components/events/eventDetail/VotesRoom';
@@ -22,7 +17,6 @@ import { useProfile } from '@/contexts/profileCtx';
 
 export default function EventDetail() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const navigation = useNavigation();
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const router = useRouter();
   const { data, loading, error, refetch, deleteEvent } = useEvent(eventId);

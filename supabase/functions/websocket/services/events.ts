@@ -1,5 +1,4 @@
 import { formatDbError } from "@postgres/postgres_errors_map";
-import type { EventResponse } from "@event";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;

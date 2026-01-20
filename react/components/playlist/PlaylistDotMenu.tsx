@@ -1,6 +1,5 @@
 import FloatButton from '@/components/generics/FloatButton';
 import {
-  ThreeDotsIcon,
   Icon,
   TrashIcon,
   EditIcon,

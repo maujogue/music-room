@@ -3,65 +3,12 @@ import { getEventSupabase } from "./events.ts";
 import { formatDbError } from "../../../utils/postgres_errors_map.ts";
 import { distanceMeters } from "../utils/geoloc.ts";
 
-import { addItemToSpotifyOwnerQueue } from "./player.ts";
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
-
-// Helper: get current top track for an event (track_id) or null
-async function getTopTrackForEvent(
-  eventId: string,
-): Promise<{ trackId: string | null; voteCount: number | null }> {
-  try {
-    const { data, error } = await supabase
-      .from("track_votes")
-      .select("track_id, vote_count")
-      .eq("event_id", eventId)
-      .order("vote_count", { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error("Error fetching top track:", error);
-      return { trackId: null, voteCount: null };
-    }
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return { trackId: null, voteCount: null };
-    }
-    const top = data[0] as { track_id: string; vote_count: number };
-    return { trackId: top.track_id ?? null, voteCount: top.vote_count ?? null };
-  } catch (err) {
-    console.error("Exception getting top track:", err);
-    return { trackId: null, voteCount: null };
-  }
-}
-
-// Helper: get owner's spotify access token for an event (via rpc)
-async function getOwnerSpotifyToken(eventId: string): Promise<string | null> {
-  try {
-    const { data, error } = await supabase.rpc(
-      "get_spotify_token_from_event_owner",
-      { p_event_id: eventId },
-    );
-    if (error) {
-      console.error("Error fetching owner spotify token via rpc:", error);
-      return null;
-    }
-    if (!data || !Array.isArray(data) || data.length === 0) return null;
-    // rpc may return array of rows; token field name expected spotify_access_token
-    const token = (data[0] as any).spotify_access_token as
-      | string
-      | null
-      | undefined;
-    return token ?? null;
-  } catch (err) {
-    console.error("Exception getting owner spotify token:", err);
-    return null;
-  }
-}
 
 interface TrackVoteRecord {
   event_id: string;
@@ -177,8 +124,6 @@ export async function handleVote(
       };
     }
 
-    const prevTop = await getTopTrackForEvent(eventId);
-
     const voteRes = await getVote(eventId, trackId);
     if (!voteRes.success) {
       return {
@@ -249,7 +194,6 @@ export async function startVoteRealtime(
     event: "*",
     schema: "public",
     table: "track_votes",
-    // deno-lint-ignore no-explicit-any
   }, async (payload: any) => {
     try {
       const trackVote = payload.new ?? payload.old;
@@ -400,7 +344,7 @@ export async function handleUnvote(
 ): Promise<VoteResponse> {
   try {
     // Get previous top track before applying this unvote
-    const prevTop = await getTopTrackForEvent(eventId);
+    // const prevTop = await getTopTrackForEvent(eventId);
     const { data: existingVote, error: fetchError } = await supabase
       .from("track_votes")
       .select("*")
@@ -484,16 +428,14 @@ export async function getVotesForEvent(
     }
 
     const isOwner = event.owner_id === userId;
-    let isMember = false;
 
     if (!isOwner) {
-      const { data: membership, error: membershipError } = await supabase
+      const { data: _membership, error: membershipError } = await supabase
         .from("event_members")
         .select("profile_id")
         .eq("event_id", eventId)
         .eq("profile_id", userId)
         .single();
-      isMember = !!membership;
 
       if (membershipError) {
         console.error("Membership check error:", membershipError);

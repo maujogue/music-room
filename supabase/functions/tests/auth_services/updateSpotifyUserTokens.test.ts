@@ -1,6 +1,11 @@
-import { assertEquals, assertExists } from "jsr:@std/assert";
-import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { restore, stub } from "jsr:@std/testing/mock";
+import { assertEquals, assertExists } from "jsr:@std/assert@1.0.16";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "jsr:@std/testing@1.0.16/bdd";
+import { restore, stub } from "jsr:@std/testing@1.0.16/mock";
 
 type UpsertParams = {
   id: string;
@@ -14,8 +19,8 @@ const createSupabaseMock = () => {
 
   return {
     client: {
-      from: (table: string) => ({
-        upsert: async (params: UpsertParams) => {
+      from: (_table: string) => ({
+        upsert: (params: UpsertParams) => {
           capturedUpsertParams = params;
           return { data: null, error: null };
         },
@@ -34,13 +39,12 @@ describe("updateSpotifyUserTokens", () => {
     user_id: string,
     spotify_token_data: any,
   ) => Promise<void>;
-  let dateNowStub: any;
   const MOCK_NOW = 1700000000000;
 
   beforeEach(() => {
     supabaseMock = createSupabaseMock();
 
-    dateNowStub = stub(Date, "now", () => MOCK_NOW);
+    stub(Date, "now", () => MOCK_NOW);
 
     updateSpotifyUserTokens = async (
       user_id: string,

@@ -1,13 +1,8 @@
 import {
-  checkIfAuthUserAlreadyExist,
-  createAuthUser,
-  fetchSpotifyUserProfile,
   fetchSpotifyUserToken,
   handleSpotifyAuth,
   handleSpotifyCallback,
-  upsertUser,
 } from "./index.ts";
-import { SupabaseError } from "./supabase_error.ts";
 import {
   assertEquals,
   assertThrowsAsync,

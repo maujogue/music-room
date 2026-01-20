@@ -47,7 +47,7 @@ export async function presentPaywall({
         duration: 3000,
       });
     }
-  } catch (error) {
+  } catch {
     toast.error({
       title: 'Paywall Error',
       description: 'Unable to show the paywall. Please try again.',

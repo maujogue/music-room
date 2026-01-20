@@ -5,7 +5,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { HStack } from '@/components/ui/hstack';
 import { Button } from '@/components/ui/button';
 import { EditIcon, Icon } from '@/components/ui/icon';
-import { Image } from '@/components/ui/image';
 
 import {
   Avatar,

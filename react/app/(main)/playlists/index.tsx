@@ -1,7 +1,6 @@
 import AllPlaylists from '@/components/playlist/AllPlaylists';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSubscription } from '@/contexts/subscriptionCtx';
-import { useRouter } from 'expo-router';
 
 export default function PlaylistsHome() {
   const { isPremium, isLoading } = useSubscription();

@@ -20,7 +20,7 @@ const createClientMock = () => {
 };
 
 // Mock for formatDbError module
-const formatDbErrorMock = spy((error: any) => ({
+const formatDbErrorMock = spy((_error: any) => ({
   status: 500,
   message: "Database error",
 }));
@@ -85,7 +85,7 @@ describe("getSupabaseEventByOwner", () => {
     supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
-      const { data, error } = await supabaseMock.rpc(
+      const { data, error: _error } = await supabaseMock.rpc(
         "get_user_events",
         {
           p_user_id: ownerId,
@@ -106,7 +106,7 @@ describe("getSupabaseEventByOwner", () => {
     supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
-      const { data, error } = await supabaseMock.rpc(
+      const { data, error: _error } = await supabaseMock.rpc(
         "get_user_events",
         {
           p_user_id: ownerId,
@@ -132,7 +132,7 @@ describe("getSupabaseEventByOwner", () => {
 
     const mockFormatDbError = (error: any) => ({
       status: 500,
-      message: "Database function error",
+      message: "Database function error " + error,
     });
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
@@ -218,7 +218,7 @@ describe("getSupabaseEventByOwner", () => {
 
     const getSupabaseEventByOwner = async (ownerId: string) => {
       try {
-        const { data, error } = await supabaseMock.rpc(
+        const { data } = await supabaseMock.rpc(
           "get_user_events",
           {
             p_user_id: ownerId,
@@ -375,7 +375,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
     supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
-      const { data, error } = await supabaseMock.rpc(
+      const { data } = await supabaseMock.rpc(
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
@@ -398,7 +398,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
     supabaseMock.rpc = spy(() => Promise.resolve({ data: [], error: null }));
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
-      const { data, error } = await supabaseMock.rpc(
+      const { data } = await supabaseMock.rpc(
         "get_user_all_playlists_with_owner",
         {
           p_user_id: userId,
@@ -424,7 +424,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
 
     const mockFormatDbError = (error: any) => ({
       status: 500,
-      message: "Database function error",
+      message: "Database function error" + error,
     });
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
@@ -510,7 +510,7 @@ describe("getCurrentUserPlaylistSupabase", () => {
 
     const getCurrentUserPlaylistSupabase = async (userId: string) => {
       try {
-        const { data, error } = await supabaseMock.rpc(
+        const { data } = await supabaseMock.rpc(
           "get_user_all_playlists_with_owner",
           {
             p_user_id: userId,

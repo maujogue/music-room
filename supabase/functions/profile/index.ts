@@ -3,7 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import "jsr:@supabase/functions-js@2.5.0/edge-runtime.d.ts";
 import { Context, Hono } from "@hono/hono";
 import { loggingMiddleware } from "../utils/loggingMiddleware.ts";
 declare module "@hono/hono" {

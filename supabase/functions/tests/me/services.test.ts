@@ -5,109 +5,215 @@ import {
   skipToNextTrack,
 } from "../../me/services/spotify.ts";
 
-import "jsr:@std/dotenv/load";
+const VALID_TOKEN = "valid_token";
 
-async function getToken() {
-  const res = await fetch("http://127.0.0.1:8888/get_access_token");
-  const data = await res.json();
-  return data.access_token;
-}
-
-const spotifyToken = await getToken() ?? "";
-if (!spotifyToken) {
-  throw new Error("spotifyToken is required.");
+async function withMockedFetch(
+  mockFetch: (
+    _url: string | URL | Request,
+    _options?: RequestInit,
+  ) => Promise<Response>,
+  fn: () => Promise<void>,
+) {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockFetch;
+  try {
+    await fn();
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 }
 
 Deno.test("getCurrentUserPlaylists returns playlists", async () => {
-  const result = await getCurrentUserPlaylists(spotifyToken);
-  if (result.error) {
-    throw new Error(result.error.message);
-  }
-  if (!result.items || !Array.isArray(result.items)) {
-    throw new Error("Result does not contain a playlists array in items");
-  }
-  if (result.items.length === 0) {
-    throw new Error("No playlists returned for this user");
-  }
+  await withMockedFetch(
+    (_url, _options) => {
+      const mockProfile = {
+        items: [
+          { id: "playlist-1", name: "Focus Beats" },
+          { id: "playlist-2", name: "Late Night Code" },
+        ],
+      };
+      return Promise.resolve(
+        new Response(JSON.stringify(mockProfile), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    },
+    async () => {
+      const result = await getCurrentUserPlaylists(VALID_TOKEN);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      if (!result.items || !Array.isArray(result.items)) {
+        throw new Error("Result does not contain a playlists array in items");
+      }
+      if (result.items.length === 0) {
+        throw new Error("No playlists returned for this user");
+      }
 
-  for (const playlist of result.items) {
-    if (!playlist.id || !playlist.name) {
-      throw new Error("A playlist is invalid: missing id or name");
-    }
-  }
+      for (const playlist of result.items) {
+        if (!playlist.id || !playlist.name) {
+          throw new Error("A playlist is invalid: missing id or name");
+        }
+      }
+    },
+  );
 });
 
 Deno.test("getCurrentUserPlaylists returns invalid acces token error", async () => {
-  const result = await getCurrentUserPlaylists("invalid_token");
+  await withMockedFetch(
+    (_url, _options) => {
+      const errorResponse = {
+        error: { status: 401, message: "Invalid access token" },
+      };
+      return Promise.resolve(
+        new Response(JSON.stringify(errorResponse), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    },
+    async () => {
+      const result = await getCurrentUserPlaylists("invalid_token");
 
-  if (!result.error) {
-    throw new Error(
-      "An error code should be return by getCurrentUserPlaylists",
-    );
-  }
+      if (!result.error) {
+        throw new Error(
+          "An error code should be return by getCurrentUserPlaylists",
+        );
+      }
+    },
+  );
 });
 
 Deno.test("getCurrentUserPlayingTrack returns invalid acces token error", async () => {
-  const result = await getCurrentUserPlayingTrack("invalid_token");
+  await withMockedFetch(
+    (_url, _options) => {
+      const errorResponse = {
+        error: { status: 401, message: "Invalid access token" },
+      };
+      return Promise.resolve(
+        new Response(JSON.stringify(errorResponse), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    },
+    async () => {
+      const result = await getCurrentUserPlayingTrack("invalid_token");
 
-  if (!result.error) {
-    throw new Error(
-      "An error code should be return by getCurrentUserPlayingTrack",
-    );
-  }
+      if (!result.error) {
+        throw new Error(
+          "An error code should be return by getCurrentUserPlayingTrack",
+        );
+      }
+    },
+  );
 });
 
 Deno.test("getCurrentUserPlayingTrack returns valid response", async () => {
-  const result = await getCurrentUserPlayingTrack(spotifyToken);
+  await withMockedFetch(
+    (_url, _options) => {
+      const mockTrack = {
+        is_playing: true,
+        item: { id: "track-1", name: "Lofi Dreams" },
+      };
+      return Promise.resolve(
+        new Response(JSON.stringify(mockTrack), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    },
+    async () => {
+      const result = await getCurrentUserPlayingTrack(VALID_TOKEN);
 
-  if (result.error) {
-    throw new Error(
-      "An error code should not be return by getCurrentUserPlayingTrack",
-    );
-  }
+      if (result.error) {
+        throw new Error(
+          "An error code should not be return by getCurrentUserPlayingTrack",
+        );
+      }
+    },
+  );
 });
 
 Deno.test("pausePlayback returns valid response", async () => {
-  const result = await pausePlayback(spotifyToken);
-  await result.text();
+  await withMockedFetch(
+    (_url, _options) =>
+      Promise.resolve(
+        new Response(null, {
+          status: 204,
+          statusText: "No Content",
+        }),
+      ),
+    async () => {
+      const result = await pausePlayback(VALID_TOKEN);
+      await result.text();
 
-  if (result.error) {
-    throw new Error("An error code should not be return by pausePlayback");
-  }
+      if (result.error) {
+        throw new Error("An error code should not be return by pausePlayback");
+      }
+    },
+  );
 });
 
 Deno.test("skipToNextTrack returns valid response", async () => {
-  const result = await skipToNextTrack(spotifyToken);
-  await result.text();
+  await withMockedFetch(
+    (_url, _options) =>
+      Promise.resolve(
+        new Response(null, {
+          status: 204,
+          statusText: "No Content",
+        }),
+      ),
+    async () => {
+      const result = await skipToNextTrack(VALID_TOKEN);
+      await result.text();
 
-  if (result.error) {
-    throw new Error("An error code should not be return by skipToNextTrack");
-  }
+      if (result.error) {
+        throw new Error(
+          "An error code should not be return by skipToNextTrack",
+        );
+      }
+    },
+  );
 });
 
 Deno.test("pausePlayback returns invalid acces token error", async () => {
-  const result = await pausePlayback(`invalid_token`);
-  await result.text();
+  await withMockedFetch(
+    (_url, _options) =>
+      Promise.resolve(
+        new Response("", {
+          status: 401,
+          statusText: "Unauthorized",
+        }),
+      ),
+    async () => {
+      const result = await pausePlayback("invalid_token");
+      await result.text();
 
-  if (result["status"] !== 401 && result["statusText"] !== "Unauthorized") {
-    throw new Error("This test expects a 401 status code");
-  }
+      if (result["status"] !== 401 && result["statusText"] !== "Unauthorized") {
+        throw new Error("This test expects a 401 status code");
+      }
+    },
+  );
 });
 
 Deno.test("skipToNextTrack returns invalid acces token error", async () => {
-  const result = await skipToNextTrack("invalid_token");
-  await result.text();
+  await withMockedFetch(
+    (_url, _options) =>
+      Promise.resolve(
+        new Response("", {
+          status: 401,
+          statusText: "Unauthorized",
+        }),
+      ),
+    async () => {
+      const result = await skipToNextTrack("invalid_token");
+      await result.text();
 
-  if (result["status"] !== 401 && result["statusText"] !== "Unauthorized") {
-    throw new Error("This test expects a 401 status code");
-  }
-});
-
-Deno.test("pausePlayback returns invalid acces token error", async () => {
-  const result = await pausePlayback("invalid_token");
-  await result.text();
-
-  if (result["status"] !== 401 && result["statusText"] !== "Unauthorized") {
-    throw new Error("This test expects a 401 status code");
-  }
+      if (result["status"] !== 401 && result["statusText"] !== "Unauthorized") {
+        throw new Error("This test expects a 401 status code");
+      }
+    },
+  );
 });

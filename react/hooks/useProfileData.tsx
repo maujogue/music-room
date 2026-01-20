@@ -2,14 +2,13 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/contexts/authCtx';
 import { useProfile } from '@/contexts/profileCtx';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getUserProfile, followUser, unfollowUser } from '@/services/profile';
 
 export type ProfileVariant = 'own' | 'public' | 'friends' | 'private';
 
 export function useProfileData(userId: string) {
   const { user: currentUser, signOut } = useAuth();
-  const queryClient = useQueryClient();
   const {
     profile: ownProfile,
     updateProfile,

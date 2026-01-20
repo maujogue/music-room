@@ -145,7 +145,7 @@ export async function getOwnerCurrentPlayingTrack(
       try {
         const json = await r.json();
         current = json as SpotifyCurrentlyPlayingTrack;
-      } catch (err) {
+      } catch (_err) {
         return {
           data: null,
           error: {
@@ -182,7 +182,7 @@ export async function getOwnerCurrentPlayingTrack(
             userId,
           );
           if (voteResult) {
-            const { pushed, topId } = voteResult;
+            const { pushed: _pushed, topId: _topId } = voteResult;
             // Leader push attempted; result handled inside resolveVoteCount
           }
         }
@@ -198,7 +198,7 @@ export async function getOwnerCurrentPlayingTrack(
       data: current,
       error: null,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       data: null,
       error: {

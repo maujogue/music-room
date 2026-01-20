@@ -1,9 +1,4 @@
-import {
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-  useFocusEffect,
-} from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import TrackList from '@/components/track/TrackList';
 import { useEffect, useState, useCallback } from 'react';
@@ -43,7 +38,6 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const [displayAddTrackButton, setDisplayAddTrackButton] = useState(false);
-  const navigation = useNavigation();
   const router = useRouter();
 
   const showPaywall = async () => {

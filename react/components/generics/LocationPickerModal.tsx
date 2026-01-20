@@ -63,7 +63,9 @@ async function getInitialCenter(initialCoords?: Coords): Promise<Coords> {
           longitude: last.coords.longitude,
         };
       }
-    } catch {}
+    } catch {
+      // Ignore errors
+    }
 
     return googleFallback;
   }

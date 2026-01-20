@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable } from 'react-native';
 import FloatButton from '../generics/FloatButton';
 import { Bug } from 'lucide-react-native';
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/drawer';
 import { Icon, CloseIcon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Divider } from '@/components/ui/divider';

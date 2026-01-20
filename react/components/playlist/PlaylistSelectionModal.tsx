@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Motion,
   AnimatePresence,
-  createMotionAnimatedComponent,
   MotionComponentProps,
 } from '@legendapp/motion';
 import { ViewStyle } from 'react-native';

@@ -8,7 +8,6 @@ import {
   DrawerHeader,
   DrawerBody,
 } from '@/components/ui/drawer';
-import { Badge, BadgeText } from '@/components/ui/badge';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
@@ -89,7 +88,9 @@ export default function Event3DotMenu({
     console.log('START EVENT CONFIRMATION');
     try {
       await startEvent(eventData.event.id);
-    } catch (e) {}
+    } catch {
+      // Ignore errors
+    }
     reload();
   }
 
@@ -97,7 +98,9 @@ export default function Event3DotMenu({
     console.log('STOP EVENT CONFIRMATION');
     try {
       await stopEvent(eventData.event.id);
-    } catch (e) {}
+    } catch {
+      // Ignore errors
+    }
     reload();
   }
 

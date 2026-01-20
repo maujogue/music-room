@@ -9,7 +9,6 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { HStack } from '@/components/ui/hstack';
 import { useEventDate } from '@/hooks/useEventDate';
 import { LinearGradient } from 'expo-linear-gradient';
-import EventAllBadges from '@/components/generics/EventAllBadges';
 import { getRandomImage } from '@/utils/randomImage';
 
 type Props = {

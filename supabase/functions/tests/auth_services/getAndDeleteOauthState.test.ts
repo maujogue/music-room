@@ -1,6 +1,11 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
-import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { restore, stub } from "jsr:@std/testing/mock";
+import { assertEquals, assertRejects } from "jsr:@std/assert@1.0.16";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "jsr:@std/testing@1.0.16/bdd";
+import { restore, stub } from "jsr:@std/testing@1.0.16/mock";
 
 class HTTPException extends Error {
   constructor(public status: number, options: { message: string }) {
@@ -17,14 +22,14 @@ const createSupabaseMock = () => {
 
   return {
     client: {
-      from: (table: string) => ({
-        select: (columns: string) => ({
-          eq: (column: string, value: string) => ({
-            single: async () => selectResponse,
+      from: (_table: string) => ({
+        select: (_columns: string) => ({
+          eq: (_column: string, _value: string) => ({
+            single: () => selectResponse,
           }),
         }),
         delete: () => ({
-          eq: (column: string, value: string) => deleteResponse,
+          eq: (_column: string, _value: string) => deleteResponse,
         }),
       }),
     },
@@ -37,7 +42,7 @@ const createSupabaseMock = () => {
   };
 };
 
-const formatDbError = (error: any) => ({
+const formatDbError = (_error: any) => ({
   status: 500,
   message: "Database error",
 });

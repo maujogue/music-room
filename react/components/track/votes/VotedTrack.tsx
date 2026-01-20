@@ -7,7 +7,6 @@ import { CircleMinus, CirclePlus } from 'lucide-react-native';
 import { Card } from '@/components/ui/card';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useRef } from 'react';
-import { padding } from 'aes-js';
 import NumBadge from '@/components/generics/NumBadge';
 
 type Props = {

@@ -9,16 +9,19 @@ Deno.test("fetchSpotifyUserProfile should throw an error for invalid access toke
 
   const originalFetch = globalThis.fetch;
 
-  globalThis.fetch = async (_url: string | URL | Request, _options: any) => {
+  globalThis.fetch = (
+    _url: string | URL | Request,
+    _options: any,
+  ): Promise<Response> => {
     const errorResponse = {
       error: { status: 401, message: "Invalid access token" },
     };
-    return {
-      ok: false,
-      status: 401,
-      json: async () => errorResponse,
-      text: async () => JSON.stringify(errorResponse),
-    } as Response;
+    return Promise.resolve(
+      new Response(JSON.stringify(errorResponse), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
   };
 
   await assertRejects(
@@ -42,13 +45,16 @@ Deno.test("fetchSpotifyUserProfile should return user profile for valid token", 
     id: "testuser123",
     email: "testuser@example.com",
   };
-  globalThis.fetch = async (_url: string | URL | Request, _options: any) => {
-    return {
-      ok: true,
-      status: 200,
-      json: async () => mockProfile,
-    } as Response;
-  };
+  globalThis.fetch = (
+    _url: string | URL | Request,
+    _options: any,
+  ): Promise<Response> =>
+    Promise.resolve(
+      new Response(JSON.stringify(mockProfile), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
   const response = await fetchSpotifyUserProfile(mockAccessToken);
   assertEquals(response, mockProfile);

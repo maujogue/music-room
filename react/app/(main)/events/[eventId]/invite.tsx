@@ -9,7 +9,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogBackdrop,
-  AlertDialogCloseButton,
 } from '@/components/ui/alert-dialog';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -17,8 +16,7 @@ import { Text } from '@/components/ui/text';
 import { Switch } from '@/components/ui/switch';
 import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
-import React, { useState } from 'react';
-import { CloseIcon, Icon } from '@/components/ui/icon';
+import { useState } from 'react';
 import { useAppToast } from '@/hooks/useAppToast';
 
 export default function Invite() {

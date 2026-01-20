@@ -1,5 +1,5 @@
 // @deno-types="https://esm.sh/@hono/hono/types/index.ts"
-import { Context, Next } from "jsr:@hono/hono";
+import { Context, Next } from "jsr:@hono/hono@4.10.3";
 import { logApiRequest } from "./logger.ts";
 
 /**

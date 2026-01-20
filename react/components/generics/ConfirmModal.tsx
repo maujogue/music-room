@@ -65,6 +65,7 @@ export default function ConfirmDialog({
       }
       if (!preventAutoCloseOnConfirm) setIsOpen(false);
     } catch (e) {
+      console.error('Error in confirm dialog:', e);
     } finally {
       setSubmitting(false);
     }

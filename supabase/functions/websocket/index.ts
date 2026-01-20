@@ -1,13 +1,13 @@
-// @ts-ignore
+// @ts-ignore: Deno edge runtime provides module resolution at runtime.
 import {
   authenticateUser,
   handleConnectionClose,
   handleConnectionError,
   handleConnectionMessage,
   handleConnectionOpen,
-  // @ts-ignore
+  // @ts-ignore: Exported types are provided by Deno runtime at execution.
 } from "./handlers/connection.ts";
-// @ts-ignore
+// @ts-ignore: Deno edge runtime provides module resolution at runtime.
 import { startVoteRealtime } from "./services/votes.ts";
 
 // Global clients map for the edge function
@@ -53,7 +53,7 @@ async function handler(request: Request): Promise<Response> {
   }
 
   const { userId, userEmail } = user;
-  // @ts-ignore
+  // @ts-ignore: Deno.upgradeWebSocket is available at runtime.
   const { socket, response } = Deno.upgradeWebSocket(request);
 
   // Set up WebSocket event handlers
@@ -77,5 +77,5 @@ async function handler(request: Request): Promise<Response> {
 }
 
 // Export the handler for Edge Function
-// @ts-ignore
+// @ts-ignore: Deno.serve is provided by the edge runtime.
 Deno.serve(handler);

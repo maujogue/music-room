@@ -1,6 +1,11 @@
-import { assertEquals, assertRejects } from "jsr:@std/assert";
-import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { restore, stub } from "jsr:@std/testing/mock";
+import { assertEquals, assertRejects } from "jsr:@std/assert@1.0.16";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+} from "jsr:@std/testing@1.0.16/bdd";
+import { restore, stub } from "jsr:@std/testing@1.0.16/mock";
 
 class HTTPException extends Error {
   constructor(public status: number, options: { message: string }) {
@@ -18,7 +23,7 @@ const createSupabaseMock = () => {
     client: {
       auth: {
         admin: {
-          createUser: async (params: any) => createUserResponse,
+          createUser: (_params: any) => createUserResponse,
         },
       },
     },

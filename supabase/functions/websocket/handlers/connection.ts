@@ -100,7 +100,7 @@ export async function handleConnectionMessage(
 
 export function handleConnectionClose(
   userId: string,
-  event: CloseEvent,
+  _event: CloseEvent,
   socket: WebSocket,
   clientsByUser: Map<string, Set<WebSocket>>,
 ): void {
