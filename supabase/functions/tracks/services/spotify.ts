@@ -23,8 +23,9 @@ export async function fetchSpotifyTracks(
   if (!contentType || !contentType.includes("application/json")) {
     const text = await response.text();
     throw new HTTPException(response.status, {
-      message: `Spotify API returned non-JSON response (${response.status}): ${text.slice(0, 100)
-        }`,
+      message: `Spotify API returned non-JSON response (${response.status}): ${
+        text.slice(0, 100)
+      }`,
     });
   }
 

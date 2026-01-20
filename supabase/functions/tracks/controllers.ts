@@ -25,8 +25,8 @@ export async function getTracks(c: Context) {
     return c.json({ tracks: [] });
   }
 
-  // Spotify allows max 50 ids per request. 
-  // For now assuming we are under limit or user will paginate client side if needed, 
+  // Spotify allows max 50 ids per request.
+  // For now assuming we are under limit or user will paginate client side if needed,
   // but let's slice just in case to be safe blindly.
   const safeIdList = idList.slice(0, 50);
 

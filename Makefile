@@ -213,15 +213,6 @@ format:
 	@echo "🔄 Formatting Supabase functions..."
 	cd ${SUPABASE_DIR} && npx deno fmt --config functions/deno.json functions
 
-# Lint/Format targets specifically for Supabase functions
-lint-functions:
-	@echo "🔄 Linting Supabase functions..."
-	cd ${SUPABASE_DIR} && npx deno lint --config functions/deno.json functions
-
-format-functions:
-	@echo "🔄 Formatting Supabase functions..."
-	cd ${SUPABASE_DIR} && npx deno fmt --config functions/deno.json functions
-
 # Quick commands for common tasks
 up: start-supabase
 down: stop-supabase

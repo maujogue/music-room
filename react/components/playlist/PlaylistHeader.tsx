@@ -117,7 +117,11 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
             </HStack>
           </HStack>
           {playlist?.description ? (
-            <Text size='sm' numberOfLines={3} className='px-4 color-secondary-700'>
+            <Text
+              size='sm'
+              numberOfLines={3}
+              className='px-4 color-secondary-700'
+            >
               {playlistDescription}
             </Text>
           ) : null}
