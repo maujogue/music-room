@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -25,10 +25,10 @@ jobs:
           deno-version: v2.x
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm i
 
       - name: Install React app dependencies
-        run: npm ci
+        run: npm i
         working-directory: react
 
       - name: Install Supabase tests dependencies
