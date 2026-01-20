@@ -293,3 +293,8 @@ load-test-visualize:
 	open load-testing/reports/playlist_create_2025-10-30_12-52-31.html
 	open load-testing/reports/profile_fetch_2025-10-30_11-47-54.html
 	open load-testing/reports/profile_update_2025-10-29_15-50-44.html
+
+pre-commit:
+	make format
+	make lint
+	make test
