@@ -7,8 +7,9 @@ on:
   pull_request:
 
 jobs:
-  pre-commit-equivalent:
+  lint-format-tests:
     runs-on: ubuntu-latest
+    environment: Prod
 
     steps:
       - name: Checkout
@@ -34,6 +35,17 @@ jobs:
       - name: Install Supabase tests dependencies
         run: npm install
         working-directory: supabase/functions/tests
+
+      - name: Create Supabase functions .env from secrets
+        run: |
+          mkdir -p supabase/functions
+          cat > supabase/functions/.env <<'EOF'
+          EXPO_PUBLIC_SUPABASE_URL=${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          SECRET_SERVICE_ROLE_KEY=${{ secrets.SECRET_SERVICE_ROLE_KEY }}
+          SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          EOF
 
       - name: Lint
         run: make lint
