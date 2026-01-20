@@ -4,11 +4,13 @@ import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { AuthProvider, useAuth } from '@/contexts/authCtx';
 import { AppState, Platform } from 'react-native';
 import type { AppStateStatus } from 'react-native';
+import { useEffect, useRef } from 'react';
 import {
   QueryClient,
   QueryClientProvider,
   focusManager,
 } from '@tanstack/react-query';
+import Purchases from 'react-native-purchases';
 
 function onAppStateChange(status: AppStateStatus) {
   if (Platform.OS !== 'web') {
@@ -47,7 +49,51 @@ export default function Root() {
 }
 
 function RootNavigator() {
-  const { session } = useAuth();
+  const { session, user } = useAuth();
+  const hasConfiguredPurchases = useRef(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
+    const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
+    if (!apiKey) {
+      console.warn(
+        'RevenueCat API key is missing. Set EXPO_PUBLIC_REVENUECAT_API_KEY.'
+      );
+      return;
+    }
+
+    if (!hasConfiguredPurchases.current) {
+      Purchases.setLogLevel(Purchases.LOG_LEVEL.INFO);
+      Purchases.configure({ apiKey });
+      hasConfiguredPurchases.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !hasConfiguredPurchases.current) {
+      return;
+    }
+
+    const syncAppUser = async () => {
+      try {
+        if (user?.id) {
+          await Purchases.logIn(user.id);
+          if (user.email) {
+            await Purchases.setAttributes({ email: user.email });
+          }
+        } else {
+          await Purchases.logOut();
+        }
+      } catch (error) {
+        console.error('Failed to sync RevenueCat app user:', error);
+      }
+    };
+
+    syncAppUser();
+  }, [user?.id, user?.email]);
 
   return (
     <GluestackUIProvider mode='light'>

@@ -3,14 +3,14 @@ import {
   AvatarFallbackText,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Tabs, useRouter, usePathname } from 'expo-router';
+import { Tabs } from 'expo-router';
 import vibingImg from '@/assets/vibing.jpg';
 import { ProfileProvider, useProfile } from '@/contexts/profileCtx';
 import { SubscriptionProvider } from '../../contexts/subscriptionCtx';
 import { PlayIcon, Icon, StarIcon, SearchIcon } from '@/components/ui/icon';
-import PaywallModal from '@/components/subscription/PaywallModal';
 import { useSubscription } from '@/contexts/subscriptionCtx';
-import { useState, useEffect } from 'react';
+import { useAppToast } from '@/hooks/useAppToast';
+import { presentPaywall } from '@/components/subscription/PaywallModal';
 
 import { useNearbyEventsNotification } from '@/hooks/useNearbyEventsNotification';
 
@@ -30,8 +30,12 @@ import { useCachePrewarmer } from '@/hooks/useCachePrewarmer';
 
 function AppTabs() {
   const { isPremium } = useSubscription();
-  const [showPaywall, setShowPaywall] = useState(false);
   const { profile } = useProfile();
+  const toast = useAppToast();
+
+  const showPaywall = async () => {
+    await presentPaywall({ isPremium, toast });
+  };
 
   // Pre-warm the cache for core data
   useCachePrewarmer();
@@ -56,7 +60,7 @@ function AppTabs() {
             tabPress: e => {
               if (!isPremium) {
                 e.preventDefault();
-                setShowPaywall(true);
+                void showPaywall();
               }
             },
           }}
@@ -88,12 +92,6 @@ function AppTabs() {
         />
         <Tabs.Screen name='index' options={{ href: null }} />
       </Tabs>
-      <PaywallModal
-        isOpen={showPaywall}
-        onClose={() => {
-          setShowPaywall(false);
-        }}
-      />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { BadgeText } from '@/components/ui/badge';
 import { Text } from '@/components/ui/text';
@@ -7,7 +7,8 @@ import { HStack } from '@/components/ui/hstack';
 import { Pressable } from 'react-native';
 import { Icon, StarIcon, InfoIcon } from '@/components/ui/icon';
 import { useSubscription } from '@/contexts/subscriptionCtx';
-import PaywallModal from './PaywallModal';
+import { useAppToast } from '@/hooks/useAppToast';
+import { presentPaywall } from '@/components/subscription/PaywallModal';
 
 interface SubscriptionBadgeProps {
   showMemberSince?: boolean;
@@ -16,8 +17,11 @@ interface SubscriptionBadgeProps {
 export default function SubscriptionBadge({
   showMemberSince = true,
 }: SubscriptionBadgeProps) {
-  const { subscription, isPremium, isLoading } = useSubscription();
-  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const { customerInfo, isPremium, isLoading } = useSubscription();
+  const toast = useAppToast();
+
+  const entitlement = customerInfo?.entitlements?.active?.['MusicRoom Pro'];
+  const memberSince = entitlement?.latestPurchaseDate;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -41,14 +45,18 @@ export default function SubscriptionBadge({
   return (
     <VStack className='px-3' style={{ alignItems: 'flex-end' }}>
       <HStack className='items-center w-full justify-end'>
-        {isPremium && subscription && showMemberSince ? (
+        {isPremium && memberSince && showMemberSince ? (
           <Text className='text-xs text-typography-500 mr-2'>
-            Since {formatDate(subscription.started_at)}
+            Since {formatDate(memberSince)}
           </Text>
         ) : (
           <Text style={{ minWidth: 80 }}> </Text>
         )}
-        <Pressable onPress={() => setIsPaywallOpen(true)}>
+        <Pressable
+          onPress={() => {
+            void presentPaywall({ isPremium, toast });
+          }}
+        >
           <Badge
             variant='solid'
             action={isPremium ? 'success' : 'warning'}
@@ -65,11 +73,6 @@ export default function SubscriptionBadge({
           </Badge>
         </Pressable>
       </HStack>
-
-      <PaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setIsPaywallOpen(false)}
-      />
     </VStack>
   );
 }

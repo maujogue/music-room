@@ -22,7 +22,7 @@ import { useAppToast } from '@/hooks/useAppToast';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { RefreshCw } from 'lucide-react-native';
-import PaywallModal from '@/components/subscription/PaywallModal';
+import { presentPaywall } from '@/components/subscription/PaywallModal';
 
 export default function PlaylistDetail() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
@@ -43,9 +43,12 @@ export default function PlaylistDetail() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
   const [displayInviteButton, setDisplayInviteButton] = useState(false);
   const [displayAddTrackButton, setDisplayAddTrackButton] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
+
+  const showPaywall = async () => {
+    await presentPaywall({ isPremium, toast });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -85,7 +88,7 @@ export default function PlaylistDetail() {
 
   const onCallEdit = () => {
     if (!isPremium) {
-      setShowPaywall(true);
+      void showPaywall();
       return;
     }
     router.push(`(main)/playlists/${playlistId}/edit`);
@@ -93,7 +96,7 @@ export default function PlaylistDetail() {
 
   const handleInviteUserPress = () => {
     if (!isPremium) {
-      setShowPaywall(true);
+      void showPaywall();
       return;
     }
     router.push(`(main)/playlists/${playlistId}/invite`);
@@ -196,13 +199,13 @@ export default function PlaylistDetail() {
       {canEdit && !isPremium && (
         <>
           <FloatButton
-            onPress={() => setShowPaywall(true)}
+            onPress={() => void showPaywall()}
             icon={Lock}
             className='absolute bottom-4 right-4 rounded-full p-4 blurred-bg'
           />
           {canInvite && (
             <FloatButton
-              onPress={() => setShowPaywall(true)}
+              onPress={() => void showPaywall()}
               icon={UserRoundPlus}
               className='absolute bottom-20 right-4 rounded-full p-4 blurred-bg'
             />
@@ -218,18 +221,13 @@ export default function PlaylistDetail() {
         itemType='playlist'
       />
 
-      <PaywallModal
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-      />
-
       {playlist && (
         <Playlist3DotMenu
           playlist={playlist}
           callDelete={() => setShowAlertDialog(true)}
           callEdit={onCallEdit}
           isPremium={isPremium}
-          onUpgrade={() => setShowPaywall(true)}
+          onUpgrade={() => void showPaywall()}
           className='absolute bottom-36 right-4 rounded-full p-4 blurred-bg'
         />
       )}
