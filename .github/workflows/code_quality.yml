@@ -12,6 +12,16 @@ jobs:
         with:
           node-version: 24
       - run: npm i
+        working-directory: react
       - run: npm run lint
+        working-directory: react
       - run: npm run format -- --check
-#hey
+        working-directory: react
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+      - run: deno lint functions
+        working-directory: supabase
+      - run: deno fmt --check functions
+        working-directory: supabase
