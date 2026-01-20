@@ -41,8 +41,5 @@ jobs:
       - name: Format
         run: make format-check
 
-      - name: Ensure formatting is clean
-        run: git diff --exit-code
-
       - name: Test
         run: make test
