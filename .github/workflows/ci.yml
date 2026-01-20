@@ -19,6 +19,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Pin npm version
+        run: |
+          npm i -g npm@11.6.0
+          npm -v
+
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
@@ -40,9 +45,6 @@ jobs:
 
       - name: Format
         run: make format-check
-
-      - name: Ensure formatting is clean
-        run: git diff --exit-code
 
       - name: Test
         run: make test
