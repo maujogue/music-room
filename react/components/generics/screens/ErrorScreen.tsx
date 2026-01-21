@@ -1,14 +1,12 @@
 import { Text } from '@/components/ui/text';
-import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
-import { Card } from '@/components/ui/card';
 import { Center } from '@/components/ui/center';
-import { Music4Icon, Music2Icon, TriangleAlertIcon } from 'lucide-react-native';
-import { Badge, BadgeIcon } from '@/components/ui/badge';
-import { Heading } from '@/components/ui/heading';
-import { Button, ButtonText, ButtonIcon } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react-native';
+import { Button, ButtonText } from '@/components/ui/button';
 import { useAuth } from '@/contexts/authCtx';
-import React from 'react';
+import { useProfile } from '@/contexts/profileCtx';
+import React, { useMemo, useState } from 'react';
+import { View } from 'react-native';
 
 interface Props {
   error: string | null;
@@ -22,50 +20,104 @@ export default function ErrorScreen({
   actionButton,
 }: Props) {
   const { signOut } = useAuth();
+  const { connectSpotify } = useProfile();
+  const [isConnectingSpotify, setIsConnectingSpotify] = useState(false);
+
+  const parsedError = useMemo(() => {
+    if (!error) {
+      return {
+        message: 'Something went wrong',
+        isSpotifyIssue: false,
+      };
+    }
+
+    let message = error;
+    let status: number | undefined;
+
+    try {
+      const parsed = JSON.parse(error) as { message?: string; status?: number };
+      if (parsed?.message) {
+        message = parsed.message;
+      }
+      if (typeof parsed?.status === 'number') {
+        status = parsed.status;
+      }
+    } catch {
+      // keep raw error string
+    }
+
+    const isSpotifyIssue =
+      /spotify/i.test(message) || (status === 401 && /connect/i.test(message));
+
+    return { message, isSpotifyIssue };
+  }, [error]);
 
   const handleLogout = async () => {
     await signOut();
   };
 
+  const handleConnectSpotify = async () => {
+    if (isConnectingSpotify) return;
+    setIsConnectingSpotify(true);
+    try {
+      await connectSpotify();
+    } finally {
+      setIsConnectingSpotify(false);
+    }
+  };
+
   return (
-    <Center className='flex-1 p-24'>
-      <Card className='items-center rounded-xl'>
-        <HStack space='md' className='items-center mb-8'>
-          <Badge size='sm' action='error' className='rounded-full h-6'>
-            <BadgeIcon size='lg' as={TriangleAlertIcon} />
-            <BadgeIcon size='lg' as={Music4Icon} />
-          </Badge>
-          <Heading className='text-center text-red-700'>
-            There is a wrong note in your music room
-          </Heading>
-          <Badge size='sm' action='error' className='rounded-full h-6'>
-            <BadgeIcon size='lg' as={Music2Icon} />
-            <BadgeIcon size='lg' as={TriangleAlertIcon} />
-          </Badge>
-        </HStack>
-        <HStack space='md' className='items-start pb-8'>
-          <VStack>
-            <Text size='md' className='font-semibold'>
-              {error ? error : 'Unknown error broke the music'}
-            </Text>
-            <Text size='md' className='text-secondary-700'>
-              {text}
-            </Text>
+    <Center className='flex-1 p-6'>
+      <View className='bg-white rounded-3xl shadow-lg p-8 w-full max-w-sm'>
+        <VStack className='items-center gap-4'>
+          {/* Icon */}
+          <View className='bg-red-100 rounded-full p-4'>
+            <AlertCircle size={40} color='#dc2626' />
+          </View>
+
+          {/* Title */}
+          <Text className='text-xl font-bold text-gray-900 text-center'>
+            Oops!
+          </Text>
+
+          {/* Error message */}
+          <Text className='text-base text-gray-700 text-center'>
+            {parsedError.message}
+          </Text>
+
+          {/* Subtitle */}
+          <Text className='text-sm text-gray-500 text-center'>{text}</Text>
+
+          {/* Buttons */}
+          <VStack className='w-full gap-3 mt-4'>
+            {parsedError.isSpotifyIssue && (
+              <Button
+                className='w-full rounded-full h-12 bg-green-500'
+                onPress={handleConnectSpotify}
+                disabled={isConnectingSpotify}
+              >
+                <ButtonText className='font-semibold text-white'>
+                  {isConnectingSpotify
+                    ? 'Connecting...'
+                    : 'Connect your Spotify'}
+                </ButtonText>
+              </Button>
+            )}
+
+            {actionButton}
+
+            <Button
+              variant='outline'
+              className='w-full rounded-full h-12 border-gray-300'
+              onPress={handleLogout}
+            >
+              <ButtonText className='text-red-600 font-semibold'>
+                Logout
+              </ButtonText>
+            </Button>
           </VStack>
-        </HStack>
-        <VStack space='md' className='mt-6 w-full'>
-          <Button
-            action='negative'
-            variant='solid'
-            onPress={handleLogout}
-            className='w-full'
-          >
-            <ButtonIcon size='sm' />
-            <ButtonText>Logout</ButtonText>
-          </Button>
         </VStack>
-        {actionButton}
-      </Card>
+      </View>
     </Center>
   );
 }

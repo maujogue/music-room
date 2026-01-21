@@ -15,8 +15,6 @@ import { useProfile } from '@/contexts/profileCtx';
 import { useSubscription } from '@/contexts/subscriptionCtx';
 import { useAppToast } from '@/hooks/useAppToast';
 import { Button, ButtonText } from '@/components/ui/button';
-import { HStack } from '@/components/ui/hstack';
-import { RefreshCw } from 'lucide-react-native';
 import { presentPaywall } from '@/components/subscription/PaywallModal';
 
 export default function PlaylistDetail() {
@@ -30,8 +28,7 @@ export default function PlaylistDetail() {
     canEdit,
     canInvite,
   } = usePlaylist(playlistId);
-  const { profile, isConnectedToSpotify, connectSpotify, refreshProfile } =
-    useProfile();
+  const { profile, isConnectedToSpotify, refreshProfile } = useProfile();
   const { isPremium } = useSubscription();
   const toast = useAppToast();
 
@@ -96,25 +93,6 @@ export default function PlaylistDetail() {
     router.push(`(main)/playlists/${playlistId}/invite`);
   };
 
-  const handleConnectSpotify = async () => {
-    try {
-      const { error } = await connectSpotify();
-      if (error) {
-        throw error;
-      }
-      setTimeout(async () => {
-        await refreshProfile();
-        refetch();
-      }, 1000);
-    } catch (error) {
-      toast.error({
-        title: 'Spotify Connection Error',
-        description: (error as Error).message,
-        duration: 3000,
-      });
-    }
-  };
-
   if (loading) {
     return <LoadingSpinner text='Loading Playlist' />;
   }
@@ -123,21 +101,17 @@ export default function PlaylistDetail() {
       <ErrorScreen
         error='You need to connect your Spotify account to view playlist details.'
         actionButton={
-          <HStack space='md' className='items-center justify-center'>
-            <Button onPress={handleConnectSpotify}>
-              <ButtonText>Connect Spotify</ButtonText>
-            </Button>
-            <Button
-              onPress={() => {
-                refreshProfile();
-                refetch();
-              }}
-              className='rounded-full'
-              variant='link'
-            >
-              <RefreshCw size={20} />
-            </Button>
-          </HStack>
+          <Button
+            className='w-full rounded-full h-12 bg-blue-500'
+            onPress={() => {
+              refreshProfile();
+              refetch();
+            }}
+          >
+            <ButtonText className='font-semibold text-white'>
+              Retry Connection
+            </ButtonText>
+          </Button>
         }
       />
     );
