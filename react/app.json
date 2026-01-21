@@ -9,7 +9,11 @@
     "newArchEnabled": true,
     "scheme": "music-room",
     "extra": {
-      "googleMapsApiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
+      "googleMapsApiKey": "AIzaSyDdLEHAvm2OqGxaArkXs4pPWl-1AiaGS4Q",
+      "router": {},
+      "eas": {
+        "projectId": "e4410650-f2c7-4770-b23b-e4b66a85ff0a"
+      }
     },
     "deepLinks": true,
     "splash": {
