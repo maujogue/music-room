@@ -34,6 +34,13 @@ export default function PlaylistDetailLayout() {
           headerShadowVisible: false,
         })}
       />
+      <Stack.Screen
+        name='members'
+        options={{
+          title: 'Manage Playlist Members',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 }

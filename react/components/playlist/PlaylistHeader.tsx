@@ -16,7 +16,6 @@ import { AvatarGroup } from '@/components/generics/AvatarGroup';
 import { getRandomImage } from '@/utils/randomImage';
 import { Pressable } from '@/components/ui/pressable';
 import { useState } from 'react';
-import PlaylistMembersDrawer from './PlaylistMembersDrawer';
 import LikeButton from '@/components/generics/LikeButton';
 import { addUserToPlaylist, removeUserFromPlaylist } from '@/services/playlist';
 import { useAuth } from '@/contexts/authCtx';
@@ -41,13 +40,7 @@ type Props = {
 export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   const router = useRouter();
   const { user: currentUser } = useAuth();
-  const [showMembersDrawer, setShowMembersDrawer] = useState(false);
   const [showCollaboratorAlert, setShowCollaboratorAlert] = useState(false);
-  const handleRefresh = () => {
-    if (onRefresh) return onRefresh();
-    setShowMembersDrawer(false);
-    setTimeout(() => setShowMembersDrawer(true), 50);
-  };
 
   const imageSource = playlist.cover_url
     ? { uri: playlist.cover_url }
@@ -56,17 +49,8 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
   const playlistDescription =
     playlist.description ?? 'No description available';
 
-  const handleInviteUserPress = () => {
-    router.push(`(main)/playlists/${playlist.id}/invite`);
-  };
-
   const handleMemberAvatarGroupPress = () => {
-    console.log('AvatarGroup pressed');
-    setShowMembersDrawer(true);
-  };
-
-  const handleCloseMembersDrawer = () => {
-    setShowMembersDrawer(false);
+    router.push(`(main)/playlists/${playlist.id}/members`);
   };
 
   const handleLikePlaylist = () => {
@@ -92,7 +76,7 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
     if (!currentUser) return;
     removeUserFromPlaylist(playlist.id, currentUser.id, 'collaborator');
     setShowCollaboratorAlert(false);
-    handleRefresh();
+    onRefresh?.();
   };
 
   const handleCancelCollaboratorDowngrade = () => {
@@ -172,15 +156,6 @@ export default function PlaylistHeader({ playlist, onRefresh }: Props) {
           )}
         </VStack>
       </Card>
-
-      {/* Drawer des membres */}
-      <PlaylistMembersDrawer
-        playlist={playlist}
-        isOpen={showMembersDrawer}
-        onClose={handleCloseMembersDrawer}
-        onInvitePress={handleInviteUserPress}
-        onUpdated={handleRefresh}
-      />
 
       {/* AlertDialog pour collaborateur */}
       <AlertDialog
