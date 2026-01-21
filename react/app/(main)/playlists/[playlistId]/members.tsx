@@ -1,13 +1,20 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import PlaylistMembersView from '@/components/playlist/PlaylistMembersView';
 import { usePlaylist } from '@/hooks/usePlaylist';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
+import { useCallback } from 'react';
 
 export default function PlaylistMembersScreen() {
   const { playlistId } = useLocalSearchParams<{ playlistId: string }>();
   const router = useRouter();
   const { playlist, loading, error, refetch } = usePlaylist(playlistId);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const handleInvitePress = () => {
     router.push(`(main)/playlists/${playlistId}/invite`);
