@@ -13,7 +13,6 @@ import { Box } from '@/components/ui/box';
 import VotedTrack from '@/components/track/votes/VotedTrack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppToast } from '@/hooks/useAppToast';
-import { useIsFocused } from '@react-navigation/native';
 import { useProfile } from '@/contexts/profileCtx';
 import { Button, ButtonText } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
@@ -34,7 +33,6 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
   const {
     connected,
     track,
-    disconnect,
     sendVote,
     sendUnvote,
     trackVotes,
@@ -56,7 +54,6 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
   const [realtimeVotes, setRealtimeVotes] = useState<Map<string, TrackVote>>(
     new Map()
   );
-  const isFocused = useIsFocused();
   const { setTrack, setTracksToPlay } = usePlayer();
 
   const {
@@ -65,12 +62,6 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
     error: perror,
     refetch: prefetch,
   } = usePlaylist(data ? data.playlist?.id : null);
-
-  useEffect(() => {
-    if (!isFocused) {
-      disconnect();
-    }
-  }, [isFocused, disconnect]);
 
   useEffect(() => {
     if (data?.event?.playlist?.tracks) {
