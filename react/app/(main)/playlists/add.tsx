@@ -12,9 +12,6 @@ export default function AddNewPlayList() {
   const toast = useAppToast();
 
   const onSubmit = async (payload: PlaylistPayload) => {
-    console.log('HERE IMPLEMENT POST NEW PLAYLIST TO BACK');
-    console.log('payload : ', payload);
-
     if (!profile) {
       setError('Authentification error, try reconnect with Spotify please');
       return;

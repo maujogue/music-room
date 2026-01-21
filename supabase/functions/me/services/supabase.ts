@@ -67,4 +67,10 @@ export async function requirePremiumSubscription(
   if (!subscription) {
     throw JSON.stringify({ subscription_required: true });
   }
+
+  // Check if subscription has expired
+  const renewalDate = new Date(subscription.renewal_date);
+  if (renewalDate < new Date()) {
+    throw JSON.stringify({ subscription_required: true, expired: true });
+  }
 }

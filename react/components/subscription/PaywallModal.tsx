@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import Purchases from 'react-native-purchases';
 import PurchasesUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
+import { upgradeSubscription } from '@/services/subscription';
 
 type ToastApi = {
   success: (args: {
@@ -41,6 +42,13 @@ export async function presentPaywall({
     });
 
     if (result === PAYWALL_RESULT.PURCHASED) {
+      // Sync the subscription to the backend database
+      try {
+        await upgradeSubscription();
+      } catch (err) {
+        console.error('Failed to sync subscription to backend:', err);
+      }
+
       toast.success({
         title: 'Welcome to Premium!',
         description: 'Your subscription is now active.',

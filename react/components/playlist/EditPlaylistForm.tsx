@@ -85,9 +85,15 @@ export default function EditPlayListForm({
       name: name.trim(),
       is_private: isPrivate,
       is_collaborative: isCollaborative,
-      description: description.trim() || undefined,
-      cover_url: finalCoverUrl || undefined,
     };
+
+    // Only add optional fields if they have values (avoid undefined which can cause issues on Android)
+    if (description.trim()) {
+      payload.description = description.trim();
+    }
+    if (finalCoverUrl) {
+      payload.cover_url = finalCoverUrl;
+    }
 
     try {
       await onSubmit(payload);
