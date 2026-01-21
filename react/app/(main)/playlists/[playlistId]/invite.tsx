@@ -43,8 +43,16 @@ export default function Invite() {
           description: `${selectedUser.username} has been invited as ${role}.`,
         });
         handleClose();
-      } catch {
-        toast.error({ title: 'Invitation failed' });
+      } catch (error: any) {
+        if (error?.status === 409) {
+          toast.error({
+            title: 'Already a member',
+            description: `${selectedUser.username} is already a member of this playlist.`,
+          });
+        } else {
+          toast.error({ title: 'Invitation failed' });
+        }
+        handleClose();
       }
     }
   };
