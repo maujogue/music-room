@@ -5,6 +5,7 @@ import EventMembersDrawer from './EventMembersDrawer';
 import { useRouter } from 'expo-router';
 import { usePlayer } from '@/contexts/PlayerCtx';
 import Event3DotMenu from '@/components/events/eventDetail/EventDotMenu';
+import ChooseDevice from '../player/ChooseDevice';
 
 type Props = {
   displayInviteButton: boolean;
@@ -28,10 +29,14 @@ export default function EventActions({
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { playTrack, tracksToPlay, setTracksToPlay } = usePlayer();
+  const [showChooseDevice, setShowChooseDevice] = useState(false);
   const router = useRouter();
 
   const isOwner = eventData.user?.role === 'owner';
-  console.log('isOwner', isOwner);
+
+  const onCloseChooseDevice = () => {
+    setShowChooseDevice(false);
+  }
 
   useEffect(() => {
     const tracksIds = eventData.playlist.tracks.map(track => track.track_id);
@@ -83,7 +88,7 @@ export default function EventActions({
       )}
       {isOwner && abovePlayer && (
         <FloatButton
-          onPress={() => playTrack(tracksToPlay)}
+          onPress={() => setShowChooseDevice(true)}
           icon={Play}
           className={'absolute right-4 rounded-full p-4 blurred-bg'}
           style={{
@@ -93,7 +98,7 @@ export default function EventActions({
       )}
       {isOwner && !abovePlayer && (
         <FloatButton
-          onPress={() => playTrack(tracksToPlay)}
+          onPress={() => { setShowChooseDevice(true); }}
           icon={Play}
           className={'absolute bottom-52 right-4 rounded-full p-4 blurred-bg'}
         />
@@ -124,6 +129,16 @@ export default function EventActions({
           }}
         />
       )}
+
+      <ChooseDevice
+        onClose={onCloseChooseDevice}
+        show={showChooseDevice}
+        onDeviceSelected={(deviceId?: string | null) => {
+          if (!deviceId) return;
+          playTrack(tracksToPlay, deviceId);
+          setShowChooseDevice(false);
+        }}
+      />
     </>
   );
 }

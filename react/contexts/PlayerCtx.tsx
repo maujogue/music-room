@@ -21,7 +21,7 @@ interface PlayerContextType {
   tracksToPlay: string[];
   setTracksToPlay: (tracks: string[]) => void;
   isPlaying: boolean;
-  playTrack: (track: any) => Promise<void>;
+  playTrack: (track: any, deviceId?: string) => Promise<void>;
   pauseTrack: () => Promise<void>;
   skipToNextTrack: () => Promise<void>;
   startAutoRefresh: () => void;
@@ -70,9 +70,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  const handlePlayTrack = async (tracks: string[]) => {
+  const handlePlayTrack = async (tracks: string[], deviceId?: string) => {
     setIsPlaying(true);
-    playTrack(tracks);
+    playTrack(tracks, deviceId);
   };
 
   const handlePauseTrack = async () => {

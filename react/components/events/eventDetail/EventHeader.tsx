@@ -24,7 +24,6 @@ export default function EventHeader({ eventData, onRefresh }: Props) {
       ? { uri: eventData.event.image_url }
       : getRandomImage()
   );
-  console.log('eventData.event.image_url', eventData.event.image_url);
 
   const handleCloseMembersDrawer = () => {
     setShowMembersDrawer(false);

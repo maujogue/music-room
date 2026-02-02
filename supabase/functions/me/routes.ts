@@ -11,6 +11,7 @@ import {
   skipToNextUserTrack,
   startUserPlayback,
   syncSpotifyPlaylists,
+  getAvailableDevices,
 } from "./controller.ts";
 
 const router = new Hono();
@@ -26,5 +27,6 @@ router.post("/playlists/sync", syncSpotifyPlaylists);
 router.get("/subscription", getMySubscription);
 router.post("/subscription", createMySubscription);
 router.delete("/subscription", deleteMySubscription);
+router.get("/player/devices", getAvailableDevices);
 
 export default router;

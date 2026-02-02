@@ -7,5 +7,5 @@ import objectsImg from '@/assets/default_playlist_img/objects.jpg';
 const images = [abstractImg, cassetteImg, headphoneImg, imagesImg, objectsImg];
 
 export const getRandomImage = () => {
-  return images[Math.floor(Math.random() * images.length)];
+  return images[0];
 };

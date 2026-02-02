@@ -15,14 +15,14 @@ export async function getCurrentUserCurrentlyPlayingTrack() {
   return res.data;
 }
 
-export async function playTrack(uris?: string[]) {
+export async function playTrack(uris?: string[], deviceId?: string) {
   if (uris) {
     uris = uris.map(uri =>
       uri.startsWith('spotify:track:') ? uri : `spotify:track:${uri}`
     );
   }
   const res = await apiFetch<void>(
-    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/play`,
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/play?device_id=${deviceId ?? ''}`,
     {
       method: 'PUT',
       body: { uris },
@@ -61,4 +61,20 @@ export async function skipToNextTrack() {
     throw res.error;
   }
   console.log('Skipped to next track successfully');
+}
+
+
+export async function getAvailableDevices() {
+  const res = await apiFetch<{ devices: SpotifyDevice[] }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/devices`,
+    {
+      method: 'GET',
+    }
+  );
+  if (!res.success) {
+    console.error('Error fetching available devices:', res.error);
+    throw res.error;
+  }
+  console.log('Available devices fetched successfully');
+  return res.data.devices;
 }

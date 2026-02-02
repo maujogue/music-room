@@ -44,7 +44,7 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
   } = useWebSocketClient(
     eventId,
     {
-      enabled: started,
+      enabled: started && !!data?.user?.role,
       done: data?.event?.done,
       spatio_licence: data?.event?.spatio_licence,
     },
