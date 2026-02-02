@@ -32,6 +32,7 @@ export async function searchUsersByQuery(
 	`,
     )
     .or(`username.ilike.%${params.query}%,email.ilike.%${params.query}%`)
+    .neq('id', currentUserId)
     .range(
       Number(params.offset) || 0,
       (Number(params.offset) || 0) + (Number(params.limit) || 20) - 1,

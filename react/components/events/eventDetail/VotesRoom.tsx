@@ -186,8 +186,8 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
                 <ButtonText>Set Playlist</ButtonText>
               </Button>
             ) : (
-              <Button onPress={refetch}>
-                <ButtonText>Retry</ButtonText>
+              <Button onPress={() => refetch()} className='rounded-full'>
+                <ButtonText >Retry</ButtonText>
               </Button>
             )
           }
