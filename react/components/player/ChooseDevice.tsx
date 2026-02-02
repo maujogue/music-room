@@ -45,7 +45,7 @@ const ChooseDevice = ({ onClose, show, onDeviceSelected }: ChooseDeviceProps) =>
 
 
             {!loading && !error && devices.length === 0 && (
-              <Text>No devices available</Text>
+              <Text>Ouvrez Spotify (navigateur ou application) pour voir vos appareils.</Text>
             )}
 
             {!loading && !error && devices.map((device) => {
