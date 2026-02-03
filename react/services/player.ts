@@ -63,7 +63,6 @@ export async function skipToNextTrack() {
   console.log('Skipped to next track successfully');
 }
 
-
 export async function getAvailableDevices() {
   const res = await apiFetch<{ devices: SpotifyDevice[] }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/devices`,

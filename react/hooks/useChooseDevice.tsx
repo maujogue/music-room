@@ -1,5 +1,5 @@
-import { getAvailableDevices } from "@/services/player";
-import { useState, useEffect, useCallback } from "react";
+import { getAvailableDevices } from '@/services/player';
+import { useState, useEffect, useCallback } from 'react';
 
 export default function useGetDevice() {
   const [devices, setDevices] = useState<SpotifyDevice[]>([]);
@@ -14,7 +14,7 @@ export default function useGetDevice() {
       setDevices(available ?? []);
       return available ?? [];
     } catch (err) {
-      console.error("Error choosing device:", err);
+      console.error('Error choosing device:', err);
       setError(err instanceof Error ? err : new Error(String(err)));
       return [];
     } finally {

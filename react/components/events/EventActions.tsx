@@ -36,7 +36,7 @@ export default function EventActions({
 
   const onCloseChooseDevice = () => {
     setShowChooseDevice(false);
-  }
+  };
 
   useEffect(() => {
     const tracksIds = eventData.playlist.tracks.map(track => track.track_id);
@@ -98,7 +98,9 @@ export default function EventActions({
       )}
       {isOwner && !abovePlayer && (
         <FloatButton
-          onPress={() => { setShowChooseDevice(true); }}
+          onPress={() => {
+            setShowChooseDevice(true);
+          }}
           icon={Play}
           className={'absolute bottom-52 right-4 rounded-full p-4 blurred-bg'}
         />
