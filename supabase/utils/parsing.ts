@@ -1,5 +1,5 @@
-import { HTTPException } from 'https://deno.land/x/hono@v3.2.3/http-exception.ts';
-import type { Context } from 'jsr:@hono/hono';
+import { HTTPException } from "https://deno.land/x/hono@v3.2.3/http-exception.ts";
+import type { Context } from "jsr:@hono/hono";
 
 export async function safeJsonFromContext<T = unknown>(c: Context): Promise<T> {
   try {

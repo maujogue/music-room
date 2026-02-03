@@ -6,12 +6,12 @@ import {
   fetchCurrentUserPlayingTrack,
   fetchCurrentUserPlaylists,
   fetchCurrentUserProfile,
+  getAvailableDevices,
   getMySubscription,
   pauseUserPlayback,
   skipToNextUserTrack,
   startUserPlayback,
   syncSpotifyPlaylists,
-  getAvailableDevices,
 } from "./controller.ts";
 
 const router = new Hono();

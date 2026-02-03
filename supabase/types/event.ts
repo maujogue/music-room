@@ -1,9 +1,15 @@
-import type { PlaylistRow } from './playlist.ts';
+import type { PlaylistRow } from "./playlist.ts";
 
-export type EventRole = 'owner' | 'member' | 'inviter' | 'voter' | 'collaborator' | null;
+export type EventRole =
+  | "owner"
+  | "member"
+  | "inviter"
+  | "voter"
+  | "collaborator"
+  | null;
 
 export interface EventResponse {
-  event: Event
+  event: Event;
   owner: SpotifyOwner;
   location?: EventLocation;
   members: EventMember[];
@@ -15,7 +21,7 @@ export interface EventResponse {
     can_invite: boolean;
     can_vote: boolean;
   };
-};
+}
 
 export interface Event {
   id: string;
@@ -32,16 +38,16 @@ export interface Event {
 }
 
 export interface EventResponseReduced {
-    id: string;
-    name: string;
-    image_url?: string;
-    is_private: boolean;
-    everyone_can_vote: boolean;
-    description?: string;
-    playlist_id?: string;
-    playlistId: string;
-    beginning_at: string;
-    owner: SpotifyOwner;
+  id: string;
+  name: string;
+  image_url?: string;
+  is_private: boolean;
+  everyone_can_vote: boolean;
+  description?: string;
+  playlist_id?: string;
+  playlistId: string;
+  beginning_at: string;
+  owner: SpotifyOwner;
 }
 
 export interface EventMember {
@@ -90,7 +96,7 @@ export interface EventPayload {
   playlist_id?: string;
   beginning_at: string;
   playlistId: string;
-	location?: EventLocationPayload;
+  location?: EventLocationPayload;
 }
 
 export interface EventLocationPayload {
@@ -106,22 +112,22 @@ export interface EventRadarResult {
     coordinates: Coordinates;
     dist: Number;
     venuename: string;
-  }
+  };
   event: Event;
   owner: SpotifyOwner;
 }
 
 export interface EventRadarFromDb {
-  id: string
-  name: string
-  beginning_at: string
-  image_url: string
-  owner_id: string
-  owner_name: string
-  owner_avatar_url: string
-  long: number
-  lat: number
-  dist_meters: number
-  done: boolean
-  spatio_licence: boolean
+  id: string;
+  name: string;
+  beginning_at: string;
+  image_url: string;
+  owner_id: string;
+  owner_name: string;
+  owner_avatar_url: string;
+  long: number;
+  lat: number;
+  dist_meters: number;
+  done: boolean;
+  spatio_licence: boolean;
 }

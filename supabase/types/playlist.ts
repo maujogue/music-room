@@ -5,7 +5,7 @@ export interface CreatePlaylistPayload {
   cover_url?: string;
   is_private?: boolean;
   is_collaborative?: boolean;
-};
+}
 
 export type UpdatePlaylistPayload = Partial<CreatePlaylistPayload>;
 
@@ -35,9 +35,9 @@ export interface PlaylistResponse {
     can_edit: boolean;
     can_invite: boolean;
     is_following: boolean;
-    role: 'owner' | 'collaborator' | 'member' | 'none';
+    role: "owner" | "collaborator" | "member" | "none";
   };
-};
+}
 
 export interface PlaylistRow {
   id: string;
@@ -67,7 +67,7 @@ export interface PlaylistCollaborator {
   user_id: string;
   added_at: string;
   added_by: string;
-  role: 'collaborator' | 'owner';
+  role: "collaborator" | "owner";
 }
 
 export interface PlaylistMember {

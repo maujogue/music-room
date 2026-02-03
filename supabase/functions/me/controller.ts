@@ -1,12 +1,12 @@
 import { Context } from "@hono/hono";
 import { HTTPException } from "@hono/http-exception";
 import {
+  getAvailableDevicesSpotify,
   getCurrentUserPlayingTrack,
   getCurrentUserPlaylists,
   pausePlayback,
   skipToNextTrack,
   startPlayback,
-  getAvailableDevicesSpotify,
 } from "./services/spotify.ts";
 import {
   getCurrentUserPlaylistSupabase,
@@ -76,7 +76,7 @@ export async function fetchCurrentUserPlayingTrack(
 export async function startUserPlayback(c: Context): Promise<Response> {
   const spotify_token = c.get("spotify_token");
   const body = await safeJsonFromContext(c);
-  const deviceId = c.req.query('device_id');
+  const deviceId = c.req.query("device_id");
   const res = await startPlayback(spotify_token, body, deviceId);
 
   if (!res) {

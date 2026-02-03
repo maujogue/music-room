@@ -437,7 +437,14 @@ export async function getVotesForEvent(
         .eq("profile_id", userId)
         .single();
 
-      console.error("event_id", eventId, "userId", userId, "_membership", _membership);
+      console.error(
+        "event_id",
+        eventId,
+        "userId",
+        userId,
+        "_membership",
+        _membership,
+      );
 
       if (membershipError) {
         console.error("Membership check error:", membershipError);
