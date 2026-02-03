@@ -206,3 +206,12 @@ type SpotifyCurrentlyPlayingTrack = {
     transferring_playback: boolean;
   };
 };
+
+type SpotifyDevice = {
+  id: string | null;
+  is_active: boolean;
+  is_restricted: boolean;
+  name: string;
+  type: string;
+  volume_percent: number | null;
+};

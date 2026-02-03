@@ -12,11 +12,20 @@ export const PG_ERRORS: Record<string, PgErrorMap> = {
   "23P01": { message: "Invalid combination of values.", status: 400 },
 
   // Transaction / Concurrency
-  "40001": { message: "A database conflict occurred. Please try again.", status: 409 },
-  "40P01": { message: "A database deadlock occurred. Please try again.", status: 503 }, // Service Unavailable
+  "40001": {
+    message: "A database conflict occurred. Please try again.",
+    status: 409,
+  },
+  "40P01": {
+    message: "A database deadlock occurred. Please try again.",
+    status: 503,
+  }, // Service Unavailable
 
   // Access / Permissions
-  "42501": { message: "You don't have permission to perform this action.", status: 403 }, // Forbidden
+  "42501": {
+    message: "You don't have permission to perform this action.",
+    status: 403,
+  }, // Forbidden
   "28P01": { message: "Authentication failed.", status: 401 }, // Unauthorized
 
   // Syntax / Invalid queries
@@ -31,13 +40,13 @@ export const PG_ERRORS: Record<string, PgErrorMap> = {
   "22007": { message: "Invalid date or time format.", status: 400 },
   "22003": { message: "Number is out of range.", status: 400 },
 
-  "PGRST116": { message: "Resource not found.", status: 404 }
+  "PGRST116": { message: "Resource not found.", status: 404 },
 };
 
 export function formatDbError(error: any): { message: string; status: number } {
   const formatError = PG_ERRORS[error.code] || {
     message: "An unexpected error occurred.",
-    status: 500
+    status: 500,
   };
 
   let message = formatError.message;
@@ -55,8 +64,10 @@ export function formatDbError(error: any): { message: string; status: number } {
       const field = uniqueMatch[1];
       const value = uniqueMatch[2];
       return {
-        message: `The field "${field}" with value "${value}" already exists.${error.message ? ` (${error.message})` : ''}`,
-        status: formatError.status
+        message: `The field "${field}" with value "${value}" already exists.${
+          error.message ? ` (${error.message})` : ""
+        }`,
+        status: formatError.status,
       };
     }
 
@@ -71,6 +82,6 @@ export function formatDbError(error: any): { message: string; status: number } {
 
   return {
     message,
-    status: formatError.status
+    status: formatError.status,
   };
 }

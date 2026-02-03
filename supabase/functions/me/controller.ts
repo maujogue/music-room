@@ -1,6 +1,7 @@
 import { Context } from "@hono/hono";
 import { HTTPException } from "@hono/http-exception";
 import {
+  getAvailableDevicesSpotify,
   getCurrentUserPlayingTrack,
   getCurrentUserPlaylists,
   pausePlayback,
@@ -75,7 +76,8 @@ export async function fetchCurrentUserPlayingTrack(
 export async function startUserPlayback(c: Context): Promise<Response> {
   const spotify_token = c.get("spotify_token");
   const body = await safeJsonFromContext(c);
-  const res = await startPlayback(spotify_token, body);
+  const deviceId = c.req.query("device_id");
+  const res = await startPlayback(spotify_token, body, deviceId);
 
   if (!res) {
     c.status(500);
@@ -303,4 +305,26 @@ export async function deleteMySubscription(c: Context): Promise<Response> {
     console.error("Error deleting subscription:", error);
     throw new HTTPException(500, { message: "Failed to cancel subscription" });
   }
+}
+
+export async function getAvailableDevices(c: Context): Promise<Response> {
+  const spotify_token = c.get("spotify_token");
+
+  const res = await getAvailableDevicesSpotify(spotify_token);
+
+  if (!res) {
+    throw new HTTPException(500, {
+      message: "Failed to fetch Spotify available devices",
+    });
+  }
+
+  if (res.error) {
+    c.status(res.error.status || 500);
+    return c.json({
+      error: res.error.message || "Unknown error from Spotify API",
+    });
+  }
+
+  c.status(200);
+  return c.json(res);
 }

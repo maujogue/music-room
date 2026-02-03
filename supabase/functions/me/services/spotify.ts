@@ -33,15 +33,23 @@ export async function getCurrentUserPlayingTrack(
 export async function startPlayback(
   spotify_token: string,
   body?: { uris: string[] },
+  deviceId?: string,
 ): Promise<any> {
-  const response = await fetch("https://api.spotify.com/v1/me/player/play", {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${spotify_token}`,
+  console.log("Starting playback with device ID:", deviceId);
+  const response = await fetch(
+    `https://api.spotify.com/v1/me/player/play${
+      deviceId ? `?device_id=${deviceId}` : ""
+    }`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${spotify_token}`,
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+  );
 
+  console.log("Start playback response status:", response);
   return response;
 }
 
@@ -65,4 +73,16 @@ export async function skipToNextTrack(spotify_token: string): Promise<any> {
   });
 
   return response;
+}
+
+export async function getAvailableDevicesSpotify(
+  spotify_token: string,
+): Promise<any> {
+  const response = await fetch("https://api.spotify.com/v1/me/player/devices", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${spotify_token}` },
+  });
+
+  console.log("Devices response status:", response);
+  return response.json();
 }

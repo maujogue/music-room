@@ -60,9 +60,9 @@ export interface SpotifyTrack {
   popularity: number;
   preview_url: string | null;
   track_number: number;
-  type: 'track' | string;
+  type: "track" | string;
   uri: string;
-};
+}
 
 export interface SpotifyCurrentlyPlayingTrack {
   device: {
@@ -102,4 +102,4 @@ export interface SpotifyCurrentlyPlayingTrack {
     toggling_repeat_track: boolean;
     transferring_playback: boolean;
   };
-};
+}
