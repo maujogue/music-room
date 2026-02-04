@@ -14,9 +14,10 @@ import { getRandomImage } from '@/utils/randomImage';
 type Props = {
   event: MusicEvent;
   owner: UserInfo;
+  onPress?: () => void;
 };
 
-export default function EventListItem({ event, owner }: Props) {
+export default function EventListItem({ event, owner, onPress }: Props) {
   const router = useRouter();
   const { start } = useEventDate(event.beginning_at);
 
@@ -32,7 +33,7 @@ export default function EventListItem({ event, owner }: Props) {
   };
 
   return (
-    <Pressable onPress={() => onEventPress()}>
+    <Pressable onPress={onPress ?? onEventPress}>
       <Card size='md' className='rounded-xl mb-2 p-0' variant='elevated'>
         <Box className='relative'>
           <Image

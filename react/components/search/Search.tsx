@@ -9,6 +9,7 @@ import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import UserListItem from '@/components/profile/UserListItem';
 import EventListItem from '@/components/events/EventListItem';
 import { useAppToast } from '@/hooks/useAppToast';
+import { useRouter } from 'expo-router';
 
 interface Props {
   placeholder?: string;
@@ -26,19 +27,16 @@ export default function Search({
   showFilters = true,
   defaultType = 'All',
   renderItemTrack = (item: any) => <TrackListItem track={item} key={item.id} />,
-  renderItemPlaylist = (item: any) => (
-    <PlaylistListItem playlist={item} key={item.id} />
-  ),
+  renderItemPlaylist,
   renderItemUser = (item: any) => (
     <UserListItem user={item} key={item.id} showActionButtons={false} />
   ),
-  renderItemEvent = (item: any) => (
-    <EventListItem event={item} owner={item.owner} key={item.id} />
-  ),
+  renderItemEvent,
   noHorizontalPadding = false,
 }: Props) {
   const { query, setQuery, filter, setFilter, onChangeFilter, results, error } =
     useSearchGlobal(defaultType);
+  const router = useRouter();
 
   const normalizeItems = <T,>(payload: any): T[] => {
     if (!payload) return [];
@@ -68,6 +66,33 @@ export default function Search({
   const events = normalizeItems<any>(results.eventResults ?? []);
   const toast = useAppToast();
   const limit = filter === 'all' ? 3 : undefined;
+
+  const defaultRenderPlaylistItem = (item: any) => (
+    <PlaylistListItem
+      playlist={item}
+      key={item.id}
+      onPress={() => {
+        router.push({
+          pathname: '/(main)/search/playlist/[playlistId]',
+          params: { playlistId: item.id },
+        });
+      }}
+    />
+  );
+
+  const defaultRenderEventItem = (item: any) => (
+    <EventListItem
+      event={item}
+      owner={item.owner}
+      key={item.id}
+      onPress={() => {
+        router.push({
+          pathname: '/(main)/search/event/[eventId]',
+          params: { eventId: item.id },
+        });
+      }}
+    />
+  );
 
   useEffect(() => {
     if (error) {
@@ -107,7 +132,7 @@ export default function Search({
           onShowMore={label => {
             setFilter(label);
           }}
-          renderItem={renderItemPlaylist}
+          renderItem={renderItemPlaylist ?? defaultRenderPlaylistItem}
           noHorizontalPadding={noHorizontalPadding}
         />
 
@@ -118,7 +143,7 @@ export default function Search({
           onShowMore={label => {
             setFilter(label);
           }}
-          renderItem={renderItemEvent}
+          renderItem={renderItemEvent ?? defaultRenderEventItem}
           noHorizontalPadding={noHorizontalPadding}
         />
 

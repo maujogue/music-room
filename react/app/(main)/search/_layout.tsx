@@ -10,6 +10,18 @@ export default function SearchLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name='playlist/[playlistId]'
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name='event/[eventId]'
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
