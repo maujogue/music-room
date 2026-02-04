@@ -68,45 +68,41 @@ export default function Search({
   const limit = filter === 'all' ? 3 : undefined;
 
   const defaultRenderPlaylistItem = (item: any) => (
-    <PlaylistListItem 
-      playlist={item} 
-      key={item.id} 
+    <PlaylistListItem
+      playlist={item}
+      key={item.id}
       onPress={() => {
         router.push({
           pathname: '/(main)/search/playlist/[playlistId]',
           params: { playlistId: item.id },
         });
-      }
-    }
+      }}
     />
   );
 
   const defaultRenderEventItem = (item: any) => (
-    <EventListItem 
-      event={item} 
-      owner={item.owner} 
-      key={item.id} 
+    <EventListItem
+      event={item}
+      owner={item.owner}
+      key={item.id}
       onPress={() => {
         router.push({
           pathname: '/(main)/search/event/[eventId]',
           params: { eventId: item.id },
         });
-      }
-    }
+      }}
     />
   );
 
-    useEffect(() => {
-      if (error) {
-        toast.error({
-          title: 'Search Error',
-          description: error.message,
-          duration: 3000,
-        });
-      }
-    }, [error]);
-
-
+  useEffect(() => {
+    if (error) {
+      toast.error({
+        title: 'Search Error',
+        description: error.message,
+        duration: 3000,
+      });
+    }
+  }, [error]);
 
   return (
     <GestureHandlerRootView>
