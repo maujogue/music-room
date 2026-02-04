@@ -43,6 +43,7 @@ export async function addItemToSpotifyOwnerQueue(
   spotify_token: string,
 ): Promise<boolean> {
   try {
+    item = item.startsWith("spotify:") ? item : `spotify:track:${item}`;
     const response = await fetch(
       "https://api.spotify.com/v1/me/player/queue?uri=" +
         encodeURIComponent(item),
@@ -54,6 +55,8 @@ export async function addItemToSpotifyOwnerQueue(
         },
       },
     );
+
+    console.log("Spotify add to queue response status:", response.status);
 
     if (!response.ok) {
       console.error("Failed to add item to queue:", response);
