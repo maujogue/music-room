@@ -2,18 +2,9 @@ import {
   createContext,
   useContext,
   useState,
-  useRef,
-  useCallback,
   type PropsWithChildren,
 } from 'react';
-import {
-  pauseTrack,
-  playTrack,
-  skipToNextTrack,
-  getCurrentUserCurrentlyPlayingTrack,
-} from '@/services/player';
-
-const REFRESH_INTERVAL = 5000;
+import { pauseTrack, playTrack, skipToNextTrack } from '@/services/player';
 
 interface PlayerContextType {
   track: PlayerTrack | null;
@@ -21,11 +12,9 @@ interface PlayerContextType {
   tracksToPlay: string[];
   setTracksToPlay: (tracks: string[]) => void;
   isPlaying: boolean;
-  playTrack: (track: any, deviceId?: string) => Promise<void>;
+  playTrack: (track?: any, deviceId?: string) => Promise<void>;
   pauseTrack: () => Promise<void>;
   skipToNextTrack: () => Promise<void>;
-  startAutoRefresh: () => void;
-  stopAutoRefresh: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -42,42 +31,22 @@ export function PlayerProvider({ children }: PropsWithChildren) {
   const [track, setTrack] = useState<any>(null);
   const [tracksToPlay, setTracksToPlay] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const refreshTrack = useCallback(async () => {
-    try {
-      const data = await getCurrentUserCurrentlyPlayingTrack();
-      setTrack(data?.item || null);
-      setIsPlaying(data?.is_playing || false);
-    } catch (error) {
-      console.error('Error refreshing track:', error);
-    }
-  }, []);
-
-  const startAutoRefresh = useCallback(() => {
-    if (intervalRef.current) return;
-
-    refreshTrack();
-    intervalRef.current = setInterval(() => {
-      refreshTrack();
-    }, REFRESH_INTERVAL);
-  }, [refreshTrack]);
-
-  const stopAutoRefresh = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
-
-  const handlePlayTrack = async (tracks: string[], deviceId?: string) => {
-    setIsPlaying(true);
-    playTrack(tracks, deviceId);
+  const handlePlayTrack = async (tracks?: string[], deviceId?: string) => {
+    console.log(
+      'playing tracks:',
+      JSON.stringify(tracks, null, 2),
+      'on device ID:',
+      deviceId
+    );
+    playTrack(tracks, deviceId).then(() => {
+      setIsPlaying(true);
+    });
   };
 
   const handlePauseTrack = async () => {
     setIsPlaying(false);
-    pauseTrack();
+    await pauseTrack();
   };
 
   const handleSkipToNextTrack = async () => {
@@ -93,8 +62,6 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     playTrack: handlePlayTrack,
     pauseTrack: handlePauseTrack,
     skipToNextTrack: handleSkipToNextTrack,
-    startAutoRefresh,
-    stopAutoRefresh,
   };
 
   return (

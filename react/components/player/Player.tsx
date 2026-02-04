@@ -22,6 +22,14 @@ const Player = ({ showControls }: PlayerProps) => {
     );
   }
 
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      pauseTrack();
+    } else {
+      playTrack();
+    }
+  };
+
   return (
     <Card
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
@@ -30,7 +38,7 @@ const Player = ({ showControls }: PlayerProps) => {
       <HStack className='items-center justify-between space-x-4 w-full'>
         {showControls && (
           <Button
-            onPress={isPlaying ? pauseTrack : playTrack}
+            onPress={handlePlayPause}
             variant='link'
             className='rounded-full px-3'
           >

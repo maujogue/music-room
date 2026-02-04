@@ -21,6 +21,7 @@ export async function playTrack(uris?: string[], deviceId?: string) {
       uri.startsWith('spotify:track:') ? uri : `spotify:track:${uri}`
     );
   }
+  console.log('Starting playback with URIs:', uris, 'and device ID:', deviceId);
   const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/play?device_id=${deviceId ?? ''}`,
     {
@@ -32,7 +33,7 @@ export async function playTrack(uris?: string[], deviceId?: string) {
     console.error('Error playing track:', res.error);
     throw res.error;
   }
-  console.log('Track played successfully');
+  console.log('res', JSON.stringify(res, null, 2));
 }
 
 export async function pauseTrack() {

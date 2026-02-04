@@ -35,7 +35,6 @@ export async function startPlayback(
   body?: { uris: string[] },
   deviceId?: string,
 ): Promise<any> {
-  console.log("Starting playback with device ID:", deviceId);
   const response = await fetch(
     `https://api.spotify.com/v1/me/player/play${
       deviceId ? `?device_id=${deviceId}` : ""
@@ -49,7 +48,6 @@ export async function startPlayback(
     },
   );
 
-  console.log("Start playback response status:", response);
   return response;
 }
 
