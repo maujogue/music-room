@@ -3,7 +3,6 @@ import type { SpotifyCurrentlyPlayingTrack } from "@track";
 import { getCurrentUserPlayingTrack } from "@me/services/spotify";
 import { getEventSupabase } from "./events.ts";
 import { clearTrackVotes } from "./votes.ts";
-import { it } from "node:test";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
