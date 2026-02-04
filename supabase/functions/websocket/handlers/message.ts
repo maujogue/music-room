@@ -25,15 +25,13 @@ export async function handleMessage(
   socket: WebSocket,
 ): Promise<void> {
   try {
-    // incoming websocket message
-
     switch (message.type) {
       case "ping":
         handlePing(userId, socket, message);
         break;
 
       case "event_current_track:get":
-        handleGetEventCurrentTrack(userId, socket, message);
+        await handleGetEventCurrentTrack(userId, socket, message);
         break;
 
       case "vote":

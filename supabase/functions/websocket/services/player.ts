@@ -3,6 +3,7 @@ import type { SpotifyCurrentlyPlayingTrack } from "@track";
 import { getCurrentUserPlayingTrack } from "@me/services/spotify";
 import { getEventSupabase } from "./events.ts";
 import { clearTrackVotes } from "./votes.ts";
+import { it } from "node:test";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -43,6 +44,7 @@ export async function addItemToSpotifyOwnerQueue(
   spotify_token: string,
 ): Promise<boolean> {
   try {
+    item = item.startsWith("spotify:") ? item : `spotify:track:${item}`;
     const response = await fetch(
       "https://api.spotify.com/v1/me/player/queue?uri=" +
         encodeURIComponent(item),
@@ -54,6 +56,8 @@ export async function addItemToSpotifyOwnerQueue(
         },
       },
     );
+
+    console.log("Spotify add to queue response status:", response.status);
 
     if (!response.ok) {
       console.error("Failed to add item to queue:", response);
