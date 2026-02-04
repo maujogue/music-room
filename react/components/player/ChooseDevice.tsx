@@ -60,8 +60,7 @@ const ChooseDevice = ({
 
             {!loading && !error && devices.length === 0 && (
               <Text>
-                Ouvrez Spotify (navigateur ou application) pour voir vos
-                appareils.
+                Open Spotify (browser or application) to see your devices.
               </Text>
             )}
 
