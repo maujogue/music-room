@@ -6,8 +6,8 @@ import {
   AvatarFallbackText,
 } from '@/components/ui/avatar';
 import { Text } from '@/components/ui/text';
-import { MoreVertical, UserMinus } from 'lucide-react-native';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
+import { MoreVertical } from 'lucide-react-native';
+import { Button, ButtonIcon } from '@/components/ui/button';
 import {
   Drawer,
   DrawerBackdrop,
@@ -16,13 +16,12 @@ import {
   DrawerBody,
 } from '@/components/ui/drawer';
 import { Divider } from '@/components/ui/divider';
-import { ScrollView, Modal, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { removeUserFromEvent, editUserInEvent } from '@/services/events';
 import { useState } from 'react';
-import { Heading } from '@/components/ui/heading';
-import { Switch } from '@/components/ui/switch';
 import { Image } from '@/components/ui/image';
 import { LinearGradient } from 'expo-linear-gradient';
+import EventMemberActionModal from './EventMemberActionModal';
 
 type Props = {
   eventData: MusicEventFetchResult;
@@ -77,6 +76,8 @@ export default function EventMembersDrawer({
     setSelectedUserCanVote(
       user.role === 'voter' || user.role === 'collaborator'
     );
+    
+    onClose();
     setShowActionDialog(true);
   };
 
@@ -245,77 +246,17 @@ export default function EventMembersDrawer({
         </DrawerContent>
       </Drawer>
 
-      {showActionDialog && (
-        <Modal transparent visible={showActionDialog} animationType='slide'>
-          <DrawerBackdrop />
-          <View className='flex-1 justify-center items-center p-4'>
-            <View className='bg-white rounded-lg overflow-hidden shadow-lg w-11/12 max-w-md'>
-              <View className='p-4 border-b'>
-                <Heading
-                  className='text-typography-950 font-semibold'
-                  size='md'
-                >
-                  Actions for {selectedUser?.profile.username}
-                </Heading>
-              </View>
-              <View className='p-4'>
-                <Text size='sm' className='mb-4'>
-                  What action would you like to perform?
-                </Text>
-              </View>
-              <View className='p-4 border-t flex flex-col gap-3'>
-                <VStack>
-                  <HStack className='my-4 items-center'>
-                    <Switch
-                      className='mx-4'
-                      value={selectedUserCanInvite}
-                      onToggle={() =>
-                        setSelectedUserCanInvite(!selectedUserCanInvite)
-                      }
-                    />
-                    <Text>Can Invite</Text>
-                  </HStack>
-                  <HStack className='mb-4 items-center'>
-                    <Switch
-                      className='mx-4'
-                      value={selectedUserCanVote}
-                      onToggle={() =>
-                        setSelectedUserCanVote(!selectedUserCanVote)
-                      }
-                    />
-                    <Text>Can Vote</Text>
-                  </HStack>
-                </VStack>
-
-                <Button
-                  variant='solid'
-                  className='w-full'
-                  onPress={handleEditUser}
-                >
-                  <ButtonText className='ml-2'>Save Changes</ButtonText>
-                </Button>
-                <Button
-                  variant='solid'
-                  action='negative'
-                  className='w-full'
-                  onPress={handleRemoveFromEvent}
-                >
-                  <ButtonIcon as={UserMinus} />
-                  <ButtonText className='ml-2'>Remove from Event</ButtonText>
-                </Button>
-
-                <Button
-                  variant='outline'
-                  className='w-full'
-                  onPress={handleCloseActionDialog}
-                >
-                  <ButtonText>Cancel</ButtonText>
-                </Button>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+      <EventMemberActionModal
+        visible={showActionDialog}
+        selectedUser={selectedUser}
+        selectedUserCanInvite={selectedUserCanInvite}
+        setSelectedUserCanInvite={setSelectedUserCanInvite}
+        selectedUserCanVote={selectedUserCanVote}
+        setSelectedUserCanVote={setSelectedUserCanVote}
+        onSave={handleEditUser}
+        onRemove={handleRemoveFromEvent}
+        onCancel={handleCloseActionDialog}
+      />
     </>
   );
 }
