@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import FloatButton from '@/components/generics/FloatButton';
-import { Users, UserPlus, Play } from 'lucide-react-native';
+import { Users, UserPlus, Play, LucideIcon } from 'lucide-react-native';
 import EventMembersDrawer from './EventMembersDrawer';
 import { useRouter } from 'expo-router';
 import { usePlayer } from '@/contexts/PlayerCtx';
@@ -18,6 +18,13 @@ type Props = {
   callEdit: () => void;
 };
 
+// Vertical spacing between stacked float buttons (px)
+const BUTTON_STEP = 60;
+
+type ButtonDef =
+  | { key: string; type: 'float'; show: boolean; icon: LucideIcon; onPress: () => void }
+  | { key: string; type: 'menu'; show: boolean };
+
 export default function EventActions({
   displayInviteButton,
   eventId,
@@ -34,10 +41,6 @@ export default function EventActions({
 
   const isOwner = eventData.user?.role === 'owner';
 
-  const onCloseChooseDevice = () => {
-    setShowChooseDevice(false);
-  };
-
   useEffect(() => {
     const tracksIds = eventData.playlist.tracks.map(track => track.track_id);
     setTracksToPlay(tracksIds);
@@ -47,93 +50,56 @@ export default function EventActions({
     router.push(`(main)/events/${eventId}/invite`);
   };
 
+  const baseBottom = abovePlayer ? 100 : 16;
+
+  const buttonDefs: ButtonDef[] = [
+    { key: 'members', type: 'float', show: displayInviteButton, icon: Users,   onPress: () => setIsDrawerOpen(true) },
+    { key: 'invite',  type: 'float', show: displayInviteButton, icon: UserPlus, onPress: handleOpenInvite },
+    { key: 'menu',    type: 'menu',  show: true },
+    { key: 'play',    type: 'float', show: isOwner,             icon: Play,    onPress: () => setShowChooseDevice(true) },
+  ];
+
+  const visibleButtons = buttonDefs.filter(b => b.show);
+
   return (
     <>
-      {displayInviteButton && abovePlayer && (
-        <>
+      {visibleButtons.map((btn, index) => {
+        const bottom = baseBottom + index * BUTTON_STEP;
+
+        if (btn.type === 'menu') {
+          return (
+            <Event3DotMenu
+              key={btn.key}
+              callDelete={callDelete}
+              callEdit={callEdit}
+              eventData={eventData}
+              isOwner={isOwner}
+              className='absolute right-4 rounded-full p-4 blurred-bg'
+              style={{ bottom }}
+            />
+          );
+        }
+
+        return (
           <FloatButton
-            onPress={handleOpenInvite}
-            icon={UserPlus}
-            className={'absolute right-4 rounded-full p-4 blurred-bg'}
-            style={{
-              bottom: 160,
-            }}
+            key={btn.key}
+            icon={btn.icon}
+            onPress={btn.onPress}
+            className='absolute right-4 rounded-full p-4 blurred-bg'
+            style={{ bottom }}
           />
-          <FloatButton
-            onPress={() => setIsDrawerOpen(true)}
-            icon={Users}
-            className={'absolute right-4 rounded-full p-4 blurred-bg'}
-            style={{
-              bottom: 100,
-            }}
-          />
-        </>
-      )}
-      {displayInviteButton && !abovePlayer && (
-        <>
-          <FloatButton
-            onPress={() => {
-              console.log('open invite');
-              handleOpenInvite();
-            }}
-            icon={UserPlus}
-            className={'absolute bottom-20 right-4 rounded-full p-4 blurred-bg'}
-          />
-          <FloatButton
-            onPress={() => setIsDrawerOpen(true)}
-            icon={Users}
-            className={'absolute bottom-4 right-4 rounded-full p-4 blurred-bg'}
-          />
-        </>
-      )}
-      {isOwner && abovePlayer && (
-        <FloatButton
-          onPress={() => setShowChooseDevice(true)}
-          icon={Play}
-          className={'absolute right-4 rounded-full p-4 blurred-bg'}
-          style={{
-            bottom: 280,
-          }}
-        />
-      )}
-      {isOwner && !abovePlayer && (
-        <FloatButton
-          onPress={() => {
-            setShowChooseDevice(true);
-          }}
-          icon={Play}
-          className={'absolute bottom-52 right-4 rounded-full p-4 blurred-bg'}
-        />
-      )}
+        );
+      })}
+
       <EventMembersDrawer
         eventData={eventData}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onUpdated={onUpdated}
       />
-      {!abovePlayer ? (
-        <Event3DotMenu
-          callDelete={callDelete}
-          callEdit={callEdit}
-          eventData={eventData}
-          isOwner={isOwner}
-          className={'absolute right-4 bottom-36 rounded-full p-4 blurred-bg'}
-        />
-      ) : (
-        <Event3DotMenu
-          callDelete={callDelete}
-          callEdit={callEdit}
-          eventData={eventData}
-          isOwner={isOwner}
-          className={'absolute right-4 rounded-full p-4 blurred-bg'}
-          style={{
-            bottom: 220,
-          }}
-        />
-      )}
 
       <ChooseDevice
-        onClose={onCloseChooseDevice}
+        onClose={() => setShowChooseDevice(false)}
         show={showChooseDevice}
         onDeviceSelected={(deviceId?: string | null) => {
           if (!deviceId) return;
