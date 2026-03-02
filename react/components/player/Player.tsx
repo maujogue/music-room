@@ -33,7 +33,7 @@ const Player = ({ showControls }: PlayerProps) => {
   return (
     <Card
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
-      className='h-25 p-2 px-4 m-2 rounded-2xl flex justify-center items-center overflow-hidden blurred-bg'
+      className='h-20 p-2 px-4 m-2 rounded-2xl flex justify-center items-center overflow-hidden blurred-bg'
     >
       <HStack className='items-center justify-between space-x-4 w-full'>
         {showControls && (
@@ -53,10 +53,10 @@ const Player = ({ showControls }: PlayerProps) => {
           <Image
             source={{ uri: track.cover_url }}
             alt={track.title}
-            className='rounded-md'
+            className='rounded-md h-16'
           />
         )}
-        <View className='ml-4 flex-1 justify-center w-25'>
+        <View className='ml-4 flex-1 justify-center w-15'>
           <Text className='text-white font-semibold'>{track.title}</Text>
           {track?.artists_names && (
             <Text className='text-gray-200'>
