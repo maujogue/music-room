@@ -13,3 +13,21 @@ export async function getSession() {
 
   return session;
 }
+
+/**
+ * Refreshes the current session (e.g. before reconnecting WebSocket).
+ * Returns the updated session or null if refresh failed.
+ */
+export async function refreshSession() {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.refreshSession();
+
+  if (error) {
+    console.error('Session refresh failed:', error);
+    return null;
+  }
+
+  return session;
+}

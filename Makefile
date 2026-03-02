@@ -70,10 +70,11 @@ setup-supabase:
 	@echo "✅ Supabase initialized!"
 
 # Start local Supabase services and apply migrations
-start-supabase: local-migrations
+start-supabase: 
 	@echo "🚀 Starting Supabase services..."
 	npx ${SUPABASE} start
 	@echo "✅ Supabase services started!"
+	make migrate
 
 
 # Stop local Supabase services

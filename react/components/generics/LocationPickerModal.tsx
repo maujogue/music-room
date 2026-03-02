@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import MapView, {
-  Marker,
-  MapPressEvent,
-  Region,
-  PROVIDER_GOOGLE,
-} from 'react-native-maps';
+import MapView, { Marker, MapPressEvent, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   Modal,

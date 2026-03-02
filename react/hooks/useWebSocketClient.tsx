@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { getSession } from '@/services/session';
+import { getSession, refreshSession } from '@/services/session';
 import { useCurrentPosition } from './useCurrentPosition';
 
 export interface TrackVote {
@@ -517,6 +517,11 @@ export default function useWebSocketClient(
   );
 
   const reconnect = useCallback(async () => {
+    const refreshed = await refreshSession();
+    if (!refreshed) {
+      setLastError('Session expired. Please login again.');
+      return;
+    }
     const tokenValid = await checkTokenValidity();
     if (!tokenValid) {
       setLastError('Session expired. Please login again.');
