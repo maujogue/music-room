@@ -180,7 +180,6 @@ export default function LocationPickerModal({
                 {region && (
                   <Box className='h-full w-full'>
                     <MapView
-                      provider={PROVIDER_GOOGLE}
                       style={{ flex: 1 }}
                       initialRegion={region}
                       onPress={handlePress}
