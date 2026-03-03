@@ -2,7 +2,7 @@ import { Context } from "@hono/hono";
 import { HTTPException } from "@hono/http-exception";
 import {
   getAvailableDevicesSpotify,
-  getCurrentUserPlayingTrack,
+  getUserPlayingTrack,
   getCurrentUserPlaylists,
   pausePlayback,
   skipToNextTrack,
@@ -49,7 +49,7 @@ export async function fetchCurrentUserPlayingTrack(
   c: Context,
 ): Promise<Response> {
   const spotify_token = c.get("spotify_token");
-  const res = await getCurrentUserPlayingTrack(spotify_token);
+  const res = await getUserPlayingTrack(spotify_token);
 
   if (!res) {
     throw new HTTPException(500, {

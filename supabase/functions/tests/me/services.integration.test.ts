@@ -1,5 +1,5 @@
 import {
-  getCurrentUserPlayingTrack,
+  getUserPlayingTrack,
   getCurrentUserPlaylists,
   pausePlayback,
   skipToNextTrack,
@@ -39,17 +39,17 @@ Deno.test({
 
 Deno.test({
   name:
-    "spotify integration: getCurrentUserPlayingTrack returns valid response",
+    "spotify integration: getUserPlayingTrack returns valid response",
   fn: async () => {
     const spotifyToken = (await getToken()) ?? "";
     if (!spotifyToken) {
       throw new Error("spotifyToken is required.");
     }
-    const result = await getCurrentUserPlayingTrack(spotifyToken);
+    const result = await getUserPlayingTrack(spotifyToken);
 
     if (result.error) {
       throw new Error(
-        "An error code should not be return by getCurrentUserPlayingTrack",
+        "An error code should not be return by getUserPlayingTrack",
       );
     }
   },

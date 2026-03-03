@@ -1,5 +1,5 @@
 import {
-  getCurrentUserPlayingTrack,
+  getUserPlayingTrack,
   getCurrentUserPlaylists,
   pausePlayback,
   skipToNextTrack,
@@ -85,7 +85,7 @@ Deno.test("getCurrentUserPlaylists returns invalid acces token error", async () 
   );
 });
 
-Deno.test("getCurrentUserPlayingTrack returns invalid acces token error", async () => {
+Deno.test("getUserPlayingTrack returns invalid acces token error", async () => {
   await withMockedFetch(
     (_url, _options) => {
       const errorResponse = {
@@ -99,18 +99,18 @@ Deno.test("getCurrentUserPlayingTrack returns invalid acces token error", async 
       );
     },
     async () => {
-      const result = await getCurrentUserPlayingTrack("invalid_token");
+      const result = await getUserPlayingTrack("invalid_token");
 
       if (!result.error) {
         throw new Error(
-          "An error code should be return by getCurrentUserPlayingTrack",
+          "An error code should be return by getUserPlayingTrack",
         );
       }
     },
   );
 });
 
-Deno.test("getCurrentUserPlayingTrack returns valid response", async () => {
+Deno.test("getUserPlayingTrack returns valid response", async () => {
   await withMockedFetch(
     (_url, _options) => {
       const mockTrack = {
@@ -125,11 +125,11 @@ Deno.test("getCurrentUserPlayingTrack returns valid response", async () => {
       );
     },
     async () => {
-      const result = await getCurrentUserPlayingTrack(VALID_TOKEN);
+      const result = await getUserPlayingTrack(VALID_TOKEN);
 
       if (result.error) {
         throw new Error(
-          "An error code should not be return by getCurrentUserPlayingTrack",
+          "An error code should not be return by getUserPlayingTrack",
         );
       }
     },
