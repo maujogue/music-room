@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { SpotifyCurrentlyPlayingTrack } from "@track";
-import { getCurrentUserPlayingTrack } from "@me/services/spotify";
+import { getUserPlayingTrack } from "@me/services/spotify";
 import { getEventSupabase } from "./events.ts";
 import { clearTrackVotes } from "./votes.ts";
 
@@ -124,7 +124,7 @@ export async function getOwnerCurrentPlayingTrack(
       };
     }
 
-    const spotifyResp = await getCurrentUserPlayingTrack(accessToken);
+    const spotifyResp = await getUserPlayingTrack(accessToken);
     // normalize 204 / empty responses
     if (!spotifyResp) {
       return {

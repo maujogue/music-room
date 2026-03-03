@@ -13,6 +13,9 @@ import { startVoteRealtime } from "./services/votes.ts";
 // Global clients map for the edge function
 const clientsByUser = new Map<string, Set<WebSocket>>();
 
+// Maps each socket to the eventId it connected with
+const socketEventMap = new Map<WebSocket, string>();
+
 // Initialize realtime subscriptions once
 let realtimeInitialized = false;
 
@@ -53,12 +56,14 @@ async function handler(request: Request): Promise<Response> {
   }
 
   const { userId, userEmail } = user;
+  const eventId = url.searchParams.get("eventId") ?? undefined;
+
   // @ts-ignore: Deno.upgradeWebSocket is available at runtime.
   const { socket, response } = Deno.upgradeWebSocket(request);
 
   // Set up WebSocket event handlers
   socket.onopen = () => {
-    handleConnectionOpen(userId, userEmail, socket, clientsByUser);
+    handleConnectionOpen(userId, userEmail, socket, clientsByUser, socketEventMap, eventId);
   };
 
   socket.onmessage = async (event) => {
@@ -66,7 +71,7 @@ async function handler(request: Request): Promise<Response> {
   };
 
   socket.onclose = (event) => {
-    handleConnectionClose(userId, event, socket, clientsByUser);
+    handleConnectionClose(userId, event, socket, clientsByUser, socketEventMap);
   };
 
   socket.onerror = (error) => {

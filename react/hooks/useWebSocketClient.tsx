@@ -124,7 +124,7 @@ export default function useWebSocketClient(
         return;
       }
 
-      const url = `${serverUrl}?token=${encodeURIComponent(currentSession.access_token)}`;
+      const url = `${serverUrl}?token=${encodeURIComponent(currentSession.access_token)}&eventId=${encodeURIComponent(event_id)}`;
       const ws = new WebSocket(url);
 
       ws.onopen = () => {

@@ -55,6 +55,8 @@ export function handleConnectionOpen(
   userEmail: string,
   socket: WebSocket,
   clientsByUser: Map<string, Set<WebSocket>>,
+  socketEventMap: Map<WebSocket, string>,
+  eventId?: string,
 ): void {
   // connection established for user
 
@@ -73,10 +75,15 @@ export function handleConnectionOpen(
 
   addClient(userId, socket, clientsByUser);
 
+  if (eventId) {
+    socketEventMap.set(socket, eventId);
+  }
+
   sendMessage(socket, {
     type: "connected",
     userId,
     email: userEmail,
+    eventId: eventId ?? null,
     message: "Successfully authenticated and connected",
   });
 }
@@ -103,9 +110,11 @@ export function handleConnectionClose(
   _event: CloseEvent,
   socket: WebSocket,
   clientsByUser: Map<string, Set<WebSocket>>,
+  socketEventMap: Map<WebSocket, string>,
 ): void {
   // connection closed for user
   removeClient(userId, socket, clientsByUser);
+  socketEventMap.delete(socket);
 }
 
 export function handleConnectionError(

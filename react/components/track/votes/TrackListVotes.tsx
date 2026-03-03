@@ -54,19 +54,8 @@ export default function TrackListVotes({
   } = useVoteCountIndex(eventId);
 
   useEffect(() => {
-    if (!playlistTracks) return;
-
-    console.log('tracks changed:', playlistTracks.length);
-  }, [tracks]);
-
-  useEffect(() => {
-    console.log('Realtime votes updated:', realtimeVotes);
-  }, [realtimeVotes]);
-
-  useEffect(() => {
     if (!tracks) return;
 
-    console.log('tracks changed:', playlistTracks.length);
   }, [tracks]);
 
   const getRealtimeVoteCount = (trackId: string): number => {
@@ -120,7 +109,7 @@ export default function TrackListVotes({
   }
 
   return (
-    <VStack className='flex-1'>
+    <VStack className='flex-1' style={{ paddingBottom: 100 }}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         {[...tracks]
           .sort((a, b) => {

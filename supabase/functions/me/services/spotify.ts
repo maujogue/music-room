@@ -11,7 +11,7 @@ export async function getCurrentUserPlaylists(
   return response.json();
 }
 
-export async function getCurrentUserPlayingTrack(
+export async function getUserPlayingTrack(
   spotify_token: string,
 ): Promise<any> {
   const response = await fetch(

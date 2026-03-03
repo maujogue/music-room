@@ -187,6 +187,7 @@ export async function handleVote(
 // Start realtime subscription for votes
 export async function startVoteRealtime(
   clientsByUser: Map<string, Set<WebSocket>>,
+  socketEventMap: Map<WebSocket, string>,
 ) {
   const trackVotesChannel = supabase.channel("realtime-track-votes");
 
@@ -244,11 +245,13 @@ export async function startVoteRealtime(
         }
         // sending update to user sockets
         for (const socket of userSockets) {
-          try {
-            socket.send(message);
-            sentCount++;
-          } catch (error) {
-            console.error(`❌ Error sending to user ${uid}:`, error);
+          if (socketEventMap.get(socket) === eventId) {
+              try {
+                socket.send(message);
+                sentCount++;
+              } catch (error) {
+                console.error(`❌ Error sending to user ${uid}:`, error);
+              }
           }
         }
       }
