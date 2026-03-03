@@ -319,14 +319,16 @@ export async function startVoteRealtime(
         const userSockets = clientsByUser.get(uid);
         if (!userSockets) continue;
         for (const socket of userSockets) {
-          try {
-            socket.send(message);
-            sentCount++;
-          } catch (err) {
-            console.error(
-              `❌ Error sending current track update to ${uid}:`,
-              err,
-            );
+          if (socketEventMap.get(socket) === eventId) {
+            try {
+              socket.send(message);
+              sentCount++;
+            } catch (err) {
+              console.error(
+                `❌ Error sending current track update to ${uid}:`,
+                err,
+              );
+            }
           }
         }
       }
