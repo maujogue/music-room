@@ -26,7 +26,7 @@ async function handler(request: Request): Promise<Response> {
   // Initialize realtime subscriptions once per cold start
   if (!realtimeInitialized) {
     try {
-      await startVoteRealtime(clientsByUser);
+      await startVoteRealtime(clientsByUser, socketEventMap);
       realtimeInitialized = true;
       console.info("Realtime subscriptions initialized");
     } catch (error) {

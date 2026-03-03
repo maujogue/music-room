@@ -80,8 +80,9 @@ export default function TrackListItem({
           className='rounded-md h-[60px] w-[60px]'
           alt='Playlist avatar'
         />
-        <HStack className='justify-between items-center flex-1'>
-          <VStack className='pt-1'>
+        <HStack className='items-center flex-1'>
+          <NumBadge num={voteCount ?? 0} hideIfZero={true} />
+          <VStack className='pt-1 pl-8'>
             <Heading size='md' className='text-typography-800'>
               {track.name}
             </Heading>
@@ -91,7 +92,6 @@ export default function TrackListItem({
               </Text>
             )}
           </VStack>
-          <NumBadge num={voteCount ?? 0} hideIfZero={true} />
         </HStack>
       </Card>
     </ReanimatedSwipeable>

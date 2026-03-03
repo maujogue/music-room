@@ -25,6 +25,8 @@ export default function EventDetail() {
   const [isActive, setIsActive] = useState<boolean>(false);
   const { profile } = useProfile();
 
+  const isOwner = data?.event?.owner_id === profile?.id;
+
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -69,7 +71,7 @@ export default function EventDetail() {
           <Center className='flex-1'>
             <VotesRoom
               eventId={eventId}
-              isOwner={data?.event?.owner_id === profile?.id}
+              isOwner={isOwner}
             />
           </Center>
         </VStack>
@@ -98,7 +100,7 @@ export default function EventDetail() {
           className='absolute bottom-0 right-18 w-full'
           pointerEvents={'auto'}
         >
-          <Player showControls={true} />
+          <Player showControls={isOwner} />
         </Box>
       )}
     </>

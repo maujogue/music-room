@@ -437,6 +437,7 @@ export default function useWebSocketClient(
   );
 
   const handleTrackPlay = useCallback((data: any) => {
+    console.log('ws: received track play update:', data);
     setTrack(data.track);
   }, []);
 
