@@ -67,12 +67,6 @@ export default function Profile({
 
   return (
     <View className='flex-1 pt-safe bg-background-0'>
-      <ProfileHeader
-        showBackButton={showBackButton}
-        username={profile.username}
-        onBack={onBack || (() => router.back())}
-      />
-
       <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'
