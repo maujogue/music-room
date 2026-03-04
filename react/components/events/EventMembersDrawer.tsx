@@ -76,7 +76,7 @@ export default function EventMembersDrawer({
     setSelectedUserCanVote(
       user.role === 'voter' || user.role === 'collaborator'
     );
-    
+
     onClose();
     setShowActionDialog(true);
   };

@@ -73,7 +73,11 @@ export default function AllPlaylists() {
 
   return (
     <View style={{ flex: 1 }}>
-      <PlaylistList sections={sections} refreshing={refreshing} onRefresh={onRefresh} />
+      <PlaylistList
+        sections={sections}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
       <FloatButton
         icon={Plus}
         onPress={onPlaylistPress}

@@ -9,7 +9,6 @@
     "newArchEnabled": true,
     "scheme": "music-room",
     "extra": {
-      "googleMapsApiKey": "AIzaSyDdLEHAvm2OqGxaArkXs4pPWl-1AiaGS4Q",
       "router": {},
       "eas": {
         "projectId": "e4410650-f2c7-4770-b23b-e4b66a85ff0a"
@@ -32,12 +31,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.maujogue.app",
-      "config": {
-        "googleMaps": {
-          "apiKey": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
-        }
-      }
+      "package": "com.maujogue.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -60,6 +54,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
           "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "nearby-events",
+          "color": "#ffffff"
         }
       ],
       "expo-router",

@@ -35,31 +35,33 @@ export default function EventMemberActionModal({
   return (
     <Modal visible={visible}>
       <DrawerBackdrop />
-      <View className="flex-1 justify-center items-center p-4">
-        <View className="bg-white rounded-lg overflow-hidden shadow-lg w-11/12 max-w-md">
-          <View className="p-4 border-b">
-            <Heading className="text-typography-950 font-semibold" size="md">
+      <View className='flex-1 justify-center items-center p-4'>
+        <View className='bg-white rounded-lg overflow-hidden shadow-lg w-11/12 max-w-md'>
+          <View className='p-4 border-b'>
+            <Heading className='text-typography-950 font-semibold' size='md'>
               Actions for {selectedUser?.profile.username}
             </Heading>
           </View>
-          <View className="p-4">
-            <Text size="sm" className="mb-4">
+          <View className='p-4'>
+            <Text size='sm' className='mb-4'>
               What action would you like to perform?
             </Text>
           </View>
-          <View className="p-4 border-t flex flex-col gap-3">
+          <View className='p-4 border-t flex flex-col gap-3'>
             <VStack>
-              <HStack className="my-4 items-center">
+              <HStack className='my-4 items-center'>
                 <Switch
-                  className="mx-4"
+                  className='mx-4'
                   value={selectedUserCanInvite}
-                  onToggle={() => setSelectedUserCanInvite(!selectedUserCanInvite)}
+                  onToggle={() =>
+                    setSelectedUserCanInvite(!selectedUserCanInvite)
+                  }
                 />
                 <Text>Can Invite</Text>
               </HStack>
-              <HStack className="mb-4 items-center">
+              <HStack className='mb-4 items-center'>
                 <Switch
-                  className="mx-4"
+                  className='mx-4'
                   value={selectedUserCanVote}
                   onToggle={() => setSelectedUserCanVote(!selectedUserCanVote)}
                 />
@@ -67,15 +69,20 @@ export default function EventMemberActionModal({
               </HStack>
             </VStack>
 
-            <Button variant="solid" className="w-full" onPress={onSave}>
-              <ButtonText className="ml-2">Save Changes</ButtonText>
+            <Button variant='solid' className='w-full' onPress={onSave}>
+              <ButtonText className='ml-2'>Save Changes</ButtonText>
             </Button>
-            <Button variant="solid" action="negative" className="w-full" onPress={onRemove}>
+            <Button
+              variant='solid'
+              action='negative'
+              className='w-full'
+              onPress={onRemove}
+            >
               <ButtonIcon as={UserMinus} />
-              <ButtonText className="ml-2">Remove from Event</ButtonText>
+              <ButtonText className='ml-2'>Remove from Event</ButtonText>
             </Button>
 
-            <Button variant="outline" className="w-full" onPress={onCancel}>
+            <Button variant='outline' className='w-full' onPress={onCancel}>
               <ButtonText>Cancel</ButtonText>
             </Button>
           </View>

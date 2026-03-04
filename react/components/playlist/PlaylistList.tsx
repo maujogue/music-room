@@ -8,7 +8,11 @@ type Props = {
   onRefresh?: () => void;
 };
 
-export default function PlaylistList({ sections, refreshing, onRefresh }: Props) {
+export default function PlaylistList({
+  sections,
+  refreshing,
+  onRefresh,
+}: Props) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -16,7 +20,10 @@ export default function PlaylistList({ sections, refreshing, onRefresh }: Props)
       className='px-4'
       refreshControl={
         onRefresh ? (
-          <RefreshControl refreshing={refreshing ?? false} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh}
+          />
         ) : undefined
       }
     >

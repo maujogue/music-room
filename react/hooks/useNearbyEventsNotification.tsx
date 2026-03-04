@@ -1,43 +1,78 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useCurrentPosition } from './useCurrentPosition';
 import { getEventsWithRadar } from '@/services/events';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+const ANDROID_CHANNEL_ID = 'nearby-events';
 
 export function useNearbyEventsNotification() {
   const { coords } = useCurrentPosition({ radiusKm: 1 });
   const router = useRouter();
 
   useEffect(() => {
-    const requestPermissions = async () => {
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== 'granted') {
-        await Notifications.requestPermissionsAsync();
+    try {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => {
+          const behavior: Notifications.NotificationBehavior = {
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+            shouldShowBanner: true,
+            shouldShowList: true,
+          };
+          if (
+            Platform.OS === 'android' &&
+            Notifications.AndroidNotificationPriority?.MAX != null
+          ) {
+            behavior.priority = Notifications.AndroidNotificationPriority.MAX;
+          }
+          return behavior;
+        },
+      });
+    } catch (e) {
+      console.warn('[Notification] setNotificationHandler failed:', e);
+    }
+
+    const setupAndRequestPermissions = async () => {
+      try {
+        if (Platform.OS === 'android') {
+          await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
+            name: 'Nearby Events',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+          });
+        }
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') {
+          await Notifications.requestPermissionsAsync();
+        }
+      } catch (e) {
+        console.warn('[Notification] Setup/permissions failed:', e);
       }
     };
 
-    requestPermissions();
+    setupAndRequestPermissions();
 
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      response => {
-        const url = response.notification.request.content.data?.url;
-        if (url) {
-          router.push(url as Href);
+    let subscription: { remove: () => void } | null = null;
+    try {
+      subscription = Notifications.addNotificationResponseReceivedListener(
+        response => {
+          const url = response.notification.request.content.data?.url;
+          if (url) {
+            router.push(url as Href);
+          }
         }
-      }
-    );
+      );
+    } catch (e) {
+      console.warn(
+        '[Notification] addNotificationResponseReceivedListener failed:',
+        e
+      );
+    }
 
-    return () => subscription.remove();
+    return () => subscription?.remove();
   }, [router]);
 
   useEffect(() => {
@@ -69,7 +104,11 @@ export function useNearbyEventsNotification() {
               body: `There are ${nearbyEventsCount} event(s) near you. Click to see them on the radar!`,
               data: { url: '/events/radar' },
             },
-            trigger: null, // show immediately
+            // On Android we must use a trigger with channelId so the notification uses our channel (and shows as a banner).
+            trigger:
+              Platform.OS === 'android'
+                ? { channelId: ANDROID_CHANNEL_ID }
+                : null,
           });
         }
       } catch (error) {

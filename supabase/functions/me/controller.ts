@@ -2,8 +2,8 @@ import { Context } from "@hono/hono";
 import { HTTPException } from "@hono/http-exception";
 import {
   getAvailableDevicesSpotify,
-  getUserPlayingTrack,
   getCurrentUserPlaylists,
+  getUserPlayingTrack,
   pausePlayback,
   skipToNextTrack,
   startPlayback,

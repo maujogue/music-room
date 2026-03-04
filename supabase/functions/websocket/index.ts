@@ -63,7 +63,14 @@ async function handler(request: Request): Promise<Response> {
 
   // Set up WebSocket event handlers
   socket.onopen = () => {
-    handleConnectionOpen(userId, userEmail, socket, clientsByUser, socketEventMap, eventId);
+    handleConnectionOpen(
+      userId,
+      userEmail,
+      socket,
+      clientsByUser,
+      socketEventMap,
+      eventId,
+    );
   };
 
   socket.onmessage = async (event) => {

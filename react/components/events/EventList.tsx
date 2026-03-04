@@ -27,7 +27,10 @@ export default function EventList({ sections, refreshing, onRefresh }: Props) {
         className='px-4'
         refreshControl={
           onRefresh ? (
-            <RefreshControl refreshing={refreshing ?? false} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refreshing ?? false}
+              onRefresh={onRefresh}
+            />
           ) : undefined
         }
       >

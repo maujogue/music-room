@@ -246,12 +246,12 @@ export async function startVoteRealtime(
         // sending update to user sockets
         for (const socket of userSockets) {
           if (socketEventMap.get(socket) === eventId) {
-              try {
-                socket.send(message);
-                sentCount++;
-              } catch (error) {
-                console.error(`❌ Error sending to user ${uid}:`, error);
-              }
+            try {
+              socket.send(message);
+              sentCount++;
+            } catch (error) {
+              console.error(`❌ Error sending to user ${uid}:`, error);
+            }
           }
         }
       }

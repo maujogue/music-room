@@ -382,12 +382,17 @@ export async function getEventsByCoordinates(c: Context): Promise<Response> {
     throw new HTTPException(400, { message: "Missing latitude or longitude" });
   }
 
+  const user = c.get("user");
   const eventsRaw = await getSupabaseEventByCoordinates(
     Number(lat),
     Number(long),
   );
+  const excludeOwn = user
+    ? (raw: EventRadarFromDb) => raw.owner_id !== user.id
+    : () => true;
+  const filtered = eventsRaw.filter(excludeOwn);
   const events = await Promise.all(
-    eventsRaw.map((event: EventRadarFromDb) => formatEventsRadars(event)),
+    filtered.map((event: EventRadarFromDb) => formatEventsRadars(event)),
   );
   return c.json(events);
 }

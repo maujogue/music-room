@@ -69,10 +69,7 @@ export default function EventDetail() {
           <EventHeader eventData={data} onRefresh={refetch} />
 
           <Center className='flex-1'>
-            <VotesRoom
-              eventId={eventId}
-              isOwner={isOwner}
-            />
+            <VotesRoom eventId={eventId} isOwner={isOwner} />
           </Center>
         </VStack>
 

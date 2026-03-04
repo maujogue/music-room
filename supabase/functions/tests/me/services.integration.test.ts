@@ -1,6 +1,6 @@
 import {
-  getUserPlayingTrack,
   getCurrentUserPlaylists,
+  getUserPlayingTrack,
   pausePlayback,
   skipToNextTrack,
 } from "../../me/services/spotify.ts";
@@ -38,8 +38,7 @@ Deno.test({
 });
 
 Deno.test({
-  name:
-    "spotify integration: getUserPlayingTrack returns valid response",
+  name: "spotify integration: getUserPlayingTrack returns valid response",
   fn: async () => {
     const spotifyToken = (await getToken()) ?? "";
     if (!spotifyToken) {

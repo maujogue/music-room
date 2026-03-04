@@ -55,7 +55,6 @@ export default function TrackListVotes({
 
   useEffect(() => {
     if (!tracks) return;
-
   }, [tracks]);
 
   const getRealtimeVoteCount = (trackId: string): number => {

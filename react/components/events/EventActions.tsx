@@ -22,7 +22,13 @@ type Props = {
 const BUTTON_STEP = 60;
 
 type ButtonDef =
-  | { key: string; type: 'float'; show: boolean; icon: LucideIcon; onPress: () => void }
+  | {
+      key: string;
+      type: 'float';
+      show: boolean;
+      icon: LucideIcon;
+      onPress: () => void;
+    }
   | { key: string; type: 'menu'; show: boolean };
 
 export default function EventActions({
@@ -53,10 +59,28 @@ export default function EventActions({
   const baseBottom = abovePlayer ? 100 : 16;
 
   const buttonDefs: ButtonDef[] = [
-    { key: 'members', type: 'float', show: displayInviteButton, icon: Users,   onPress: () => setIsDrawerOpen(true) },
-    { key: 'invite',  type: 'float', show: displayInviteButton, icon: UserPlus, onPress: handleOpenInvite },
-    { key: 'menu',    type: 'menu',  show: true },
-    { key: 'play',    type: 'float', show: isOwner,             icon: Play,    onPress: () => setShowChooseDevice(true) },
+    {
+      key: 'members',
+      type: 'float',
+      show: displayInviteButton,
+      icon: Users,
+      onPress: () => setIsDrawerOpen(true),
+    },
+    {
+      key: 'invite',
+      type: 'float',
+      show: displayInviteButton,
+      icon: UserPlus,
+      onPress: handleOpenInvite,
+    },
+    { key: 'menu', type: 'menu', show: true },
+    {
+      key: 'play',
+      type: 'float',
+      show: isOwner,
+      icon: Play,
+      onPress: () => setShowChooseDevice(true),
+    },
   ];
 
   const visibleButtons = buttonDefs.filter(b => b.show);

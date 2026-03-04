@@ -1,6 +1,6 @@
 import {
-  getUserPlayingTrack,
   getCurrentUserPlaylists,
+  getUserPlayingTrack,
   pausePlayback,
   skipToNextTrack,
 } from "../../me/services/spotify.ts";

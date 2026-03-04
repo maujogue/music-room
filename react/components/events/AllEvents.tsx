@@ -74,5 +74,11 @@ export default function AllEvents() {
     );
   }
 
-  return <EventList sections={sections} refreshing={refreshing} onRefresh={onRefresh} />;
+  return (
+    <EventList
+      sections={sections}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
+  );
 }
