@@ -3,7 +3,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useRouter } from 'expo-router';
-import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileActions from '@/components/profile/ProfileActions';
 import ProfileContent from '@/components/profile/ProfileContent';
 import { useProfileData } from '@/hooks/useProfileData';
