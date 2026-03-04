@@ -50,7 +50,7 @@ export default function ProfileContent({
 }: ProfileContentProps) {
   const router = useRouter();
   return (
-    <VStack className='gap-4'>
+    <VStack className='gap-4 mt-7'>
       <HStack className='items-center'>
         {/* Avatar */}
         <ProfileAvatarSection
