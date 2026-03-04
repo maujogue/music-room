@@ -225,6 +225,7 @@ export default function useWebSocketClient(
               handleUserInfo(data);
               break;
             case 'event_current_track:update':
+              console.log('ws: received event_current_track:update:', data);
               handleTrackPlay(data);
               break;
             default:

@@ -2,7 +2,7 @@ import { useUserEvents } from '@/hooks/useUserEvents';
 import { useProfile } from '@/contexts/profileCtx';
 import EventList from '@/components/events/EventList';
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import EmptyState from '@/components/generics/screens/EmptyStateScreen';
@@ -14,6 +14,7 @@ export default function AllEvents() {
   const { events, refetch, loading, error } = useUserEvents();
   const { profile } = useProfile();
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
 
   const handlePressCreateEvent = () => {
     router.push('/events/add');
@@ -22,6 +23,12 @@ export default function AllEvents() {
   const handlePressEventRadar = () => {
     router.push('/events/radar');
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,5 +74,5 @@ export default function AllEvents() {
     );
   }
 
-  return <EventList sections={sections} />;
+  return <EventList sections={sections} refreshing={refreshing} onRefresh={onRefresh} />;
 }

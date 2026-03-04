@@ -1,4 +1,4 @@
-import { SectionList, ScrollView, View } from 'react-native';
+import { SectionList, ScrollView, View, RefreshControl } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import EventListItem from '@/components/events/EventListItem';
 import { useRouter } from 'expo-router';
@@ -8,9 +8,11 @@ import { Radar } from 'lucide-react-native';
 
 type Props = {
   sections: MusicEventSection[];
+  refreshing?: boolean;
+  onRefresh?: () => void;
 };
 
-export default function EventList({ sections }: Props) {
+export default function EventList({ sections, refreshing, onRefresh }: Props) {
   const router = useRouter();
   const handlePressCreateEvent = () => {
     router.push('/events/add');
@@ -21,7 +23,14 @@ export default function EventList({ sections }: Props) {
   };
   return (
     <>
-      <ScrollView className='px-4'>
+      <ScrollView
+        className='px-4'
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl refreshing={refreshing ?? false} onRefresh={onRefresh} />
+          ) : undefined
+        }
+      >
         <View className='pt-6 pb-4'>
           <Heading size='3xl' className='font-bold text-typography-900'>
             Events

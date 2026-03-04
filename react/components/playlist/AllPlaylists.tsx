@@ -2,7 +2,7 @@ import { View } from 'react-native';
 import { useUserPlaylists } from '@/hooks/useUserPlaylists';
 import PlaylistList from '@/components/playlist/PlaylistList';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import LoadingSpinner from '@/components/generics/screens/LoadingSpinner';
 import ErrorScreen from '@/components/generics/screens/ErrorScreen';
 import { useRouter } from 'expo-router';
@@ -17,6 +17,7 @@ export default function AllPlaylists() {
   const router = useRouter();
   const params = useLocalSearchParams<{ refresh?: string }>();
   const toast = useAppToast();
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -27,6 +28,12 @@ export default function AllPlaylists() {
   useEffect(() => {
     if (params.refresh) refetch();
   }, [params.refresh, refetch]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const onPlaylistPress = () => {
     router.push('(main)/playlists/add/');
@@ -66,7 +73,7 @@ export default function AllPlaylists() {
 
   return (
     <View style={{ flex: 1 }}>
-      <PlaylistList sections={sections} />
+      <PlaylistList sections={sections} refreshing={refreshing} onRefresh={onRefresh} />
       <FloatButton
         icon={Plus}
         onPress={onPlaylistPress}
