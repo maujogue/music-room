@@ -24,35 +24,42 @@ export async function insertOauthStateToSupabase(
 export async function getAndDeleteOauthState(
   state: string,
 ): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("oauth_state")
-    .select("*")
-    .eq("state", state)
-    .single();
-
-  if (error) {
-    console.error("Supabase error:", error);
-    const pgError = formatDbError(error);
-    throw new HTTPException(pgError.status, { message: pgError.message });
-  }
-
-  if (!data) {
-    throw new HTTPException(400, { message: "Invalid state parameter" });
-  }
-
-  const { error: deleteError } = await supabase
+  try {
+    const { data, error } = await supabase
+      .from("oauth_state")
+      .select("*")
+      .eq("state", state)
+      .single();
+  
+    if (error) {
+      console.error("Supabase error:", error);
+      const pgError = formatDbError(error);
+      throw new HTTPException(pgError.status, { message: pgError.message });
+    }
+  
+    if (!data) {
+      throw new HTTPException(400, { message: "Invalid state parameter" });
+    }
+    
+    const { error: deleteError } = await supabase
     .from("oauth_state")
     .delete()
     .eq("state", state);
-
-  if (deleteError) {
-    console.error("Supabase error:", deleteError);
-    const pgError = formatDbError(deleteError);
-    throw new HTTPException(pgError.status, { message: pgError.message });
+    
+    if (deleteError) {
+      console.error("Supabase error:", deleteError);
+      const pgError = formatDbError(deleteError);
+      throw new HTTPException(pgError.status, { message: pgError.message });
+    }
+    
+    return data.user_id;
+    } catch (error) {
+      if (error instanceof HTTPException) {
+        throw error;
+      }
+      throw new HTTPException(400, { message: "Error occurred while fetching OAuth state" });
+    }
   }
-
-  return data.user_id;
-}
 
 export async function updateSpotifyUserTokens(
   user_id: string,

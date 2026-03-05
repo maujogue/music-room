@@ -48,7 +48,7 @@ export default function EventActions({
   const isOwner = eventData.user?.role === 'owner';
 
   useEffect(() => {
-    const tracksIds = eventData.playlist.tracks.map(track => track.track_id);
+    const tracksIds = eventData?.playlist?.tracks.map(track => track.track_id);
     setTracksToPlay(tracksIds);
   }, []);
 

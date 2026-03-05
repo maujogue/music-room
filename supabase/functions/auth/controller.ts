@@ -12,6 +12,7 @@ import {
   fetchSpotifyUserProfile,
   fetchSpotifyUserTokenData,
 } from "./services/spotify.ts";
+import { HTTPException } from "@hono/http-exception";
 
 const client_id = Deno.env.get("SPOTIFY_CLIENT_ID")!;
 const base_url = Deno.env.get("SUPABASE_URL")!;
@@ -60,9 +61,7 @@ export async function handleSpotifyCallback(c: Context) {
       c.status(403);
       return c.json({ message: "Access denied by user" });
     }
-    console.error("Spotify error:", spotifyError);
-    c.status(500);
-    return c.json({ message: "Spotify error: " + spotifyError });
+    throw new HTTPException(400, { message: `Spotify callback error: ${spotifyError}` });
   }
 
   const user_id = await getAndDeleteOauthState(state);

@@ -40,6 +40,9 @@ type Options = {
   done?: boolean;
 };
 
+
+const ownerEventGetMap = new Map<string, number>();
+
 export default function useWebSocketClient(
   event_id: string,
   opts?: Options,
@@ -89,7 +92,7 @@ export default function useWebSocketClient(
         return false;
       }
 
-      
+
       if (session.expires_at) {
         const expirationTime = new Date(session.expires_at).getTime();
         const currentTime = Date.now();
@@ -146,16 +149,29 @@ export default function useWebSocketClient(
                 eventId: event_id,
               })
             );
-            if (isOwner) {
-              ws.send(
-                JSON.stringify({
-                  type: 'event_current_track:get',
-                  eventId: event_id,
-                })
-              );
-            }
           }
         }, pingInterval);
+
+        if (isOwner) {
+          if (!ownerEventGetMap.has(event_id)) {
+            const id = window.setInterval(() => {
+              try {
+                const sock = webSocketRef.current || ws;
+                if (sock && sock.readyState === WebSocket.OPEN) {
+                  sock.send(
+                    JSON.stringify({
+                      type: 'event_current_track:get',
+                      eventId: event_id,
+                    })
+                  );
+                }
+              } catch (e) {
+                // ignore send errors
+              }
+            }, 2000);
+            ownerEventGetMap.set(event_id, id as unknown as number);
+          }
+        }
 
         sendRequestUserInfo(ws);
         ws.send(
@@ -167,6 +183,11 @@ export default function useWebSocketClient(
       };
 
       ws.onclose = event => {
+        console.warn('ws: connection closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
         setConnected(false);
 
         if (pingIntervalRef.current) {
@@ -189,9 +210,8 @@ export default function useWebSocketClient(
         }
       };
 
-      ws.onerror = () => {
-        setLastError('Connection error occurred');
-        setConnected(false);
+      ws.onerror = (error) => {
+        console.error('ws: connection error', error);
       };
 
       ws.onmessage = event => {
@@ -229,7 +249,6 @@ export default function useWebSocketClient(
               handleTrackPlay(data);
               break;
             default:
-              // unhandled message type
               break;
           }
         } catch (error) {
@@ -470,17 +489,6 @@ export default function useWebSocketClient(
   );
 
   const reconnect = useCallback(async () => {
-    const refreshed = await refreshSession();
-    if (!refreshed) {
-      setLastError('Session expired. Please login again.');
-      return;
-    }
-    const tokenValid = await checkTokenValidity();
-    if (!tokenValid) {
-      setLastError('Session expired. Please login again.');
-      return;
-    }
-
     if (!shouldReconnectRef.current) {
       return;
     }
@@ -505,7 +513,7 @@ export default function useWebSocketClient(
     setConnectionAttempts(connectionAttemptsRef.current);
     setLastError(null);
     initWebSocket();
-  }, [initWebSocket, checkTokenValidity, maxReconnectAttempts]);
+  }, [initWebSocket, maxReconnectAttempts]);
 
   const disconnect = useCallback(() => {
     shouldReconnectRef.current = false;
@@ -523,6 +531,14 @@ export default function useWebSocketClient(
     if (webSocketRef.current) {
       webSocketRef.current.close(1000, 'Manual disconnect');
       webSocketRef.current = null;
+    }
+    // if owner had a persistent event_current_track interval, clear it
+    if (ownerEventGetMap.has(event_id)) {
+      try {
+        const id = ownerEventGetMap.get(event_id)!;
+        clearInterval(id);
+      } catch { }
+      ownerEventGetMap.delete(event_id);
     }
     setWebSocket(null);
     setConnected(false);
