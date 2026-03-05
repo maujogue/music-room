@@ -11,6 +11,10 @@ import {
   focusManager,
 } from '@tanstack/react-query';
 import Purchases from 'react-native-purchases';
+import { LogBox } from 'react-native';
+
+// [N] to not show all console warning / error in emulators
+LogBox.ignoreAllLogs(true);
 
 function onAppStateChange(status: AppStateStatus) {
   if (Platform.OS !== 'web') {

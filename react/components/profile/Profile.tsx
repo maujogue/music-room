@@ -3,7 +3,6 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { useRouter } from 'expo-router';
-import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileActions from '@/components/profile/ProfileActions';
 import ProfileContent from '@/components/profile/ProfileContent';
 import { useProfileData } from '@/hooks/useProfileData';
@@ -67,12 +66,6 @@ export default function Profile({
 
   return (
     <View className='flex-1 pt-safe bg-background-0'>
-      <ProfileHeader
-        showBackButton={showBackButton}
-        username={profile.username}
-        onBack={onBack || (() => router.back())}
-      />
-
       <ScrollView
         contentContainerStyle={{ paddingBottom: 32 }}
         keyboardShouldPersistTaps='handled'

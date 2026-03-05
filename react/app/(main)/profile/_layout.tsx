@@ -13,8 +13,8 @@ export default function ProfileLayout() {
       <Stack.Screen
         name='[userId]'
         options={{
-          title: 'User Profile',
-          headerShown: false, // We're using custom header in the Profile component
+          title: '',
+          headerTransparent: true,
         }}
       />
       <Stack.Screen
