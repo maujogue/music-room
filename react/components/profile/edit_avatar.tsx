@@ -35,12 +35,10 @@ export default function EditAvatar({ url, onUpload, isEdit, username }: Props) {
       });
 
       if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log('User cancelled image picker.');
         return;
       }
 
       const image = result.assets[0];
-      console.log('Got image', image);
 
       if (!image.uri) {
         throw new Error('No image uri!');

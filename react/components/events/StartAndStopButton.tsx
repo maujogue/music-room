@@ -48,7 +48,6 @@ export default function StartAndStopButton({
   }
 
   async function submitStartEvent() {
-    console.log('START EVENT CONFIRMATION');
     try {
       await startEvent(eventId);
     } catch {
@@ -58,7 +57,6 @@ export default function StartAndStopButton({
   }
 
   async function submitStopEvent() {
-    console.log('STOP EVENT CONFIRMATION');
     try {
       await stopEvent(eventId);
     } catch {

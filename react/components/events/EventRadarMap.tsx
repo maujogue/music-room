@@ -56,7 +56,6 @@ export default function EventRadarmap({ radiusKm = 50 }: RadarProps) {
   }, [selectedId, userEvents]);
 
   function select(id: string) {
-    console.log('Selecting : ', id);
     setSelectedId(id);
   }
 

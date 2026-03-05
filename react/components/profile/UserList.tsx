@@ -27,8 +27,6 @@ export default function UserList({
   const router = useRouter();
   const { users, isLoading, error, refetch } = useUserFollows(userId, type);
 
-  console.log('UserList users:', users);
-
   const handleUserPress = (userItem: UserWithFollowStatus) => {
     router.push(`/profile/${userItem.id}`);
   };

@@ -70,7 +70,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
   // Token-based login function (from Theodo blog post)
   const loginWithToken = useCallback(
     async ({ access_token, refresh_token }: Tokens) => {
-      console.log('Logging in with tokens...');
       const signIn = async () => {
         await supabase.auth.setSession({
           access_token,
@@ -121,8 +120,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
 
     const handleDeepLink = async (url: string) => {
-      console.log('Processing deep link:', url);
-
       // Only process update-password links
       if (!url.includes('update-password')) {
         return;
@@ -130,7 +127,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       const tokens = extractTokensFromUrl(url);
       if (tokens) {
-        console.log('Found tokens in URL, logging in...');
         await loginWithToken(tokens);
       }
     };
@@ -139,7 +135,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const checkInitialUrl = async () => {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
-        console.log('Initial URL:', initialUrl);
         await handleDeepLink(initialUrl);
       }
     };
@@ -148,7 +143,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     // Listen for URL changes (when app is already running)
     const subscription = Linking.addEventListener('url', async ({ url }) => {
-      console.log('URL event received:', url);
       await handleDeepLink(url);
     });
 
@@ -163,7 +157,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event);
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -226,7 +219,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setIsLoading(true);
     // Use Linking.createURL to generate proper deep link (from Theodo blog post)
     const resetPasswordURL = Linking.createURL('/update-password');
-    console.log('Reset password URL:', resetPasswordURL);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: resetPasswordURL,
     });

@@ -89,6 +89,7 @@ export default function useWebSocketClient(
         return false;
       }
 
+      
       if (session.expires_at) {
         const expirationTime = new Date(session.expires_at).getTime();
         const currentTime = Date.now();
@@ -225,7 +226,6 @@ export default function useWebSocketClient(
               handleUserInfo(data);
               break;
             case 'event_current_track:update':
-              console.log('ws: received event_current_track:update:', data);
               handleTrackPlay(data);
               break;
             default:
@@ -259,57 +259,9 @@ export default function useWebSocketClient(
         clearInterval(pingIntervalRef.current);
         pingIntervalRef.current = null;
       }
-
-      if (webSocketRef.current) {
-        try {
-          shouldReconnectRef.current = false;
-          webSocketRef.current.close(1000, 'Component unmounted');
-        } catch {
-          console.warn('ws: error closing socket on unmount');
-        }
-        webSocketRef.current = null;
-        setWebSocket(null);
-      }
     };
   }, [initWebSocket, enabled, done]);
 
-  // Listen to app state and close websocket when app is backgrounded to avoid reconnect loops
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      const active = nextAppState === 'active';
-      if (!active) {
-        shouldReconnectRef.current = false;
-
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
-          reconnectTimeoutRef.current = null;
-        }
-
-        if (pingIntervalRef.current) {
-          clearInterval(pingIntervalRef.current);
-          pingIntervalRef.current = null;
-        }
-
-        if (webSocketRef.current) {
-          try {
-            webSocketRef.current.close(1000, 'App backgrounded');
-          } catch {
-            console.warn('ws: error closing socket on app background');
-          }
-          webSocketRef.current = null;
-          setWebSocket(null);
-        }
-      } else {
-        shouldReconnectRef.current = true;
-        connectionAttemptsRef.current = 0;
-        setConnectionAttempts(0);
-        initWebSocket();
-      }
-    };
-
-    const sub = AppState.addEventListener('change', handleAppStateChange);
-    return () => sub.remove();
-  }, [initWebSocket, enabled, done]);
 
   const sendRequestUserInfo = useCallback(
     (ws?: WebSocket) => {
@@ -438,7 +390,6 @@ export default function useWebSocketClient(
   );
 
   const handleTrackPlay = useCallback((data: any) => {
-    console.log('ws: received track play update:', data);
     setTrack(data.track);
   }, []);
 
@@ -524,6 +475,12 @@ export default function useWebSocketClient(
       setLastError('Session expired. Please login again.');
       return;
     }
+    const tokenValid = await checkTokenValidity();
+    if (!tokenValid) {
+      setLastError('Session expired. Please login again.');
+      return;
+    }
+
     if (!shouldReconnectRef.current) {
       return;
     }

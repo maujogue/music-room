@@ -182,7 +182,6 @@ export async function deleteEventById(id: string) {
     }
   );
 
-  console.log('deleteEventById', { id, res });
   if (!res.success) {
     console.error('Error deleting Event:', res.error);
     throw res.error;
@@ -296,7 +295,6 @@ export async function addUserToEvent(
   userId: string,
   role: string
 ) {
-  console.log('Adding user to event', { eventId, userId, role });
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
     {
@@ -311,7 +309,6 @@ export async function addUserToEvent(
     console.error('Error inviting user to event:', res.error);
     throw res.error;
   }
-  console.log('User invited successfully to event:', res.data);
   return res.data;
 }
 
@@ -326,10 +323,8 @@ export async function removeUserFromEvent(eventId: string, userId: string) {
     }
   );
   if (!res.success) {
-    console.error('Error removing user from event:', res.error);
     throw res.error;
   }
-  console.log('User removed successfully from event:', res.data);
   return res.data;
 }
 
@@ -338,7 +333,6 @@ export async function editUserInEvent(
   userId: string,
   role: 'inviter' | 'voter' | 'member' | 'collaborator'
 ) {
-  console.log('Editing user in event', { eventId, userId, role });
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/events/${eventId}/invite`,
     {
@@ -353,6 +347,6 @@ export async function editUserInEvent(
     console.error('Error editing user in event:', res.error);
     throw res.error;
   }
-  console.log('User edited successfully in event:', res.data);
+  
   return res.data;
 }

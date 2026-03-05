@@ -12,10 +12,8 @@ export async function apiFetch<T>(
   url: string,
   options: RequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  console.log('apiFetch options:', options);
   const { method = 'GET', headers = {}, body, cache = 'default' } = options;
 
-  console.log('apiFetch called with:', { url, method, headers, body, cache });
   try {
     const session = await getSession();
 
@@ -44,7 +42,6 @@ export async function apiFetch<T>(
         ? JSON.stringify(body)
         : undefined;
 
-    console.log('Fetching:', method, url);
     const res = await fetch(url, {
       method,
       headers: finalHeaders,
@@ -56,7 +53,6 @@ export async function apiFetch<T>(
     const contentType = res.headers.get('content-type');
     const isJson = contentType?.includes('application/json');
 
-    console.log('Response status:', res.status, 'for', method, url);
     if (!res.status.toString().startsWith('2')) {
       const json = await res.json();
       const errorMessage = isJson ? json.message : null;

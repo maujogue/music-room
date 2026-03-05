@@ -59,7 +59,6 @@ export default function useSearchGlobal(
       const res: any = await apiFetch<any>(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/search?q=${uriQuery}&type=${uriFilter}`
       );
-      console.log('search results', res);
       if (res?.success) {
         setError(null);
         setResults(res.data || {});

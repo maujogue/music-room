@@ -20,8 +20,8 @@ export default function EventLayout() {
       <Stack.Screen
         name='radar'
         options={{
-          headerShown: true,
-          title: 'Events Radar',
+          headerTransparent: true,
+          title: '',
         }}
       />
     </Stack>

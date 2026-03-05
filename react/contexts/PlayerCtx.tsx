@@ -33,12 +33,6 @@ export function PlayerProvider({ children }: PropsWithChildren) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   const handlePlayTrack = async (tracks?: string[], deviceId?: string) => {
-    console.log(
-      'playing tracks:',
-      JSON.stringify(tracks, null, 2),
-      'on device ID:',
-      deviceId
-    );
     playTrack(tracks, deviceId).then(() => {
       setIsPlaying(true);
     });

@@ -9,10 +9,10 @@ import { Icon, AlertCircleIcon } from '@/components/ui/icon';
 import { Center } from '@/components/ui/center';
 import { FormControl } from '@/components/ui/form-control';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
-import { ScrollView, Image } from 'react-native';
+import { ScrollView, Image, KeyboardAvoidingView } from 'react-native';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
-import { MapPinIcon, Pen, Save } from 'lucide-react-native';
+import { Key, MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
@@ -28,6 +28,7 @@ import SpatioLicenceBadge from '@/components/generics/SpatioLicenceBadge';
 import SwitchRow from '@/components/generics/SwitchRow';
 import { uploadImageToSupabase } from '@/utils/uploadImage';
 import { getRandomImage } from '@/utils/randomImage';
+import { Platform } from 'react-native';
 
 type Props = {
   onSubmit: (payload: MusicEventPayload) => Promise<void> | void;
@@ -96,7 +97,6 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
       });
 
       if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log('User cancelled image picker.');
         return;
       }
 
@@ -158,7 +158,6 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
   };
 
   const handlePressValid = async () => {
-    console.log('Submitting event form...');
     if (!validate()) return;
 
     let finalImageUrl = imageUrl;
@@ -179,7 +178,6 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
       }
     }
 
-    console.log('Preparing event payload...');
     const getLoc = location
       ? {
           id: initialValues?.location?.id,
@@ -216,7 +214,6 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
       spatio_licence,
     } as any;
 
-    console.log('Event payload:', payload);
     try {
       await onSubmit(payload);
     } catch (e: any) {
@@ -225,7 +222,7 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
   };
 
   return (
-    <>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FormControl className='p-0 m-0'>
         <ScrollView
           keyboardShouldPersistTaps='handled'
@@ -466,6 +463,6 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
             : undefined
         }
       />
-    </>
+    </KeyboardAvoidingView>
   );
 }

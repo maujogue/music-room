@@ -78,26 +78,21 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
         },
       };
     }
-    console.log('Google Sign-In successful:', userInfo.data);
 
     return {
       success: true,
       data,
     };
   } catch (error: any) {
-    console.log('Google Sign-In Error:', error);
-
     let errorMessage = 'Google Sign-In failed. Please try again.';
     let errorCode = 'UNKNOWN_ERROR';
 
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
       // User cancelled the login flow
-      console.log('User cancelled Google Sign-In');
       errorCode = 'CANCELLED';
       errorMessage = 'Sign-in was cancelled';
     } else if (error.code === statusCodes.IN_PROGRESS) {
       // Operation (e.g. sign in) is in progress already
-      console.log('Google Sign-In already in progress');
       errorCode = 'IN_PROGRESS';
       errorMessage = 'Sign-in already in progress';
     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
@@ -122,7 +117,7 @@ export async function signOutFromGoogle() {
   try {
     await GoogleSignin.signOut();
   } catch (error) {
-    console.log('Error signing out from Google:', error);
+    console.error('Error signing out from Google:', error);
   }
 }
 
@@ -170,7 +165,6 @@ export async function signInWithSpotify(): Promise<SpotifySignInResult> {
       data: { message: 'Spotify authorization initiated' },
     };
   } catch (error: any) {
-    console.log('Spotify Sign-In Error:', error);
 
     let errorMessage = 'Spotify Sign-In failed. Please try again.';
     let errorCode = 'UNKNOWN_ERROR';
@@ -195,31 +189,23 @@ export async function signInWithSpotify(): Promise<SpotifySignInResult> {
 
 // Handle Spotify Connection flow (for existing users)
 export async function connectToSpotify(): Promise<void> {
-  try {
     // Get the Spotify authorization URL (using existing endpoint)
-    // The backend will detect the logged-in user from the auth token
-    const response = await apiFetch<{ url: string }>(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,
-      {
-        method: 'POST',
-      }
-    );
-
-    if (!response.success) {
-      throw new Error(
-        response.error?.message || 'Failed to get Spotify authorization URL'
-      );
+  // The backend will detect the logged-in user from the auth token
+  const response = await apiFetch<{ url: string }>(
+    `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,
+    {
+      method: 'POST',
     }
+  );
 
-    // Open the Spotify authorization URL
-    await Linking.openURL(response.data.url);
-
-    // Note: The actual connection happens in the callback
-    // This function just initiates the flow
-  } catch (error: any) {
-    console.log('Spotify Connection Error:', error);
-    throw error;
+  if (!response.success) {
+    throw new Error(
+      response.error?.message || 'Failed to get Spotify authorization URL'
+    );
   }
+
+  // Open the Spotify authorization URL
+  await Linking.openURL(response.data.url);
 }
 
 // Handle Google Connection flow (for existing users)

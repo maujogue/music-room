@@ -20,7 +20,6 @@ export async function getUserProfile(
     console.error('Error fetching user profile:', res.error);
     throw res.error;
   }
-  console.log('Fetched user profile:', res.data);
   return res.data;
 }
 
@@ -35,7 +34,6 @@ export async function updateProfile(
     console.error('Error updating profile:', res.error);
     throw res.error;
   }
-  console.log('Profile updated successfully:', res.data);
   return res.data;
 }
 

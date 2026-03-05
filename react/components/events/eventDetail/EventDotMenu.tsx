@@ -85,7 +85,6 @@ export default function Event3DotMenu({
   };
 
   async function submitStartEvent() {
-    console.log('START EVENT CONFIRMATION');
     try {
       await startEvent(eventData.event.id);
     } catch {
@@ -95,7 +94,6 @@ export default function Event3DotMenu({
   }
 
   async function submitStopEvent() {
-    console.log('STOP EVENT CONFIRMATION');
     try {
       await stopEvent(eventData.event.id);
     } catch {

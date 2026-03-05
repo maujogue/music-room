@@ -22,7 +22,7 @@ export default function ProfileHeader({
       <Pressable onPress={onBack}>
         <Icon as={ArrowLeftIcon} size='lg' />
       </Pressable>
-      <Heading size='lg'>{username}</Heading>
+      <Heading size='sm'>{username}</Heading>
       <View className='w-6' />
     </HStack>
   );

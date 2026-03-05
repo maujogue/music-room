@@ -69,7 +69,6 @@ export default function PlaylistDetail() {
 
   const onDeletePlaylist = async () => {
     setShowAlertDialog(false);
-    console.log(`PlaylistDetailScreen(${playlistId}) Playlist delelete call`);
 
     await deletePlaylist();
     if (!error && !loading) {

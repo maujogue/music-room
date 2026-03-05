@@ -77,27 +77,20 @@ export function useNearbyEventsNotification() {
 
   useEffect(() => {
     if (!coords) {
-      console.log('[Notification] No coords yet');
       return;
     }
 
     const checkNearbyEvents = async () => {
-      console.log('[Notification] Checking events at:', coords);
       try {
         const events = await getEventsWithRadar(coords);
-        console.log(
-          `[Notification] Found ${events.length} total events on radar`
-        );
 
         // dist in 'radar' is in meters (confirmed in backend controller)
         // 1000 meters = 1km
         const nearbyEventsCount = events.filter(
           e => e.radar.dist <= 1000
         ).length;
-        console.log(`[Notification] ${nearbyEventsCount} events within 1000m`);
 
         if (nearbyEventsCount > 0) {
-          console.log('[Notification] Triggering notification...');
           await Notifications.scheduleNotificationAsync({
             content: {
               title: 'Nearby Events!',

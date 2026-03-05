@@ -43,7 +43,6 @@ export async function addItemToPlaylist(id: string, uris: string[]) {
     throw res.error;
   }
 
-  console.log('Items added successfully:', res.data);
   return res.data;
 }
 
@@ -62,7 +61,6 @@ export async function deleteItemFromPlaylist(
     console.error('Error deleting item from playlist:', res.error);
     throw res.error;
   }
-  console.log('Items deleted successfully from playlist');
   return res.success;
 }
 
@@ -77,7 +75,6 @@ export async function deletePlaylistById(playlistId: string) {
     console.error('Error deleting playlist:', res.error);
     throw res.error;
   }
-  console.log('Playlist deleted successfully');
   return res.success;
 }
 
@@ -85,7 +82,6 @@ export async function editPlaylistById(
   playlistId: string,
   payload: PlaylistPayload
 ) {
-  console.log(`Updating playlist ${playlistId} with payload:`, payload);
   const res = await apiFetch<SpotifyPlaylist>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}`,
     {
@@ -97,7 +93,6 @@ export async function editPlaylistById(
     console.error('Error updating playlist:', res.error);
     throw res.error;
   }
-  console.log('Playlist updated successfully:', res.data);
   return res.data;
 }
 
@@ -112,7 +107,7 @@ export async function syncSpotifyPlaylists() {
     console.error('Error syncing Spotify playlists:', res.error);
     throw res.error;
   }
-  console.log('Spotify playlists synchronized successfully:', res.data);
+
   return res.data;
 }
 
@@ -121,9 +116,6 @@ export async function addUserToPlaylist(
   userId: string,
   role: 'member' | 'collaborator'
 ) {
-  console.log(
-    `Inviting user ${userId} to playlist ${playlistId} with role ${role}`
-  );
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/users`,
     {
@@ -135,7 +127,6 @@ export async function addUserToPlaylist(
     console.error('Error inviting member to playlist:', res.error);
     throw res.error;
   }
-  console.log('Member invited successfully:', res.data);
   return res.data;
 }
 
@@ -144,7 +135,6 @@ export async function removeUserFromPlaylist(
   userId: string,
   role?: 'member' | 'collaborator'
 ) {
-  console.log(`Removing user ${userId} from playlist ${playlistId}`);
   const res = await apiFetch<{ message: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/playlists/${playlistId}/users`,
     {
@@ -156,6 +146,5 @@ export async function removeUserFromPlaylist(
     console.error('Error removing user from playlist:', res.error);
     throw res.error;
   }
-  console.log('User removed successfully:', res.data);
   return res.data;
 }

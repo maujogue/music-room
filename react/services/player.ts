@@ -11,7 +11,6 @@ export async function getCurrentUserCurrentlyPlayingTrack() {
     console.error('Error fetching currently playing track:', res.error);
     throw res.error;
   }
-  // console.log('Currently playing track:', res.data);
   return res.data;
 }
 
@@ -21,7 +20,6 @@ export async function playTrack(uris?: string[], deviceId?: string) {
       uri.startsWith('spotify:track:') ? uri : `spotify:track:${uri}`
     );
   }
-  console.log('Starting playback with URIs:', uris, 'and device ID:', deviceId);
   const res = await apiFetch<void>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/me/player/play?device_id=${deviceId ?? ''}`,
     {
@@ -33,7 +31,6 @@ export async function playTrack(uris?: string[], deviceId?: string) {
     console.error('Error playing track:', res.error);
     throw res.error;
   }
-  console.log('res', JSON.stringify(res, null, 2));
 }
 
 export async function pauseTrack() {
@@ -47,7 +44,6 @@ export async function pauseTrack() {
     console.error('Error pausing track:', res.error);
     throw res.error;
   }
-  console.log('Track paused successfully');
 }
 
 export async function skipToNextTrack() {
@@ -61,7 +57,6 @@ export async function skipToNextTrack() {
     console.error('Error skipping to next track:', res.error);
     throw res.error;
   }
-  console.log('Skipped to next track successfully');
 }
 
 export async function getAvailableDevices() {

@@ -34,7 +34,6 @@ export default function TrackList({
   const router = useRouter();
 
   if (!playlistTracks) {
-    console.log('No playlistTracks provided');
     return <LoadingSpinner text='Loading playlist...' />;
   }
 

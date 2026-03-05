@@ -172,7 +172,6 @@ export default function VotesRoom({ eventId, isOwner }: Props) {
     );
   }
   if (perror || !playlist) {
-    console.log('Playlist load error or missing playlist:', perror);
     return (
       <>
         <ErrorScreen
