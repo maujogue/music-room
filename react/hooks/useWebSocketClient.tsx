@@ -524,12 +524,6 @@ export default function useWebSocketClient(
       setLastError('Session expired. Please login again.');
       return;
     }
-    const tokenValid = await checkTokenValidity();
-    if (!tokenValid) {
-      setLastError('Session expired. Please login again.');
-      return;
-    }
-
     if (!shouldReconnectRef.current) {
       return;
     }
