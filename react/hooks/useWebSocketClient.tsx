@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
-import { getSession, refreshSession } from '@/services/session';
+import { getSession } from '@/services/session';
 import { useCurrentPosition } from './useCurrentPosition';
 
 export interface TrackVote {
@@ -39,7 +38,6 @@ type Options = {
   spatio_licence?: boolean;
   done?: boolean;
 };
-
 
 const ownerEventGetMap = new Map<string, number>();
 
@@ -84,31 +82,6 @@ export default function useWebSocketClient(
       return true;
     }
   }, [coords]);
-
-  const checkTokenValidity = useCallback(async () => {
-    try {
-      const session = await getSession();
-      if (!session?.access_token) {
-        return false;
-      }
-
-
-      if (session.expires_at) {
-        const expirationTime = new Date(session.expires_at).getTime();
-        const currentTime = Date.now();
-        const fiveMinutes = 5 * 60 * 1000;
-
-        if (expirationTime - currentTime < fiveMinutes) {
-          return false;
-        }
-      }
-
-      return true;
-    } catch (error) {
-      console.error('🔐 Error checking token validity:', error);
-      return false;
-    }
-  }, []);
 
   const initWebSocket = useCallback(async () => {
     try {
@@ -165,8 +138,10 @@ export default function useWebSocketClient(
                     })
                   );
                 }
-              } catch (e) {
-                // ignore send errors
+              } catch {
+                console.warn(
+                  'ws: failed to send event_current_track:get for owner'
+                );
               }
             }, 2000);
             ownerEventGetMap.set(event_id, id as unknown as number);
@@ -210,7 +185,7 @@ export default function useWebSocketClient(
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         console.error('ws: connection error', error);
       };
 
@@ -280,7 +255,6 @@ export default function useWebSocketClient(
       }
     };
   }, [initWebSocket, enabled, done]);
-
 
   const sendRequestUserInfo = useCallback(
     (ws?: WebSocket) => {
@@ -537,7 +511,9 @@ export default function useWebSocketClient(
       try {
         const id = ownerEventGetMap.get(event_id)!;
         clearInterval(id);
-      } catch { }
+      } catch {
+        console.warn('ws: failed to clear owner event_current_track interval');
+      }
       ownerEventGetMap.delete(event_id);
     }
     setWebSocket(null);

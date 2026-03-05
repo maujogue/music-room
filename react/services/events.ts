@@ -347,6 +347,6 @@ export async function editUserInEvent(
     console.error('Error editing user in event:', res.error);
     throw res.error;
   }
-  
+
   return res.data;
 }

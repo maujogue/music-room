@@ -165,7 +165,6 @@ export async function signInWithSpotify(): Promise<SpotifySignInResult> {
       data: { message: 'Spotify authorization initiated' },
     };
   } catch (error: any) {
-
     let errorMessage = 'Spotify Sign-In failed. Please try again.';
     let errorCode = 'UNKNOWN_ERROR';
 
@@ -189,7 +188,7 @@ export async function signInWithSpotify(): Promise<SpotifySignInResult> {
 
 // Handle Spotify Connection flow (for existing users)
 export async function connectToSpotify(): Promise<void> {
-    // Get the Spotify authorization URL (using existing endpoint)
+  // Get the Spotify authorization URL (using existing endpoint)
   // The backend will detect the logged-in user from the auth token
   const response = await apiFetch<{ url: string }>(
     `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth/spotify`,

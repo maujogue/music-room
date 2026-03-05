@@ -44,7 +44,7 @@ const mockEventMember: EventMember = {
   user_id: "member123",
   joined_at: "",
   profile: {
-    id: "profile1",
+    id: "member123",
     name: "dom",
     email: "dom@gmail.com",
     avatar_url: "",

@@ -12,7 +12,7 @@ import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { ScrollView, Image, KeyboardAvoidingView } from 'react-native';
 import { Divider } from '@/components/ui/divider';
 import { Heading } from '@/components/ui/heading';
-import { Key, MapPinIcon, Pen, Save } from 'lucide-react-native';
+import { MapPinIcon, Pen, Save } from 'lucide-react-native';
 import AddPlaylistItem from '@/components/playlist/AddPlaylistItem';
 import PlaylistListItem from '@/components/playlist/PlaylistListItem';
 import PlaylistSelectionModal from '@/components/playlist/PlaylistSelectionModal';
@@ -222,7 +222,9 @@ export default function EditEventForm({ initialValues = {}, onSubmit }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <FormControl className='p-0 m-0'>
         <ScrollView
           keyboardShouldPersistTaps='handled'

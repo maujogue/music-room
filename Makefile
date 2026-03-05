@@ -53,7 +53,7 @@ help:
 # Install all dependencies
 install:
 	@echo "📦 Installing dependencies..."
-	cd ${REACT_APP_DIR} && npx expo install
+	cd ${REACT_APP_DIR} && npm install
 	@echo "✅ Dependencies installed successfully!"
 	cd ${SUPABASE_DIR}/functions/tests && npm install
 

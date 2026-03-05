@@ -61,7 +61,9 @@ export async function handleSpotifyCallback(c: Context) {
       c.status(403);
       return c.json({ message: "Access denied by user" });
     }
-    throw new HTTPException(400, { message: `Spotify callback error: ${spotifyError}` });
+    throw new HTTPException(400, {
+      message: `Spotify callback error: ${spotifyError}`,
+    });
   }
 
   const user_id = await getAndDeleteOauthState(state);
